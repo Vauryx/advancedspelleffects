@@ -227,6 +227,6 @@ Hooks.once("socketlib.ready", () => {
             await tokenD.document.setFlag("world", "detectMagicHookId", detectMagicHookId);
         }
     }
-	socket = socketlib.registerModule("advancedspellmacros");
+	socket = socketlib.registerModule("advancedspelleffects");
 	socket.register("detectMagic", detectMagicContinous);
 });

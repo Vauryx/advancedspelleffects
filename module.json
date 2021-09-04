@@ -1,7 +1,7 @@
 {
   "socket": true,
-  "name": "advancedspellmacros",
-  "title": "Advanced Spell Macros",
+  "name": "advancedspelleffects",
+  "title": "Advanced Spell Effects",
   "description": "",
   "version": "This is auto replaced",
   "library": "false",
