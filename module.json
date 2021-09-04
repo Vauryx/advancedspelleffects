@@ -19,16 +19,24 @@
     }
   ],
   "dependencies": [
-
+    {
+      "name": "midi-qol"
+    },
+    {
+      "name": "tokenmagic"
+    },
+    {
+      "name": "sequencer"
+    },
+    {
+      "name": "tagger"
+    }
   ],
-  "conflicts": [
-    
-  ],
+  "conflicts": [],
   "esmodules": [
     "/scripts/AnimFunctions.js"
   ],
-  "scripts": [
-  ],
+  "scripts": [],
   "styles": [
     "/styles/module.css"
   ],
