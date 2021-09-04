@@ -4,8 +4,8 @@ game.AdvancedSpellEffects.${spell name}(args)
 ```
 inside a macro being called from the "OnUseMacro" field of MIDI-QOL
 
-**List of currently avaiable spells: 
-*Detect Magic
+List of currently avaiable spells: 
+Detect Magic
 ```javascript
   game.AdvancedSpellEffects.detectMagic(args);
 ```
