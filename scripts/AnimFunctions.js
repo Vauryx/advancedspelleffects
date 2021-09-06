@@ -866,11 +866,10 @@ Hooks.once("socketlib.ready", () => {
             //console.log("Wall Data: ", walls);
             await canvas.scene.createEmbeddedDocuments("Wall", walls);
             await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [templateData._id]);
-            Hooks.on("updateTile", async function moveAttachedWalls(tileD, diff) {
+            let updateTileHookId = Hooks.on("updateTile", async function moveAttachedWalls(tileD, diff) {
 
                 //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
                 //console.log('diff: ', diff);
-                if(!diff.x || !diff.y) return;
                 //console.log(wall_number);
                 let placedX = tileD.data.x + (tileD.data.width/2);
                 let placedY = tileD.data.y +  (tileD.data.height/2);
@@ -928,6 +927,7 @@ Hooks.once("socketlib.ready", () => {
                 if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
                     await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
                     Hooks.off("deleteTile", darknessTileDeleteHookId);
+                    Hooks.off("updateTile", updateTileHookId);
                 }
 
             });
