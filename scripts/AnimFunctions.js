@@ -14,12 +14,16 @@ Hooks.once('init', async function () {
     async function darknessWithWalls(rollData, numWalls) {
         socket.executeAsGM("darknessWithWalls", rollData, numWalls || 12);
     }
+    async function tollTheDead(rollData) {
+        setTimeout(() => {socket.executeAsGM("tollTheDead", rollData[0]);}, 100);
+    }
     // List of effects that can be called
     game.AdvancedSpellEffects = {};
     game.AdvancedSpellEffects.detectMagic = detectMagic;
     game.AdvancedSpellEffects.detectMagicRecursive = detectMagicRecursive;
     game.AdvancedSpellEffects.fogCloudWithWalls = fogCloudWithWalls;
     game.AdvancedSpellEffects.darknessWithWalls = darknessWithWalls;
+    game.AdvancedSpellEffects.tollTheDead = tollTheDead;
 });
 
 Hooks.once("socketlib.ready", () => {
@@ -611,7 +615,7 @@ Hooks.once("socketlib.ready", () => {
         }
 
         let template = canvas.templates.get(rollData[0].templateId);
-        
+
         await placeCloudAsTile(template, rollData[0].tokenId);
         async function placeCloudAsTile(template, casterId) {
             let templateData = template.data;
@@ -626,7 +630,7 @@ Hooks.once("socketlib.ready", () => {
             let walls = [];
             tileWidth = (templateData.distance * 45) * rollData[0].spellLevel;
             tileHeight = (templateData.distance * 45) * rollData[0].spellLevel;
-            
+
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
@@ -794,7 +798,7 @@ Hooks.once("socketlib.ready", () => {
         }
 
         let template = canvas.templates.get(rollData[0].templateId);
-        
+
         await placeCloudAsTile(template, rollData[0].tokenId);
         async function placeCloudAsTile(template, casterId) {
             let templateData = template.data;
@@ -809,7 +813,7 @@ Hooks.once("socketlib.ready", () => {
             let walls = [];
             tileWidth = (templateData.distance * 45);
             tileHeight = (templateData.distance * 45);
-            
+
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
@@ -871,8 +875,8 @@ Hooks.once("socketlib.ready", () => {
                 //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
                 //console.log('diff: ', diff);
                 //console.log(wall_number);
-                let placedX = tileD.data.x + (tileD.data.width/2);
-                let placedY = tileD.data.y +  (tileD.data.height/2);
+                let placedX = tileD.data.x + (tileD.data.width / 2);
+                let placedY = tileD.data.y + (tileD.data.height / 2);
                 let outerCircleRadius = tileD.data.width / 2.2;
                 let wall_angles = 2 * Math.PI / wall_number;
                 let walls = [];
@@ -935,6 +939,67 @@ Hooks.once("socketlib.ready", () => {
 
 
     }
+
+    async function tollTheDead(rollData) {
+        console.log(rollData);
+        //let caster = canvas.tokens.controlled[0];
+        let bellAnim = "jb2a.toll_the_dead.purple.bell";
+        let shockAnim = "jb2a.toll_the_dead.purple.shockwave";
+        let skullAnim = "jb2a.toll_the_dead.purple.skull_smoke";
+        let target = rollData.failedSaves[0];
+
+        if (target != undefined) {
+            let targetCurrentHP = target._actor.data.data.attributes.hp.value;
+            let targetMaxHP = target._actor.data.data.attributes.hp.max;
+            let damageDie = "1d8";
+            let animScale = 0.3;
+            let volume = 0.2;
+            if (targetCurrentHP < targetMaxHP) {
+                damageDie = "1d12";
+                animScale = 0.6;
+                volume = 0.3;
+            }
+
+            let damageRoll = new Roll(`${damageDie}`).roll();
+            executeBell();
+            async function executeBell() {
+                if (game.modules.get("dice-so-nice")?.active) {
+                    await game.dice3d?.showForRoll(damageRoll);
+                }
+                new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, damageRoll.total, "necrotic", [target], damageRoll, { flavor: `Toll the Dead - Damage Roll (${damageDie} Necrotic)`, itemCardId: rollData.itemCardId });
+                //await SequencerPreloader.preloadForClients([animFilePath, audioFilePath], true);
+                let sequence = new Sequence()
+                .effect()
+                    .file(bellAnim)
+                    .atLocation(target)
+                    .scale(animScale)
+                    .rotate(30)
+                    .fadeIn(250)
+                    .JB2A()
+                    .scaleIn(0.4,850, {ease: "easeInOutCirc"})
+                    .rotateIn(30, 850, {ease: "easeInOutBack"})
+                    .rotateOut(45, 650, {ease: "easeOutBounce"})
+                    .fadeOut(150)
+                    .endTimePerc(0.75)
+                    .waitUntilFinished(-475)
+                    .scaleOut(0.65, 850)
+                .effect()
+                    .file(shockAnim)
+                    .atLocation(target)
+                    .JB2A()
+                    .scale((animScale + 0.2))
+                    .waitUntilFinished(-800)
+                    .fadeOut(600)
+                    .endTimePerc(0.65)
+                .effect()
+                    .atLocation(target)
+                    .file(skullAnim)
+                    .JB2A()
+                    .scale(animScale)
+            sequence.play();
+            }
+        }
+    }
     //register module with socketlib
     socket = socketlib.registerModule("advancedspelleffects");
     //register all effect functions defined above with socketlib here
@@ -942,4 +1007,5 @@ Hooks.once("socketlib.ready", () => {
     socket.register("detectMagicRecursive", detectMagicRecursive);
     socket.register("fogCloudWithWalls", fogCloudWithWalls);
     socket.register("darknessWithWalls", darknessWithWalls);
+    socket.register("tollTheDead", tollTheDead);
 });
