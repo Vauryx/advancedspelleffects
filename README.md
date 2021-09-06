@@ -57,3 +57,8 @@ optional: wallNumber is the number of desired walls around the edge of the tile.
 ```javascript
   game.AdvancedSpellEffects.darknessWithWalls(args, wallNumber)
 ```
+
+Toll The Dead
+```javascript
+game.AdvancedSpellEffects.tollTheDead(args);
+```
