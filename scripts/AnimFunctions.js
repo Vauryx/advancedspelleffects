@@ -8,11 +8,18 @@ Hooks.once('init', async function () {
     async function detectMagicRecursive(rollData) {
         socket.executeAsGM("detectMagicRecursive", rollData);
     }
-
+    async function fogCloudWithWalls(rollData, numWalls) {
+        socket.executeAsGM("fogCloudWithWalls", rollData, numWalls || 12);
+    }
+    async function darknessWithWalls(rollData, numWalls) {
+        socket.executeAsGM("darknessWithWalls", rollData, numWalls || 12);
+    }
     // List of effects that can be called
     game.AdvancedSpellEffects = {};
     game.AdvancedSpellEffects.detectMagic = detectMagic;
     game.AdvancedSpellEffects.detectMagicRecursive = detectMagicRecursive;
+    game.AdvancedSpellEffects.fogCloudWithWalls = fogCloudWithWalls;
+    game.AdvancedSpellEffects.darknessWithWalls = darknessWithWalls;
 });
 
 Hooks.once("socketlib.ready", () => {
@@ -203,7 +210,7 @@ Hooks.once("socketlib.ready", () => {
                 //console.log("hook fired!");
                 if ((!updateData.x && !updateData.y) || (tokenDocument.id != tokenD.id)) return;
                 //console.log("Controlled token: " , tokenD);
-                let magicalObjects = [];
+                let magicalObjects = []
                 if (game.modules.get("tagger")?.active) {
 
                     let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
@@ -471,7 +478,7 @@ Hooks.once("socketlib.ready", () => {
             let detectMagicHookId = Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
                 //console.log("hook fired!");
                 if ((!updateData.x && !updateData.y) || (tokenDocument.id != tokenD.id)) return;
-                let newPos = {x: 0, y: 0};
+                let newPos = { x: 0, y: 0 };
                 newPos.x = (updateData.x) ? updateData.x : tokenD.data.x;
                 newPos.y = (updateData.y) ? updateData.y : tokenD.data.y;
                 //console.log("Controlled token: " , tokenD);
@@ -480,7 +487,7 @@ Hooks.once("socketlib.ready", () => {
                 let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
 
                 let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
-                
+
                 magicalObjects = objects.map(o => {
                     let distance = canvas.grid.measureDistance(newPos, o);
                     return {
@@ -563,9 +570,376 @@ Hooks.once("socketlib.ready", () => {
         }
     }
 
+    async function fogCloudWithWalls(rollData, numWalls) {
+        //console.log("Roll Data: ", rollData);
+        let error = false;
+        if (typeof args !== 'undefined' && args.length === 0) {
+            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+        }
+
+        if (!(game.modules.get("jb2a_patreon"))) {
+            error = `You need to have JB2A's patreon only module installed to run this macro!`;
+        }
+
+        if (!game.modules.get("advanced-macros")?.active) {
+            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+            error = `You need to have Advanced Macros ${installed} to run this macro!`;
+        }
+
+        if (!game.modules.get("midi-qol")?.active) {
+            let installed = game.modules.get("midi-qol") && !game.modules.get("midi-qol").active ? "enabled" : "installed";
+            error = `You need to have MidiQOL ${installed} to run this macro!`;
+        }
+
+        if (!game.modules.get("socketlib")?.active) {
+            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+            error = `You need to have SocketLib ${installed} to run this macro!`;
+        }
+
+        if (!game.modules.get("tagger")?.active) {
+            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+            error = `You need to have TTagger${installed} to run this macro!`;
+        }
+
+        if (!game.modules.get("sequencer")?.active) {
+            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+            error = `You need to have Sequencer ${installed} to run this macro!`;
+        }
+        if (error) {
+            ui.notifications.error(error);
+            return;
+        }
+
+        let template = canvas.templates.get(rollData[0].templateId);
+        
+        await placeCloudAsTile(template, rollData[0].tokenId);
+        async function placeCloudAsTile(template, casterId) {
+            let templateData = template.data;
+            //console.log("Template Data: ", templateData);
+            let tileWidth;
+            let tileHeight;
+            let tileX;
+            let tileY;
+            let placedX = templateData.x;
+            let placedY = templateData.y;
+            let wallPoints = [];
+            let walls = [];
+            tileWidth = (templateData.distance * 45) * rollData[0].spellLevel;
+            tileHeight = (templateData.distance * 45) * rollData[0].spellLevel;
+            
+            let outerCircleRadius = tileWidth / 2.2;
+            tileX = templateData.x - (tileWidth / 2);
+            tileY = templateData.y - (tileHeight / 2);
+            //console.log("Tile Width, Tile Height: ", tileWidth, tileHeight);
+            // console.log("Tile X, Tile Y: ", tileX, tileY);
+            data = {
+                alpha: 1,
+                width: tileWidth,
+                height: tileHeight,
+                img: "modules/jb2a_patreon/Library/1st_Level/Fog_Cloud/FogCloud_01_White_800x800.webm",
+                overhead: true,
+                occlusion: {
+                    alpha: 0,
+                    mode: 3,
+                },
+                video: {
+                    autoplay: true,
+                    loop: true,
+                    volume: 0,
+                },
+                x: tileX,
+                y: tileY,
+                z: 100,
+                flags: { tagger: { tags: [`FogCloudTile-${casterId}`] } }
+            }
+            let createdTiles = await canvas.scene.createEmbeddedDocuments("Tile", [data]);
+            let tileD = createdTiles[0];
+            //console.log("Created tile..:", tileD);
+            //console.log(numWalls);
+            let wall_number = numWalls * rollData[0].spellLevel;
+            let wall_angles = 2 * Math.PI / wall_number
+            for (let i = 0; i < wall_number; i++) {
+                let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                wallPoints.push({ x: x, y: y });
+            }
+            //console.log("Walls Coordinates: ",wallPoints);
+            for (let i = 0; i < wallPoints.length; i++) {
+                if (i < wallPoints.length - 1) {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                        flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+                else {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                        flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+            }
+            //console.log("Wall Data: ", walls);
+            await canvas.scene.createEmbeddedDocuments("Wall", walls);
+            await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [templateData._id]);
+            /*Hooks.on("updateTile", async function moveAttachedWalls(tileD, diff) {
+
+                //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
+                //console.log('diff: ', diff);
+                if(!diff.x || !diff.y) return;
+                //console.log(wall_number);
+                let placedX = tileD.data.x + (tileD.data.width/2);
+                let placedY = tileD.data.y +  (tileD.data.height/2);
+                let outerCircleRadius = tileD.data.width / 2.2;
+                let wall_angles = 2 * Math.PI / wall_number;
+                let walls = [];
+                let wallDocuments = [];
+                let wallPoints = [];
+                //console.log("Tile Document: ",tileD);
+                walls = await Tagger.getByTag([`FogCloudWall-${tileD.id}`]);
+                walls.forEach((wall) => {
+                    wallDocuments.push(wall.document.id);
+                });
+                walls = [];
+                if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+                    await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+                    for (let i = 0; i < wall_number; i++) {
+                        let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                        let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                        wallPoints.push({ x: x, y: y });
+                    }
+                    //console.log("Walls Coordinates: ",wallPoints);
+                    for (let i = 0; i < wallPoints.length; i++) {
+                        if (i < wallPoints.length - 1) {
+                            walls.push({
+                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                                flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
+                                move: 0
+                            })
+                        }
+                        else {
+                            walls.push({
+                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                                flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
+                                move: 0
+                            })
+                        }
+                    }
+
+                }
+                console.log("Walls: ", walls);
+                await canvas.scene.createEmbeddedDocuments("Wall", walls);
+                //console.log(wallDocuments);
+            });*/
+            let fogCloudTileDeleteHookId = Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
+
+                let walls = [];
+                let wallDocuments = [];
+                walls = await Tagger.getByTag([`FogCloudWall-${tileD.id}`]);
+                walls.forEach((wall) => {
+                    wallDocuments.push(wall.document.id);
+                });
+                //console.log(wallDocuments);
+                //console.log("Embedded document test...", canvas.scene.getEmbeddedDocument("Wall",wallDocuments[0]));
+                if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+                    await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+                    Hooks.off("deleteTile", fogCloudTileDeleteHookId);
+                }
+
+            });
+        }
+
+
+    }
+
+    async function darknessWithWalls(rollData, numWalls) {
+        //console.log("Roll Data: ", rollData);
+        let error = false;
+        if (typeof args !== 'undefined' && args.length === 0) {
+            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+        }
+
+        if (!(game.modules.get("jb2a_patreon"))) {
+            error = `You need to have JB2A's patreon only module installed to run this macro!`;
+        }
+
+        if (!game.modules.get("advanced-macros")?.active) {
+            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+            error = `You need to have Advanced Macros ${installed} to run this macro!`;
+        }
+
+        if (!game.modules.get("midi-qol")?.active) {
+            let installed = game.modules.get("midi-qol") && !game.modules.get("midi-qol").active ? "enabled" : "installed";
+            error = `You need to have MidiQOL ${installed} to run this macro!`;
+        }
+
+        if (!game.modules.get("socketlib")?.active) {
+            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+            error = `You need to have SocketLib ${installed} to run this macro!`;
+        }
+
+        if (!game.modules.get("tagger")?.active) {
+            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+            error = `You need to have TTagger${installed} to run this macro!`;
+        }
+
+        if (!game.modules.get("sequencer")?.active) {
+            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+            error = `You need to have Sequencer ${installed} to run this macro!`;
+        }
+        if (error) {
+            ui.notifications.error(error);
+            return;
+        }
+
+        let template = canvas.templates.get(rollData[0].templateId);
+        
+        await placeCloudAsTile(template, rollData[0].tokenId);
+        async function placeCloudAsTile(template, casterId) {
+            let templateData = template.data;
+            //console.log("Template Data: ", templateData);
+            let tileWidth;
+            let tileHeight;
+            let tileX;
+            let tileY;
+            let placedX = templateData.x;
+            let placedY = templateData.y;
+            let wallPoints = [];
+            let walls = [];
+            tileWidth = (templateData.distance * 45);
+            tileHeight = (templateData.distance * 45);
+            
+            let outerCircleRadius = tileWidth / 2.2;
+            tileX = templateData.x - (tileWidth / 2);
+            tileY = templateData.y - (tileHeight / 2);
+            //console.log("Tile Width, Tile Height: ", tileWidth, tileHeight);
+            // console.log("Tile X, Tile Y: ", tileX, tileY);
+            data = {
+                alpha: 1,
+                width: tileWidth,
+                height: tileHeight,
+                img: "modules/jb2a_patreon/Library/2nd_Level/Darkness/Darkness_01_Black_600x600.webm",
+                overhead: true,
+                occlusion: {
+                    alpha: 0,
+                    mode: 3,
+                },
+                video: {
+                    autoplay: true,
+                    loop: true,
+                    volume: 0,
+                },
+                x: tileX,
+                y: tileY,
+                z: 100,
+                flags: { tagger: { tags: [`DarknessTile-${casterId}`] } }
+            }
+            let createdTiles = await canvas.scene.createEmbeddedDocuments("Tile", [data]);
+            let tileD = createdTiles[0];
+            //console.log("Created tile..:", tileD);
+            //console.log(numWalls);
+            let wall_number = numWalls;
+            let wall_angles = 2 * Math.PI / wall_number
+            for (let i = 0; i < wall_number; i++) {
+                let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                wallPoints.push({ x: x, y: y });
+            }
+            //console.log("Walls Coordinates: ",wallPoints);
+            for (let i = 0; i < wallPoints.length; i++) {
+                if (i < wallPoints.length - 1) {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+                else {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+            }
+            //console.log("Wall Data: ", walls);
+            await canvas.scene.createEmbeddedDocuments("Wall", walls);
+            await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [templateData._id]);
+            Hooks.on("updateTile", async function moveAttachedWalls(tileD, diff) {
+
+                //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
+                //console.log('diff: ', diff);
+                if(!diff.x || !diff.y) return;
+                //console.log(wall_number);
+                let placedX = tileD.data.x + (tileD.data.width/2);
+                let placedY = tileD.data.y +  (tileD.data.height/2);
+                let outerCircleRadius = tileD.data.width / 2.2;
+                let wall_angles = 2 * Math.PI / wall_number;
+                let walls = [];
+                let wallDocuments = [];
+                let wallPoints = [];
+                //console.log("Tile Document: ",tileD);
+                walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
+                walls.forEach((wall) => {
+                    wallDocuments.push(wall.document.id);
+                });
+                walls = [];
+                if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+                    await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+                    for (let i = 0; i < wall_number; i++) {
+                        let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                        let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                        wallPoints.push({ x: x, y: y });
+                    }
+                    //console.log("Walls Coordinates: ",wallPoints);
+                    for (let i = 0; i < wallPoints.length; i++) {
+                        if (i < wallPoints.length - 1) {
+                            walls.push({
+                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                                flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                                move: 0
+                            })
+                        }
+                        else {
+                            walls.push({
+                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                                flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                                move: 0
+                            })
+                        }
+                    }
+
+                }
+                //console.log("Walls: ", walls);
+                await canvas.scene.createEmbeddedDocuments("Wall", walls);
+                //console.log(wallDocuments);
+            });
+            let darknessTileDeleteHookId = Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
+
+                let walls = [];
+                let wallDocuments = [];
+                walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
+                walls.forEach((wall) => {
+                    wallDocuments.push(wall.document.id);
+                });
+                //console.log(wallDocuments);
+                //console.log("Embedded document test...", canvas.scene.getEmbeddedDocument("Wall",wallDocuments[0]));
+                if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+                    await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+                    Hooks.off("deleteTile", darknessTileDeleteHookId);
+                }
+
+            });
+        }
+
+
+    }
     //register module with socketlib
     socket = socketlib.registerModule("advancedspelleffects");
     //register all effect functions defined above with socketlib here
     socket.register("detectMagic", detectMagicContinous);
     socket.register("detectMagicRecursive", detectMagicRecursive);
+    socket.register("fogCloudWithWalls", fogCloudWithWalls);
+    socket.register("darknessWithWalls", darknessWithWalls);
 });
