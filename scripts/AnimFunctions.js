@@ -15,7 +15,10 @@ Hooks.once('init', async function () {
         socket.executeAsGM("darknessWithWalls", rollData, numWalls || 12);
     }
     async function tollTheDead(rollData) {
-        setTimeout(() => {socket.executeAsGM("tollTheDead", rollData[0]);}, 100);
+        setTimeout(() => { socket.executeAsGM("tollTheDead", rollData[0]); }, 100);
+    }
+    async function steelWindStrike(rollData, weapon, color) {
+        socket.executeAsGM("steelWindStrike", rollData[0], weapon || "sword", color || "blue");
     }
     // List of effects that can be called
     game.AdvancedSpellEffects = {};
@@ -24,6 +27,7 @@ Hooks.once('init', async function () {
     game.AdvancedSpellEffects.fogCloudWithWalls = fogCloudWithWalls;
     game.AdvancedSpellEffects.darknessWithWalls = darknessWithWalls;
     game.AdvancedSpellEffects.tollTheDead = tollTheDead;
+    game.AdvancedSpellEffects.steelWindStrike = steelWindStrike;
 });
 
 Hooks.once("socketlib.ready", () => {
@@ -945,7 +949,8 @@ Hooks.once("socketlib.ready", () => {
         //let caster = canvas.tokens.controlled[0];
         let bellAnim = "jb2a.toll_the_dead.purple.bell";
         let shockAnim = "jb2a.toll_the_dead.purple.shockwave";
-        let skullAnim = "jb2a.toll_the_dead.purple.skull_smoke";
+        let skullAnim = "jb2a.toll_the_dead.purple.skull_smoke"
+        let spawnEffect = "jb2a.eldritch_blast.purple"
         let target = rollData.failedSaves[0];
 
         if (target != undefined) {
@@ -969,21 +974,29 @@ Hooks.once("socketlib.ready", () => {
                 new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, damageRoll.total, "necrotic", [target], damageRoll, { flavor: `Toll the Dead - Damage Roll (${damageDie} Necrotic)`, itemCardId: rollData.itemCardId });
                 //await SequencerPreloader.preloadForClients([animFilePath, audioFilePath], true);
                 let sequence = new Sequence()
-                .effect()
+                    .effect()
+                    .file(spawnEffect)
+                    .atLocation(target)
+                    .JB2A()
+                    .waitUntilFinished(-1200)
+                    .endTime(3300)
+                    .playbackRate(0.75)
+                    .fadeOut(500)
+                    .effect()
                     .file(bellAnim)
                     .atLocation(target)
-                    .scale(0.6)
+                    .scale(animScale)
                     .rotate(45)
-                    .fadeIn(250)
+                    .fadeIn(500)
                     .JB2A()
-                    .scaleIn((animScale-0.2), 850, {ease: "easeInOutCirc"})
-                    .rotateIn(10, 850, {ease: "easeInOutBack"})
-                    .rotateOut(45, 650, {ease: "easeOutBounce"})
+                    .scaleIn((animScale - 0.2), 850, { ease: "easeInOutCirc" })
+                    .rotateIn(10, 850, { ease: "easeInOutBack" })
+                    .rotateOut(45, 650, { ease: "easeOutBounce" })
                     .fadeOut(150)
                     .endTimePerc(0.75)
                     .waitUntilFinished(-475)
-                    .scaleOut(0.65, 850)
-                .effect()
+                    .scaleOut((animScale + 0.05), 850)
+                    .effect()
                     .file(shockAnim)
                     .atLocation(target)
                     .JB2A()
@@ -991,13 +1004,264 @@ Hooks.once("socketlib.ready", () => {
                     .waitUntilFinished(-800)
                     .fadeOut(600)
                     .endTimePerc(0.65)
-                .effect()
+                    .effect()
                     .atLocation(target)
                     .file(skullAnim)
                     .JB2A()
                     .scale(animScale)
-            sequence.play();
+                sequence.play();
             }
+        }
+    }
+
+    async function steelWindStrike(rollData, weapon, color) {
+        console.log("rollData", rollData);
+        let caster = canvas.tokens.get(rollData.tokenId);
+        console.log("Caster roll data: ", caster.actor.getRollData());
+        let targets = Array.from(game.user.targets);
+        let rollDataForDisplay = [];
+        //let spellCastingAbility = rollData.actor.data.attributes.spellcasting;
+        let dagger = "";
+        if (weapon == "dagger") dagger = ".02"
+
+        let swordAnim;
+        let gustAnim = "jb2a.gust_of_wind.veryfast";
+        //let allFiles = [gustAnim, swordAnim];
+        //console.log('Files about to be preloaded...',allFiles);
+        //await SequencerPreloader.preloadForClients(allFiles, true);
+
+        let animStartTimeMap = {
+            "sword": 1050,
+            "mace": 825,
+            "greataxe": 1400,
+            "greatsword": 1400,
+            "handaxe": 1000,
+            "spear": 825,
+            "dagger": 700
+        };
+        swordAnim = `jb2a.${weapon}.melee${dagger}.${color}`;
+
+        await caster.document.setFlag("autorotate", "enabled", false);
+
+        await steelWindStrike(caster, targets);
+
+        async function evaluateAttack(target) {
+            //console.log("Evalute attack target: ", target);
+            let attackRoll = new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
+            // game.dice3d?.showForRoll(attackRoll);
+            if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
+                onMiss(target, attackRoll);
+            }
+            else {
+                onHit(target, attackRoll);
+            }
+        }
+
+        async function onHit(target, attackRoll) {
+            //console.log('Attack hit!');
+            //console.log("Attack roll: ", attackRoll);
+            let currentRoll = new Roll('6d10', caster.actor.getRollData()).roll();
+            //console.log("Current damage dice roll total: ", currentRoll.total);
+            //game.dice3d?.showForRoll(currentRoll);
+            let damageData = new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: 'Steel Wind Strike - Damage Roll (6d10 force)', itemCardId: rollData.itemCardId });
+            //console.log("damage data: ", damageData);
+            rollDataForDisplay.push({
+                "target": target.name,
+                "attackroll": attackRoll.total,
+                "hit": true,
+                "damageroll": currentRoll.total
+            })
+        }
+        async function onMiss(target, attackRoll) {
+            //console.log('Missed attack...');
+            //console.log("Attack roll: ", attackRoll);
+            rollDataForDisplay.push({
+                "target": target.name,
+                "attackroll": attackRoll.total,
+                "hit": false,
+                "damageroll": 0
+            })
+            //let currentRoll = new Roll(`${damageDie}`, caster.actor.getRollData()).roll({ async: false });
+            //game.dice3d?.showForRoll(currentRoll);
+            //new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, currentRoll.total, "bludgeoning", [target], currentRoll, { flavor: `Flurry of Blows - Damage Roll (${damageDie} Bludgeoning)`, itemCardId: rollData.itemCardId });
+        }
+
+        async function finalTeleport(caster, location){
+
+            let adjustedLocation = {x: location.data.x - (canvas.grid.size/2), y: location.data.y - (canvas.grid.size/2)}
+            let distance = Math.sqrt(Math.pow((adjustedLocation.x - caster.x), 2) + Math.pow((adjustedLocation.y - caster.y), 2));
+
+            let steelWindSequence = new Sequence()
+                    .effect()
+                    .atLocation(caster)
+                    .JB2A()
+                    .file(gustAnim)
+                    .reachTowards(adjustedLocation)
+                    .opacity(0.8)
+                    .fadeOut(250)
+                    .belowTokens()
+                    .animation()
+                    .on(caster)
+                    .rotateTowards(adjustedLocation)
+                    .animation()
+                    .on(caster)
+                    .moveTowards(adjustedLocation, { ease: "easeOutElasticCustom" })
+                    .moveSpeed(distance / 60)
+                    .duration(800)
+                await steelWindSequence.play();
+        }
+
+        async function steelWindStrike(caster, targets) {
+            let currentX;
+            let targetX;
+            let currentY;
+            let targetY;
+            let distance;
+            let params =
+                [{
+                    filterType: "blur",
+                    filterId: "SWSBlur",
+                    padding: 10,
+                    quality: 4.0,
+                    blur: 0,
+                    blurX: 0,
+                    blurY: 0,
+                    animated:
+                    {
+                        blurX:
+                        {
+                            active: true,
+                            animType: "syncCosOscillation",
+                            loopDuration: 500,
+                            val1: 0,
+                            val2: 8
+                        },
+                        blurY:
+                        {
+                            active: true,
+                            animType: "syncCosOscillation",
+                            loopDuration: 250,
+                            val1: 0,
+                            val2: 8
+                        }
+                    }
+                }];
+            await caster.TMFXaddUpdateFilters(params);
+            //console.log(targets);
+            for (let i = 0; i < targets.length; i++) {
+
+                //console.log(targets[i]);
+                let target = targets[i];
+                evaluateAttack(target);
+
+                currentX = caster.x;
+                targetX = target.x;
+                currentY = caster.y;
+                targetY = target.y;
+                distance = Math.sqrt(Math.pow((targetX - currentX), 2) + Math.pow((targetY - currentY), 2));
+                //console.log(distance);
+                let steelWindSequence = new Sequence()
+                    .effect()
+                    .atLocation(caster)
+                    .JB2A()
+                    .file(gustAnim)
+                    .reachTowards(target)
+                    .opacity(0.8)
+                    .fadeOut(250)
+                    .belowTokens()
+                    .effect()
+                    .atLocation(caster)
+                    .JB2A()
+                    .file(swordAnim)
+                    .startTime(animStartTimeMap[weapon] || 1050)
+                    .moveTowards(target, { ease: "easeOutElasticCustom" })
+                    .moveSpeed(distance)
+                    .animation()
+                    .on(caster)
+                    .rotateTowards(target)
+                    .animation()
+                    .on(caster)
+                    .moveTowards(target, { ease: "easeOutElasticCustom" })
+                    .moveSpeed(distance / 60)
+                    .duration(800)
+                    .waitUntilFinished()
+                await steelWindSequence.play();
+            }
+
+            let contentHTML = `<form class="editable flexcol" autocomplete="off">`;
+
+            rollDataForDisplay.forEach((data) => {
+                let name = data.target;
+                let attackTotal = data.attackroll;
+                let damageTotal = data.damageroll;
+                let hitStatus = data.hit;
+                contentHTML = contentHTML + `<section style="border: 1px solid black">
+                                                <li class="flexrow">
+                                                    <h4>${name}</h4>
+                                                    <div>
+                                                        <span>Attack Total: ${attackTotal}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span>${hitStatus ? 'Hit!' : 'Missed!'}</span>
+                                                    </div>
+                                                    <div> 
+                                                        <span>Damage Total: ${damageTotal}</span>
+                                                    </div>
+                                                </li>
+                                            </section> 
+                                            <br>`;
+            });
+            contentHTML = contentHTML + `</form>`
+            let preReticle;
+            let reticle;
+
+            let templateData = {
+                t: "circle",
+                user: game.user._id,
+                distance: 2.5,
+                direction: 0,
+                x: 0,
+                y: 0,
+                texture: ""
+            };
+            async function createTemplate(reticleData) {
+                preReticle = new MeasuredTemplateDocument(reticleData, { parent: canvas.scene });
+                //console.log("Pre-Reticle: ", preReticle);
+                reticle = new game.dnd5e.canvas.AbilityTemplate(preReticle);
+                reticle.actorSheet = rollData.actor.document.sheet;
+                //console.log("Reticle: ", reticle);
+                Hooks.once("createMeasuredTemplate", async (template) => {
+                    //console.log("template placed: ", template);
+                    canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [template.data._id])
+                    await finalTeleport(caster, template);
+                    await caster.TMFXdeleteFilters("SWSBlur");
+                    await caster.document.setFlag("autorotate", "enabled", true);
+                    
+                });
+                await reticle.drawPreview();
+            }
+            let callBolt = await (new Promise((resolve) => {
+                new Dialog({
+                    title: "Steel Wind Strike breakdown",
+                    content: contentHTML,
+                    buttons:
+                    {
+                        one: {
+                            label: 'Okay',
+                            callback: (html) => {
+                                resolve(true);
+                            }
+                        }
+                    },
+                },
+                    { width: '500' },
+                ).render(true)
+            }));
+
+            if (callBolt) {
+                await createTemplate(templateData);
+            }
+            
         }
     }
     //register module with socketlib
@@ -1008,4 +1272,5 @@ Hooks.once("socketlib.ready", () => {
     socket.register("fogCloudWithWalls", fogCloudWithWalls);
     socket.register("darknessWithWalls", darknessWithWalls);
     socket.register("tollTheDead", tollTheDead);
+    socket.register("steelWindStrike", steelWindStrike);
 });
