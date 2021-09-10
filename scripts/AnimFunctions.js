@@ -1087,7 +1087,7 @@ Hooks.once("socketlib.ready", () => {
         }
 
         async function finalTeleport(caster, location){
-
+            console.log("template: ", location);
             let adjustedLocation = {x: location.data.x - (canvas.grid.size/2), y: location.data.y - (canvas.grid.size/2)}
             let distance = Math.sqrt(Math.pow((adjustedLocation.x - caster.x), 2) + Math.pow((adjustedLocation.y - caster.y), 2));
 
@@ -1096,16 +1096,17 @@ Hooks.once("socketlib.ready", () => {
                     .atLocation(caster)
                     .JB2A()
                     .file(gustAnim)
-                    .reachTowards(adjustedLocation)
+                    .reachTowards(location)
                     .opacity(0.8)
                     .fadeOut(250)
                     .belowTokens()
                     .animation()
                     .on(caster)
-                    .rotateTowards(adjustedLocation)
+                    .rotateTowards(location)
                     .animation()
                     .on(caster)
-                    .moveTowards(adjustedLocation, { ease: "easeOutElasticCustom" })
+                    .snapToSquare()
+                    .moveTowards(location, { ease: "easeOutElasticCustom" })
                     .moveSpeed(distance / 60)
                     .duration(800)
                 await steelWindSequence.play();
@@ -1265,12 +1266,12 @@ Hooks.once("socketlib.ready", () => {
         }
     }
     //register module with socketlib
-    socket = socketlib.registerModule("advancedspelleffects");
+    ASEsocket = socketlib.registerModule("advancedspelleffects");
     //register all effect functions defined above with socketlib here
-    socket.register("detectMagic", detectMagicContinous);
-    socket.register("detectMagicRecursive", detectMagicRecursive);
-    socket.register("fogCloudWithWalls", fogCloudWithWalls);
-    socket.register("darknessWithWalls", darknessWithWalls);
-    socket.register("tollTheDead", tollTheDead);
-    socket.register("steelWindStrike", steelWindStrike);
+    ASEsocket.register("detectMagic", detectMagicContinous);
+    ASEsocket.register("detectMagicRecursive", detectMagicRecursive);
+    ASEsocket.register("fogCloudWithWalls", fogCloudWithWalls);
+    ASEsocket.register("darknessWithWalls", darknessWithWalls);
+    ASEsocket.register("tollTheDead", tollTheDead);
+    ASEsocket.register("steelWindStrike", steelWindStrike);
 });
