@@ -1,11 +1,8 @@
 let ASEsocket;
 
 Hooks.once('ready', async function() {
-        let updateTileHookId = Hooks.on("updateTile", async function moveAttachedWalls(tileD) {
+        Hooks.on("updateTile", async function moveAttachedWalls(tileD) {
 
-            //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
-            //console.log('diff: ', diff);
-            //console.log(wall_number);
             let wall_number = 12;
             let placedX = tileD.data.x + (tileD.data.width / 2);
             let placedY = tileD.data.y + (tileD.data.height / 2);
@@ -14,7 +11,7 @@ Hooks.once('ready', async function() {
             let walls = [];
             let wallDocuments = [];
             let wallPoints = [];
-            //console.log("Tile Document: ",tileD);
+
             walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
             walls.forEach((wall) => {
                 wallDocuments.push(wall.document.id);
@@ -27,7 +24,7 @@ Hooks.once('ready', async function() {
                     let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
                     wallPoints.push({ x: x, y: y });
                 }
-                //console.log("Walls Coordinates: ",wallPoints);
+
                 for (let i = 0; i < wallPoints.length; i++) {
                     if (i < wallPoints.length - 1) {
                         walls.push({
@@ -46,24 +43,20 @@ Hooks.once('ready', async function() {
                 }
 
             }
-            //console.log("Walls: ", walls);
-            await canvas.scene.createEmbeddedDocuments("Wall", walls);
-            //console.log(wallDocuments);
-        });
-        let darknessTileDeleteHookId = Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
 
+            await canvas.scene.createEmbeddedDocuments("Wall", walls);
+
+        });
+        Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
+            console.log("Ready hook deletion!");
             let walls = [];
             let wallDocuments = [];
             walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
             walls.forEach((wall) => {
                 wallDocuments.push(wall.document.id);
             });
-            //console.log(wallDocuments);
-            //console.log("Embedded document test...", canvas.scene.getEmbeddedDocument("Wall",wallDocuments[0]));
             if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
                 await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
-                Hooks.off("deleteTile", darknessTileDeleteHookId);
-                Hooks.off("updateTile", updateTileHookId);
             }
 
         });
@@ -86,6 +79,9 @@ Hooks.once('init', async function () {
     async function darknessWithWalls(rollData) {
         ASEsocket.executeAsGM("darknessWithWalls", rollData);
     }
+    async function darknessWithWallsNoMIDI(item, caster) {
+        ASEsocket.executeAsGM("darknessWithWallsNoMIDI", item, caster);
+    }
     async function tollTheDead(rollData) {
         setTimeout(() => { ASEsocket.executeAsGM("tollTheDead", rollData[0]); }, 100);
     }
@@ -98,6 +94,7 @@ Hooks.once('init', async function () {
     game.AdvancedSpellEffects.detectMagicRecursive = detectMagicRecursive;
     game.AdvancedSpellEffects.fogCloudWithWalls = fogCloudWithWalls;
     game.AdvancedSpellEffects.darknessWithWalls = darknessWithWalls;
+    game.AdvancedSpellEffects.darknessWithWallsNoMIDI = darknessWithWallsNoMIDI;
     game.AdvancedSpellEffects.tollTheDead = tollTheDead;
     game.AdvancedSpellEffects.steelWindStrike = steelWindStrike;
 });
@@ -948,10 +945,11 @@ Hooks.once("socketlib.ready", () => {
             await canvas.scene.createEmbeddedDocuments("Wall", walls);
             await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [templateData._id]);
             let updateTileHookId = Hooks.on("updateTile", async function moveAttachedWalls(tileD) {
-
+                //debugger;
                 //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
                 //console.log('diff: ', diff);
                 //console.log(wall_number);
+                let wall_number = 12;
                 let placedX = tileD.data.x + (tileD.data.width / 2);
                 let placedY = tileD.data.y + (tileD.data.height / 2);
                 let outerCircleRadius = tileD.data.width / 2.2;
@@ -960,7 +958,7 @@ Hooks.once("socketlib.ready", () => {
                 let wallDocuments = [];
                 let wallPoints = [];
                 //console.log("Tile Document: ",tileD);
-                walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
+                walls = await Tagger.getByTag([`DrknessWall-${tileD.id}`]);
                 walls.forEach((wall) => {
                     wallDocuments.push(wall.document.id);
                 });
@@ -996,17 +994,13 @@ Hooks.once("socketlib.ready", () => {
                 //console.log(wallDocuments);
             });
             let darknessTileDeleteHookId = Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
-
+                //debugger;
                 let walls = [];
-                let wallDocuments = [];
                 walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
-                walls.forEach((wall) => {
-                    wallDocuments.push(wall.document.id);
-                });
-                //console.log(wallDocuments);
+                console.log(walls);
                 //console.log("Embedded document test...", canvas.scene.getEmbeddedDocument("Wall",wallDocuments[0]));
-                if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
-                    await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+                if (walls.length>0) {
+                    setTimeout(() => {canvas.scene.deleteEmbeddedDocuments("Wall", walls);}, 10);
                     Hooks.off("deleteTile", darknessTileDeleteHookId);
                     Hooks.off("updateTile", updateTileHookId);
                 }
@@ -1016,6 +1010,113 @@ Hooks.once("socketlib.ready", () => {
 
 
     }
+
+    async function darknessWithWallsNoMIDI(item, caster) {
+        //console.log("Roll Data: ", rollData);
+        let error = false;
+        if (typeof args !== 'undefined' && args.length === 0) {
+            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+        }
+        if (!(game.modules.get("jb2a_patreon"))) {
+            error = `You need to have JB2A's patreon only module installed to run this macro!`;
+        }
+        if (!game.modules.get("advanced-macros")?.active) {
+            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+            error = `You need to have Advanced Macros ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("socketlib")?.active) {
+            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+            error = `You need to have SocketLib ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("tagger")?.active) {
+            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+            error = `You need to have TTagger${installed} to run this macro!`;
+        }
+        if (!game.modules.get("sequencer")?.active) {
+            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+            error = `You need to have Sequencer ${installed} to run this macro!`;
+        }
+        if (error) {
+            ui.notifications.error(error);
+            return;
+        }
+
+        let template = await warpgate.crosshairs.show(3, item.img, "Darkness");
+
+        await placeCloudAsTile(template, caster.id);
+
+        async function placeCloudAsTile(templateData, casterId) {
+            console.log("Template given: ", template);
+
+            let tileWidth;
+            let tileHeight;
+            let tileX;
+            let tileY;
+            let placedX = templateData.x;
+            let placedY = templateData.y;
+            let wallPoints = [];
+            let walls = [];
+            tileWidth = (templateData.distance * 45);
+            tileHeight = (templateData.distance * 45);
+
+            let outerCircleRadius = tileWidth / 2.2;
+            tileX = templateData.x - (tileWidth / 2);
+            tileY = templateData.y - (tileHeight / 2);
+
+            data = [{
+                alpha: 1,
+                width: tileWidth,
+                height: tileHeight,
+                img: "modules/jb2a_patreon/Library/2nd_Level/Darkness/Darkness_01_Black_600x600.webm",
+                overhead: true,
+                occlusion: {
+                    alpha: 0,
+                    mode: 3,
+                },
+                video: {
+                    autoplay: true,
+                    loop: true,
+                    volume: 0,
+                },
+                x: tileX,
+                y: tileY,
+                z: 100,
+                flags: { tagger: { tags: [`DarknessTile-${casterId}`] } }
+            }]
+            let createdTiles = await canvas.scene.createEmbeddedDocuments("Tile", data);
+            let tileD = createdTiles[0];
+
+            let wall_number = 12;
+            let wall_angles = 2 * Math.PI / wall_number
+            for (let i = 0; i < wall_number; i++) {
+                let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                wallPoints.push({ x: x, y: y });
+            }
+           
+            for (let i = 0; i < wallPoints.length; i++) {
+                if (i < wallPoints.length - 1) {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+                else {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+            }
+            
+            await canvas.scene.createEmbeddedDocuments("Wall", walls);
+        }
+
+
+    }
+
 
     async function tollTheDead(rollData) {
         console.log(rollData);
@@ -1345,6 +1446,7 @@ Hooks.once("socketlib.ready", () => {
     ASEsocket.register("detectMagicRecursive", detectMagicRecursive);
     ASEsocket.register("fogCloudWithWalls", fogCloudWithWalls);
     ASEsocket.register("darknessWithWalls", darknessWithWalls);
+    ASEsocket.register("darknessWithWallsNoMIDI", darknessWithWallsNoMIDI);
     ASEsocket.register("tollTheDead", tollTheDead);
     ASEsocket.register("steelWindStrike", steelWindStrike);
 });
