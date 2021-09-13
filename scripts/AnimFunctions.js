@@ -1,4 +1,67 @@
 let ASEsocket;
+
+Hooks.once('ready', async function () {
+    Hooks.on("updateTile", async function moveAttachedWalls(tileD) {
+
+        let wall_number = 12;
+        let placedX = tileD.data.x + (tileD.data.width / 2);
+        let placedY = tileD.data.y + (tileD.data.height / 2);
+        let outerCircleRadius = tileD.data.width / 2.2;
+        let wall_angles = 2 * Math.PI / wall_number;
+        let walls = [];
+        let wallDocuments = [];
+        let wallPoints = [];
+
+        walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
+        walls.forEach((wall) => {
+            wallDocuments.push(wall.document.id);
+        });
+        walls = [];
+        if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+            await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+            for (let i = 0; i < wall_number; i++) {
+                let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                wallPoints.push({ x: x, y: y });
+            }
+
+            for (let i = 0; i < wallPoints.length; i++) {
+                if (i < wallPoints.length - 1) {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+                else {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+            }
+
+        }
+
+        await canvas.scene.createEmbeddedDocuments("Wall", walls);
+
+    });
+    Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
+        console.log("Ready hook deletion!");
+        let walls = [];
+        let wallDocuments = [];
+        walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
+        walls.forEach((wall) => {
+            wallDocuments.push(wall.document.id);
+        });
+        if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+            await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+        }
+
+    });
+});
+
 Hooks.once('init', async function () {
     //Effect functions to be called from a macro in the "OnUseMacro" field of MIDI-QOL
     //Each function is excuted via socketlib to ensure proper permissions for the effect
@@ -14,6 +77,9 @@ Hooks.once('init', async function () {
     async function darknessWithWalls(rollData, numWalls) {
         ASEsocket.executeAsGM("darknessWithWalls", rollData, numWalls || 12);
     }
+    async function darknessWithWallsNoMIDI(item, caster) {
+        ASEsocket.executeAsGM("darknessWithWallsNoMIDI", item, caster);
+    }
     async function tollTheDead(rollData) {
         setTimeout(() => { ASEsocket.executeAsGM("tollTheDead", rollData[0]); }, 100);
     }
@@ -28,6 +94,7 @@ Hooks.once('init', async function () {
     game.AdvancedSpellEffects = {};
     game.AdvancedSpellEffects.fogCloudWithWalls = fogCloudWithWalls;
     game.AdvancedSpellEffects.darknessWithWalls = darknessWithWalls;
+    game.AdvancedSpellEffects.darknessWithWallsNoMIDI = darknessWithWallsNoMIDI;
     game.AdvancedSpellEffects.tollTheDead = tollTheDead;
     game.AdvancedSpellEffects.steelWindStrike = steelWindStrike;
     game.AdvancedSpellEffects.steelWindStrikeNoMIDI = steelWindStrikeNoMIDI;
@@ -447,16 +514,16 @@ Hooks.once("socketlib.ready", () => {
                 };
             }
 
-          
-                await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
-                console.log("Done creating and adding effect to actor...");
-            
+
+            await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+            console.log("Done creating and adding effect to actor...");
+
             return true;
             // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
 
         }
 
-        await addConcentration({"item": item, "actor": actorD })
+        await addConcentration({ "item": item, "actor": actorD })
 
         let magicalObjects = [];
 
@@ -492,20 +559,12 @@ Hooks.once("socketlib.ready", () => {
                 await applyMagicHighlight();
             })
             .thenDo(async () => {
-                
-                    console.log("Actor: ", actorD);
-                    let concentrationActiveEffect = actorD.effects.filter((effect) => effect.data.label === "Concentration")[0];
-                    await concentrationActiveEffect.update({
-                        changes: [{
-                            key: "macro.itemMacro",
-                            mode: 0,
-                            value: 0
-                        }]
-                    });
-                    let newItemMacro;
 
-                    if (item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.detectMagicNoMIDI(item, token);" || item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.detectMagicNoMIDI(item, token)") {
-                        newItemMacro = `if(args.length>0){
+                console.log("Actor: ", actorD);
+                let newItemMacro;
+
+                if (item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.detectMagicNoMIDI(item, token);" || item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.detectMagicNoMIDI(item, token)") {
+                    newItemMacro = `if(args.length>0){
 if(args[0] === "off"){
     let tokenD = canvas.tokens.controlled[0];
     let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
@@ -541,10 +600,10 @@ if(args[0] === "off"){
     else{
         game.AdvancedSpellEffects.detectMagicNoMIDI(item, token);
     }`;
-                        //console.log(newItemMacro);
-                        await item.setFlag("itemacro", "macro.data.command", newItemMacro)
-                    }
-             
+                    //console.log(newItemMacro);
+                    await item.setFlag("itemacro", "macro.data.command", newItemMacro)
+                }
+
             })
         for (let magical of magicalObjects) {
             if (!magical.school) {
@@ -1077,6 +1136,198 @@ if(args[0] === "off"){
                 }
 
             });
+        }
+
+
+    }
+
+    async function darknessWithWallsNoMIDI(item, caster) {
+        //console.log("Roll Data: ", rollData);
+        let error = false;
+        if (typeof args !== 'undefined' && args.length === 0) {
+            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+        }
+        if (!(game.modules.get("jb2a_patreon"))) {
+            error = `You need to have JB2A's patreon only module installed to run this macro!`;
+        }
+        if (!game.modules.get("advanced-macros")?.active) {
+            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+            error = `You need to have Advanced Macros ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("socketlib")?.active) {
+            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+            error = `You need to have SocketLib ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("tagger")?.active) {
+            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+            error = `You need to have TTagger${installed} to run this macro!`;
+        }
+        if (!game.modules.get("sequencer")?.active) {
+            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+            error = `You need to have Sequencer ${installed} to run this macro!`;
+        }
+        if (error) {
+            ui.notifications.error(error);
+            return;
+        }
+
+        const actor = item.actor;
+
+        let template = await warpgate.crosshairs.show(3, item.img, "Darkness");
+
+        await placeCloudAsTile(template, caster.id);
+
+        await changeSelfItemMacro();
+
+        await addConcentration();
+
+        
+
+        function getSelfTarget(actor) {
+            if (actor.token)
+                return actor.token;
+            const speaker = ChatMessage.getSpeaker({ actor });
+            if (speaker.token)
+                return canvas.tokens?.get(speaker.token);
+            return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
+        }
+        async function addConcentration() {
+            console.log("item in addConcentration: ", item);
+            let selfTarget = item.actor.token ? item.actor.token.object : getSelfTarget(item.actor);
+            if (!selfTarget)
+                return;
+
+            let concentrationName = "Concentration";
+            const inCombat = (game.combat?.turns.some(combatant => combatant.token?.id === selfTarget.id));
+            const effectData = {
+                changes: [{
+                    key: "macro.itemMacro",
+                    mode: 0,
+                    value: 0
+                }],
+                origin: item.uuid,
+                disabled: false,
+                icon: "modules/advancedspelleffects/icons/concentrate.png",
+                label: concentrationName,
+                duration: {},
+                flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
+            };
+
+            const convertedDuration = globalThis.DAE.convertDuration(item.data.data.duration, inCombat);
+            if (convertedDuration?.type === "seconds") {
+                effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
+            }
+            else if (convertedDuration?.type === "turns") {
+                effectData.duration = {
+                    rounds: convertedDuration.rounds,
+                    turns: convertedDuration.turns,
+                    startRound: game.combat?.round,
+                    startTurn: game.combat?.turn
+                };
+            }
+
+
+            await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+            console.log("Done creating and adding effect to actor...");
+
+            return true;
+            // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+
+        }
+
+        async function changeSelfItemMacro(){
+            let newItemMacro;
+
+            if (item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item, token);" || item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item, token)") {
+                newItemMacro = `if(args.length > 0){
+                    if(args[0] === "off"){
+                        console.log("token: ", token)
+                        let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${token.id}`"+`);
+                        darknessTiles.then(async (tiles) => {
+                            console.log("tiles to delete: ", tiles);
+                            if(tiles.length>0){
+                            await canvas.scene.deleteEmbeddedDocuments("Tile", [tiles[0].id]);
+                        }
+                        })
+                        
+                    }
+                }
+                else
+                {
+                    game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item, token);
+                }`;
+                //console.log(newItemMacro);
+                await item.setFlag("itemacro", "macro.data.command", newItemMacro)
+            }
+    }
+
+        async function placeCloudAsTile(templateData, casterId) {
+            console.log("Template given: ", template);
+
+            let tileWidth;
+            let tileHeight;
+            let tileX;
+            let tileY;
+            let placedX = templateData.x;
+            let placedY = templateData.y;
+            let wallPoints = [];
+            let walls = [];
+            tileWidth = (templateData.distance * 45);
+            tileHeight = (templateData.distance * 45);
+
+            let outerCircleRadius = tileWidth / 2.2;
+            tileX = templateData.x - (tileWidth / 2);
+            tileY = templateData.y - (tileHeight / 2);
+
+            data = [{
+                alpha: 1,
+                width: tileWidth,
+                height: tileHeight,
+                img: "modules/jb2a_patreon/Library/2nd_Level/Darkness/Darkness_01_Black_600x600.webm",
+                overhead: true,
+                occlusion: {
+                    alpha: 0,
+                    mode: 3,
+                },
+                video: {
+                    autoplay: true,
+                    loop: true,
+                    volume: 0,
+                },
+                x: tileX,
+                y: tileY,
+                z: 100,
+                flags: { tagger: { tags: [`DarknessTile-${casterId}`] } }
+            }]
+            let createdTiles = await canvas.scene.createEmbeddedDocuments("Tile", data);
+            let tileD = createdTiles[0];
+
+            let wall_number = 12;
+            let wall_angles = 2 * Math.PI / wall_number
+            for (let i = 0; i < wall_number; i++) {
+                let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                wallPoints.push({ x: x, y: y });
+            }
+
+            for (let i = 0; i < wallPoints.length; i++) {
+                if (i < wallPoints.length - 1) {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+                else {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+            }
+
+            await canvas.scene.createEmbeddedDocuments("Wall", walls);
         }
 
 
@@ -1677,6 +1928,7 @@ if(args[0] === "off"){
     //register all effect functions defined above with socketlib here
     ASEsocket.register("fogCloudWithWalls", fogCloudWithWalls);
     ASEsocket.register("darknessWithWalls", darknessWithWalls);
+    ASEsocket.register("darknessWithWallsNoMIDI", darknessWithWallsNoMIDI);
     ASEsocket.register("tollTheDead", tollTheDead);
     ASEsocket.register("steelWindStrike", steelWindStrike);
     ASEsocket.register("steelWindStrikeNoMIDI", steelWindStrikeNoMIDI);
