@@ -20,12 +20,6 @@
   ],
   "dependencies": [
     {
-      "name": "midi-qol"
-    },
-    {
-      "name": "tokenmagic"
-    },
-    {
       "name": "sequencer"
     },
     {
