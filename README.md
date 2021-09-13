@@ -53,9 +53,8 @@ optional: wallNumber is the number of desired walls around the edge of the tile.
 ```
 
 Darkness (The associated walls will move with the darkness tile)
-optional: wallNumber is the number of desired walls around the edge of the tile. Default is 12, minimum 10 is recommended. 
 ```javascript
-  game.AdvancedSpellEffects.darknessWithWalls(args, wallNumber)
+  game.AdvancedSpellEffects.darknessWithWalls(args)
 ```
 
 Toll The Dead
