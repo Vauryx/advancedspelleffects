@@ -1,24 +1,25 @@
+let ASEsocket;
 Hooks.once('init', async function () {
 
     //Effect functions to be called from a macro in the "OnUseMacro" field of MIDI-QOL
     //Each function is excuted via socketlib to ensure proper permissions for the effect
     async function detectMagic(rollData) {
-        socket.executeAsGM("detectMagic", rollData);
+        ASEsocket.executeAsGM("detectMagic", rollData);
     }
     async function detectMagicRecursive(rollData) {
-        socket.executeAsGM("detectMagicRecursive", rollData);
+        ASEsocket.executeAsGM("detectMagicRecursive", rollData);
     }
     async function fogCloudWithWalls(rollData, numWalls) {
-        socket.executeAsGM("fogCloudWithWalls", rollData, numWalls || 12);
+        ASEsocket.executeAsGM("fogCloudWithWalls", rollData, numWalls || 12);
     }
     async function darknessWithWalls(rollData, numWalls) {
-        socket.executeAsGM("darknessWithWalls", rollData, numWalls || 12);
+        ASEsocket.executeAsGM("darknessWithWalls", rollData, numWalls || 12);
     }
     async function tollTheDead(rollData) {
-        setTimeout(() => { socket.executeAsGM("tollTheDead", rollData[0]); }, 100);
+        setTimeout(() => { ASEsocket.executeAsGM("tollTheDead", rollData[0]); }, 100);
     }
     async function steelWindStrike(rollData, weapon, color) {
-        socket.executeAsGM("steelWindStrike", rollData[0], weapon || "sword", color || "blue");
+        ASEsocket.executeAsGM("steelWindStrike", rollData[0], weapon || "sword", color || "blue");
     }
     // List of effects that can be called
     game.AdvancedSpellEffects = {};
