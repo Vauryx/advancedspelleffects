@@ -1108,7 +1108,7 @@ Hooks.once("socketlib.ready", () => {
         async function changeSelfItemMacro(){
             let newItemMacro;
 
-            if (item.getFlag("itemacro", "macro.data.command").replace(" ", "") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item,token);" || item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item,token)") {
+            if (item.getFlag("itemacro", "macro.data.command").replace(/ /g, "") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item,token);" || item.getFlag("itemacro", "macro.data.command").replace(/ /g, "") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item,token)") {
                 newItemMacro = `if(args.length > 0){
                     if(args[0] === "off"){
                         console.log("token: ", token)
