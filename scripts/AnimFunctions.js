@@ -1041,12 +1041,98 @@ Hooks.once("socketlib.ready", () => {
             return;
         }
 
+        const actor = item.actor;
+
         let template = await warpgate.crosshairs.show(3, item.img, "Darkness");
 
         await placeCloudAsTile(template, caster.id);
 
+        await changeSelfItemMacro();
+
+        await addConcentration();
+
+        
+
+        function getSelfTarget(actor) {
+            if (actor.token)
+                return actor.token;
+            const speaker = ChatMessage.getSpeaker({ actor });
+            if (speaker.token)
+                return canvas.tokens?.get(speaker.token);
+            return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
+        }
+        async function addConcentration() {
+            //console.log("item in addConcentration: ", item);
+            let selfTarget = item.actor.token ? item.actor.token.object : getSelfTarget(item.actor);
+            if (!selfTarget)
+                return;
+
+            let concentrationName = "Concentration";
+            const inCombat = (game.combat?.turns.some(combatant => combatant.token?.id === selfTarget.id));
+            const effectData = {
+                changes: [{
+                    key: "macro.itemMacro",
+                    mode: 0,
+                    value: 0
+                }],
+                origin: item.uuid,
+                disabled: false,
+                icon: "modules/advancedspelleffects/icons/concentrate.png",
+                label: concentrationName,
+                duration: {},
+                flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
+            };
+
+            const convertedDuration = globalThis.DAE.convertDuration(item.data.data.duration, inCombat);
+            if (convertedDuration?.type === "seconds") {
+                effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
+            }
+            else if (convertedDuration?.type === "turns") {
+                effectData.duration = {
+                    rounds: convertedDuration.rounds,
+                    turns: convertedDuration.turns,
+                    startRound: game.combat?.round,
+                    startTurn: game.combat?.turn
+                };
+            }
+
+
+            await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+            //console.log("Done creating and adding effect to actor...");
+
+            return true;
+            // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+
+        }
+
+        async function changeSelfItemMacro(){
+            let newItemMacro;
+
+            if (item.getFlag("itemacro", "macro.data.command").replace(" ", "") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item,token);" || item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item,token)") {
+                newItemMacro = `if(args.length > 0){
+                    if(args[0] === "off"){
+                        console.log("token: ", token)
+                        let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${token.id}`"+`);
+                        darknessTiles.then(async (tiles) => {
+                            console.log("tiles to delete: ", tiles);
+                            if(tiles.length>0){
+                            await canvas.scene.deleteEmbeddedDocuments("Tile", [tiles[0].id]);
+                        }
+                        })
+                        
+                    }
+                }
+                else
+                {
+                    game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item, token);
+                }`;
+                //console.log(newItemMacro);
+                await item.setFlag("itemacro", "macro.data.command", newItemMacro)
+            }
+    }
+
         async function placeCloudAsTile(templateData, casterId) {
-            console.log("Template given: ", template);
+           // console.log("Template given: ", template);
 
             let tileWidth;
             let tileHeight;
@@ -1093,7 +1179,7 @@ Hooks.once("socketlib.ready", () => {
                 let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
                 wallPoints.push({ x: x, y: y });
             }
-           
+
             for (let i = 0; i < wallPoints.length; i++) {
                 if (i < wallPoints.length - 1) {
                     walls.push({
@@ -1110,7 +1196,7 @@ Hooks.once("socketlib.ready", () => {
                     })
                 }
             }
-            
+
             await canvas.scene.createEmbeddedDocuments("Wall", walls);
         }
 
