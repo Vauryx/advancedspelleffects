@@ -1,4 +1,75 @@
 let ASEsocket;
+
+Hooks.once('ready', async function() {
+        let updateTileHookId = Hooks.on("updateTile", async function moveAttachedWalls(tileD) {
+
+            //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
+            //console.log('diff: ', diff);
+            //console.log(wall_number);
+            let wall_number = 12;
+            let placedX = tileD.data.x + (tileD.data.width / 2);
+            let placedY = tileD.data.y + (tileD.data.height / 2);
+            let outerCircleRadius = tileD.data.width / 2.2;
+            let wall_angles = 2 * Math.PI / wall_number;
+            let walls = [];
+            let wallDocuments = [];
+            let wallPoints = [];
+            //console.log("Tile Document: ",tileD);
+            walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
+            walls.forEach((wall) => {
+                wallDocuments.push(wall.document.id);
+            });
+            walls = [];
+            if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+                await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+                for (let i = 0; i < wall_number; i++) {
+                    let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                    let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                    wallPoints.push({ x: x, y: y });
+                }
+                //console.log("Walls Coordinates: ",wallPoints);
+                for (let i = 0; i < wallPoints.length; i++) {
+                    if (i < wallPoints.length - 1) {
+                        walls.push({
+                            c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                            flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                            move: 0
+                        })
+                    }
+                    else {
+                        walls.push({
+                            c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                            flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                            move: 0
+                        })
+                    }
+                }
+
+            }
+            //console.log("Walls: ", walls);
+            await canvas.scene.createEmbeddedDocuments("Wall", walls);
+            //console.log(wallDocuments);
+        });
+        let darknessTileDeleteHookId = Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
+
+            let walls = [];
+            let wallDocuments = [];
+            walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
+            walls.forEach((wall) => {
+                wallDocuments.push(wall.document.id);
+            });
+            //console.log(wallDocuments);
+            //console.log("Embedded document test...", canvas.scene.getEmbeddedDocument("Wall",wallDocuments[0]));
+            if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+                await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+                Hooks.off("deleteTile", darknessTileDeleteHookId);
+                Hooks.off("updateTile", updateTileHookId);
+            }
+
+        });
+    });
+
+
 Hooks.once('init', async function () {
 
     //Effect functions to be called from a macro in the "OnUseMacro" field of MIDI-QOL
@@ -12,8 +83,8 @@ Hooks.once('init', async function () {
     async function fogCloudWithWalls(rollData, numWalls) {
         ASEsocket.executeAsGM("fogCloudWithWalls", rollData, numWalls || 12);
     }
-    async function darknessWithWalls(rollData, numWalls) {
-        ASEsocket.executeAsGM("darknessWithWalls", rollData, numWalls || 12);
+    async function darknessWithWalls(rollData) {
+        ASEsocket.executeAsGM("darknessWithWalls", rollData);
     }
     async function tollTheDead(rollData) {
         setTimeout(() => { ASEsocket.executeAsGM("tollTheDead", rollData[0]); }, 100);
@@ -762,7 +833,7 @@ Hooks.once("socketlib.ready", () => {
 
     }
 
-    async function darknessWithWalls(rollData, numWalls) {
+    async function darknessWithWalls(rollData, numWalls = 12) {
         //console.log("Roll Data: ", rollData);
         let error = false;
         if (typeof args !== 'undefined' && args.length === 0) {
@@ -805,6 +876,7 @@ Hooks.once("socketlib.ready", () => {
         let template = canvas.templates.get(rollData[0].templateId);
 
         await placeCloudAsTile(template, rollData[0].tokenId);
+
         async function placeCloudAsTile(template, casterId) {
             let templateData = template.data;
             //console.log("Template Data: ", templateData);
@@ -875,7 +947,7 @@ Hooks.once("socketlib.ready", () => {
             //console.log("Wall Data: ", walls);
             await canvas.scene.createEmbeddedDocuments("Wall", walls);
             await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [templateData._id]);
-            let updateTileHookId = Hooks.on("updateTile", async function moveAttachedWalls(tileD, diff) {
+            let updateTileHookId = Hooks.on("updateTile", async function moveAttachedWalls(tileD) {
 
                 //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
                 //console.log('diff: ', diff);
