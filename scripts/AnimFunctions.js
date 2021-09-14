@@ -33,6 +33,27 @@ Hooks.once('init', async function () {
     async function removeTiles(tileIds) {
         ASEsocket.executeAsGM("deleteTiles", tileIds);
     }
+
+    async function darkness(options){
+        switch(options.version) {
+            case "MIDI":
+              // code block
+              break;
+            case "ItemMacro":
+                let itemId = options.itemId;
+                let tokenId = options.tokenId;
+                let caster = await canvas.tokens.get(tokenId);
+                const actor = caster.actor;
+                let item = actor.items.find((item) => item.id == itemId);
+                let template = await warpgate.crosshairs.show(3, item.img, "Darkness");
+                ASEsocket.executeAsGM("registeredDarknessWithWallsNoMIDI", template, itemId, tokenId);
+              break;
+            default:
+              // code block
+              return;
+          }
+    }
+
     async function detectMagic(rollData) {
         ASEsocket.executeAsGM("registeredDetectMagic", rollData);
     }
@@ -46,11 +67,7 @@ Hooks.once('init', async function () {
         ASEsocket.executeAsGM("registeredDarknessWithWalls", rollData, numWalls || 12);
     }
     async function darknessWithWallsNoMIDI(itemId, tokenId) {
-        let caster = await canvas.tokens.get(tokenId);
-        const actor = caster.actor;
-        let item = actor.items.find((item) => item.id == itemId);
-        let template = await warpgate.crosshairs.show(3, item.img, "Darkness");
-        ASEsocket.executeAsGM("registeredDarknessWithWallsNoMIDI", template, itemId, tokenId);
+        
     }
     async function tollTheDead(rollData) {
         setTimeout(() => { ASEsocket.executeAsGM("registeredTollTheDead", rollData[0]); }, 100);
@@ -65,6 +82,7 @@ Hooks.once('init', async function () {
 
     game.AdvancedSpellEffects = {};
     game.AdvancedSpellEffects.removeTiles = removeTiles;
+    game.AdvancedSpellEffects.darkness = darkness;
     game.AdvancedSpellEffects.fogCloudWithWalls = fogCloudWithWalls;
     game.AdvancedSpellEffects.darknessWithWalls = darknessWithWalls;
     game.AdvancedSpellEffects.darknessWithWallsNoMIDI = darknessWithWallsNoMIDI;
@@ -1281,23 +1299,23 @@ Hooks.once("socketlib.ready", () => {
         async function changeSelfItemMacro(){
             let newItemMacro;
     
-            if (item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item, token);" || item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item, token)") {
-                newItemMacro = `if(args.length > 0){
+            if (!item.getFlag("itemacro", "macro.data.command").includes("/*ASE_REPLACED*/")) {
+                newItemMacro = `/*ASE_REPLACED*/if(args.length > 0){
                     if(args[0] === "off"){
                         //console.log("token: ", token)
                         let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${token.id}`"+`);
                         darknessTiles.then(async (tiles) => {
-                            //console.log("tiles to delete: ", tiles);
+                            console.log("tiles to delete: ", [tiles[0].id]);
                             if(tiles.length>0){
-                            game.AdvancedSpellEffects.removeTiles([tiles[0].id])
+                            game.AdvancedSpellEffects.removeTiles([tiles[0].id]);
                         }
                         })
-                        
                     }
                 }
                 else
                 {
-                    game.AdvancedSpellEffects.darknessWithWallsNoMIDI(item, token);
+                    let options = {"version": "ItemMacro", "itemId": item.id, "tokenId": token.id};
+                    game.AdvancedSpellEffects.darkness(options);
                 }`;
                 //console.log(newItemMacro);
                 await item.setFlag("itemacro", "macro.data.command", newItemMacro)
