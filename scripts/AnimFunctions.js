@@ -38,6 +38,8 @@ Hooks.once('init', async function () {
         switch(options.version) {
             case "MIDI":
               // code block
+              let rollData = options.args;
+              ASEsocket.executeAsGM("registeredDarknessWithWalls", rollData, numWalls || 12);
               break;
             case "ItemMacro":
                 let itemId = options.itemId;
@@ -51,23 +53,28 @@ Hooks.once('init', async function () {
             default:
               // code block
               return;
-          }
+        }
     }
 
-    async function detectMagic(rollData) {
-        ASEsocket.executeAsGM("registeredDetectMagic", rollData);
+    async function detectMagic(options) {
+        switch(options.version) {
+            case "MIDI":
+                let rollData = options.args;
+                ASEsocket.executeAsGM("registeredDetectMagic", rollData);
+                break;
+            case "ItemMacro":
+                let itemId = options.itemId;
+                let tokenId = options.tokenId;
+                ASEsocket.executeAsGM("registeredDetectMagicNoMIDI", item, token);
+                break;
+            default:
+                // code block
+                return;
+        }
     }
-    async function detectMagicNoMIDI(item, token) {
-        ASEsocket.executeAsGM("registeredDetectMagicNoMIDI", item, token);
-    }
+
     async function fogCloudWithWalls(rollData, numWalls) {
         ASEsocket.executeAsGM("registeredFogCloudWithWalls", rollData, numWalls || 12);
-    }
-    async function darknessWithWalls(rollData, numWalls) {
-        ASEsocket.executeAsGM("registeredDarknessWithWalls", rollData, numWalls || 12);
-    }
-    async function darknessWithWallsNoMIDI(itemId, tokenId) {
-        
     }
     async function tollTheDead(rollData) {
         setTimeout(() => { ASEsocket.executeAsGM("registeredTollTheDead", rollData[0]); }, 100);
@@ -83,14 +90,13 @@ Hooks.once('init', async function () {
     game.AdvancedSpellEffects = {};
     game.AdvancedSpellEffects.removeTiles = removeTiles;
     game.AdvancedSpellEffects.darkness = darkness;
+    /*
     game.AdvancedSpellEffects.fogCloudWithWalls = fogCloudWithWalls;
-    game.AdvancedSpellEffects.darknessWithWalls = darknessWithWalls;
-    game.AdvancedSpellEffects.darknessWithWallsNoMIDI = darknessWithWallsNoMIDI;
     game.AdvancedSpellEffects.tollTheDead = tollTheDead;
     game.AdvancedSpellEffects.steelWindStrike = steelWindStrike;
     game.AdvancedSpellEffects.steelWindStrikeNoMIDI = steelWindStrikeNoMIDI;
     game.AdvancedSpellEffects.detectMagic = detectMagic;
-    game.AdvancedSpellEffects.detectMagicNoMIDI = detectMagicNoMIDI;
+    game.AdvancedSpellEffects.detectMagicNoMIDI = detectMagicNoMIDI;*/
 
 });
 
@@ -1289,7 +1295,7 @@ Hooks.once("socketlib.ready", () => {
     
     
             await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
-            console.log("Done creating and adding effect to actor...");
+            //console.log("Done creating and adding effect to actor...");
     
             return true;
             // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
@@ -1323,7 +1329,7 @@ Hooks.once("socketlib.ready", () => {
     }
     
         async function placeCloudAsTile(templateData, casterId) {
-            console.log("Template given: ", template);
+           // console.log("Template given: ", template);
     
             let tileWidth;
             let tileHeight;
