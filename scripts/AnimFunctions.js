@@ -73,7 +73,7 @@ Hooks.once('init', async function () {
                 itemId = rollData.id;
                 tokenId = rollData.tokenId;
                 template = await warpgate.crosshairs.show(3, rollData.item.img, "Darkness");
-                console.log(rollData);
+                //console.log(rollData);
                 ASEsocket.executeAsGM("registeredDarknessMIDI", template, itemId, tokenId);
                 break;
             case "ItemMacro":
@@ -1111,18 +1111,16 @@ Hooks.once("socketlib.ready", () => {
             let newItemMacro;
 
             if (!item.getFlag("itemacro", "macro.data.command").includes("/*ASE_REPLACED*/")) {
-                newItemMacro = `/*ASE_REPLACED*/if(args.length > 0){
-                    if(args[0] === "off"){
+                newItemMacro = `/*ASE_REPLACED*/if(args[0] === "off"){
                         //console.log("token: ", token)
                         let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${token.id}`" + `);
                         darknessTiles.then(async (tiles) => {
-                            console.log("tiles to delete: ", [tiles[0].id]);
+                            //console.log("tiles to delete: ", [tiles[0].id]);
                             if(tiles.length>0){
                             game.AdvancedSpellEffects.removeTiles([tiles[0].id]);
                         }
                         })
                     }
-                }
                 else
                 {
                     let options = {version: "MIDI", args: args};
