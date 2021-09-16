@@ -1,29 +1,52 @@
 let ASEsocket;
-    //Define every function needed for an effect here so that they can be registered by socketlib
+//Define every function needed for an effect here so that they can be registered by socketlib
 
 
 Hooks.once('ready', async function () {
-    if(!game.user.isGM){
+    if (!game.user.isGM) {
         return;
     }
     Hooks.on("updateTile", async function (tileD) {
         ASEsocket.executeAsGM("moveDarknessWalls", tileD.id);
+        if (tileD.getFlag("advancedspelleffects", "fogCloudWallNum")) {
+            let wallNum = tileD.getFlag("advancedspelleffects", "fogCloudWallNum");
+            ASEsocket.executeAsGM("moveFogCloudWalls", tileD.id, wallNum);
+        }
+
     });
     Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
         //console.log("Ready hook deletion!");
-        if(!game.user.isGM){
+        if (!game.user.isGM) {
             return;
         }
-        let walls = [];
-        let wallDocuments = [];
-        walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
-        walls.forEach((wall) => {
-            wallDocuments.push(wall.document.id);
-        });
-        if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
-            await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+        async function deleteDarknessTile() {
+            let walls = [];
+            let wallDocuments = [];
+            walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
+            walls.forEach((wall) => {
+                wallDocuments.push(wall.document.id);
+            });
+            if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+                await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+            }
+        }
+        async function deleteFogCloudTile() {
+            let walls = [];
+            let wallDocuments = [];
+            walls = await Tagger.getByTag([`FogCloudWall-${tileD.id}`]);
+            //console.log("Tagged Fog Cloud walls: ", walls);
+            walls.forEach((wall) => {
+                wallDocuments.push(wall.document.id);
+            });
+            //console.log(wallDocuments);
+            //console.log("Embedded document test...", canvas.scene.getEmbeddedDocument("Wall",wallDocuments[0]));
+            if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+                await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+            }
         }
 
+        deleteDarknessTile();
+        deleteFogCloudTile();
     });
 });
 
@@ -34,38 +57,31 @@ Hooks.once('init', async function () {
         ASEsocket.executeAsGM("deleteTiles", tileIds);
     }
 
-    async function darkness(options){
-        switch(options.version) {
-            case "MIDI":
-              // code block
-              let rollData = options.args;
-              ASEsocket.executeAsGM("registeredDarknessWithWalls", rollData, numWalls || 12);
-              break;
-            case "ItemMacro":
-                let itemId = options.itemId;
-                let tokenId = options.tokenId;
-                let caster = await canvas.tokens.get(tokenId);
-                const actor = caster.actor;
-                let item = actor.items.find((item) => item.id == itemId);
-                let template = await warpgate.crosshairs.show(3, item.img, "Darkness");
-                ASEsocket.executeAsGM("registeredDarknessWithWallsNoMIDI", template, itemId, tokenId);
-              break;
-            default:
-              // code block
-              return;
-        }
+    async function updateFlag(ObjectId, flag, value) {
+        await ASEsocket.executeAsGM("updateObjectFlag", ObjectId, flag, value);
     }
 
-    async function detectMagic(options) {
-        switch(options.version) {
+    //MIDI/ITEM MACRO VERSIONS
+    async function darkness(options) {
+        let itemId;
+        let tokenId;
+        let template;
+        switch (options.version) {
             case "MIDI":
-                let rollData = options.args;
-                ASEsocket.executeAsGM("registeredDetectMagic", rollData);
+                // code block
+                let rollData = options.args[0];
+                itemId = rollData.id;
+                tokenId = rollData.tokenId;
+                template = await warpgate.crosshairs.show(3, rollData.item.img, "Darkness");
+                console.log(rollData);
+                ASEsocket.executeAsGM("registeredDarknessMIDI", template, itemId, tokenId);
                 break;
             case "ItemMacro":
-                let itemId = options.itemId;
-                let tokenId = options.tokenId;
-                ASEsocket.executeAsGM("registeredDetectMagicNoMIDI", item, token);
+                let caster = await canvas.tokens.get(options.tokenId);
+                const actor = caster.actor;
+                let item = await actor.items.get(options.itemId);
+                template = await warpgate.crosshairs.show(3, item.img, "Darkness");
+                ASEsocket.executeAsGM("registeredDarknessItemMacro", template, options.itemId, options.tokenId);
                 break;
             default:
                 // code block
@@ -73,9 +89,818 @@ Hooks.once('init', async function () {
         }
     }
 
-    async function fogCloudWithWalls(rollData, numWalls) {
-        ASEsocket.executeAsGM("registeredFogCloudWithWalls", rollData, numWalls || 12);
+    //MIDI/ITEM MACRO VERSIONS
+    async function detectMagic(options) {
+        let item;
+        let actor;
+        let caster;
+        let users = [];
+        let magicalObjects = [];
+        let sequence;
+        let error;
+        async function applyMagicHighlight(caster) {
+            let detectMagicGlow =
+                [{
+                    filterType: "zapshadow",
+                    filterId: "detectMagicZapShadow",
+                    alphaTolerance: 0.50
+                },
+                {
+                    filterType: "xglow",
+                    filterId: "detectMagicGlow",
+                    auraType: 2,
+                    color: 0x8F00FF,
+                    thickness: 0.01,
+                    scale: 1,
+                    time: 0,
+                    auraIntensity: 2,
+                    subAuraIntensity: 1.5,
+                    threshold: 0.5,
+                    discard: true,
+                    animated:
+                    {
+                        time:
+                        {
+                            active: true,
+                            speed: 0.0027,
+                            animType: "move"
+                        },
+                        thickness:
+                        {
+                            active: true,
+                            loopDuration: 3000,
+                            animType: "cosOscillation",
+                            val1: 2,
+                            val2: 5
+                        }
+                    }
+                }];
+
+            await TokenMagic.addFilters(caster, detectMagicGlow);
+        }
+        switch (options.version) {
+            case "MIDI":
+                let args = options.args;
+                //console.log("ARGS: ", args);
+                error = false;
+                if (typeof args !== 'undefined' && args.length === 0) {
+                    error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+                }
+
+                if (!(game.modules.get("jb2a_patreon"))) {
+                    error = `You need to have JB2A's patreon only module installed to run this macro!`;
+                }
+
+                if (!game.modules.get("advanced-macros")?.active) {
+                    let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+                    error = `You need to have Advanced Macros ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("midi-qol")?.active) {
+                    let installed = game.modules.get("midi-qol") && !game.modules.get("midi-qol").active ? "enabled" : "installed";
+                    error = `You need to have MidiQOL ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("tokenmagic")?.active) {
+                    let installed = game.modules.get("tokenmagic") && !game.modules.get("tokenmagic").active ? "enabled" : "installed";
+                    error = `You need to have Token Magic FX ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("socketlib")?.active) {
+                    let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+                    error = `You need to have SocketLib ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("tagger")?.active) {
+                    let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+                    error = `You need to have TTagger${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("sequencer")?.active) {
+                    let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+                    error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+
+                actor = game.actors.get(args[0].actor._id);
+                //console.log("Actor: ", actorD);
+
+                for (const user in actor.data.permission) {
+                    if (user == "default") continue;
+                    users.push(user);
+                }
+                //console.log("Visible to users: ", users);
+                caster = canvas.tokens.get(args[0].tokenId);
+                item = actor.items.getName(args[0].item.name);
+                //console.log(itemD);
+                if (error) {
+                    ui.notifications.error(error);
+                    return;
+                }
+
+
+
+                if (game.modules.get("tagger")?.active) {
+
+                    let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+                    let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
+
+                    let objects = await Tagger.getByTag("magical", { ignore: [caster] });
+                    magicalObjects = objects.map(o => {
+                        let distance = canvas.grid.measureDistance(caster, o);
+                        return {
+                            delay: distance * 55,
+                            distance: distance,
+                            obj: o,
+                            school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                            color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                        }
+                    })
+                        .filter(o => o.distance <= 32.5)
+                }
+                //console.log("Detected Magical Objects: ", magicalObjects);
+                sequence = new Sequence()
+                    .effect("jb2a.detect_magic.circle.purple")
+                    .atLocation(caster)
+                    .JB2A()
+                    .belowTiles()
+                    .scale(2.33333)
+                    .thenDo(async () => {
+                        console.log("Registering detect magic hook...");
+                        await registerDetectMagicMIDIHook(caster, users);
+                    })
+                    .thenDo(async () => {
+                        console.log("Applying Token Magic Highlight Effect...");
+                        await applyMagicHighlight(caster);
+                    })
+                    .wait(100)
+                    .thenDo(async () => {
+                        //console.log("Actor: ", actorD);
+                        let concentrationActiveEffect = actor.effects.filter((effect) => effect.data.label === "Concentrating")[0];
+                        //console.log("Detect Magic Concentration effect: ", concentrationActiveEffect);
+                        await concentrationActiveEffect.update({
+                            changes: [{
+                                key: "macro.itemMacro",
+                                mode: 0,
+                                value: 0
+                            }]
+                        });
+                        let newItemMacro;
+                        //console.log("Current ItemMacro: ", item.getFlag("itemacro", "macro.data.command"));
+                        if (!item.getFlag("itemacro", "macro.data.command").includes("/*ASE_REPLACED*/")) {
+                            //console.log("Replacing current item macro...");
+                            newItemMacro = `/*ASE_REPLACED*/if(args[0] === "off"){
+        let midiData = args[args.length-1];
+        let caster = canvas.tokens.get(midiData.tokenId);
+        let objects = await Tagger.getByTag("magical", { ignore: [caster] });
+        let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+        let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
+        let detectMagicHookId = await caster.document.getFlag("advancedspelleffects","detectMagicHookId");
+        Hooks.off("updateToken", detectMagicHookId);
+        await TokenMagic.deleteFilters(caster, "detectMagicGlow");
+        await TokenMagic.deleteFilters(caster, "detectMagicZapShadow");
+        await caster.document.setFlag("advancedspelleffects","detectMagicHookId", -1);
+        let magicalObjects = [];
+        
+        magicalObjects = objects.map(o => {
+                            let distance = canvas.grid.measureDistance(caster, o);
+                            return {
+                                delay: 0,
+                                distance: distance,
+                                obj: o,
+                                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                            }
+                        })
+                        for (let magical of magicalObjects) {
+                            if (!magical.school) {
+                                continue;
+                            }
+                            await game.AdvancedSpellEffects.updateFlag(magical.obj.id, "magicDetected", false);
+                            SequencerEffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
+                        }
+        }
+        else if(args[0] != "on" && args[0] != "off"){
+            let options = {version: "MIDI", args: args};
+            game.AdvancedSpellEffects.detectMagic(options);
+        }`;
+                            //console.log(newItemMacro);
+                            await item.setFlag("itemacro", "macro.data.command", newItemMacro)
+                        }
+                    })
+
+                for (let magical of magicalObjects) {
+                    if (!magical.school) {
+                        continue;
+                    }
+                    await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
+
+                    //console.log("Magical OBJ: ", magical.obj)
+                    new Sequence()
+                        .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
+                        .forUsers(users)
+                        .atLocation(magical.obj)
+                        .scale(0.25)
+                        .delay(magical.delay)
+                        .setMustache(magical)
+                        .waitUntilFinished(-1200)
+                        .zIndex(0)
+                        .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
+                        .name(`${magical.obj.document.id}-magicRune`)
+                        .delay(magical.delay)
+                        .forUsers(users)
+                        .atLocation(magical.obj)
+                        .scale(0.25)
+                        .attachTo(magical.obj)
+                        .persist(true)
+                        .setMustache(magical)
+                        .waitUntilFinished(-750)
+                        .fadeOut(750, { ease: "easeInQuint" })
+                        .zIndex(1)
+                        .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+                        .forUsers(users)
+                        .atLocation(magical.obj)
+                        .scale(0.25)
+                        .setMustache(magical)
+                        .zIndex(0)
+                        .play()
+
+                }
+                sequence.play();
+
+
+
+                async function registerDetectMagicMIDIHook(tokenD, users) {
+                    let detectMagicHookId = Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
+                        //console.log("hook fired!");
+                        if ((!updateData.x && !updateData.y) || (tokenDocument.id != tokenD.id)) return;
+                        let newPos = { x: 0, y: 0 };
+                        newPos.x = (updateData.x) ? updateData.x : tokenD.data.x;
+                        newPos.y = (updateData.y) ? updateData.y : tokenD.data.y;
+                        //console.log("Controlled token: " , tokenD);
+                        let magicalObjects = [];
+                        let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+                        let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
+
+                        let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
+
+                        magicalObjects = objects.map(o => {
+                            let distance = canvas.grid.measureDistance(newPos, o);
+                            return {
+                                delay: 0,
+                                distance: distance,
+                                obj: o,
+                                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                            }
+                        }).filter(o => o.distance > 32.5)
+                        for (let magical of magicalObjects) {
+                            if (!magical.school) {
+                                continue;
+                            }
+                            await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", false);
+                            //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
+                            SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+
+                        }
+                        magicalObjects = objects.map(o => {
+                            let distance = canvas.grid.measureDistance(newPos, o);
+                            //console.log("distance: ", distance);
+                            return {
+                                delay: 0,
+                                distance: distance,
+                                obj: o,
+                                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                            }
+                        }).filter(o => o.distance <= 32.5)
+
+                        //console.log("Magical Objects in Range: " , magicalObjects);
+                        for (let magical of magicalObjects) {
+                            if (!magical.school) {
+                                continue;
+                            }
+                            //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
+                            if (!(magical.obj.document.getFlag("advancedspelleffects", "magicDetected"))) {
+                                await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
+                                new Sequence()
+                                    .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
+                                    .forUsers(users)
+                                    .atLocation(magical.obj)
+                                    .scale(0.25)
+                                    .delay(magical.delay)
+                                    .setMustache(magical)
+                                    .waitUntilFinished(-800)
+                                    .zIndex(0)
+                                    .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
+                                    .name(`${magical.obj.document.id}-magicRune`)
+                                    .delay(magical.delay)
+                                    .forUsers(users)
+                                    .atLocation(magical.obj)
+                                    .scale(0.25)
+                                    .attachTo(magical.obj)
+                                    .persist(true)
+                                    .setMustache(magical)
+                                    .waitUntilFinished(-750)
+                                    .zIndex(1)
+                                    .fadeOut(750, { ease: "easeInQuint" })
+                                    .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+                                    .forUsers(users)
+                                    .atLocation(magical.obj)
+                                    .scale(0.25)
+                                    .setMustache(magical)
+                                    .zIndex(0)
+                                    .play()
+                            }
+                        }
+                    });
+                    await tokenD.document.setFlag("advancedspelleffects", "detectMagicHookId", detectMagicHookId);
+                }
+                break;
+            case "ItemMacro":
+                caster = await canvas.tokens.get(options.tokenId);
+                actor = caster.actor;
+                item = await actor.items.get(options.itemId);
+
+                //console.log("ARGS: ", args);
+                error = false;
+
+                if (!(game.modules.get("jb2a_patreon"))) {
+                    error = `You need to have JB2A's patreon only module installed to run this macro!`;
+                }
+
+                if (!game.modules.get("advanced-macros")?.active) {
+                    let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+                    error = `You need to have Advanced Macros ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("tokenmagic")?.active) {
+                    let installed = game.modules.get("tokenmagic") && !game.modules.get("tokenmagic").active ? "enabled" : "installed";
+                    error = `You need to have Token Magic FX ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("socketlib")?.active) {
+                    let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+                    error = `You need to have SocketLib ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("tagger")?.active) {
+                    let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+                    error = `You need to have TTagger${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("sequencer")?.active) {
+                    let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+                    error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+
+                //const actorD = game.actors.get(args[0].actor._id);
+                //console.log("Actor: ", actorD);
+                for (const user in actor.data.permission) {
+                    if (user == "default") continue;
+                    users.push(user);
+                }
+                //console.log("Visible to users: ", users);
+                //const tokenD = canvas.tokens.get(args[0].tokenId);
+                //const item = actorD.items.getName(args[0].item.name);
+                //console.log(itemD);
+                if (error) {
+                    ui.notifications.error(error);
+                    return;
+                }
+
+
+                if (game.modules.get("tagger")?.active) {
+
+                    let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+                    let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
+
+                    let objects = await Tagger.getByTag("magical", { ignore: [caster] });
+                    magicalObjects = objects.map(o => {
+                        let distance = canvas.grid.measureDistance(caster, o);
+                        return {
+                            delay: distance * 55,
+                            distance: distance,
+                            obj: o,
+                            school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                            color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                        }
+                    })
+                        .filter(o => o.distance <= 32.5)
+                }
+                //console.log("Detected Magical Objects: ", magicalObjects);
+                sequence = new Sequence()
+                    .effect("jb2a.detect_magic.circle.purple")
+                    .atLocation(caster)
+                    .JB2A()
+                    .belowTiles()
+                    .scale(2.33333)
+                    .thenDo(async () => {
+                        console.log("Registering detect magic hook...");
+                        await registerDetectMagicItemMacroHook(caster, users);
+                    })
+                    .thenDo(async () => {
+                        console.log("Applying Token Magic Highlight Effect...");
+                        await applyMagicHighlight(caster);
+                    })
+                    .wait(100)
+                    .thenDo(async () => {
+                        await addConcentration();
+                        let newItemMacro;
+                        //console.log("Current ItemMacro: ", item.getFlag("itemacro", "macro.data.command"));
+                        if (!item.getFlag("itemacro", "macro.data.command").includes("/*ASE_REPLACED*/")) {
+                            //console.log("Replacing current item macro...");
+                            newItemMacro = `/*ASE_REPLACED*/if(args[0] === "off"){
+let objects = await Tagger.getByTag("magical", { ignore: [token] });
+let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
+let detectMagicHookId = await token.document.getFlag("advancedspelleffects","detectMagicHookId");
+Hooks.off("updateToken", detectMagicHookId);
+await TokenMagic.deleteFilters(token, "detectMagicGlow");
+await TokenMagic.deleteFilters(token, "detectMagicZapShadow");
+await token.document.setFlag("advancedspelleffects","detectMagicHookId", -1);
+let magicalObjects = [];
+
+magicalObjects = objects.map(o => {
+                    let distance = canvas.grid.measureDistance(token, o);
+                    return {
+                        delay: 0,
+                        distance: distance,
+                        obj: o,
+                        school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                        color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                    }
+                })
+                for (let magical of magicalObjects) {
+                    if (!magical.school) {
+                        continue;
+                    }
+                    await game.AdvancedSpellEffects.updateFlag(magical.obj.id, "magicDetected", false);
+                    SequencerEffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
+                }
+}
+else if(args[0] != "on" && args[0] != "off"){
+    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id};
+    game.AdvancedSpellEffects.detectMagic(options);
+}`;
+                            //console.log(newItemMacro);
+                            await item.setFlag("itemacro", "macro.data.command", newItemMacro)
+                        }
+                    })
+
+                for (let magical of magicalObjects) {
+                    if (!magical.school) {
+                        continue;
+                    }
+                    await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
+
+                    //console.log("Magical OBJ: ", magical.obj)
+                    new Sequence()
+                        .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
+                        .forUsers(users)
+                        .atLocation(magical.obj)
+                        .scale(0.25)
+                        .delay(magical.delay)
+                        .setMustache(magical)
+                        .waitUntilFinished(-1200)
+                        .zIndex(0)
+                        .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
+                        .name(`${magical.obj.document.id}-magicRune`)
+                        .delay(magical.delay)
+                        .forUsers(users)
+                        .atLocation(magical.obj)
+                        .scale(0.25)
+                        .attachTo(magical.obj)
+                        .persist(true)
+                        .setMustache(magical)
+                        .waitUntilFinished(-750)
+                        .fadeOut(750, { ease: "easeInQuint" })
+                        .zIndex(1)
+                        .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+                        .forUsers(users)
+                        .atLocation(magical.obj)
+                        .scale(0.25)
+                        .setMustache(magical)
+                        .zIndex(0)
+                        .play()
+
+                }
+                sequence.play();
+
+                function getSelfTarget(actor) {
+                    if (actor.token)
+                        return actor.token;
+                    const speaker = ChatMessage.getSpeaker({ actor });
+                    if (speaker.token)
+                        return canvas.tokens?.get(speaker.token);
+                    return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
+                }
+                async function addConcentration() {
+                    //console.log("item in addConcentration: ", item);
+                    let selfTarget = item.actor.token ? item.actor.token.object : getSelfTarget(item.actor);
+                    if (!selfTarget)
+                        return;
+
+                    let concentrationName = "Concentration";
+                    const inCombat = (game.combat?.turns.some(combatant => combatant.token?.id === selfTarget.id));
+                    const effectData = {
+                        changes: [{
+                            key: "macro.itemMacro",
+                            mode: 0,
+                            value: 0
+                        }],
+                        origin: item.uuid,
+                        disabled: false,
+                        icon: "modules/advancedspelleffects/icons/concentrate.png",
+                        label: concentrationName,
+                        duration: {},
+                        flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
+                    };
+
+                    const convertedDuration = globalThis.DAE.convertDuration(item.data.data.duration, inCombat);
+                    if (convertedDuration?.type === "seconds") {
+                        effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
+                    }
+                    else if (convertedDuration?.type === "turns") {
+                        effectData.duration = {
+                            rounds: convertedDuration.rounds,
+                            turns: convertedDuration.turns,
+                            startRound: game.combat?.round,
+                            startTurn: game.combat?.turn
+                        };
+                    }
+
+
+                    await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+                    //console.log("Done creating and adding effect to actor...");
+
+                    return true;
+                    // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+
+                }
+                async function registerDetectMagicItemMacroHook(tokenD, users) {
+                    let detectMagicHookId = Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
+                        //console.log("hook fired!");
+                        if ((!updateData.x && !updateData.y) || (tokenDocument.id != tokenD.id)) return;
+                        let newPos = { x: 0, y: 0 };
+                        newPos.x = (updateData.x) ? updateData.x : tokenD.data.x;
+                        newPos.y = (updateData.y) ? updateData.y : tokenD.data.y;
+                        //console.log("Controlled token: " , tokenD);
+                        let magicalObjects = [];
+                        let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+                        let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
+
+                        let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
+
+                        magicalObjects = objects.map(o => {
+                            let distance = canvas.grid.measureDistance(newPos, o);
+                            return {
+                                delay: 0,
+                                distance: distance,
+                                obj: o,
+                                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                            }
+                        }).filter(o => o.distance > 32.5)
+                        for (let magical of magicalObjects) {
+                            if (!magical.school) {
+                                continue;
+                            }
+                            await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", false);
+                            //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
+                            SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+
+                        }
+                        magicalObjects = objects.map(o => {
+                            let distance = canvas.grid.measureDistance(newPos, o);
+                            //console.log("distance: ", distance);
+                            return {
+                                delay: 0,
+                                distance: distance,
+                                obj: o,
+                                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                            }
+                        }).filter(o => o.distance <= 32.5)
+
+                        //console.log("Magical Objects in Range: " , magicalObjects);
+                        for (let magical of magicalObjects) {
+                            if (!magical.school) {
+                                continue;
+                            }
+                            //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
+                            if (!(magical.obj.document.getFlag("advancedspelleffects", "magicDetected"))) {
+                                await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
+                                new Sequence()
+                                    .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
+                                    .forUsers(users)
+                                    .atLocation(magical.obj)
+                                    .scale(0.25)
+                                    .delay(magical.delay)
+                                    .setMustache(magical)
+                                    .waitUntilFinished(-800)
+                                    .zIndex(0)
+                                    .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
+                                    .name(`${magical.obj.document.id}-magicRune`)
+                                    .delay(magical.delay)
+                                    .forUsers(users)
+                                    .atLocation(magical.obj)
+                                    .scale(0.25)
+                                    .attachTo(magical.obj)
+                                    .persist(true)
+                                    .setMustache(magical)
+                                    .waitUntilFinished(-750)
+                                    .zIndex(1)
+                                    .fadeOut(750, { ease: "easeInQuint" })
+                                    .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+                                    .forUsers(users)
+                                    .atLocation(magical.obj)
+                                    .scale(0.25)
+                                    .setMustache(magical)
+                                    .zIndex(0)
+                                    .play()
+                            }
+                        }
+                    });
+                    await tokenD.document.setFlag("advancedspelleffects", "detectMagicHookId", detectMagicHookId);
+                }
+                break;
+            default:
+                // code block
+                return;
+        }
     }
+
+    //MIDI
+    async function fogCloud(options) {
+        //console.log("Spell Options: ", options);
+        switch (options.version) {
+            case "MIDI":
+                //console.log("Roll Data: ", rollData);
+                let error = false;
+                const rollData = options.args;
+                const actor = rollData[0].actor;
+                const item = actor.items.getName(rollData[0].item.name);
+                if (typeof args !== 'undefined' && args.length === 0) {
+                    error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+                }
+                if (!(game.modules.get("jb2a_patreon"))) {
+                    error = `You need to have JB2A's patreon only module installed to run this macro!`;
+                }
+                if (!game.modules.get("advanced-macros")?.active) {
+                    let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+                    error = `You need to have Advanced Macros ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("midi-qol")?.active) {
+                    let installed = game.modules.get("midi-qol") && !game.modules.get("midi-qol").active ? "enabled" : "installed";
+                    error = `You need to have MidiQOL ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("socketlib")?.active) {
+                    let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+                    error = `You need to have SocketLib ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("tagger")?.active) {
+                    let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+                    error = `You need to have TTagger${installed} to run this macro!`;
+                }
+                if (!game.modules.get("sequencer")?.active) {
+                    let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+                    error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+                if (error) {
+                    ui.notifications.error(error);
+                    return;
+                }
+
+                let template = await warpgate.crosshairs.show(8 * (rollData[0].spellLevel), item.img, "Fog Cloud");
+
+                await placeCloudAsTile(template, rollData[0].tokenId);
+                await changeSelfItemMacro();
+
+
+                async function changeSelfItemMacro() {
+                    let concentrationActiveEffect = actor.effects.filter((effect) => effect.data.label === "Concentrating")[0];
+                    //console.log("Detect Magic Concentration effect: ", concentrationActiveEffect);
+                    await concentrationActiveEffect.update({
+                        changes: [{
+                            key: "macro.itemMacro",
+                            mode: 0,
+                            value: 0
+                        }]
+                    });
+                    let newItemMacro;
+                    if (!item.getFlag("itemacro", "macro.data.command").includes("/*ASE_REPLACED*/")) {
+                        newItemMacro = `/*ASE_REPLACED*/
+if(args[0] === "off"){
+    console.log("token: ", token)
+    let fogCloudTiles = Tagger.getByTag(`+ "`FogCloudTile-${token.id}`" + `);
+        fogCloudTiles.then(async (tiles) => {
+            console.log("tiles to delete: ", tiles);
+            if(tiles.length>0){
+            game.AdvancedSpellEffects.removeTiles([tiles[0].id]);
+            }
+        })
+        }
+    else if(args[0] != "on" && args[0] != "off"){
+        let options = {version: "MIDI", args: args, numberWalls: 12};
+        game.AdvancedSpellEffects.fogCloud(options);
+    }`;
+                        //console.log(newItemMacro);
+                        await item.setFlag("itemacro", "macro.data.command", newItemMacro)
+                    }
+                }
+                async function placeCloudAsTile(template, casterId) {
+                    let templateData = template;
+                    //console.log(templateData);
+                    //console.log("Template Data: ", templateData);
+                    let tileWidth;
+                    let tileHeight;
+                    let tileX;
+                    let tileY;
+                    let placedX = templateData.x;
+                    let placedY = templateData.y;
+                    let wallPoints = [];
+                    let walls = [];
+                    const spellLevel = rollData[0].spellLevel;
+                    let wall_number = options.numberWalls * spellLevel;
+                    let wall_angles = 2 * Math.PI / wall_number
+                    //console.log("Spell Cast at level: ", spellLevel);
+                    tileWidth = (templateData.width * canvas.grid.size);
+                    tileHeight = (templateData.width * canvas.grid.size);
+
+                    //console.log("Tile Width: ", tileWidth);
+                    //console.log("Tile Height: ", tileHeight);
+
+                    let outerCircleRadius = tileWidth / 2.2;
+                    tileX = templateData.x - (tileWidth / 2);
+                    tileY = templateData.y - (tileHeight / 2);
+                    //console.log("Tile Width, Tile Height: ", tileWidth, tileHeight);
+                    // console.log("Tile X, Tile Y: ", tileX, tileY);
+                    data = {
+                        alpha: 1,
+                        width: tileWidth,
+                        height: tileHeight,
+                        img: "modules/jb2a_patreon/Library/1st_Level/Fog_Cloud/FogCloud_01_White_800x800.webm",
+                        overhead: true,
+                        occlusion: {
+                            alpha: 0,
+                            mode: 3,
+                        },
+                        video: {
+                            autoplay: true,
+                            loop: true,
+                            volume: 0,
+                        },
+                        x: tileX,
+                        y: tileY,
+                        z: 100,
+                        flags: { tagger: { tags: [`FogCloudTile-${casterId}`] }, advancedspelleffects: { fogCloudWallNum: wall_number } }
+                    }
+                    let createdTiles = await ASEsocket.executeAsGM("placeTiles", [data]);
+                    let tileD = createdTiles[0];
+
+                    //console.log("Created tile..:", tileD);
+                    //console.log("Amount of walls to place per spell level: ", options.numberWalls);
+
+
+                    for (let i = 0; i < wall_number; i++) {
+                        let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                        let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                        wallPoints.push({ x: x, y: y });
+                    }
+                    //console.log("Walls Coordinates: ",wallPoints);
+                    for (let i = 0; i < wallPoints.length; i++) {
+                        if (i < wallPoints.length - 1) {
+                            walls.push({
+                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                                flags: { tagger: { tags: [`FogCloudWall-${tileD._id}`] } },
+                                move: 0
+                            })
+                        }
+                        else {
+                            walls.push({
+                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                                flags: { tagger: { tags: [`FogCloudWall-${tileD._id}`] } },
+                                move: 0
+                            })
+                        }
+                    }
+                    //console.log("Wall Data: ", walls);
+                    await ASEsocket.executeAsGM("placeWalls", walls);
+                    /*Hooks.on("updateTile", async function moveAttachedWalls(tileD, diff) {
+            
+                       
+                    });*/
+
+                }
+
+                break;
+            case "ItemMacro":
+                break;
+            default:
+                return;
+        }
+    }
+
     async function tollTheDead(rollData) {
         setTimeout(() => { ASEsocket.executeAsGM("registeredTollTheDead", rollData[0]); }, 100);
     }
@@ -89,14 +914,15 @@ Hooks.once('init', async function () {
 
     game.AdvancedSpellEffects = {};
     game.AdvancedSpellEffects.removeTiles = removeTiles;
+    game.AdvancedSpellEffects.updateFlag = updateFlag;
     game.AdvancedSpellEffects.darkness = darkness;
+    game.AdvancedSpellEffects.detectMagic = detectMagic;
+    game.AdvancedSpellEffects.fogCloud = fogCloud;
     /*
-    game.AdvancedSpellEffects.fogCloudWithWalls = fogCloudWithWalls;
+    
     game.AdvancedSpellEffects.tollTheDead = tollTheDead;
     game.AdvancedSpellEffects.steelWindStrike = steelWindStrike;
-    game.AdvancedSpellEffects.steelWindStrikeNoMIDI = steelWindStrikeNoMIDI;
-    game.AdvancedSpellEffects.detectMagic = detectMagic;
-    game.AdvancedSpellEffects.detectMagicNoMIDI = detectMagicNoMIDI;*/
+    game.AdvancedSpellEffects.steelWindStrikeNoMIDI = steelWindStrikeNoMIDI;*/
 
 });
 
@@ -106,21 +932,87 @@ Hooks.once("socketlib.ready", () => {
     //register module with socketlib
     ASEsocket = window.socketlib.registerModule("advancedspelleffects");
     //register all effect functions defined above with socketlib here
-    ASEsocket.register("registeredFogCloudWithWalls", fogCloudWithWallsSocketFunction);
-    ASEsocket.register("registeredDarknessWithWalls", darknessWithWallsSocketFunction);
-    ASEsocket.register("registeredDarknessWithWallsNoMIDI", darknessWithWallsNoMIDISocketFunction);
+    //ASEsocket.register("registeredFogCloudWithWalls", fogCloudWithWallsSocketFunction);
+    ASEsocket.register("registeredDarknessMIDI", darknessMIDISocketFunction);
+    ASEsocket.register("registeredDarknessItemMacro", darknessItemMacroSocketFunction);
     ASEsocket.register("registeredTollTheDead", tollTheDeadSocketFunction);
     ASEsocket.register("registeredSteelWindStrike", steelWindStrikeSocketFunction);
     ASEsocket.register("registeredSteelWindStrikeNoMIDI", steelWindStrikeNoMIDISocketFunction);
-    ASEsocket.register("registeredDetectMagic", detectMagicSocketFunction);
+    //ASEsocket.register("registeredDetectMagic", detectMagicSocketFunction);
     ASEsocket.register("registeredDetectMagicNoMIDI", detectMagicNoMIDISocketFunction);
     ASEsocket.register("moveDarknessWalls", darknessWallMover);
     ASEsocket.register("deleteTiles", deleteTiles);
+    ASEsocket.register("placeTiles", placeTiles);
+    ASEsocket.register("updateObjectFlag", updateFlag);
+    ASEsocket.register("placeWalls", placeWalls);
+    ASEsocket.register("moveFogCloudWalls", fogCloudWallMover);
 
-    async function deleteTiles(tileIds){
+    async function updateFlag(objectId, flag, value) {
+        //console.log("Tile ID: ", objectId);
+        const object = canvas.scene.tiles.get(objectId);
+        await object.setFlag("advancedspelleffects", flag, value);
+    }
+    async function deleteTiles(tileIds) {
         await canvas.scene.deleteEmbeddedDocuments("Tile", tileIds);
     }
-    async function darknessWallMover(tileId){
+    async function placeTiles(tileData) {
+        return (await canvas.scene.createEmbeddedDocuments("Tile", tileData));
+    }
+    async function placeWalls(wallData) {
+        return (await canvas.scene.createEmbeddedDocuments("Wall", wallData));
+    }
+
+    async function fogCloudWallMover(tileId, wall_number) {
+        let tileD = await canvas.scene.tiles.get(tileId);
+        //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
+        //console.log('diff: ', diff);
+        //if (!diff.x || !diff.y) return;
+        //console.log(wall_number);
+        let placedX = tileD.data.x + (tileD.data.width / 2);
+        let placedY = tileD.data.y + (tileD.data.height / 2);
+        let outerCircleRadius = tileD.data.width / 2.2;
+        let wall_angles = 2 * Math.PI / wall_number;
+        let walls = [];
+        let wallDocuments = [];
+        let wallPoints = [];
+        //console.log("Tile Document: ",tileD);
+        walls = await Tagger.getByTag([`FogCloudWall-${tileD.id}`]);
+        walls.forEach((wall) => {
+            wallDocuments.push(wall.document.id);
+        });
+        walls = [];
+        if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
+            await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
+            for (let i = 0; i < wall_number; i++) {
+                let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                wallPoints.push({ x: x, y: y });
+            }
+            //console.log("Walls Coordinates: ",wallPoints);
+            for (let i = 0; i < wallPoints.length; i++) {
+                if (i < wallPoints.length - 1) {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                        flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+                else {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                        flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+            }
+
+        }
+        //console.log("Walls: ", walls);
+        await canvas.scene.createEmbeddedDocuments("Wall", walls);
+        //console.log(wallDocuments);
+    }
+
+    async function darknessWallMover(tileId) {
         let tileD = await canvas.scene.tiles.get(tileId);
         let wall_number = 12;
         let placedX = tileD.data.x + (tileD.data.width / 2);
@@ -136,7 +1028,7 @@ Hooks.once("socketlib.ready", () => {
             wallDocuments.push(wall.document.id);
         });
         walls = [];
-        if (wallDocuments.length>0) {
+        if (wallDocuments.length > 0) {
             await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
             for (let i = 0; i < wall_number; i++) {
                 let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
@@ -162,1048 +1054,13 @@ Hooks.once("socketlib.ready", () => {
             }
 
         }
-        if(walls.length>0){
+        if (walls.length > 0) {
             await canvas.scene.createEmbeddedDocuments("Wall", walls);
         }
-        
+
     }
 
-    async function detectMagicSocketFunction(rollData) {
-        // Wasp - Sequencer guy Detect Magic Macro
-        // Requires the JB2A patreon module
-        // Requires Advanced Macros and MidiQOL with Workflow -> Add macro to call on use
-        // Then add this macro's name to the bottom of the Detect Magic spell in the "On Use Macro" field
-    
-        // Small modification to display rune when a token moves within range of magical object as long as effect is active
-        // Effect can be disabled by running the following in a separate macro with the caster of detect magic selected
-        /* 
-        let tokenD = canvas.tokens.controlled[0];
-        let detectMagicHookId = await tokenD.document.getFlag("world","detectMagicHookId");
-        Hooks.off("updateToken", detectMagicHookId);
-        await TokenMagic.deleteFilters(tokenD, "detectMagicGlow");
-        */
-        let args = rollData;
-        console.log("ARGS: ", args);
-        let error = false;
-        if (typeof args !== 'undefined' && args.length === 0) {
-            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
-        }
-    
-        if (!(game.modules.get("jb2a_patreon"))) {
-            error = `You need to have JB2A's patreon only module installed to run this macro!`;
-        }
-    
-        if (!game.modules.get("advanced-macros")?.active) {
-            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
-            error = `You need to have Advanced Macros ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("midi-qol")?.active) {
-            let installed = game.modules.get("midi-qol") && !game.modules.get("midi-qol").active ? "enabled" : "installed";
-            error = `You need to have MidiQOL ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("tokenmagic")?.active) {
-            let installed = game.modules.get("tokenmagic") && !game.modules.get("tokenmagic").active ? "enabled" : "installed";
-            error = `You need to have Token Magic FX ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("socketlib")?.active) {
-            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
-            error = `You need to have SocketLib ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("tagger")?.active) {
-            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
-            error = `You need to have TTagger${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("sequencer")?.active) {
-            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
-            error = `You need to have Sequencer ${installed} to run this macro!`;
-        }
-        const actorD = game.actors.get(args[0].actor._id);
-        console.log("Actor: ", actorD);
-        let users = [];
-        for (const user in actorD.data.permission) {
-            if (user == "default") continue;
-            users.push(user);
-        }
-        console.log("Visible to users: ", users);
-        const tokenD = canvas.tokens.get(args[0].tokenId);
-        const itemD = actorD.items.getName(args[0].item.name);
-        console.log(itemD);
-        if (error) {
-            ui.notifications.error(error);
-            return;
-        }
-    
-        let magicalObjects = [];
-    
-        if (game.modules.get("tagger")?.active) {
-    
-            let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
-            let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-    
-            let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
-            magicalObjects = objects.map(o => {
-                let distance = canvas.grid.measureDistance(tokenD, o);
-                return {
-                    delay: distance * 55,
-                    distance: distance,
-                    obj: o,
-                    school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                    color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                }
-            })
-                .filter(o => o.distance <= 32.5)
-        }
-    
-        let sequence = new Sequence()
-            .effect("jb2a.detect_magic.circle.purple")
-            .atLocation(tokenD)
-            .JB2A()
-            .belowTiles()
-            .scale(2.33333)
-            .thenDo(async () => {
-                await registerDetectMagicHook(tokenD, users);
-            })
-            .thenDo(async () => {
-                await applyMagicHighlight();
-            })
-            .thenDo(async () => {
-                let concentrationActiveEffect = game.actors.get("OWf6nH8A6rPv1CR2").effects.filter((effect) => effect.data.label === "Concentrating")[0];
-                await concentrationActiveEffect.update({
-                    changes: [{
-                        key: "macro.itemMacro",
-                        mode: 0,
-                        value: 0
-                    }]
-                });
-                let newItemMacro;
-    
-                if (itemD.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.detectMagic(args);" || itemD.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.detectMagic(args)") {
-                    newItemMacro = `if(args[0] === "off"){
-    let midiData = args[args.length-1];
-    let tokenD = canvas.tokens.get(midiData.tokenId);
-    let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
-    let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
-    let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-    let detectMagicHookId = await tokenD.document.getFlag("world","detectMagicHookId");
-    Hooks.off("updateToken", detectMagicHookId);
-    await TokenMagic.deleteFilters(tokenD, "detectMagicGlow");
-    await tokenD.document.setFlag("world","detectMagicHookId", -1);
-    let magicalObjects = [];
-    
-    magicalObjects = objects.map(o => {
-                        let distance = canvas.grid.measureDistance(tokenD, o);
-                        return {
-                            delay: 0,
-                            distance: distance,
-                            obj: o,
-                            school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                            color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                        }
-                    })
-                    for (let magical of magicalObjects) {
-                        if (!magical.school) {
-                            continue;
-                        }
-                        await magical.obj.document.setFlag("world", "magicDetected", false);
-                        SequencerEffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
-                    }
-    }
-    else if(args[0] != "on" && args[0] != "off"){
-        game.AdvancedSpellEffects.detectMagic(args);
-    }`;
-                    //console.log(newItemMacro);
-                    await itemD.setFlag("itemacro", "macro.data.command", newItemMacro)
-                }
-            })
-    
-        for (let magical of magicalObjects) {
-            if (!magical.school) {
-                continue;
-            }
-            await magical.obj.document.setFlag("world", "magicDetected", true);
-    
-            //console.log("Magical OBJ: ", magical.obj)
-            new Sequence()
-                .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
-                .forUsers(users)
-                .atLocation(magical.obj)
-                .scale(0.25)
-                .delay(magical.delay)
-                .setMustache(magical)
-                .waitUntilFinished(-1200)
-                .zIndex(0)
-                .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
-                .name(`${magical.obj.document.id}-magicRune`)
-                .delay(magical.delay)
-                .forUsers(users)
-                .atLocation(magical.obj)
-                .scale(0.25)
-                .attachTo(magical.obj)
-                .persist(true)
-                .setMustache(magical)
-                .waitUntilFinished(-750)
-                .fadeOut(750, { ease: "easeInQuint" })
-                .zIndex(1)
-                .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                .forUsers(users)
-                .atLocation(magical.obj)
-                .scale(0.25)
-                .setMustache(magical)
-                .zIndex(0)
-                .play()
-    
-        }
-        sequence.play();
-    
-        async function applyMagicHighlight() {
-            let detectMagicGlow =
-                [{
-                    filterType: "zapshadow",
-                    filterId: "myZapShadow",
-                    alphaTolerance: 0.50
-                },
-                {
-                    filterType: "xglow",
-                    filterId: "detectMagicGlow",
-                    auraType: 2,
-                    color: 0x8F00FF,
-                    thickness: 0.01,
-                    scale: 1,
-                    time: 0,
-                    auraIntensity: 2,
-                    subAuraIntensity: 1.5,
-                    threshold: 0.5,
-                    discard: true,
-                    animated:
-                    {
-                        time:
-                        {
-                            active: true,
-                            speed: 0.0027,
-                            animType: "move"
-                        },
-                        thickness:
-                        {
-                            active: true,
-                            loopDuration: 3000,
-                            animType: "cosOscillation",
-                            val1: 2,
-                            val2: 5
-                        }
-                    }
-                }];
-    
-            await TokenMagic.addFilters(tokenD, detectMagicGlow);
-        }
-    
-    
-        async function registerDetectMagicHook(tokenD, users) {
-            let detectMagicHookId = Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
-                //console.log("hook fired!");
-                if ((!updateData.x && !updateData.y) || (tokenDocument.id != tokenD.id)) return;
-                let newPos = { x: 0, y: 0 };
-                newPos.x = (updateData.x) ? updateData.x : tokenD.data.x;
-                newPos.y = (updateData.y) ? updateData.y : tokenD.data.y;
-                //console.log("Controlled token: " , tokenD);
-                let magicalObjects = [];
-                let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
-                let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-    
-                let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
-    
-                magicalObjects = objects.map(o => {
-                    let distance = canvas.grid.measureDistance(newPos, o);
-                    return {
-                        delay: 0,
-                        distance: distance,
-                        obj: o,
-                        school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                        color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                    }
-                }).filter(o => o.distance > 32.5)
-                for (let magical of magicalObjects) {
-                    if (!magical.school) {
-                        continue;
-                    }
-                    await magical.obj.document.setFlag("world", "magicDetected", false);
-                    //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
-                    SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-    
-                }
-                magicalObjects = objects.map(o => {
-                    let distance = canvas.grid.measureDistance(newPos, o);
-                    //console.log("distance: ", distance);
-                    return {
-                        delay: 0,
-                        distance: distance,
-                        obj: o,
-                        school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                        color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                    }
-                }).filter(o => o.distance <= 32.5)
-    
-                //console.log("Magical Objects in Range: " , magicalObjects);
-                for (let magical of magicalObjects) {
-                    if (!magical.school) {
-                        continue;
-                    }
-                    //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
-                    if (!(magical.obj.document.getFlag("world", "magicDetected"))) {
-                        await magical.obj.document.setFlag("world", "magicDetected", true);
-                        new Sequence()
-                            .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
-                            .forUsers(users)
-                            .atLocation(magical.obj)
-                            .scale(0.25)
-                            .delay(magical.delay)
-                            .setMustache(magical)
-                            .waitUntilFinished(-800)
-                            .zIndex(0)
-                            .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
-                            .name(`${magical.obj.document.id}-magicRune`)
-                            .delay(magical.delay)
-                            .forUsers(users)
-                            .atLocation(magical.obj)
-                            .scale(0.25)
-                            .attachTo(magical.obj)
-                            .persist(true)
-                            .setMustache(magical)
-                            .waitUntilFinished(-750)
-                            .zIndex(1)
-                            .fadeOut(750, { ease: "easeInQuint" })
-                            .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                            .forUsers(users)
-                            .atLocation(magical.obj)
-                            .scale(0.25)
-                            .setMustache(magical)
-                            .zIndex(0)
-                            .play()
-                    }
-                }
-            });
-            await tokenD.document.setFlag("world", "detectMagicHookId", detectMagicHookId);
-        }
-    }
-    
-    async function detectMagicNoMIDISocketFunction(item, caster) {
-        // Requires the JB2A patreon module
-        let error = false;
-    
-        if (!(game.modules.get("jb2a_patreon"))) {
-            error = `You need to have JB2A's patreon only module installed to run this macro!`;
-        }
-    
-        if (!game.modules.get("advanced-macros")?.active) {
-            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
-            error = `You need to have Advanced Macros ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("socketlib")?.active) {
-            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
-            error = `You need to have SocketLib ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("tagger")?.active) {
-            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
-            error = `You need to have TTagger${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("sequencer")?.active) {
-            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
-            error = `You need to have Sequencer ${installed} to run this macro!`;
-        }
-        console.log("Item: ", item);
-        const actorD = item.actor;
-        //console.log("Actor: ", actorD);
-        let users = [];
-        for (const user in actorD.data.permission) {
-            if (user == "default") continue;
-            users.push(user);
-        }
-        console.log("Visible to users: ", users);
-        const tokenD = caster;
-        if (error) {
-            ui.notifications.error(error);
-            return;
-        }
-    
-        function getSelfTarget(actor) {
-            if (actor.token)
-                return actor.token;
-            const speaker = ChatMessage.getSpeaker({ actor });
-            if (speaker.token)
-                return canvas.tokens?.get(speaker.token);
-            return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
-        }
-        async function addConcentration(options) {
-            const item = options.item;
-            console.log("Options item: ", item);
-            let selfTarget = item.actor.token ? item.actor.token.object : getSelfTarget(item.actor);
-            if (!selfTarget)
-                return;
-            let actor = options.actor;
-            let concentrationName = "Concentration";
-            const inCombat = (game.combat?.turns.some(combatant => combatant.token?.id === selfTarget.id));
-            const effectData = {
-                changes: [{
-                    key: "macro.itemMacro",
-                    mode: 0,
-                    value: 0
-                }],
-                origin: item.uuid,
-                disabled: false,
-                icon: "modules/advancedspelleffects/icons/concentrate.png",
-                label: concentrationName,
-                duration: {},
-                flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
-            };
-    
-            const convertedDuration = globalThis.DAE.convertDuration(item.data.data.duration, inCombat);
-            if (convertedDuration?.type === "seconds") {
-                effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
-            }
-            else if (convertedDuration?.type === "turns") {
-                effectData.duration = {
-                    rounds: convertedDuration.rounds,
-                    turns: convertedDuration.turns,
-                    startRound: game.combat?.round,
-                    startTurn: game.combat?.turn
-                };
-            }
-    
-    
-            await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
-            console.log("Done creating and adding effect to actor...");
-    
-            return true;
-            // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
-    
-        }
-    
-        await addConcentration({ "item": item, "actor": actorD })
-    
-        let magicalObjects = [];
-    
-        if (game.modules.get("tagger")?.active) {
-    
-            let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
-            let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-    
-            let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
-            magicalObjects = objects.map(o => {
-                let distance = canvas.grid.measureDistance(tokenD, o);
-                return {
-                    delay: distance * 55,
-                    distance: distance,
-                    obj: o,
-                    school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                    color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                }
-            })
-                .filter(o => o.distance <= 32.5)
-        }
-    
-        let sequence = new Sequence()
-            .effect("jb2a.detect_magic.circle.purple")
-            .atLocation(tokenD)
-            .JB2A()
-            .belowTiles()
-            .scale(2.33333)
-            .thenDo(async () => {
-                await registerDetectMagicHook(tokenD, users);
-            })
-            .thenDo(async () => {
-                await applyMagicHighlight();
-            })
-            .thenDo(async () => {
-    
-                console.log("Actor: ", actorD);
-                let newItemMacro;
-    
-                if (item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.detectMagicNoMIDI(item, token);" || item.getFlag("itemacro", "macro.data.command") == "game.AdvancedSpellEffects.detectMagicNoMIDI(item, token)") {
-                    newItemMacro = `if(args.length>0){
-    if(args[0] === "off"){
-    let tokenD = canvas.tokens.controlled[0];
-    let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
-    let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
-    let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-    let detectMagicHookId = await tokenD.document.getFlag("world","detectMagicHookId");
-    Hooks.off("updateToken", detectMagicHookId);
-    if (game.modules.get("tokenmagic")?.active) {
-        await TokenMagic.deleteFilters(tokenD, "detectMagicGlow");
-    }
-    await tokenD.document.setFlag("world","detectMagicHookId", -1);
-    let magicalObjects = [];
-    
-    magicalObjects = objects.map(o => {
-                        let distance = canvas.grid.measureDistance(tokenD, o);
-                        return {
-                            delay: 0,
-                            distance: distance,
-                            obj: o,
-                            school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                            color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                        }
-                    })
-                    for (let magical of magicalObjects) {
-                        if (!magical.school) {
-                            continue;
-                        }
-                        await magical.obj.document.setFlag("world", "runeLooping", false);
-                        SequencerEffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + ` ,object: magical.obj});
-                    }
-        }
-    }
-    else{
-        game.AdvancedSpellEffects.detectMagicNoMIDI(item, token);
-    }`;
-                    //console.log(newItemMacro);
-                    await item.setFlag("itemacro", "macro.data.command", newItemMacro)
-                }
-    
-            })
-        for (let magical of magicalObjects) {
-            if (!magical.school) {
-                continue;
-            }
-            await magical.obj.document.setFlag("world", "magicDetected", true);
-    
-            //console.log("Magical OBJ: ", magical.obj)
-            new Sequence()
-                .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
-                .forUsers(users)
-                .atLocation(magical.obj)
-                .scale(0.25)
-                .delay(magical.delay)
-                .setMustache(magical)
-                .waitUntilFinished(-1200)
-                .zIndex(0)
-                .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
-                .name(`${magical.obj.document.id}-magicRune`)
-                .delay(magical.delay)
-                .forUsers(users)
-                .atLocation(magical.obj)
-                .scale(0.25)
-                .attachTo(magical.obj)
-                .persist(true)
-                .setMustache(magical)
-                .waitUntilFinished(-750)
-                .fadeOut(750, { ease: "easeInQuint" })
-                .zIndex(1)
-                .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                .forUsers(users)
-                .atLocation(magical.obj)
-                .scale(0.25)
-                .setMustache(magical)
-                .zIndex(0)
-                .play()
-    
-        }
-        sequence.play();
-    
-        async function applyMagicHighlight() {
-            let detectMagicGlow =
-                [{
-                    filterType: "zapshadow",
-                    filterId: "myZapShadow",
-                    alphaTolerance: 0.50
-                },
-                {
-                    filterType: "xglow",
-                    filterId: "detectMagicGlow",
-                    auraType: 2,
-                    color: 0x8F00FF,
-                    thickness: 0.01,
-                    scale: 1,
-                    time: 0,
-                    auraIntensity: 2,
-                    subAuraIntensity: 1.5,
-                    threshold: 0.5,
-                    discard: true,
-                    animated:
-                    {
-                        time:
-                        {
-                            active: true,
-                            speed: 0.0027,
-                            animType: "move"
-                        },
-                        thickness:
-                        {
-                            active: true,
-                            loopDuration: 3000,
-                            animType: "cosOscillation",
-                            val1: 2,
-                            val2: 5
-                        }
-                    }
-                }];
-            if (game.modules.get("tokenmagic")?.active) {
-                await TokenMagic.addFilters(tokenD, detectMagicGlow);
-            }
-        }
-    
-    
-        async function registerDetectMagicHook(tokenD, users) {
-            let detectMagicHookId = Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
-                //console.log("hook fired!");
-                if ((!updateData.x && !updateData.y) || (tokenDocument.id != tokenD.id)) return;
-                let newPos = { x: 0, y: 0 };
-                newPos.x = (updateData.x) ? updateData.x : tokenD.data.x;
-                newPos.y = (updateData.y) ? updateData.y : tokenD.data.y;
-                //console.log("Controlled token: " , tokenD);
-                let magicalObjects = [];
-                let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
-                let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-    
-                let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
-    
-                magicalObjects = objects.map(o => {
-                    let distance = canvas.grid.measureDistance(newPos, o);
-                    return {
-                        delay: 0,
-                        distance: distance,
-                        obj: o,
-                        school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                        color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                    }
-                }).filter(o => o.distance > 32.5)
-                for (let magical of magicalObjects) {
-                    if (!magical.school) {
-                        continue;
-                    }
-                    await magical.obj.document.setFlag("world", "magicDetected", false);
-                    //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
-                    SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-    
-                }
-                magicalObjects = objects.map(o => {
-                    let distance = canvas.grid.measureDistance(newPos, o);
-                    //console.log("distance: ", distance);
-                    return {
-                        delay: 0,
-                        distance: distance,
-                        obj: o,
-                        school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                        color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                    }
-                }).filter(o => o.distance <= 32.5)
-    
-                //console.log("Magical Objects in Range: " , magicalObjects);
-                for (let magical of magicalObjects) {
-                    if (!magical.school) {
-                        continue;
-                    }
-                    //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
-                    if (!(magical.obj.document.getFlag("world", "magicDetected"))) {
-                        await magical.obj.document.setFlag("world", "magicDetected", true);
-                        new Sequence()
-                            .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
-                            .forUsers(users)
-                            .atLocation(magical.obj)
-                            .scale(0.25)
-                            .delay(magical.delay)
-                            .setMustache(magical)
-                            .waitUntilFinished(-800)
-                            .zIndex(0)
-                            .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
-                            .name(`${magical.obj.document.id}-magicRune`)
-                            .delay(magical.delay)
-                            .forUsers(users)
-                            .atLocation(magical.obj)
-                            .scale(0.25)
-                            .attachTo(magical.obj)
-                            .persist(true)
-                            .setMustache(magical)
-                            .waitUntilFinished(-750)
-                            .zIndex(1)
-                            .fadeOut(750, { ease: "easeInQuint" })
-                            .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                            .forUsers(users)
-                            .atLocation(magical.obj)
-                            .scale(0.25)
-                            .setMustache(magical)
-                            .zIndex(0)
-                            .play()
-                    }
-                }
-            });
-            await tokenD.document.setFlag("world", "detectMagicHookId", detectMagicHookId);
-        }
-    }
-    
-    async function fogCloudWithWallsSocketFunction(rollData, numWalls) {
-        //console.log("Roll Data: ", rollData);
-        let error = false;
-        if (typeof args !== 'undefined' && args.length === 0) {
-            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
-        }
-    
-        if (!(game.modules.get("jb2a_patreon"))) {
-            error = `You need to have JB2A's patreon only module installed to run this macro!`;
-        }
-    
-        if (!game.modules.get("advanced-macros")?.active) {
-            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
-            error = `You need to have Advanced Macros ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("midi-qol")?.active) {
-            let installed = game.modules.get("midi-qol") && !game.modules.get("midi-qol").active ? "enabled" : "installed";
-            error = `You need to have MidiQOL ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("socketlib")?.active) {
-            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
-            error = `You need to have SocketLib ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("tagger")?.active) {
-            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
-            error = `You need to have TTagger${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("sequencer")?.active) {
-            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
-            error = `You need to have Sequencer ${installed} to run this macro!`;
-        }
-        if (error) {
-            ui.notifications.error(error);
-            return;
-        }
-    
-        let template = canvas.templates.get(rollData[0].templateId);
-    
-        await placeCloudAsTile(template, rollData[0].tokenId);
-        async function placeCloudAsTile(template, casterId) {
-            let templateData = template.data;
-            //console.log("Template Data: ", templateData);
-            let tileWidth;
-            let tileHeight;
-            let tileX;
-            let tileY;
-            let placedX = templateData.x;
-            let placedY = templateData.y;
-            let wallPoints = [];
-            let walls = [];
-            tileWidth = (templateData.distance * 45) * rollData[0].spellLevel;
-            tileHeight = (templateData.distance * 45) * rollData[0].spellLevel;
-    
-            let outerCircleRadius = tileWidth / 2.2;
-            tileX = templateData.x - (tileWidth / 2);
-            tileY = templateData.y - (tileHeight / 2);
-            //console.log("Tile Width, Tile Height: ", tileWidth, tileHeight);
-            // console.log("Tile X, Tile Y: ", tileX, tileY);
-            data = {
-                alpha: 1,
-                width: tileWidth,
-                height: tileHeight,
-                img: "modules/jb2a_patreon/Library/1st_Level/Fog_Cloud/FogCloud_01_White_800x800.webm",
-                overhead: true,
-                occlusion: {
-                    alpha: 0,
-                    mode: 3,
-                },
-                video: {
-                    autoplay: true,
-                    loop: true,
-                    volume: 0,
-                },
-                x: tileX,
-                y: tileY,
-                z: 100,
-                flags: { tagger: { tags: [`FogCloudTile-${casterId}`] } }
-            }
-            let createdTiles = await canvas.scene.createEmbeddedDocuments("Tile", [data]);
-            let tileD = createdTiles[0];
-            //console.log("Created tile..:", tileD);
-            //console.log(numWalls);
-            let wall_number = numWalls * rollData[0].spellLevel;
-            let wall_angles = 2 * Math.PI / wall_number
-            for (let i = 0; i < wall_number; i++) {
-                let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
-                let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
-                wallPoints.push({ x: x, y: y });
-            }
-            //console.log("Walls Coordinates: ",wallPoints);
-            for (let i = 0; i < wallPoints.length; i++) {
-                if (i < wallPoints.length - 1) {
-                    walls.push({
-                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
-                        flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
-                        move: 0
-                    })
-                }
-                else {
-                    walls.push({
-                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
-                        flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
-                        move: 0
-                    })
-                }
-            }
-            //console.log("Wall Data: ", walls);
-            await canvas.scene.createEmbeddedDocuments("Wall", walls);
-            await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [templateData._id]);
-            /*Hooks.on("updateTile", async function moveAttachedWalls(tileD, diff) {
-    
-                //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
-                //console.log('diff: ', diff);
-                if(!diff.x || !diff.y) return;
-                //console.log(wall_number);
-                let placedX = tileD.data.x + (tileD.data.width/2);
-                let placedY = tileD.data.y +  (tileD.data.height/2);
-                let outerCircleRadius = tileD.data.width / 2.2;
-                let wall_angles = 2 * Math.PI / wall_number;
-                let walls = [];
-                let wallDocuments = [];
-                let wallPoints = [];
-                //console.log("Tile Document: ",tileD);
-                walls = await Tagger.getByTag([`FogCloudWall-${tileD.id}`]);
-                walls.forEach((wall) => {
-                    wallDocuments.push(wall.document.id);
-                });
-                walls = [];
-                if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
-                    await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
-                    for (let i = 0; i < wall_number; i++) {
-                        let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
-                        let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
-                        wallPoints.push({ x: x, y: y });
-                    }
-                    //console.log("Walls Coordinates: ",wallPoints);
-                    for (let i = 0; i < wallPoints.length; i++) {
-                        if (i < wallPoints.length - 1) {
-                            walls.push({
-                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
-                                flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
-                                move: 0
-                            })
-                        }
-                        else {
-                            walls.push({
-                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
-                                flags: { tagger: { tags: [`FogCloudWall-${tileD.id}`] } },
-                                move: 0
-                            })
-                        }
-                    }
-    
-                }
-                console.log("Walls: ", walls);
-                await canvas.scene.createEmbeddedDocuments("Wall", walls);
-                //console.log(wallDocuments);
-            });*/
-            let fogCloudTileDeleteHookId = Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
-    
-                let walls = [];
-                let wallDocuments = [];
-                walls = await Tagger.getByTag([`FogCloudWall-${tileD.id}`]);
-                walls.forEach((wall) => {
-                    wallDocuments.push(wall.document.id);
-                });
-                //console.log(wallDocuments);
-                //console.log("Embedded document test...", canvas.scene.getEmbeddedDocument("Wall",wallDocuments[0]));
-                if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
-                    await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
-                    Hooks.off("deleteTile", fogCloudTileDeleteHookId);
-                }
-    
-            });
-        }
-    
-    
-    }
-    
-    async function darknessWithWallsSocketFunction(rollData, numWalls) {
-        //console.log("Roll Data: ", rollData);
-        let error = false;
-        if (typeof args !== 'undefined' && args.length === 0) {
-            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
-        }
-    
-        if (!(game.modules.get("jb2a_patreon"))) {
-            error = `You need to have JB2A's patreon only module installed to run this macro!`;
-        }
-    
-        if (!game.modules.get("advanced-macros")?.active) {
-            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
-            error = `You need to have Advanced Macros ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("midi-qol")?.active) {
-            let installed = game.modules.get("midi-qol") && !game.modules.get("midi-qol").active ? "enabled" : "installed";
-            error = `You need to have MidiQOL ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("socketlib")?.active) {
-            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
-            error = `You need to have SocketLib ${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("tagger")?.active) {
-            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
-            error = `You need to have TTagger${installed} to run this macro!`;
-        }
-    
-        if (!game.modules.get("sequencer")?.active) {
-            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
-            error = `You need to have Sequencer ${installed} to run this macro!`;
-        }
-        if (error) {
-            ui.notifications.error(error);
-            return;
-        }
-    
-        let template = canvas.templates.get(rollData[0].templateId);
-    
-        await placeCloudAsTile(template, rollData[0].tokenId);
-        async function placeCloudAsTile(template, casterId) {
-            let templateData = template.data;
-            //console.log("Template Data: ", templateData);
-            let tileWidth;
-            let tileHeight;
-            let tileX;
-            let tileY;
-            let placedX = templateData.x;
-            let placedY = templateData.y;
-            let wallPoints = [];
-            let walls = [];
-            tileWidth = (templateData.distance * 45);
-            tileHeight = (templateData.distance * 45);
-    
-            let outerCircleRadius = tileWidth / 2.2;
-            tileX = templateData.x - (tileWidth / 2);
-            tileY = templateData.y - (tileHeight / 2);
-            //console.log("Tile Width, Tile Height: ", tileWidth, tileHeight);
-            // console.log("Tile X, Tile Y: ", tileX, tileY);
-            data = {
-                alpha: 1,
-                width: tileWidth,
-                height: tileHeight,
-                img: "modules/jb2a_patreon/Library/2nd_Level/Darkness/Darkness_01_Black_600x600.webm",
-                overhead: true,
-                occlusion: {
-                    alpha: 0,
-                    mode: 3,
-                },
-                video: {
-                    autoplay: true,
-                    loop: true,
-                    volume: 0,
-                },
-                x: tileX,
-                y: tileY,
-                z: 100,
-                flags: { tagger: { tags: [`DarknessTile-${casterId}`] } }
-            }
-            let createdTiles = await canvas.scene.createEmbeddedDocuments("Tile", [data]);
-            let tileD = createdTiles[0];
-            //console.log("Created tile..:", tileD);
-            //console.log(numWalls);
-            let wall_number = numWalls;
-            let wall_angles = 2 * Math.PI / wall_number
-            for (let i = 0; i < wall_number; i++) {
-                let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
-                let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
-                wallPoints.push({ x: x, y: y });
-            }
-            //console.log("Walls Coordinates: ",wallPoints);
-            for (let i = 0; i < wallPoints.length; i++) {
-                if (i < wallPoints.length - 1) {
-                    walls.push({
-                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
-                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
-                        move: 0
-                    })
-                }
-                else {
-                    walls.push({
-                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
-                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
-                        move: 0
-                    })
-                }
-            }
-            //console.log("Wall Data: ", walls);
-            await canvas.scene.createEmbeddedDocuments("Wall", walls);
-            await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [templateData._id]);
-            let updateTileHookId = Hooks.on("updateTile", async function moveAttachedWalls(tileD, diff) {
-    
-                //console.log("tile pos: ", { 'x': tileD.data.x, 'y': tileD.data.y });
-                //console.log('diff: ', diff);
-                //console.log(wall_number);
-                let placedX = tileD.data.x + (tileD.data.width / 2);
-                let placedY = tileD.data.y + (tileD.data.height / 2);
-                let outerCircleRadius = tileD.data.width / 2.2;
-                let wall_angles = 2 * Math.PI / wall_number;
-                let walls = [];
-                let wallDocuments = [];
-                let wallPoints = [];
-                //console.log("Tile Document: ",tileD);
-                walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
-                walls.forEach((wall) => {
-                    wallDocuments.push(wall.document.id);
-                });
-                walls = [];
-                if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
-                    await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
-                    for (let i = 0; i < wall_number; i++) {
-                        let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
-                        let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
-                        wallPoints.push({ x: x, y: y });
-                    }
-                    //console.log("Walls Coordinates: ",wallPoints);
-                    for (let i = 0; i < wallPoints.length; i++) {
-                        if (i < wallPoints.length - 1) {
-                            walls.push({
-                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
-                                flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
-                                move: 0
-                            })
-                        }
-                        else {
-                            walls.push({
-                                c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
-                                flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
-                                move: 0
-                            })
-                        }
-                    }
-    
-                }
-                //console.log("Walls: ", walls);
-                await canvas.scene.createEmbeddedDocuments("Wall", walls);
-                //console.log(wallDocuments);
-            });
-            let darknessTileDeleteHookId = Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {
-    
-                let walls = [];
-                let wallDocuments = [];
-                walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
-                walls.forEach((wall) => {
-                    wallDocuments.push(wall.document.id);
-                });
-                //console.log(wallDocuments);
-                //console.log("Embedded document test...", canvas.scene.getEmbeddedDocument("Wall",wallDocuments[0]));
-                if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
-                    await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
-                    Hooks.off("deleteTile", darknessTileDeleteHookId);
-                    Hooks.off("updateTile", updateTileHookId);
-                }
-    
-            });
-        }
-    
-    
-    }
-    
-    async function darknessWithWallsNoMIDISocketFunction(template, itemID, tokenID) {
+    async function darknessMIDISocketFunction(template, itemID, tokenID) {
         //console.log("Roll Data: ", rollData);
         let caster = await canvas.tokens.get(tokenID);
         const actor = caster.actor;
@@ -1238,78 +1095,28 @@ Hooks.once("socketlib.ready", () => {
             ui.notifications.error(error);
             return;
         }
-    
-        
-        
-    
+
         await placeCloudAsTile(template, caster.id);
-    
+
         await changeSelfItemMacro();
-    
-        await addConcentration();
-    
-        
-    
-        function getSelfTarget(actor) {
-            if (actor.token)
-                return actor.token;
-            const speaker = ChatMessage.getSpeaker({ actor });
-            if (speaker.token)
-                return canvas.tokens?.get(speaker.token);
-            return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
-        }
-        async function addConcentration() {
-            //console.log("item in addConcentration: ", item);
-            let selfTarget = item.actor.token ? item.actor.token.object : getSelfTarget(item.actor);
-            if (!selfTarget)
-                return;
-    
-            let concentrationName = "Concentration";
-            const inCombat = (game.combat?.turns.some(combatant => combatant.token?.id === selfTarget.id));
-            const effectData = {
+
+        async function changeSelfItemMacro() {
+            let concentrationActiveEffect = actor.effects.filter((effect) => effect.data.label === "Concentrating")[0];
+            //console.log("Detect Magic Concentration effect: ", concentrationActiveEffect);
+            await concentrationActiveEffect.update({
                 changes: [{
                     key: "macro.itemMacro",
                     mode: 0,
                     value: 0
-                }],
-                origin: item.uuid,
-                disabled: false,
-                icon: "modules/advancedspelleffects/icons/concentrate.png",
-                label: concentrationName,
-                duration: {},
-                flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
-            };
-    
-            const convertedDuration = globalThis.DAE.convertDuration(item.data.data.duration, inCombat);
-            if (convertedDuration?.type === "seconds") {
-                effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
-            }
-            else if (convertedDuration?.type === "turns") {
-                effectData.duration = {
-                    rounds: convertedDuration.rounds,
-                    turns: convertedDuration.turns,
-                    startRound: game.combat?.round,
-                    startTurn: game.combat?.turn
-                };
-            }
-    
-    
-            await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
-            //console.log("Done creating and adding effect to actor...");
-    
-            return true;
-            // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
-    
-        }
-    
-        async function changeSelfItemMacro(){
+                }]
+            });
             let newItemMacro;
-    
+
             if (!item.getFlag("itemacro", "macro.data.command").includes("/*ASE_REPLACED*/")) {
                 newItemMacro = `/*ASE_REPLACED*/if(args.length > 0){
                     if(args[0] === "off"){
                         //console.log("token: ", token)
-                        let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${token.id}`"+`);
+                        let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${token.id}`" + `);
                         darknessTiles.then(async (tiles) => {
                             console.log("tiles to delete: ", [tiles[0].id]);
                             if(tiles.length>0){
@@ -1320,17 +1127,17 @@ Hooks.once("socketlib.ready", () => {
                 }
                 else
                 {
-                    let options = {"version": "ItemMacro", "itemId": item.id, "tokenId": token.id};
+                    let options = {version: "MIDI", args: args};
                     game.AdvancedSpellEffects.darkness(options);
                 }`;
                 //console.log(newItemMacro);
                 await item.setFlag("itemacro", "macro.data.command", newItemMacro)
             }
-    }
-    
+        }
+
         async function placeCloudAsTile(templateData, casterId) {
-           // console.log("Template given: ", template);
-    
+            // console.log("Template given: ", template);
+
             let tileWidth;
             let tileHeight;
             let tileX;
@@ -1341,11 +1148,11 @@ Hooks.once("socketlib.ready", () => {
             let walls = [];
             tileWidth = (templateData.distance * 45);
             tileHeight = (templateData.distance * 45);
-    
+
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
-    
+
             data = [{
                 alpha: 1,
                 width: tileWidth,
@@ -1368,7 +1175,7 @@ Hooks.once("socketlib.ready", () => {
             }]
             let createdTiles = await canvas.scene.createEmbeddedDocuments("Tile", data);
             let tileD = createdTiles[0];
-    
+
             let wall_number = 12;
             let wall_angles = 2 * Math.PI / wall_number
             for (let i = 0; i < wall_number; i++) {
@@ -1376,7 +1183,7 @@ Hooks.once("socketlib.ready", () => {
                 let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
                 wallPoints.push({ x: x, y: y });
             }
-    
+
             for (let i = 0; i < wallPoints.length; i++) {
                 if (i < wallPoints.length - 1) {
                     walls.push({
@@ -1393,15 +1200,211 @@ Hooks.once("socketlib.ready", () => {
                     })
                 }
             }
-    
+
             await canvas.scene.createEmbeddedDocuments("Wall", walls);
         }
-    
-    
+
     }
-    
+
+    async function darknessItemMacroSocketFunction(template, itemID, tokenID) {
+        //console.log("Roll Data: ", rollData);
+        let caster = await canvas.tokens.get(tokenID);
+        const actor = caster.actor;
+        let item = actor.items.find((item) => item.id == itemID);
+        //console.log("Actor: ", actor);
+        //console.log("Caster: ", caster);
+        //console.log("Item: ", item);
+        let error = false;
+        if (typeof args !== 'undefined' && args.length === 0) {
+            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+        }
+        if (!(game.modules.get("jb2a_patreon"))) {
+            error = `You need to have JB2A's patreon only module installed to run this macro!`;
+        }
+        if (!game.modules.get("advanced-macros")?.active) {
+            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+            error = `You need to have Advanced Macros ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("socketlib")?.active) {
+            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+            error = `You need to have SocketLib ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("tagger")?.active) {
+            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+            error = `You need to have TTagger${installed} to run this macro!`;
+        }
+        if (!game.modules.get("sequencer")?.active) {
+            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+            error = `You need to have Sequencer ${installed} to run this macro!`;
+        }
+        if (error) {
+            ui.notifications.error(error);
+            return;
+        }
+
+
+
+
+        await placeCloudAsTile(template, caster.id);
+
+        await changeSelfItemMacro();
+
+        await addConcentration();
+
+
+
+        function getSelfTarget(actor) {
+            if (actor.token)
+                return actor.token;
+            const speaker = ChatMessage.getSpeaker({ actor });
+            if (speaker.token)
+                return canvas.tokens?.get(speaker.token);
+            return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
+        }
+        async function addConcentration() {
+            //console.log("item in addConcentration: ", item);
+            let selfTarget = item.actor.token ? item.actor.token.object : getSelfTarget(item.actor);
+            if (!selfTarget)
+                return;
+
+            let concentrationName = "Concentration";
+            const inCombat = (game.combat?.turns.some(combatant => combatant.token?.id === selfTarget.id));
+            const effectData = {
+                changes: [{
+                    key: "macro.itemMacro",
+                    mode: 0,
+                    value: 0
+                }],
+                origin: item.uuid,
+                disabled: false,
+                icon: "modules/advancedspelleffects/icons/concentrate.png",
+                label: concentrationName,
+                duration: {},
+                flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
+            };
+
+            const convertedDuration = globalThis.DAE.convertDuration(item.data.data.duration, inCombat);
+            if (convertedDuration?.type === "seconds") {
+                effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
+            }
+            else if (convertedDuration?.type === "turns") {
+                effectData.duration = {
+                    rounds: convertedDuration.rounds,
+                    turns: convertedDuration.turns,
+                    startRound: game.combat?.round,
+                    startTurn: game.combat?.turn
+                };
+            }
+
+
+            await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+            //console.log("Done creating and adding effect to actor...");
+
+            return true;
+            // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+
+        }
+
+        async function changeSelfItemMacro() {
+            let newItemMacro;
+
+            if (!item.getFlag("itemacro", "macro.data.command").includes("/*ASE_REPLACED*/")) {
+                newItemMacro = `/*ASE_REPLACED*/if(args.length > 0){
+    if(args[0] === "off"){
+        //console.log("token: ", token)
+        let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${token.id}`" + `);
+        darknessTiles.then(async (tiles) => {
+            console.log("tiles to delete: ", [tiles[0].id]);
+            if(tiles.length>0){
+            game.AdvancedSpellEffects.removeTiles([tiles[0].id]);
+        }
+        })
+    }
+}
+else
+{
+    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id};
+    game.AdvancedSpellEffects.darkness(options);
+}`;
+                //console.log(newItemMacro);
+                await item.setFlag("itemacro", "macro.data.command", newItemMacro)
+            }
+        }
+
+        async function placeCloudAsTile(templateData, casterId) {
+            // console.log("Template given: ", template);
+
+            let tileWidth;
+            let tileHeight;
+            let tileX;
+            let tileY;
+            let placedX = templateData.x;
+            let placedY = templateData.y;
+            let wallPoints = [];
+            let walls = [];
+            tileWidth = (templateData.distance * 45);
+            tileHeight = (templateData.distance * 45);
+
+            let outerCircleRadius = tileWidth / 2.2;
+            tileX = templateData.x - (tileWidth / 2);
+            tileY = templateData.y - (tileHeight / 2);
+
+            data = [{
+                alpha: 1,
+                width: tileWidth,
+                height: tileHeight,
+                img: "modules/jb2a_patreon/Library/2nd_Level/Darkness/Darkness_01_Black_600x600.webm",
+                overhead: true,
+                occlusion: {
+                    alpha: 0,
+                    mode: 3,
+                },
+                video: {
+                    autoplay: true,
+                    loop: true,
+                    volume: 0,
+                },
+                x: tileX,
+                y: tileY,
+                z: 100,
+                flags: { tagger: { tags: [`DarknessTile-${casterId}`] } }
+            }]
+            let createdTiles = await canvas.scene.createEmbeddedDocuments("Tile", data);
+            let tileD = createdTiles[0];
+
+            let wall_number = 12;
+            let wall_angles = 2 * Math.PI / wall_number
+            for (let i = 0; i < wall_number; i++) {
+                let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
+                let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
+                wallPoints.push({ x: x, y: y });
+            }
+
+            for (let i = 0; i < wallPoints.length; i++) {
+                if (i < wallPoints.length - 1) {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+                else {
+                    walls.push({
+                        c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
+                        flags: { tagger: { tags: [`DarknessWall-${tileD.id}`] } },
+                        move: 0
+                    })
+                }
+            }
+
+            await canvas.scene.createEmbeddedDocuments("Wall", walls);
+        }
+
+
+    }
+
     async function tollTheDeadSocketFunction(rollData) {
-    
+
         console.log(rollData);
         //let caster = canvas.tokens.controlled[0];
         let bellAnim = "jb2a.toll_the_dead.purple.bell";
@@ -1409,7 +1412,7 @@ Hooks.once("socketlib.ready", () => {
         let skullAnim = "jb2a.toll_the_dead.purple.skull_smoke"
         let spawnEffect = "jb2a.eldritch_blast.purple"
         let target = rollData.failedSaves[0];
-    
+
         if (target != undefined) {
             let targetCurrentHP = target._actor.data.data.attributes.hp.value;
             let targetMaxHP = target._actor.data.data.attributes.hp.max;
@@ -1421,7 +1424,7 @@ Hooks.once("socketlib.ready", () => {
                 animScale = 0.6;
                 volume = 0.3;
             }
-    
+
             let damageRoll = new Roll(`${damageDie}`).roll();
             executeBell();
             async function executeBell() {
@@ -1470,12 +1473,12 @@ Hooks.once("socketlib.ready", () => {
             }
         }
     }
-    
+
     async function steelWindStrikeSocketFunction(rollData, weapon, color) {
         //console.log("rollData", rollData);
         function easeOutElasticCustom(x) {
             const c4 = (2 * Math.PI) / 10;
-    
+
             return x === 0
                 ? 0
                 : x === 1
@@ -1490,13 +1493,13 @@ Hooks.once("socketlib.ready", () => {
         //let spellCastingAbility = rollData.actor.data.attributes.spellcasting;
         let dagger = "";
         if (weapon == "dagger") dagger = ".02"
-    
+
         let swordAnim;
         let gustAnim = "jb2a.gust_of_wind.veryfast";
         //let allFiles = [gustAnim, swordAnim];
         //console.log('Files about to be preloaded...',allFiles);
         //await SequencerPreloader.preloadForClients(allFiles, true);
-    
+
         let animStartTimeMap = {
             "sword": 1050,
             "mace": 825,
@@ -1507,11 +1510,11 @@ Hooks.once("socketlib.ready", () => {
             "dagger": 700
         };
         swordAnim = `jb2a.${weapon}.melee${dagger}.${color}`;
-    
+
         await caster.document.setFlag("autorotate", "enabled", false);
-    
+
         await steelWindStrike(caster, targets);
-    
+
         async function evaluateAttack(target) {
             //console.log("Evalute attack target: ", target);
             let attackRoll = new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
@@ -1523,7 +1526,7 @@ Hooks.once("socketlib.ready", () => {
                 onHit(target, attackRoll);
             }
         }
-    
+
         async function onHit(target, attackRoll) {
             //console.log('Attack hit!');
             //console.log("Attack roll: ", attackRoll);
@@ -1552,12 +1555,12 @@ Hooks.once("socketlib.ready", () => {
             //game.dice3d?.showForRoll(currentRoll);
             //new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, currentRoll.total, "bludgeoning", [target], currentRoll, { flavor: `Flurry of Blows - Damage Roll (${damageDie} Bludgeoning)`, itemCardId: rollData.itemCardId });
         }
-    
+
         async function finalTeleport(caster, location) {
             console.log("template: ", location);
             let adjustedLocation = { x: location.data.x - (canvas.grid.size / 2), y: location.data.y - (canvas.grid.size / 2) }
             let distance = Math.sqrt(Math.pow((adjustedLocation.x - caster.x), 2) + Math.pow((adjustedLocation.y - caster.y), 2));
-    
+
             let steelWindSequence = new Sequence()
                 .effect()
                 .atLocation(caster)
@@ -1578,7 +1581,7 @@ Hooks.once("socketlib.ready", () => {
                 .duration(800)
             await steelWindSequence.play();
         }
-    
+
         async function steelWindStrike(caster, targets) {
             let currentX;
             let targetX;
@@ -1617,11 +1620,11 @@ Hooks.once("socketlib.ready", () => {
             await caster.TMFXaddUpdateFilters(params);
             //console.log(targets);
             for (let i = 0; i < targets.length; i++) {
-    
+
                 //console.log(targets[i]);
                 let target = targets[i];
                 evaluateAttack(target);
-    
+
                 currentX = caster.x;
                 targetX = target.x;
                 currentY = caster.y;
@@ -1655,9 +1658,9 @@ Hooks.once("socketlib.ready", () => {
                     .waitUntilFinished()
                 await steelWindSequence.play();
             }
-    
+
             let contentHTML = `<form class="editable flexcol" autocomplete="off">`;
-    
+
             rollDataForDisplay.forEach((data) => {
                 let name = data.target;
                 let attackTotal = data.attackroll;
@@ -1682,7 +1685,7 @@ Hooks.once("socketlib.ready", () => {
             contentHTML = contentHTML + `</form>`
             let preReticle;
             let reticle;
-    
+
             let templateData = {
                 t: "circle",
                 user: game.user._id,
@@ -1704,7 +1707,7 @@ Hooks.once("socketlib.ready", () => {
                     await finalTeleport(caster, template);
                     await caster.TMFXdeleteFilters("SWSBlur");
                     await caster.document.setFlag("autorotate", "enabled", true);
-    
+
                 });
                 await reticle.drawPreview();
             }
@@ -1725,19 +1728,19 @@ Hooks.once("socketlib.ready", () => {
                     { width: '500' },
                 ).render(true)
             }));
-    
+
             if (callBolt) {
                 await createTemplate(templateData);
             }
-    
+
         }
     }
-    
+
     async function steelWindStrikeNoMIDISocketFunction(item, weapon, color) {
-    
+
         function easeOutElasticCustom(x) {
             const c4 = (2 * Math.PI) / 10;
-    
+
             return x === 0
                 ? 0
                 : x === 1
@@ -1765,9 +1768,9 @@ Hooks.once("socketlib.ready", () => {
         };
         swordAnim = `jb2a.${weapon}.melee${dagger}.${color}`;
         await caster.document.setFlag("autorotate", "enabled", false);
-    
+
         await steelWindStrike(caster, targets);
-    
+
         async function steelWindStrike(caster, targets) {
             let currentX;
             let targetX;
@@ -1809,7 +1812,7 @@ Hooks.once("socketlib.ready", () => {
                 //console.log(targets[i]);
                 let target = targets[i];
                 evaluateAttack(target);
-    
+
                 currentX = caster.x;
                 targetX = target.x;
                 currentY = caster.y;
@@ -1843,9 +1846,9 @@ Hooks.once("socketlib.ready", () => {
                     .waitUntilFinished()
                 await steelWindSequence.play();
             }
-    
+
             let contentHTML = `<form class="editable flexcol" autocomplete="off">`;
-    
+
             rollDataForDisplay.forEach((data) => {
                 let name = data.target;
                 let attackTotal = data.attackroll;
@@ -1870,7 +1873,7 @@ Hooks.once("socketlib.ready", () => {
             contentHTML = contentHTML + `</form>`
             let preReticle;
             let reticle;
-    
+
             let templateData = {
                 t: "circle",
                 user: game.user.id,
@@ -1892,7 +1895,7 @@ Hooks.once("socketlib.ready", () => {
                     await finalTeleport(caster, template);
                     await caster.TMFXdeleteFilters("SWSBlur");
                     await caster.document.setFlag("autorotate", "enabled", true);
-    
+
                 });
                 await reticle.drawPreview();
             }
@@ -1913,11 +1916,11 @@ Hooks.once("socketlib.ready", () => {
                     { width: '500' },
                 ).render(true)
             }));
-    
+
             if (waitForInput) {
                 await createTemplate(templateData);
             }
-    
+
         }
         async function evaluateAttack(target) {
             //console.log("Evalute attack target: ", target);
@@ -1940,7 +1943,7 @@ Hooks.once("socketlib.ready", () => {
             //game.dice3d?.showForRoll(currentRoll);
             //let damageData = new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: 'Steel Wind Strike - Damage Roll (6d10 force)', itemCardId: rollData.itemCardId });
             //console.log("damage data: ", damageData);
-    
+
             rollDataForDisplay.push({
                 "target": target.name,
                 "attackroll": attackRoll.total,
@@ -1961,12 +1964,12 @@ Hooks.once("socketlib.ready", () => {
             //game.dice3d?.showForRoll(currentRoll);
             //new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, currentRoll.total, "bludgeoning", [target], currentRoll, { flavor: `Flurry of Blows - Damage Roll (${damageDie} Bludgeoning)`, itemCardId: rollData.itemCardId });
         }
-    
+
         async function finalTeleport(caster, location) {
             console.log("template: ", location);
             let adjustedLocation = { x: location.data.x - (canvas.grid.size / 2), y: location.data.y - (canvas.grid.size / 2) }
             let distance = Math.sqrt(Math.pow((adjustedLocation.x - caster.x), 2) + Math.pow((adjustedLocation.y - caster.y), 2));
-    
+
             let steelWindSequence = new Sequence()
                 .effect()
                 .atLocation(caster)
@@ -1987,7 +1990,7 @@ Hooks.once("socketlib.ready", () => {
                 .duration(800)
             await steelWindSequence.play();
         }
-    
+
     }
 
 });
