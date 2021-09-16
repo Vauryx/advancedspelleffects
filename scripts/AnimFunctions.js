@@ -938,8 +938,6 @@ Hooks.once("socketlib.ready", () => {
     ASEsocket.register("registeredTollTheDead", tollTheDeadSocketFunction);
     ASEsocket.register("registeredSteelWindStrike", steelWindStrikeSocketFunction);
     ASEsocket.register("registeredSteelWindStrikeNoMIDI", steelWindStrikeNoMIDISocketFunction);
-    //ASEsocket.register("registeredDetectMagic", detectMagicSocketFunction);
-    ASEsocket.register("registeredDetectMagicNoMIDI", detectMagicNoMIDISocketFunction);
     ASEsocket.register("moveDarknessWalls", darknessWallMover);
     ASEsocket.register("deleteTiles", deleteTiles);
     ASEsocket.register("placeTiles", placeTiles);
