@@ -55,8 +55,11 @@ game.AdvancedSpellEffects.fogCloud(options);
 ### Steel Wind Strike:
 - Make sure to remove the range/target from the spell and to use "Utility/Other" for the "Action Type" 
 - Also make sure to remove any damage forumla on the spell as the spell will roll an attack and damage for target as it goes through them. 
-- A "weapon" and "color" option must be set in the options object for this spell. The available weapon options are listen below. The available colors are any colors for the selected weapon in the JB2A library.
-* "sword","mace","greataxe","greatsword","handaxe","spear","dagger"
+
+- A "weapon" and "color" option must be set in the options object for this spell. 
+- The available weapon options are: 
+    ######  "sword","mace","greataxe","greatsword","handaxe","spear","dagger"
+- The available colors are any colors for the selected weapon in the JB2A library.
 #### *MIDI*
 ```javascript
 let options = {version: "MIDI", args: args, weapon: "weapon", color: "color"};
