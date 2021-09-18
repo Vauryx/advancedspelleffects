@@ -3,7 +3,7 @@
 ## Usage Instructions
 Spell effects can be called from a macro generally using the command: 
 ```javascript 
-game.AdvancedSpellEffects.SpellName(options)
+game.AdvancedSpellEffects.spellName(options)
 ```
 "options" should be an object structured like this: 
 {version: "Version Name", arguments...}
