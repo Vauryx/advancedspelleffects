@@ -6,7 +6,7 @@ Hooks.once('ready', async function () {
     Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
 
         if ((!updateData.x && !updateData.y)) return;
-        console.log("hook fired!...", tokenDocument, updateData);
+        //console.log("hook fired!...", tokenDocument, updateData);
         if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length==0) return;
 
         let users = [];
