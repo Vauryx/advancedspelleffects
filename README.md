@@ -41,7 +41,7 @@ game.AdvancedSpellEffects.detectMagic(options);
 ```
 #### *Item Macro*
 ```javascript
-let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, , color: 'blue'};
+let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, waveColor: "blue", auraColor: "blue"};
 game.AdvancedSpellEffects.detectMagic(options);
 ```
 
