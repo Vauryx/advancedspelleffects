@@ -221,11 +221,6 @@ Hooks.once('init', async function () {
                     error = `You need to have MidiQOL ${installed} to run this macro!`;
                 }
 
-                if (!game.modules.get("tokenmagic")?.active) {
-                    let installed = game.modules.get("tokenmagic") && !game.modules.get("tokenmagic").active ? "enabled" : "installed";
-                    error = `You need to have Token Magic FX ${installed} to run this macro!`;
-                }
-
                 if (!game.modules.get("socketlib")?.active) {
                     let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
                     error = `You need to have SocketLib ${installed} to run this macro!`;
@@ -422,12 +417,6 @@ Hooks.once('init', async function () {
                     let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
                     error = `You need to have Advanced Macros ${installed} to run this macro!`;
                 }
-
-                if (!game.modules.get("tokenmagic")?.active) {
-                    let installed = game.modules.get("tokenmagic") && !game.modules.get("tokenmagic").active ? "enabled" : "installed";
-                    error = `You need to have Token Magic FX ${installed} to run this macro!`;
-                }
-
                 if (!game.modules.get("socketlib")?.active) {
                     let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
                     error = `You need to have SocketLib ${installed} to run this macro!`;
