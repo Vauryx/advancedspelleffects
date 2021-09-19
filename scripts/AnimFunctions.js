@@ -38,10 +38,18 @@ Hooks.once('ready', async function () {
             if (!magical.school) {
                 continue;
             }
+            new Sequence()
+            .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+            .forUsers(users)
+            .atLocation(magical.obj)
+            .scale(0.25)
+            .setMustache(magical)
+            .zIndex(0)
+            .playIf((magical.obj.document.getFlag("advancedspelleffects", "magicDetected")))
+            .play()
             await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", false);
             //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
             SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-
         }
         magicalObjects = objects.map(o => {
             let distance = canvas.grid.measureDistance(newPos, o);
@@ -61,8 +69,10 @@ Hooks.once('ready', async function () {
                 continue;
             }
             let runeDisplayed = Sequencer.EffectManager.getEffects({name: `${magical.obj.document.id}-magicRune`, object: magical.obj});
+            //let runeIntros = Sequencer.EffectManager.getEffects({name: `detectMagicRuneIntro`, object: canvas.tokens.get(tokenDocument.id)});
+            //console.log("Intros displaying: ", runeIntros);
             //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
-            if (!(magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) && runeDisplayed.length == 0) {
+            if (!(magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) && runeDisplayed.length == 0 /*&& runeIntros.length == 0*/) {
                 await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
                 new Sequence()
                     .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
@@ -71,6 +81,8 @@ Hooks.once('ready', async function () {
                     .scale(0.25)
                     .delay(magical.delay)
                     .setMustache(magical)
+                    .name("detectMagicRuneIntro")
+                    .attachTo(magical.obj)
                     .waitUntilFinished(-800)
                     .zIndex(0)
                     .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
@@ -85,13 +97,7 @@ Hooks.once('ready', async function () {
                     .waitUntilFinished(-750)
                     .zIndex(1)
                     .fadeOut(750, { ease: "easeInQuint" })
-                    .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                    .forUsers(users)
-                    .atLocation(magical.obj)
-                    .scale(0.25)
-                    .setMustache(magical)
-                    .zIndex(0)
-                    .play()
+                .play()
             }
         }
     });
@@ -190,47 +196,8 @@ Hooks.once('init', async function () {
         let magicalObjects = [];
         let sequence;
         let error;
-        let color = options.color || 'blue';
-        async function applyMagicHighlight(caster) {
-            let detectMagicGlow =
-                [{
-                    filterType: "zapshadow",
-                    filterId: "detectMagicZapShadow",
-                    alphaTolerance: 0.50
-                },
-                {
-                    filterType: "xglow",
-                    filterId: "detectMagicGlow",
-                    auraType: 2,
-                    color: 0x8F00FF,
-                    thickness: 0.01,
-                    scale: 1,
-                    time: 0,
-                    auraIntensity: 2,
-                    subAuraIntensity: 1.5,
-                    threshold: 0.5,
-                    discard: true,
-                    animated:
-                    {
-                        time:
-                        {
-                            active: true,
-                            speed: 0.0027,
-                            animType: "move"
-                        },
-                        thickness:
-                        {
-                            active: true,
-                            loopDuration: 3000,
-                            animType: "cosOscillation",
-                            val1: 2,
-                            val2: 5
-                        }
-                    }
-                }];
-
-            await TokenMagic.addFilters(caster, detectMagicGlow);
-        }
+        let waveColor = options.waveColor || 'blue';
+        let auraColor = options.auraColor || 'blue';
         switch (options.version) {
             case "MIDI":
                 let args = options.args;
@@ -312,16 +279,31 @@ Hooks.once('init', async function () {
                 }
                 //console.log("Detected Magical Objects: ", magicalObjects);
                 sequence = new Sequence()
-                    .effect(`jb2a.detect_magic.circle.${color}`)
+                    .effect(`jb2a.detect_magic.circle.${waveColor}`)
                     .atLocation(caster)
+                    .attachTo(caster)
                     .JB2A()
                     .belowTiles()
                     .scale(2.33333)
-                    .thenDo(async () => {
-                        //console.log("Applying Token Magic Highlight Effect...");
-                        await applyMagicHighlight(caster);
-                    })
-                    .wait(100)
+                    .effect()
+                        .file(`jb2a.magic_signs.circle.02.divination.intro.${auraColor}`)
+                        .atLocation(caster)
+                        .attachTo(caster)
+                        .scale(0.2)
+                        .belowTokens()
+                        .waitUntilFinished(-1000)
+                        .fadeOut(1000, { ease: "easeInQuint" })
+                    .effect()
+                        .file(`jb2a.magic_signs.circle.02.divination.loop.${auraColor}`)
+                        .atLocation(caster)
+                        .attachTo(caster)
+                        .persist()
+                        .extraEndDuration(750)
+                        .fadeOut(750, { ease: "easeInQuint" })
+                        .scale(0.2)
+                        .loopProperty("sprite", "rotation", { duration: 20000, from: 0, to: 360 })
+                        .name(`${caster.id}-detectMagicAura`)
+                        .belowTokens()
                     .thenDo(async () => {
                         //console.log("Actor: ", actorD);
                         let concentrationActiveEffect = actor.effects.filter((effect) => effect.data.label === "Concentrating")[0];
@@ -340,14 +322,14 @@ Hooks.once('init', async function () {
                             newItemMacro = `/*ASE_REPLACED*/if(args[0] === "off"){
         let midiData = args[args.length-1];
         let caster = canvas.tokens.get(midiData.tokenId);
+        let users = [];
+        for (const user in game.actors.get(midiData.actorId).data.permission) {
+            if (user == "default") continue;
+            users.push(user);
+        }
         let objects = await Tagger.getByTag("magical", { ignore: [caster] });
         let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
         let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-        let detectMagicHookId = await caster.document.getFlag("advancedspelleffects","detectMagicHookId");
-        Hooks.off("updateToken", detectMagicHookId);
-        await TokenMagic.deleteFilters(caster, "detectMagicGlow");
-        await TokenMagic.deleteFilters(caster, "detectMagicZapShadow");
-        await caster.document.setFlag("advancedspelleffects","detectMagicHookId", -1);
         let magicalObjects = [];
         
         magicalObjects = objects.map(o => {
@@ -365,11 +347,26 @@ Hooks.once('init', async function () {
                                 continue;
                             }
                             await game.AdvancedSpellEffects.updateFlag(magical.obj.id, "magicDetected", false);
-                            SequencerEffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
+                            Sequencer.EffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
+                            Sequencer.EffectManager.endEffects({name: ` + "`${caster.id}-detectMagicAura`" + `, object: caster});
+                            new Sequence()
+                                .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+                                .forUsers(users)
+                                .atLocation(magical.obj)
+                                .scale(0.25)
+                                .setMustache(magical)
+                                .zIndex(0)
+                                .effect()
+                                .file("jb2a.magic_signs.circle.02.divination.outro.` + auraColor + `")
+                                .atLocation(caster)
+                                .scale(0.2)
+                                .belowTokens()
+                                .attachTo(caster)
+                            .play()
                         }
         }
         else if(args[0] != "on" && args[0] != "off"){
-            let options = {version: "MIDI", args: args, color: "`+ color + `"};
+            let options = {version: "MIDI", args: args, waveColor: "`+ waveColor + `", auraColor: "`+ auraColor + `"};
             game.AdvancedSpellEffects.detectMagic(options);
         }`;
                             //console.log(newItemMacro);
@@ -405,14 +402,7 @@ Hooks.once('init', async function () {
                         .waitUntilFinished(-750)
                         .fadeOut(750, { ease: "easeInQuint" })
                         .zIndex(1)
-                        .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                        .forUsers(users)
-                        .atLocation(magical.obj)
-                        .scale(0.25)
-                        .setMustache(magical)
-                        .zIndex(0)
-                        .play()
-
+                    .play()
                 }
                 sequence.play();
                 break;
@@ -489,20 +479,31 @@ Hooks.once('init', async function () {
                 }
                 //console.log("Detected Magical Objects: ", magicalObjects);
                 sequence = new Sequence()
-                    .effect(`jb2a.detect_magic.circle.${color}`)
+                    .effect(`jb2a.detect_magic.circle.${waveColor}`)
                     .atLocation(caster)
                     .JB2A()
                     .belowTiles()
+                    .attachTo(caster)
                     .scale(2.33333)
-                    .thenDo(async () => {
-                        console.log("Registering detect magic hook...");
-                        //await registerDetectMagicItemMacroHook(caster, users);
-                    })
-                    .thenDo(async () => {
-                        console.log("Applying Token Magic Highlight Effect...");
-                        await applyMagicHighlight(caster);
-                    })
-                    .wait(100)
+                    .effect()
+                        .file(`jb2a.magic_signs.circle.02.divination.intro.${auraColor}`)
+                        .atLocation(caster)
+                        .attachTo(caster)
+                        .scale(0.2)
+                        .belowTokens()
+                        .waitUntilFinished(-1000)
+                        .fadeOut(1000, { ease: "easeInQuint" })
+                    .effect()
+                        .file(`jb2a.magic_signs.circle.02.divination.loop.${auraColor}`)
+                        .atLocation(caster)
+                        .attachTo(caster)
+                        .persist()
+                        .extraEndDuration(750)
+                        .fadeOut(750, { ease: "easeInQuint" })
+                        .scale(0.2)
+                        .loopProperty("sprite", "rotation", { duration: 20000, from: 0, to: 360 })
+                        .name(`${caster.id}-detectMagicAura`)
+                        .belowTokens()
                     .thenDo(async () => {
                         await addConcentration();
                         let newItemMacro;
@@ -511,13 +512,13 @@ Hooks.once('init', async function () {
                             //console.log("Replacing current item macro...");
                             newItemMacro = `/*ASE_REPLACED*/if(args[0] === "off"){
 let objects = await Tagger.getByTag("magical", { ignore: [token] });
+let users = [];
+for (const user in game.actors.get(token.data.actorId).data.permission) {
+    if (user == "default") continue;
+    users.push(user);
+}
 let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
 let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-let detectMagicHookId = await token.document.getFlag("advancedspelleffects","detectMagicHookId");
-Hooks.off("updateToken", detectMagicHookId);
-await TokenMagic.deleteFilters(token, "detectMagicGlow");
-await TokenMagic.deleteFilters(token, "detectMagicZapShadow");
-await token.document.setFlag("advancedspelleffects","detectMagicHookId", -1);
 let magicalObjects = [];
 
 magicalObjects = objects.map(o => {
@@ -535,11 +536,26 @@ magicalObjects = objects.map(o => {
                         continue;
                     }
                     await game.AdvancedSpellEffects.updateFlag(magical.obj.id, "magicDetected", false);
-                    SequencerEffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
+                    Sequencer.EffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
+                    Sequencer.EffectManager.endEffects({name: ` + "`${token.id}-detectMagicAura`" + `, object: token});
+                    new Sequence()
+                    .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+                    .forUsers(users)
+                    .atLocation(magical.obj)
+                    .scale(0.25)
+                    .setMustache(magical)
+                    .zIndex(0)
+                    .effect()
+                    .file("jb2a.magic_signs.circle.02.divination.outro.` + auraColor + `")
+                    .atLocation(caster)
+                    .scale(0.2)
+                    .belowTokens()
+                    .attachTo(caster)
+                    .play()
                 }
 }
 else if(args[0] != "on" && args[0] != "off"){
-    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, color: "`+ color + `"};
+    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, waveColor: "`+ waveColor + `", auraColor: "`+ auraColor + `"};
     game.AdvancedSpellEffects.detectMagic(options);
 }`;
                             //console.log(newItemMacro);
@@ -575,12 +591,6 @@ else if(args[0] != "on" && args[0] != "off"){
                         .waitUntilFinished(-750)
                         .fadeOut(750, { ease: "easeInQuint" })
                         .zIndex(1)
-                        .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                        .forUsers(users)
-                        .atLocation(magical.obj)
-                        .scale(0.25)
-                        .setMustache(magical)
-                        .zIndex(0)
                         .play()
 
                 }
