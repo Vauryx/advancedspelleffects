@@ -3,9 +3,101 @@ let ASEsocket;
 
 
 Hooks.once('ready', async function () {
-    if (!game.user.isGM) {
-        return;
-    }
+    Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
+
+        if ((!updateData.x && !updateData.y)) return;
+        console.log("hook fired!...", tokenDocument, updateData);
+        if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length==0) return;
+
+        let users = [];
+        for (const user in tokenDocument.actor.data.permission) {
+            if (user == "default") continue;
+            users.push(user);
+        }
+        let newPos = { x: 0, y: 0 };
+        newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
+        newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
+        console.log("Controlled token: " , tokenDocument);
+        let magicalObjects = [];
+        let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+        let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
+
+        let objects = await Tagger.getByTag("magical", { ignore: [tokenDocument] });
+
+        magicalObjects = objects.map(o => {
+            let distance = canvas.grid.measureDistance(newPos, o);
+            return {
+                delay: 0,
+                distance: distance,
+                obj: o,
+                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+            }
+        }).filter(o => o.distance > 32.5)
+        for (let magical of magicalObjects) {
+            if (!magical.school) {
+                continue;
+            }
+            await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", false);
+            //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
+            SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+
+        }
+        magicalObjects = objects.map(o => {
+            let distance = canvas.grid.measureDistance(newPos, o);
+            //console.log("distance: ", distance);
+            return {
+                delay: 0,
+                distance: distance,
+                obj: o,
+                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+            }
+        }).filter(o => o.distance <= 32.5)
+
+        //console.log("Magical Objects in Range: " , magicalObjects);
+        for (let magical of magicalObjects) {
+            if (!magical.school) {
+                continue;
+            }
+            let runeDisplayed = Sequencer.EffectManager.getEffects({name: `${magical.obj.document.id}-magicRune`, object: magical.obj});
+            //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
+            if (!(magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) && runeDisplayed.length == 0) {
+                await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
+                new Sequence()
+                    .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
+                    .forUsers(users)
+                    .atLocation(magical.obj)
+                    .scale(0.25)
+                    .delay(magical.delay)
+                    .setMustache(magical)
+                    .waitUntilFinished(-800)
+                    .zIndex(0)
+                    .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
+                    .name(`${magical.obj.document.id}-magicRune`)
+                    .delay(magical.delay)
+                    .forUsers(users)
+                    .atLocation(magical.obj)
+                    .scale(0.25)
+                    .attachTo(magical.obj)
+                    .persist(true)
+                    .setMustache(magical)
+                    .waitUntilFinished(-750)
+                    .zIndex(1)
+                    .fadeOut(750, { ease: "easeInQuint" })
+                    .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+                    .forUsers(users)
+                    .atLocation(magical.obj)
+                    .scale(0.25)
+                    .setMustache(magical)
+                    .zIndex(0)
+                    .play()
+            }
+        }
+    });
+
+    if (!game.user.isGM) return;
+
     Hooks.on("updateTile", async function (tileD) {
         ASEsocket.executeAsGM("moveDarknessWalls", tileD.id);
         if (tileD.getFlag("advancedspelleffects", "fogCloudWallNum")) {
@@ -225,10 +317,6 @@ Hooks.once('init', async function () {
                     .belowTiles()
                     .scale(2.33333)
                     .thenDo(async () => {
-                        console.log("Registering detect magic hook...");
-                        await registerDetectMagicMIDIHook(caster, users);
-                    })
-                    .thenDo(async () => {
                         console.log("Applying Token Magic Highlight Effect...");
                         await applyMagicHighlight(caster);
                     })
@@ -326,95 +414,6 @@ Hooks.once('init', async function () {
 
                 }
                 sequence.play();
-
-
-
-                async function registerDetectMagicMIDIHook(tokenD, users) {
-                    let detectMagicHookId = Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
-                        //console.log("hook fired!");
-                        if ((!updateData.x && !updateData.y) || (tokenDocument.id != tokenD.id)) return;
-                        let newPos = { x: 0, y: 0 };
-                        newPos.x = (updateData.x) ? updateData.x : tokenD.data.x;
-                        newPos.y = (updateData.y) ? updateData.y : tokenD.data.y;
-                        //console.log("Controlled token: " , tokenD);
-                        let magicalObjects = [];
-                        let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
-                        let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-
-                        let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
-
-                        magicalObjects = objects.map(o => {
-                            let distance = canvas.grid.measureDistance(newPos, o);
-                            return {
-                                delay: 0,
-                                distance: distance,
-                                obj: o,
-                                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                            }
-                        }).filter(o => o.distance > 32.5)
-                        for (let magical of magicalObjects) {
-                            if (!magical.school) {
-                                continue;
-                            }
-                            await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", false);
-                            //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
-                            SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-
-                        }
-                        magicalObjects = objects.map(o => {
-                            let distance = canvas.grid.measureDistance(newPos, o);
-                            //console.log("distance: ", distance);
-                            return {
-                                delay: 0,
-                                distance: distance,
-                                obj: o,
-                                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                            }
-                        }).filter(o => o.distance <= 32.5)
-
-                        //console.log("Magical Objects in Range: " , magicalObjects);
-                        for (let magical of magicalObjects) {
-                            if (!magical.school) {
-                                continue;
-                            }
-                            //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
-                            if (!(magical.obj.document.getFlag("advancedspelleffects", "magicDetected"))) {
-                                await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
-                                new Sequence()
-                                    .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
-                                    .forUsers(users)
-                                    .atLocation(magical.obj)
-                                    .scale(0.25)
-                                    .delay(magical.delay)
-                                    .setMustache(magical)
-                                    .waitUntilFinished(-800)
-                                    .zIndex(0)
-                                    .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
-                                    .name(`${magical.obj.document.id}-magicRune`)
-                                    .delay(magical.delay)
-                                    .forUsers(users)
-                                    .atLocation(magical.obj)
-                                    .scale(0.25)
-                                    .attachTo(magical.obj)
-                                    .persist(true)
-                                    .setMustache(magical)
-                                    .waitUntilFinished(-750)
-                                    .zIndex(1)
-                                    .fadeOut(750, { ease: "easeInQuint" })
-                                    .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                                    .forUsers(users)
-                                    .atLocation(magical.obj)
-                                    .scale(0.25)
-                                    .setMustache(magical)
-                                    .zIndex(0)
-                                    .play()
-                            }
-                        }
-                    });
-                    await tokenD.document.setFlag("advancedspelleffects", "detectMagicHookId", detectMagicHookId);
-                }
                 break;
             case "ItemMacro":
                 caster = await canvas.tokens.get(options.tokenId);
@@ -496,7 +495,7 @@ Hooks.once('init', async function () {
                     .scale(2.33333)
                     .thenDo(async () => {
                         console.log("Registering detect magic hook...");
-                        await registerDetectMagicItemMacroHook(caster, users);
+                        //await registerDetectMagicItemMacroHook(caster, users);
                     })
                     .thenDo(async () => {
                         console.log("Applying Token Magic Highlight Effect...");
@@ -636,92 +635,6 @@ else if(args[0] != "on" && args[0] != "off"){
                     return true;
                     // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
 
-                }
-                async function registerDetectMagicItemMacroHook(tokenD, users) {
-                    let detectMagicHookId = Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
-                        //console.log("hook fired!");
-                        if ((!updateData.x && !updateData.y) || (tokenDocument.id != tokenD.id)) return;
-                        let newPos = { x: 0, y: 0 };
-                        newPos.x = (updateData.x) ? updateData.x : tokenD.data.x;
-                        newPos.y = (updateData.y) ? updateData.y : tokenD.data.y;
-                        //console.log("Controlled token: " , tokenD);
-                        let magicalObjects = [];
-                        let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
-                        let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-
-                        let objects = await Tagger.getByTag("magical", { ignore: [tokenD] });
-
-                        magicalObjects = objects.map(o => {
-                            let distance = canvas.grid.measureDistance(newPos, o);
-                            return {
-                                delay: 0,
-                                distance: distance,
-                                obj: o,
-                                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                            }
-                        }).filter(o => o.distance > 32.5)
-                        for (let magical of magicalObjects) {
-                            if (!magical.school) {
-                                continue;
-                            }
-                            await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", false);
-                            //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
-                            SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-
-                        }
-                        magicalObjects = objects.map(o => {
-                            let distance = canvas.grid.measureDistance(newPos, o);
-                            //console.log("distance: ", distance);
-                            return {
-                                delay: 0,
-                                distance: distance,
-                                obj: o,
-                                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-                            }
-                        }).filter(o => o.distance <= 32.5)
-
-                        //console.log("Magical Objects in Range: " , magicalObjects);
-                        for (let magical of magicalObjects) {
-                            if (!magical.school) {
-                                continue;
-                            }
-                            //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
-                            if (!(magical.obj.document.getFlag("advancedspelleffects", "magicDetected"))) {
-                                await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
-                                new Sequence()
-                                    .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
-                                    .forUsers(users)
-                                    .atLocation(magical.obj)
-                                    .scale(0.25)
-                                    .delay(magical.delay)
-                                    .setMustache(magical)
-                                    .waitUntilFinished(-800)
-                                    .zIndex(0)
-                                    .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
-                                    .name(`${magical.obj.document.id}-magicRune`)
-                                    .delay(magical.delay)
-                                    .forUsers(users)
-                                    .atLocation(magical.obj)
-                                    .scale(0.25)
-                                    .attachTo(magical.obj)
-                                    .persist(true)
-                                    .setMustache(magical)
-                                    .waitUntilFinished(-750)
-                                    .zIndex(1)
-                                    .fadeOut(750, { ease: "easeInQuint" })
-                                    .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                                    .forUsers(users)
-                                    .atLocation(magical.obj)
-                                    .scale(0.25)
-                                    .setMustache(magical)
-                                    .zIndex(0)
-                                    .play()
-                            }
-                        }
-                    });
-                    await tokenD.document.setFlag("advancedspelleffects", "detectMagicHookId", detectMagicHookId);
                 }
                 break;
             default:
@@ -908,205 +821,205 @@ if(args[0] === "off"){
     async function steelWindStrike(options) {
         let itemId;
         let tokenId;
-        switch (options.version){
+        switch (options.version) {
             case "MIDI":
                 //console.log("rollData", rollData);
-        function easeOutElasticCustom(x) {
-            const c4 = (2 * Math.PI) / 10;
-            return x === 0
-                ? 0
-                : x === 1
-                    ? 1
-                    : Math.pow(2, -12 * x) * Math.sin((x * 12 - 0.75) * c4) + 1;
-        }
-        Sequencer.registerEase("easeOutElasticCustom", easeOutElasticCustom);
-        let rollData = options.args[0];
-        let caster = canvas.tokens.get(rollData.tokenId);
-        //console.log("Caster roll data: ", caster.actor.getRollData());
-        let targets = Array.from(game.user.targets);
-        let rollDataForDisplay = [];
-        //let spellCastingAbility = rollData.actor.data.attributes.spellcasting;
-        let dagger = "";
-        if (options.weapon == "dagger") dagger = ".02"
+                function easeOutElasticCustom(x) {
+                    const c4 = (2 * Math.PI) / 10;
+                    return x === 0
+                        ? 0
+                        : x === 1
+                            ? 1
+                            : Math.pow(2, -12 * x) * Math.sin((x * 12 - 0.75) * c4) + 1;
+                }
+                Sequencer.registerEase("easeOutElasticCustom", easeOutElasticCustom);
+                let rollData = options.args[0];
+                let caster = canvas.tokens.get(rollData.tokenId);
+                //console.log("Caster roll data: ", caster.actor.getRollData());
+                let targets = Array.from(game.user.targets);
+                let rollDataForDisplay = [];
+                //let spellCastingAbility = rollData.actor.data.attributes.spellcasting;
+                let dagger = "";
+                if (options.weapon == "dagger") dagger = ".02"
 
-        let swordAnim;
-        let gustAnim = "jb2a.gust_of_wind.veryfast";
-        //let allFiles = [gustAnim, swordAnim];
-        //console.log('Files about to be preloaded...',allFiles);
-        //await SequencerPreloader.preloadForClients(allFiles, true);
+                let swordAnim;
+                let gustAnim = "jb2a.gust_of_wind.veryfast";
+                //let allFiles = [gustAnim, swordAnim];
+                //console.log('Files about to be preloaded...',allFiles);
+                //await SequencerPreloader.preloadForClients(allFiles, true);
 
-        let animStartTimeMap = {
-            "sword": 1050,
-            "mace": 825,
-            "greataxe": 1400,
-            "greatsword": 1400,
-            "handaxe": 1000,
-            "spear": 825,
-            "dagger": 700
-        };
-        swordAnim = `jb2a.${options.weapon}.melee${dagger}.${options.color}`;
+                let animStartTimeMap = {
+                    "sword": 1050,
+                    "mace": 825,
+                    "greataxe": 1400,
+                    "greatsword": 1400,
+                    "handaxe": 1000,
+                    "spear": 825,
+                    "dagger": 700
+                };
+                swordAnim = `jb2a.${options.weapon}.melee${dagger}.${options.color}`;
 
-        await caster.document.setFlag("autorotate", "enabled", false);
-        //console.log ("Auto Rotate Flag status: ",caster.document.getFlag("autorotate", "enabled"));
-        await steelWindStrike(caster, targets);
+                await caster.document.setFlag("autorotate", "enabled", false);
+                //console.log ("Auto Rotate Flag status: ",caster.document.getFlag("autorotate", "enabled"));
+                await steelWindStrike(caster, targets);
 
-        async function evaluateAttack(target) {
-            //console.log("Evalute attack target: ", target);
-            let attackRoll = new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
-            // game.dice3d?.showForRoll(attackRoll);
-            if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
-                onMiss(target, attackRoll);
-            }
-            else {
-                onHit(target, attackRoll);
-            }
-        }
-
-        async function onHit(target, attackRoll) {
-            //console.log('Attack hit!');
-            //console.log("Attack roll: ", attackRoll);
-            let currentRoll = new Roll('6d10', caster.actor.getRollData()).roll();
-            //console.log("Current damage dice roll total: ", currentRoll.total);
-            //game.dice3d?.showForRoll(currentRoll);
-            let damageData = new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: 'Steel Wind Strike - Damage Roll (6d10 force)', itemCardId: rollData.itemCardId });
-            //console.log("damage data: ", damageData);
-            rollDataForDisplay.push({
-                "target": target.name,
-                "attackroll": attackRoll.total,
-                "hit": true,
-                "damageroll": currentRoll.total
-            })
-        }
-        async function onMiss(target, attackRoll) {
-            //console.log('Missed attack...');
-            //console.log("Attack roll: ", attackRoll);
-            rollDataForDisplay.push({
-                "target": target.name,
-                "attackroll": attackRoll.total,
-                "hit": false,
-                "damageroll": 0
-            })
-            //let currentRoll = new Roll(`${damageDie}`, caster.actor.getRollData()).roll({ async: false });
-            //game.dice3d?.showForRoll(currentRoll);
-            //new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, currentRoll.total, "bludgeoning", [target], currentRoll, { flavor: `Flurry of Blows - Damage Roll (${damageDie} Bludgeoning)`, itemCardId: rollData.itemCardId });
-        }
-
-        async function finalTeleport(caster, location) {
-            console.log("template: ", location);
-            let startLocation = {x: caster.x, y: caster.y};
-            //let adjustedLocation = { x: location.x - (canvas.grid.size / 2), y: location.y - (canvas.grid.size / 2) }
-            let distance = Math.sqrt(Math.pow((location.x - caster.x), 2) + Math.pow((location.y - caster.y), 2));
-
-            let steelWindSequence = new Sequence()
-                .animation()
-                .on(caster)
-                .rotateTowards(location)
-                .animation()
-                .on(caster)
-                .snapToSquare()
-                .moveTowards(location, { ease: "easeOutElasticCustom" })
-                .moveSpeed(distance / 60)
-                .duration(800)
-                .waitUntilFinished(-750)
-                .effect()
-                .atLocation(startLocation)
-                .JB2A()
-                .file(gustAnim)
-                .reachTowards(location)
-                .opacity(0.8)
-                .fadeOut(250)
-                .belowTokens()
-                .waitUntilFinished()
-                .thenDo(async () => {
-                    await caster.TMFXdeleteFilters("SWSBlur");
-                    await caster.document.setFlag("autorotate", "enabled", true);
-                })
-            await steelWindSequence.play();
-        }
-
-        async function steelWindStrike(caster, targets) {
-            let currentX;
-            let targetX;
-            let currentY;
-            let targetY;
-            let distance;
-            let params =
-                [{
-                    filterType: "blur",
-                    filterId: "SWSBlur",
-                    padding: 10,
-                    quality: 4.0,
-                    blur: 0,
-                    blurX: 0,
-                    blurY: 0,
-                    animated:
-                    {
-                        blurX:
-                        {
-                            active: true,
-                            animType: "syncCosOscillation",
-                            loopDuration: 500,
-                            val1: 0,
-                            val2: 8
-                        },
-                        blurY:
-                        {
-                            active: true,
-                            animType: "syncCosOscillation",
-                            loopDuration: 250,
-                            val1: 0,
-                            val2: 8
-                        }
+                async function evaluateAttack(target) {
+                    //console.log("Evalute attack target: ", target);
+                    let attackRoll = new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
+                    // game.dice3d?.showForRoll(attackRoll);
+                    if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
+                        onMiss(target, attackRoll);
                     }
-                }];
-            await caster.TMFXaddUpdateFilters(params);
-            //console.log(targets);
-            for (let i = 0; i < targets.length; i++) {
+                    else {
+                        onHit(target, attackRoll);
+                    }
+                }
 
-                //console.log(targets[i]);
-                let target = targets[i];
-                evaluateAttack(target);
+                async function onHit(target, attackRoll) {
+                    //console.log('Attack hit!');
+                    //console.log("Attack roll: ", attackRoll);
+                    let currentRoll = new Roll('6d10', caster.actor.getRollData()).roll();
+                    //console.log("Current damage dice roll total: ", currentRoll.total);
+                    //game.dice3d?.showForRoll(currentRoll);
+                    let damageData = new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: 'Steel Wind Strike - Damage Roll (6d10 force)', itemCardId: rollData.itemCardId });
+                    //console.log("damage data: ", damageData);
+                    rollDataForDisplay.push({
+                        "target": target.name,
+                        "attackroll": attackRoll.total,
+                        "hit": true,
+                        "damageroll": currentRoll.total
+                    })
+                }
+                async function onMiss(target, attackRoll) {
+                    //console.log('Missed attack...');
+                    //console.log("Attack roll: ", attackRoll);
+                    rollDataForDisplay.push({
+                        "target": target.name,
+                        "attackroll": attackRoll.total,
+                        "hit": false,
+                        "damageroll": 0
+                    })
+                    //let currentRoll = new Roll(`${damageDie}`, caster.actor.getRollData()).roll({ async: false });
+                    //game.dice3d?.showForRoll(currentRoll);
+                    //new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, currentRoll.total, "bludgeoning", [target], currentRoll, { flavor: `Flurry of Blows - Damage Roll (${damageDie} Bludgeoning)`, itemCardId: rollData.itemCardId });
+                }
 
-                currentX = caster.x;
-                targetX = target.x;
-                currentY = caster.y;
-                targetY = target.y;
-                distance = Math.sqrt(Math.pow((targetX - currentX), 2) + Math.pow((targetY - currentY), 2));
-                //console.log(distance);
-                let steelWindSequence = new Sequence()
-                    .effect()
-                    .atLocation(caster)
-                    .JB2A()
-                    .file(gustAnim)
-                    .reachTowards(target)
-                    .opacity(0.8)
-                    .fadeOut(250)
-                    .belowTokens()
-                    .effect()
-                    .atLocation(caster)
-                    .JB2A()
-                    .file(swordAnim)
-                    .startTime(animStartTimeMap[options.weapon] || 1050)
-                    .moveTowards(target, { ease: "easeOutElasticCustom" })
-                    .moveSpeed(distance)
-                    .animation()
-                    .on(caster)
-                    .rotateTowards(target)
-                    .animation()
-                    .on(caster)
-                    .moveTowards(target, { ease: "easeOutElasticCustom" })
-                    .moveSpeed(distance / 60)
-                    .duration(800)
-                    .waitUntilFinished()
-                await steelWindSequence.play();
-            }
-            let contentHTML = `<form class="editable flexcol" autocomplete="off">`;
-            rollDataForDisplay.forEach((data) => {
-                let name = data.target;
-                let attackTotal = data.attackroll;
-                let damageTotal = data.damageroll;
-                let hitStatus = data.hit;
-                contentHTML = contentHTML + `<section style="border: 1px solid black">
+                async function finalTeleport(caster, location) {
+                    console.log("template: ", location);
+                    let startLocation = { x: caster.x, y: caster.y };
+                    //let adjustedLocation = { x: location.x - (canvas.grid.size / 2), y: location.y - (canvas.grid.size / 2) }
+                    let distance = Math.sqrt(Math.pow((location.x - caster.x), 2) + Math.pow((location.y - caster.y), 2));
+
+                    let steelWindSequence = new Sequence()
+                        .animation()
+                        .on(caster)
+                        .rotateTowards(location)
+                        .animation()
+                        .on(caster)
+                        .snapToSquare()
+                        .moveTowards(location, { ease: "easeOutElasticCustom" })
+                        .moveSpeed(distance / 60)
+                        .duration(800)
+                        .waitUntilFinished(-750)
+                        .effect()
+                        .atLocation(startLocation)
+                        .JB2A()
+                        .file(gustAnim)
+                        .reachTowards(location)
+                        .opacity(0.8)
+                        .fadeOut(250)
+                        .belowTokens()
+                        .waitUntilFinished()
+                        .thenDo(async () => {
+                            await caster.TMFXdeleteFilters("SWSBlur");
+                            await caster.document.setFlag("autorotate", "enabled", true);
+                        })
+                    await steelWindSequence.play();
+                }
+
+                async function steelWindStrike(caster, targets) {
+                    let currentX;
+                    let targetX;
+                    let currentY;
+                    let targetY;
+                    let distance;
+                    let params =
+                        [{
+                            filterType: "blur",
+                            filterId: "SWSBlur",
+                            padding: 10,
+                            quality: 4.0,
+                            blur: 0,
+                            blurX: 0,
+                            blurY: 0,
+                            animated:
+                            {
+                                blurX:
+                                {
+                                    active: true,
+                                    animType: "syncCosOscillation",
+                                    loopDuration: 500,
+                                    val1: 0,
+                                    val2: 8
+                                },
+                                blurY:
+                                {
+                                    active: true,
+                                    animType: "syncCosOscillation",
+                                    loopDuration: 250,
+                                    val1: 0,
+                                    val2: 8
+                                }
+                            }
+                        }];
+                    await caster.TMFXaddUpdateFilters(params);
+                    //console.log(targets);
+                    for (let i = 0; i < targets.length; i++) {
+
+                        //console.log(targets[i]);
+                        let target = targets[i];
+                        evaluateAttack(target);
+
+                        currentX = caster.x;
+                        targetX = target.x;
+                        currentY = caster.y;
+                        targetY = target.y;
+                        distance = Math.sqrt(Math.pow((targetX - currentX), 2) + Math.pow((targetY - currentY), 2));
+                        //console.log(distance);
+                        let steelWindSequence = new Sequence()
+                            .effect()
+                            .atLocation(caster)
+                            .JB2A()
+                            .file(gustAnim)
+                            .reachTowards(target)
+                            .opacity(0.8)
+                            .fadeOut(250)
+                            .belowTokens()
+                            .effect()
+                            .atLocation(caster)
+                            .JB2A()
+                            .file(swordAnim)
+                            .startTime(animStartTimeMap[options.weapon] || 1050)
+                            .moveTowards(target, { ease: "easeOutElasticCustom" })
+                            .moveSpeed(distance)
+                            .animation()
+                            .on(caster)
+                            .rotateTowards(target)
+                            .animation()
+                            .on(caster)
+                            .moveTowards(target, { ease: "easeOutElasticCustom" })
+                            .moveSpeed(distance / 60)
+                            .duration(800)
+                            .waitUntilFinished()
+                        await steelWindSequence.play();
+                    }
+                    let contentHTML = `<form class="editable flexcol" autocomplete="off">`;
+                    rollDataForDisplay.forEach((data) => {
+                        let name = data.target;
+                        let attackTotal = data.attackroll;
+                        let damageTotal = data.damageroll;
+                        let hitStatus = data.hit;
+                        contentHTML = contentHTML + `<section style="border: 1px solid black">
                                                 <li class="flexrow">
                                                     <h4>${name}</h4>
                                                     <div>
@@ -1121,36 +1034,36 @@ if(args[0] === "off"){
                                                 </li>
                                             </section> 
                                             <br>`;
-            });
-            contentHTML = contentHTML + `</form>`
-            async function chooseFinalLocation() {
-                    let template = await warpgate.crosshairs.show(1, rollData.item.img, "End At");
-                    await finalTeleport(caster, template);
-                    
-            }
-            let done = await (new Promise((resolve) => {
-                new Dialog({
-                    title: "Steel Wind Strike breakdown",
-                    content: contentHTML,
-                    buttons:
-                    {
-                        one: {
-                            label: 'Okay',
-                            callback: (html) => {
-                                resolve(true);
-                            }
-                        }
-                    },
-                },
-                    { width: '500' },
-                ).render(true)
-            }));
+                    });
+                    contentHTML = contentHTML + `</form>`
+                    async function chooseFinalLocation() {
+                        let template = await warpgate.crosshairs.show(1, rollData.item.img, "End At");
+                        await finalTeleport(caster, template);
 
-            if (done) {
-                await chooseFinalLocation();
-            }
+                    }
+                    let done = await (new Promise((resolve) => {
+                        new Dialog({
+                            title: "Steel Wind Strike breakdown",
+                            content: contentHTML,
+                            buttons:
+                            {
+                                one: {
+                                    label: 'Okay',
+                                    callback: (html) => {
+                                        resolve(true);
+                                    }
+                                }
+                            },
+                        },
+                            { width: '500' },
+                        ).render(true)
+                    }));
 
-        }
+                    if (done) {
+                        await chooseFinalLocation();
+                    }
+
+                }
                 break;
             case "ItemMacro":
                 break;
@@ -1181,7 +1094,6 @@ Hooks.once("socketlib.ready", () => {
     ASEsocket.register("registeredDarknessMIDI", darknessMIDISocketFunction);
     ASEsocket.register("registeredDarknessItemMacro", darknessItemMacroSocketFunction);
     ASEsocket.register("registeredTollTheDead", tollTheDeadSocketFunction);
-    ASEsocket.register("registeredSteelWindStrike", steelWindStrikeSocketFunction);
     ASEsocket.register("registeredSteelWindStrikeNoMIDI", steelWindStrikeNoMIDISocketFunction);
     ASEsocket.register("moveDarknessWalls", darknessWallMover);
     ASEsocket.register("deleteTiles", deleteTiles);
@@ -1713,10 +1625,6 @@ else
                 sequence.play();
             }
         }
-    }
-
-    async function steelWindStrikeSocketFunction(rollData, weapon, color) {
-        
     }
 
     async function steelWindStrikeNoMIDISocketFunction(item, weapon, color) {
