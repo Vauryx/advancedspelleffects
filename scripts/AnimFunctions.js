@@ -17,7 +17,7 @@ Hooks.once('ready', async function () {
         let newPos = { x: 0, y: 0 };
         newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
         newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
-        console.log("Controlled token: " , tokenDocument);
+        //console.log("Controlled token: " , tokenDocument);
         let magicalObjects = [];
         let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
         let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
@@ -190,6 +190,7 @@ Hooks.once('init', async function () {
         let magicalObjects = [];
         let sequence;
         let error;
+        let color = options.color || 'blue';
         async function applyMagicHighlight(caster) {
             let detectMagicGlow =
                 [{
@@ -311,7 +312,7 @@ Hooks.once('init', async function () {
                 }
                 //console.log("Detected Magical Objects: ", magicalObjects);
                 sequence = new Sequence()
-                    .effect("jb2a.detect_magic.circle.purple")
+                    .effect(`jb2a.detect_magic.circle.${color}`)
                     .atLocation(caster)
                     .JB2A()
                     .belowTiles()
@@ -368,7 +369,7 @@ Hooks.once('init', async function () {
                         }
         }
         else if(args[0] != "on" && args[0] != "off"){
-            let options = {version: "MIDI", args: args};
+            let options = {version: "MIDI", args: args, color: ${color}};
             game.AdvancedSpellEffects.detectMagic(options);
         }`;
                             //console.log(newItemMacro);
@@ -488,7 +489,7 @@ Hooks.once('init', async function () {
                 }
                 //console.log("Detected Magical Objects: ", magicalObjects);
                 sequence = new Sequence()
-                    .effect("jb2a.detect_magic.circle.purple")
+                    .effect(`jb2a.detect_magic.circle.${color}`)
                     .atLocation(caster)
                     .JB2A()
                     .belowTiles()
@@ -538,7 +539,7 @@ magicalObjects = objects.map(o => {
                 }
 }
 else if(args[0] != "on" && args[0] != "off"){
-    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id};
+    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, color: ${color}};
     game.AdvancedSpellEffects.detectMagic(options);
 }`;
                             //console.log(newItemMacro);

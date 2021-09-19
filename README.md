@@ -32,14 +32,16 @@ game.AdvancedSpellEffects.darkness(options);
 ```
 ### Detect Magic:
 - In both cases for this spell, make sure to remove the range/target from the spell and to use "Utility/Other" for the "Action Type"
+- This spell uses the Tagger module to determine what is magical. Set the 'magical' tag on anything you want the spell to ping. Further Customization can be done by adding a magical school tag as well as a color tag.
+- An optional 'color' property can be set for the options object that can change the color of wave of detect magic.
 #### *MIDI*
 ```javascript
-let options = {version: "MIDI", args: args};
+let options = {version: "MIDI", args: args, color: 'blue'};
 game.AdvancedSpellEffects.detectMagic(options);
 ```
 #### *Item Macro*
 ```javascript
-let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id};
+let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, , color: 'blue'};
 game.AdvancedSpellEffects.detectMagic(options);
 ```
 
