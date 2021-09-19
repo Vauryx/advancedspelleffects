@@ -318,7 +318,7 @@ Hooks.once('init', async function () {
                     .belowTiles()
                     .scale(2.33333)
                     .thenDo(async () => {
-                        console.log("Applying Token Magic Highlight Effect...");
+                        //console.log("Applying Token Magic Highlight Effect...");
                         await applyMagicHighlight(caster);
                     })
                     .wait(100)
@@ -369,7 +369,7 @@ Hooks.once('init', async function () {
                         }
         }
         else if(args[0] != "on" && args[0] != "off"){
-            let options = {version: "MIDI", args: args, color: ${color}};
+            let options = {version: "MIDI", args: args, color: "`+ color + `"};
             game.AdvancedSpellEffects.detectMagic(options);
         }`;
                             //console.log(newItemMacro);
@@ -539,7 +539,7 @@ magicalObjects = objects.map(o => {
                 }
 }
 else if(args[0] != "on" && args[0] != "off"){
-    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, color: ${color}};
+    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, color: "`+ color + `"};
     game.AdvancedSpellEffects.detectMagic(options);
 }`;
                             //console.log(newItemMacro);
