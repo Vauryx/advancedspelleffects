@@ -25,6 +25,10 @@ List of currently avaiable spells:
 let options = {version: "MIDI", args: args};
 game.AdvancedSpellEffects.darkness(options);
 ```
+
+https://user-images.githubusercontent.com/32877348/134225849-22115c32-5a6e-47d5-93aa-5c429d3ee9a5.mp4
+
+
 #### *Item Macro*
 ```javascript
 let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id};
@@ -69,4 +73,3 @@ game.AdvancedSpellEffects.steelWindStrike(options);
 ```
 
 ### Thunder Step:
-![plot](./resources/darkness_demo.mp4)
