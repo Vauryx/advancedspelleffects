@@ -67,3 +67,6 @@ game.AdvancedSpellEffects.fogCloud(options);
 let options = {version: "MIDI", args: args, weapon: "weapon", color: "color"};
 game.AdvancedSpellEffects.steelWindStrike(options);
 ```
+
+### Thunder Step:
+![plot](./resources/darkness_demo.mp4)

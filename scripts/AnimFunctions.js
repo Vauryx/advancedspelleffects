@@ -7,7 +7,7 @@ Hooks.once('ready', async function () {
 
         if ((!updateData.x && !updateData.y)) return;
         //console.log("hook fired!...", tokenDocument, updateData);
-        if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length==0) return;
+        if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length == 0) return;
 
         let users = [];
         for (const user in tokenDocument.actor.data.permission) {
@@ -39,14 +39,14 @@ Hooks.once('ready', async function () {
                 continue;
             }
             new Sequence()
-            .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-            .forUsers(users)
-            .atLocation(magical.obj)
-            .scale(0.25)
-            .setMustache(magical)
-            .zIndex(0)
-            .playIf((magical.obj.document.getFlag("advancedspelleffects", "magicDetected")))
-            .play()
+                .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+                .forUsers(users)
+                .atLocation(magical.obj)
+                .scale(0.25)
+                .setMustache(magical)
+                .zIndex(0)
+                .playIf((magical.obj.document.getFlag("advancedspelleffects", "magicDetected")))
+                .play()
             await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", false);
             //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
             SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
@@ -68,7 +68,7 @@ Hooks.once('ready', async function () {
             if (!magical.school) {
                 continue;
             }
-            let runeDisplayed = Sequencer.EffectManager.getEffects({name: `${magical.obj.document.id}-magicRune`, object: magical.obj});
+            let runeDisplayed = Sequencer.EffectManager.getEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
             //let runeIntros = Sequencer.EffectManager.getEffects({name: `detectMagicRuneIntro`, object: canvas.tokens.get(tokenDocument.id)});
             //console.log("Intros displaying: ", runeIntros);
             //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
@@ -97,7 +97,7 @@ Hooks.once('ready', async function () {
                     .waitUntilFinished(-750)
                     .zIndex(1)
                     .fadeOut(750, { ease: "easeInQuint" })
-                .play()
+                    .play()
             }
         }
     });
@@ -281,24 +281,24 @@ Hooks.once('init', async function () {
                     .belowTiles()
                     .scale(2.33333)
                     .effect()
-                        .file(`jb2a.magic_signs.circle.02.divination.intro.${auraColor}`)
-                        .atLocation(caster)
-                        .attachTo(caster)
-                        .scale(0.2)
-                        .belowTokens()
-                        .waitUntilFinished(-1000)
-                        .fadeOut(1000, { ease: "easeInQuint" })
+                    .file(`jb2a.magic_signs.circle.02.divination.intro.${auraColor}`)
+                    .atLocation(caster)
+                    .attachTo(caster)
+                    .scale(0.2)
+                    .belowTokens()
+                    .waitUntilFinished(-1000)
+                    .fadeOut(1000, { ease: "easeInQuint" })
                     .effect()
-                        .file(`jb2a.magic_signs.circle.02.divination.loop.${auraColor}`)
-                        .atLocation(caster)
-                        .attachTo(caster)
-                        .persist()
-                        .extraEndDuration(750)
-                        .fadeOut(750, { ease: "easeInQuint" })
-                        .scale(0.2)
-                        .loopProperty("sprite", "rotation", { duration: 20000, from: 0, to: 360 })
-                        .name(`${caster.id}-detectMagicAura`)
-                        .belowTokens()
+                    .file(`jb2a.magic_signs.circle.02.divination.loop.${auraColor}`)
+                    .atLocation(caster)
+                    .attachTo(caster)
+                    .persist()
+                    .extraEndDuration(750)
+                    .fadeOut(750, { ease: "easeInQuint" })
+                    .scale(0.2)
+                    .loopProperty("sprite", "rotation", { duration: 20000, from: 0, to: 360 })
+                    .name(`${caster.id}-detectMagicAura`)
+                    .belowTokens()
                     .thenDo(async () => {
                         //console.log("Actor: ", actorD);
                         let concentrationActiveEffect = actor.effects.filter((effect) => effect.data.label === "Concentrating")[0];
@@ -361,7 +361,7 @@ Hooks.once('init', async function () {
                         }
         }
         else if(args[0] != "on" && args[0] != "off"){
-            let options = {version: "MIDI", args: args, waveColor: "`+ waveColor + `", auraColor: "`+ auraColor + `"};
+            let options = {version: "MIDI", args: args, waveColor: "`+ waveColor + `", auraColor: "` + auraColor + `"};
             game.AdvancedSpellEffects.detectMagic(options);
         }`;
                             //console.log(newItemMacro);
@@ -397,7 +397,7 @@ Hooks.once('init', async function () {
                         .waitUntilFinished(-750)
                         .fadeOut(750, { ease: "easeInQuint" })
                         .zIndex(1)
-                    .play()
+                        .play()
                 }
                 sequence.play();
                 break;
@@ -475,24 +475,24 @@ Hooks.once('init', async function () {
                     .attachTo(caster)
                     .scale(2.33333)
                     .effect()
-                        .file(`jb2a.magic_signs.circle.02.divination.intro.${auraColor}`)
-                        .atLocation(caster)
-                        .attachTo(caster)
-                        .scale(0.2)
-                        .belowTokens()
-                        .waitUntilFinished(-1000)
-                        .fadeOut(1000, { ease: "easeInQuint" })
+                    .file(`jb2a.magic_signs.circle.02.divination.intro.${auraColor}`)
+                    .atLocation(caster)
+                    .attachTo(caster)
+                    .scale(0.2)
+                    .belowTokens()
+                    .waitUntilFinished(-1000)
+                    .fadeOut(1000, { ease: "easeInQuint" })
                     .effect()
-                        .file(`jb2a.magic_signs.circle.02.divination.loop.${auraColor}`)
-                        .atLocation(caster)
-                        .attachTo(caster)
-                        .persist()
-                        .extraEndDuration(750)
-                        .fadeOut(750, { ease: "easeInQuint" })
-                        .scale(0.2)
-                        .loopProperty("sprite", "rotation", { duration: 20000, from: 0, to: 360 })
-                        .name(`${caster.id}-detectMagicAura`)
-                        .belowTokens()
+                    .file(`jb2a.magic_signs.circle.02.divination.loop.${auraColor}`)
+                    .atLocation(caster)
+                    .attachTo(caster)
+                    .persist()
+                    .extraEndDuration(750)
+                    .fadeOut(750, { ease: "easeInQuint" })
+                    .scale(0.2)
+                    .loopProperty("sprite", "rotation", { duration: 20000, from: 0, to: 360 })
+                    .name(`${caster.id}-detectMagicAura`)
+                    .belowTokens()
                     .thenDo(async () => {
                         await addConcentration();
                         let newItemMacro;
@@ -544,7 +544,7 @@ magicalObjects = objects.map(o => {
                 }
 }
 else if(args[0] != "on" && args[0] != "off"){
-    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, waveColor: "`+ waveColor + `", auraColor: "`+ auraColor + `"};
+    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, waveColor: "`+ waveColor + `", auraColor: "` + auraColor + `"};
     game.AdvancedSpellEffects.detectMagic(options);
 }`;
                             //console.log(newItemMacro);
@@ -818,6 +818,7 @@ if(args[0] === "off"){
     async function tollTheDead(rollData) {
         setTimeout(() => { ASEsocket.executeAsGM("registeredTollTheDead", rollData[0]); }, 100);
     }
+
     async function steelWindStrike(options) {
         let itemId;
         let tokenId;
@@ -1071,6 +1072,230 @@ if(args[0] === "off"){
                 return;
         }
     }
+
+    async function thunderStep(options) {
+        let error;
+        switch (options.version) {
+            case "MIDI":
+                error = false;
+                if (typeof args !== 'undefined' && args.length === 0) {
+                    error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+                }
+
+                if (!(game.modules.get("jb2a_patreon"))) {
+                    error = `You need to have JB2A's patreon only module installed to run this macro!`;
+                }
+
+                if (!game.modules.get("advanced-macros")?.active) {
+                    let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+                    error = `You need to have Advanced Macros ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("midi-qol")?.active) {
+                    let installed = game.modules.get("midi-qol") && !game.modules.get("midi-qol").active ? "enabled" : "installed";
+                    error = `You need to have MidiQOL ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("socketlib")?.active) {
+                    let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+                    error = `You need to have SocketLib ${installed} to run this macro!`;
+                }
+
+                if (!game.modules.get("sequencer")?.active) {
+                    let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+                    error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+                if (error) {
+                    ui.notifications.error(error);
+                    return;
+                }
+                let midiData = options.args[0];
+                //console.log("Midi Data: ", midiData);
+                let caster = canvas.tokens.get(midiData.tokenId);
+                let target = canvas.tokens.get(midiData.targets[0]?.id);
+                let casterActor = game.actors.get(caster.data.actorId);
+                //console.log("Caster: ", caster);
+                let saveDC = casterActor.data.data.attributes.spelldc;
+                //console.log("Save DC: ", saveDC);
+                let tokens = canvas.tokens.objects.children.filter((token) => token.id != caster.id).map(t => {
+                    let distance = canvas.grid.measureDistance(caster, t);
+                    return { token: t, distance: distance }
+                }).filter(t => t.distance <= 12.5);
+                if (target) {
+                    tokens = tokens.filter((token) => token.token.id != target.id);
+                }
+                //console.log("Tokens in range: ", tokens);
+                let failedSaves = [];
+                let passedSaves = [];
+
+                for (const currentTarget of tokens) {
+                    let currentTargetActor = currentTarget.token.actor;
+                    let saveResult = await currentTargetActor.rollAbilitySave("con", {fastForward: true, flavor: "Thunder Step Saving Throw"});;
+
+                    if (saveResult.total < saveDC) {
+                        failedSaves.push(currentTarget.token);
+                    }
+                    else if (saveResult.total >= saveDC){
+                        passedSaves.push(currentTarget.token);
+                    }
+                }
+                //console.log("Failed Saves - ", failedSaves);
+                //console.log("Passed Saves - ", passedSaves);
+                let fullDamageRoll = new Roll(`${midiData.spellLevel}d10`).evaluate();
+                if (game.modules.get("dice-so-nice")?.active) {
+                    game.dice3d?.showForRoll(fullDamageRoll);
+                }
+                //console.log("Thunder Step Full Damage roll: ", fullDamageRoll);
+                let halfdamageroll = new Roll(`${fullDamageRoll.total}/2`).evaluate({async: false});
+                let casterTeleportLocation = await warpgate.crosshairs.show(1, midiData.item.img, "Thunder Step - Caster");
+
+                const loadImage = src =>
+                    new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => resolve(img);
+                        img.onerror = reject;
+                        img.src = src;
+                    })
+                    ;
+                let casterImage;
+                let targetImage;
+                loadImage(caster.data.img).then(async (image) => {
+                    casterImage = image;
+                    //console.log(casterImage);
+                    const casterImageScale = caster.w / casterImage.width;
+                    //console.log("Token Image Scale: ", casterImageScale);
+
+                    //console.log("Target selected: ", target);
+                    if (target) {
+                        await loadImage(target.data.img).then(async (image) => {
+                            //console.log("Target Image Loaded...");
+                            targetImage = image;
+                            //console.log(targetImage);
+                            const targetImageScale = target.w / targetImage.width;
+                            //console.log("Target Image Scale: ", targetImageScale);
+                            let targetTeleportLocation = await warpgate.crosshairs.show(1, midiData.item.img, "Thunder Step - Tag Along");
+                            playTargetTeleportEffect(target, targetImageScale, targetTeleportLocation);
+                        });
+                    }
+                    
+                    await playCasterTeleportEffect(caster, casterImageScale, casterTeleportLocation);
+                    //console.log("Done teleporting...");
+
+                    if(failedSaves.length>0){
+                        new MidiQOL.DamageOnlyWorkflow(casterActor, caster, fullDamageRoll.total, "thunder", failedSaves, fullDamageRoll, { flavor: `Thunder Step Full Damage - Damage Roll (${midiData.spellLevel}d10 Thunder)`, itemCardId: "new", itemData: midiData.item});
+                    }
+                    
+                    if(passedSaves.length>0){
+                        new MidiQOL.DamageOnlyWorkflow(casterActor, caster, halfdamageroll.total, "thunder", passedSaves, halfdamageroll, { flavor: `Thunder Step Half Damage - Damage Roll (${midiData.spellLevel}d10 Thunder)`, itemCardId: "new", itemData: midiData.item});
+                    }
+                    
+                    
+                });
+                async function playTargetTeleportEffect(target, targetImageScale, teleportLocation) {
+                    let sequence = new Sequence()
+                        .effect()
+                        .file("jb2a.eldritch_blast.lightblue.05ft")
+                        .atLocation(target)
+                        .JB2A()
+                        .waitUntilFinished(-1200)
+                        .endTime(3300)
+                        .playbackRate(1)
+                        .scaleOut(0, 250)
+                        .belowTokens()
+                        .filter("Glow", { color: '0x0000FF', distance: 35, outerStrength: 2, innerStrength: 0.25 })
+                        .animation()
+                        .on(target)
+                        .opacity(0)
+                        .effect()
+                        .file(target.data.img)
+                        .atLocation(target)
+                        .scale(targetImageScale)
+                        .rotate(-target.data.rotation)
+                        .scaleOut(0, 1000, { ease: "easeInOutElastic" })
+                        .waitUntilFinished()
+                        .animation()
+                        .on(target)
+                        .teleportTo(teleportLocation)
+                        .snapToSquare()
+                        .waitUntilFinished()
+                        .effect()
+                        .file()
+                        .file(target.data.img)
+                        .atLocation(target)
+                        .scale(targetImageScale)
+                        .addPostOverride(async (effect, data) => {
+                            data.angle = -target.data.rotation;
+                            return data;
+                        })
+                        .scaleIn(0, 1000, { ease: "easeInOutElastic" })
+                        .filter("Glow", { color: '0x0000FF', distance: 50, outerStrength: 2, innerStrength: 0 })
+                        .fadeOut(250)
+                        .waitUntilFinished(-250)
+                        .animation()
+                        .on(target)
+                        .opacity(1)
+                    sequence.play();
+                }
+
+                async function playCasterTeleportEffect(caster, casterImageScale, teleportLocation) {
+                    let sequence = new Sequence()
+                        .effect()
+                        .file("jb2a.eldritch_blast.lightblue.05ft")
+                        .atLocation(caster)
+                        .JB2A()
+                        .waitUntilFinished(-1200)
+                        .endTime(3300)
+                        .playbackRate(1)
+                        .scaleOut(0, 250)
+                        .belowTokens()
+                        .filter("Glow", { color: '0x0000FF', distance: 35, outerStrength: 2, innerStrength: 0.25 })
+                        .animation()
+                        .on(caster)
+                        .opacity(0)
+                        .effect()
+                        .file(caster.data.img)
+                        .atLocation(caster)
+                        .scale(casterImageScale)
+                        .rotate(-caster.data.rotation)
+                        .scaleOut(0, 1000, { ease: "easeInOutElastic" })
+                        .waitUntilFinished()
+                        .effect()
+                        .file("jb2a.explosion.04.blue")
+                        .atLocation(caster)
+                        .filter("Glow", { color: '0x0000FF', distance: 35, outerStrength: 1, innerStrength: 0.25 })
+                        .scale(2)
+                        .animation()
+                        .on(caster)
+                        .teleportTo(teleportLocation)
+                        .snapToSquare()
+                        .waitUntilFinished()
+                        .effect()
+                        .file()
+                        .file(caster.data.img)
+                        .addPostOverride(async (effect, data) => {
+                            //console.log(data);
+                            data.angle = -caster.data.rotation;
+                            return data;
+                        })
+                        .atLocation(caster)
+                        .scale(casterImageScale)
+                        .scaleIn(0, 1000, { ease: "easeInOutElastic" })
+                        .filter("Glow", { color: '0x0000FF', distance: 50, outerStrength: 2, innerStrength: 0 })
+                        .fadeOut(250)
+                        .waitUntilFinished(-250)
+                        .animation()
+                        .on(caster)
+                        .opacity(1)
+                    await sequence.play();
+                }
+
+                break;
+            case "ItemMacro":
+                break;
+            default:
+                return;
+        }
+    }
     // List of effects that can be called
     game.AdvancedSpellEffects = {};
     game.AdvancedSpellEffects.removeTiles = removeTiles;
@@ -1079,6 +1304,7 @@ if(args[0] === "off"){
     game.AdvancedSpellEffects.detectMagic = detectMagic;
     game.AdvancedSpellEffects.fogCloud = fogCloud;
     game.AdvancedSpellEffects.steelWindStrike = steelWindStrike;
+    game.AdvancedSpellEffects.thunderStep = thunderStep;
     /*
     game.AdvancedSpellEffects.tollTheDead = tollTheDead;*/
 
