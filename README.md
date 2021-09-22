@@ -16,6 +16,8 @@ The arguments will depend on the spell and version you are using.
 ## Currently available spells
 The currently available spells, their versions and how to call them are outlined below. 
 
+There is a compendium that includes MIDI versions of the spells pre-configured called "Advanced Spell Effects - MIDI Spells".
+
 Each of the provided macro calls should be palced in the item's ItemMacro field regardless of whether the MIDI or Item Macro Only version is benig used.
 
 List of currently avaiable spells: 
