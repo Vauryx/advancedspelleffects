@@ -1525,8 +1525,8 @@ Hooks.once("socketlib.ready", () => {
             let placedY = templateData.y;
             let wallPoints = [];
             let walls = [];
-            tileWidth = (templateData.distance * 45);
-            tileHeight = (templateData.distance * 45);
+            tileWidth = (templateData.width * canvas.grid.size);
+            tileHeight = (templateData.width * canvas.grid.size);
 
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);
@@ -1721,8 +1721,8 @@ else
             let placedY = templateData.y;
             let wallPoints = [];
             let walls = [];
-            tileWidth = (templateData.distance * 45);
-            tileHeight = (templateData.distance * 45);
+            tileWidth = (templateData.width * canvas.grid.size);
+            tileHeight = (templateData.width * canvas.grid.size);
 
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);
