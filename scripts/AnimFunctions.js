@@ -170,7 +170,7 @@ Hooks.once('init', async function () {
                 let rollData = options.args[0];
                 itemId = rollData.id;
                 tokenId = rollData.tokenId;
-                template = await warpgate.crosshairs.show(3, rollData.item.img, "Darkness");
+                template = await warpgate.crosshairs.show(6, rollData.item.img, "Darkness");
                 //console.log(rollData);
                 ASEsocket.executeAsGM("registeredDarknessMIDI", template, itemId, tokenId);
                 break;
@@ -178,7 +178,7 @@ Hooks.once('init', async function () {
                 let caster = await canvas.tokens.get(options.tokenId);
                 const actor = caster.actor;
                 let item = await actor.items.get(options.itemId);
-                template = await warpgate.crosshairs.show(3, item.img, "Darkness");
+                template = await warpgate.crosshairs.show(6, item.img, "Darkness");
                 ASEsocket.executeAsGM("registeredDarknessItemMacro", template, options.itemId, options.tokenId);
                 break;
             default:
