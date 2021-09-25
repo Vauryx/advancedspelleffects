@@ -1130,12 +1130,12 @@ if(args[0] === "off"){
 
                 for (const currentTarget of tokens) {
                     let currentTargetActor = currentTarget.token.actor;
-                    let saveResult = await currentTargetActor.rollAbilitySave("con", {fastForward: true, flavor: "Thunder Step Saving Throw"});;
+                    let saveResult = await currentTargetActor.rollAbilitySave("con", { fastForward: true, flavor: "Thunder Step Saving Throw" });;
 
                     if (saveResult.total < saveDC) {
                         failedSaves.push(currentTarget.token);
                     }
-                    else if (saveResult.total >= saveDC){
+                    else if (saveResult.total >= saveDC) {
                         passedSaves.push(currentTarget.token);
                     }
                 }
@@ -1146,7 +1146,7 @@ if(args[0] === "off"){
                     game.dice3d?.showForRoll(fullDamageRoll);
                 }
                 //console.log("Thunder Step Full Damage roll: ", fullDamageRoll);
-                let halfdamageroll = new Roll(`${fullDamageRoll.total}/2`).evaluate({async: false});
+                let halfdamageroll = new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: false });
                 let casterTeleportLocation = await warpgate.crosshairs.show(1, midiData.item.img, "Thunder Step - Caster");
 
                 const loadImage = src =>
@@ -1177,19 +1177,19 @@ if(args[0] === "off"){
                             playTargetTeleportEffect(target, targetImageScale, targetTeleportLocation);
                         });
                     }
-                    
+
                     await playCasterTeleportEffect(caster, casterImageScale, casterTeleportLocation);
                     //console.log("Done teleporting...");
 
-                    if(failedSaves.length>0){
-                        new MidiQOL.DamageOnlyWorkflow(casterActor, caster, fullDamageRoll.total, "thunder", failedSaves, fullDamageRoll, { flavor: `Thunder Step Full Damage - Damage Roll (${midiData.spellLevel}d10 Thunder)`, itemCardId: "new", itemData: midiData.item});
+                    if (failedSaves.length > 0) {
+                        new MidiQOL.DamageOnlyWorkflow(casterActor, caster, fullDamageRoll.total, "thunder", failedSaves, fullDamageRoll, { flavor: `Thunder Step Full Damage - Damage Roll (${midiData.spellLevel}d10 Thunder)`, itemCardId: "new", itemData: midiData.item });
                     }
-                    
-                    if(passedSaves.length>0){
-                        new MidiQOL.DamageOnlyWorkflow(casterActor, caster, halfdamageroll.total, "thunder", passedSaves, halfdamageroll, { flavor: `Thunder Step Half Damage - Damage Roll (${midiData.spellLevel}d10 Thunder)`, itemCardId: "new", itemData: midiData.item});
+
+                    if (passedSaves.length > 0) {
+                        new MidiQOL.DamageOnlyWorkflow(casterActor, caster, halfdamageroll.total, "thunder", passedSaves, halfdamageroll, { flavor: `Thunder Step Half Damage - Damage Roll (${midiData.spellLevel}d10 Thunder)`, itemCardId: "new", itemData: midiData.item });
                     }
-                    
-                    
+
+
                 });
                 async function playTargetTeleportEffect(target, targetImageScale, teleportLocation) {
                     let sequence = new Sequence()
@@ -1296,6 +1296,308 @@ if(args[0] === "off"){
                 return;
         }
     }
+
+    async function summon(options) {
+        switch (options.version) {
+            case "MIDI":
+                let midiData = options.args[0];
+                switch (options.type.toLowerCase()) {
+                    case "spiritual weapon":
+                        const actorD = game.actors.get(midiData.actor._id);
+                        const tokenD = canvas.tokens.get(midiData.tokenId);
+                        const level = midiData.spellLevel;
+                        let summonType = "Spiritual Weapon";
+                        const summonerDc = actorD.data.data.attributes.spelldc;
+                        const summonerAttack = summonerDc - 8;
+                        const summonerMod = getProperty(tokenD.actor, `data.data.abilities.${getProperty(tokenD.actor, 'data.data.attributes.spellcasting')}.mod`);
+                        let damageScale = '';
+                        function componentToHex(c) {
+                            var hex = c.toString(16);
+                            return hex.length == 1 ? "0" + hex : hex;
+                        }
+
+                        function rgbToHex(r, g, b) {
+                            return "0x" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+                        }
+                        async function myEffectFunction(template, color, update) {
+                            console.log("Color: ", color);
+                            let glowColor;
+                            switch (color) {
+                                case 'blue':
+                                    glowColor = rgbToHex(173, 216, 230)
+                                    break;
+                                case 'green':
+                                    glowColor = rgbToHex(144, 238, 144)
+                                    break;
+                                case 'orange':
+                                    glowColor = rgbToHex(255, 128, 0)
+                                    break;
+                                case 'pruple':
+                                    glowColor = rgbToHex(153, 0, 153)
+                                    break;
+                                case 'red':
+                                    glowColor = rgbToHex(204, 0, 0)
+                                    break;
+                                case 'yellow':
+                                    glowColor = rgbToHex(255, 255, 0)
+                                    break;
+                                case 'pink':
+                                    glowColor = rgbToHex(255, 102, 255)
+                                    break;
+                                default:
+                                    glowColor = rgbToHex(153, 204, 255)
+                            }
+                            let effectFile;
+                            if (Sequencer.Database.entryExists(`jb2a.eldritch_blast.${color}`)) {
+                                effectFile = `jb2a.eldritch_blast.${color}.05ft`
+                            }
+                            else {
+                                effectFile = `jb2a.eldritch_blast.lightblue.05ft`
+                            }
+                            let effect = `jb2a.bless.400px.intro.${color}`;
+                            if (Sequencer.Database.entryExists(effect)) {
+                                effect = effect;
+                            }
+                            else {
+                                effect = `jb2a.bless.400px.intro.blue`;
+                            }
+                            new Sequence()
+                                .effect()
+                                .file(effectFile)
+                                .atLocation(template)
+                                .JB2A()
+                                .waitUntilFinished(-1200)
+                                .endTime(3300)
+                                .playbackRate(0.7)
+                                .scaleOut(0, 250)
+                                .belowTokens()
+                                .filter("Glow", { color: glowColor, distance: 35, outerStrength: 2, innerStrength: 0.25 })
+                                .center()
+                                .belowTokens()
+                                .effect()
+                                .file(effect)
+                                .atLocation(template)
+                                .center()
+                                .JB2A()
+                                .scale(1.5)
+                                .belowTokens()
+                            .play()
+                        }
+
+                        async function postEffects(template, token) {
+
+                            new Sequence()
+                                .animation()
+                                .on(token)
+                                .fadeIn(500)
+                                .play()
+                        }
+
+                        function capitalizeFirstLetter(string) {
+                            return string.charAt(0).toUpperCase() + string.slice(1);
+                        }
+
+                        let weaponData = [{
+                            type: "select",
+                            label: "Weapon",
+                            options: ["Mace", "Maul", "Scythe", "Sword"]
+                        }]
+                        let weaponChoice = await warpgate.dialog(weaponData);
+                        weaponChoice = weaponChoice[0].toLowerCase();
+
+                        let spiritWeapon = `jb2a.spiritual_weapon.${weaponChoice}`;
+
+                        let types = Sequencer.Database.getEntry(spiritWeapon);
+                        types = Object.keys(types);
+                        let typeOptions = [];
+
+                        types.forEach((type) => {
+                            typeOptions.push(capitalizeFirstLetter(type));
+                        });
+
+                        let typeData = [{
+                            type: "select",
+                            label: "Spirit Type",
+                            options: typeOptions
+                        }];
+                        let typeChoice = await warpgate.dialog(typeData);
+                        typeChoice = typeChoice[0].toLowerCase();
+
+                        spiritWeapon = spiritWeapon + `.${typeChoice}`;
+
+                        let colors = Sequencer.Database.getEntry(spiritWeapon);
+                        colors = Object.keys(colors);
+                        let colorOptions = [];
+
+                        colors.forEach((color) => {
+                            colorOptions.push(capitalizeFirstLetter(color));
+                        });
+                        let attackColors;
+
+                        if (Sequencer.Database.entryExists(`jb2a.${weaponChoice}.melee`)) {
+                            attackColors = Sequencer.Database.getEntry(`jb2a.${weaponChoice}.melee`);
+                            attackColors = Object.keys(attackColors);
+                        }
+                        else {
+                            attackColors = Sequencer.Database.getEntry(`jb2a.sword.melee`);
+                            attackColors = Object.keys(attackColors);
+                        }
+                        const templateIndex = attackColors.indexOf("_template");
+
+                        if (templateIndex > -1) {
+                            attackColors.splice(templateIndex, 1);
+                        }
+
+                        let attackColorOptions = [];
+
+                        attackColors.forEach((attackColor) => {
+                            attackColorOptions.push(capitalizeFirstLetter(attackColor));
+                        });
+
+                        let colorData = [{
+                            type: "select",
+                            label: "Spirit Color",
+                            options: colorOptions
+                        }, {
+                            type: "select",
+                            label: "Spirit Attack Color",
+                            options: attackColorOptions
+                        }];
+
+                        let colorChoices = await warpgate.dialog(colorData);
+                        let spiritColorChoice = colorChoices[0].toLowerCase();
+                        let attackColorChoice = colorChoices[1].toLowerCase();
+
+                        spiritWeapon = spiritWeapon + `.${spiritColorChoice}`;
+                        let spiritAttackAnim
+                        if (weaponChoice != "scythe") {
+                            spiritAttackAnim = `jb2a.${weaponChoice}.melee.${attackColorChoice}`;
+                        }
+                        else {
+                            spiritAttackAnim = `jb2a.sword.melee.${attackColorChoice}`;
+                        }
+
+
+                        /*console.log("Weapon: ", weaponChoice);
+                        console.log("Type: ", typeChoice);
+                        console.log("Spirit Color: ", spiritColorChoice);
+                        console.log("Spirit Attack Color: ", attackColorChoice);
+                        console.log("Complete Spirit Weapon: ", spiritWeapon);
+                        console.log("Complete Spirit Attack: ", spiritAttackAnim);*/
+
+                        //thankfully jb2a has very structured file names
+                        let spiritualWeapon = Sequencer.Database.getEntry(spiritWeapon).file;
+
+                        console.log("Spiritual Weapon path: ", spiritualWeapon);
+                        if ((level - 3) > 0) {
+                            damageScale = `+ ${Math.floor((level - 2) / 2)}d8[upcast]`;
+                        }
+
+                        let updates = {
+                            token: {
+                                'alpha': 0,
+                                'name': `${summonType} of ${actorD.name}`,
+                                'img': spiritualWeapon,
+                                'scale': 1.5
+                            },
+                            actor: {
+                                'name': `${summonType} of ${actorD.name}`,
+                            },
+                            item: {
+                                "Attack": {
+                                    'data.attackBonus': `- @mod - @prof + ${summonerAttack}`,
+                                    'data.damage.parts': [[`1d8 ${damageScale} + ${summonerMod}`, 'force']],
+                                    'data.attackBonus': `- @mod - @prof + ${summonerAttack}`,
+                                    'data.damage.parts': [[`1d8 ${damageScale} + ${summonerMod}`, 'force']],
+                                    'flags.midi-qol.onUseMacroName': 'ItemMacro',
+                                    'flags.itemacro.macro.data.name': "Attack",
+                                    'flags.itemacro.macro.data.type': "script",
+                                    'flags.itemacro.macro.data.scope': "global",
+                                    'flags.itemacro.macro.data.command': `let caster = canvas.tokens.get(args[0].tokenId);
+        let attackTarget = args[0].targets[0];
+        let hitTarget = args[0].hitTargets[0];
+        if (caster) {
+            let animFile = "${spiritAttackAnim}";
+            let missDirection = Math.floor(Math.random() * 10);
+            let missRotation = 60;
+            if (missDirection > 4) {
+                missRotation *= -1;
+            }
+
+            if (attackTarget) {
+                if (!hitTarget) {
+                    let onMissSequence = new Sequence()
+                        .animation()
+                            .on(caster)
+                            .opacity(1)
+                            .fadeOut(250)
+                        .effect()
+                            .file(animFile)
+                            .fadeIn(750)
+                            .atLocation(caster)
+                            .JB2A()
+                            .rotate(missRotation)
+                            .reachTowards(attackTarget)
+                            .fadeOut(500)
+                            .waitUntilFinished(-500)
+                        .animation()
+                            .on(caster)
+                            .opacity(1)
+                            .fadeIn(750)
+                    onMissSequence.play();
+                }
+                else {
+                    let onHitSequence = new Sequence()
+                        .animation()
+                            .on(caster)
+                            .opacity(1)
+                            .fadeOut(250)
+                        .effect()
+                            .fadeIn(750)
+                            .file(animFile)
+                            .atLocation(caster)
+                            .JB2A()
+                            .fadeOut(500)
+                            .reachTowards(hitTarget)
+                            .waitUntilFinished(-500)
+                        .animation()
+                            .on(caster)
+                            .opacity(1)
+                            .fadeIn(750)
+                    onHitSequence.play();
+                }
+            }
+        }`
+                                }
+                            }
+                        }
+                        
+                        const options = { controllingActor: game.actors.get(midiData.actor._id) };
+
+                        const callbacks = {
+                            pre: async (template, update) => {
+                                myEffectFunction(template, spiritColorChoice, update);
+                                await warpgate.wait(1750);
+                            },
+                            post: async (template, token) => {
+                                postEffects(template, token);
+                                await warpgate.wait(500);
+                            }
+                        };
+                        warpgate.spawn(summonType, updates, callbacks, options);
+                        break;
+                    case "beast":
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case "IteMMacro":
+                break;
+            default:
+                return;
+        }
+    }
     // List of effects that can be called
     game.AdvancedSpellEffects = {};
     game.AdvancedSpellEffects.removeTiles = removeTiles;
@@ -1305,6 +1607,7 @@ if(args[0] === "off"){
     game.AdvancedSpellEffects.fogCloud = fogCloud;
     game.AdvancedSpellEffects.steelWindStrike = steelWindStrike;
     game.AdvancedSpellEffects.thunderStep = thunderStep;
+    game.AdvancedSpellEffects.summon = summon;
     /*
     game.AdvancedSpellEffects.tollTheDead = tollTheDead;*/
 
