@@ -101,6 +101,15 @@ Hooks.once('ready', async function () {
             }
         }
     });
+    Hooks.on("updateCombat", async function (combat) {
+        let currentCombatantId = combat.current.tokenId;
+        let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == currentCombatantId);
+        console.log("update hook fired...", stormCloudTiles);
+        if (stormCloudTiles.length > 0 && !game.user.isGM) {
+            console.log("Detected Storm Cloud! Prompting for Bolt...");
+            await game.AdvancedSpellEffects.callBolt(stormCloudTiles[0]);
+        }
+    });
 
     if (!game.user.isGM) return;
 
@@ -149,6 +158,167 @@ Hooks.once('ready', async function () {
 });
 
 Hooks.once('init', async function () {
+    // Helper Function for Call Lightning
+    async function callBolt(stormCloudTile) {
+        let confirmData = {
+            buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
+            title: "Call forth Lightning Bolt?"
+        };
+        let confirm = await warpgate.buttonDialog(confirmData, 'row');
+        if (confirm) {
+            let template = await warpgate.crosshairs.show(3, "icons/magic/lightning/bolt-strike-blue.webp", "Lightning Bolt");
+            let casterID = stormCloudTile.getFlag("advancedspelleffects", "stormCloudTile");
+            //console.log("Call Lightning caster id: ", casterID);
+            let caster = canvas.tokens.get(casterID);
+            let boltLength = canvas.grid.measureDistance({ x: caster.data.x + (canvas.grid.size / 2), y: caster.data.y + (canvas.grid.size / 2) }, template);
+            //console.log("Bolt Length: ", boltLength);
+            if(boltLength > 60){
+                await warpgate.buttonDialog({
+                    buttons: [{ label: "Ok", value: true }],
+                    title: "Spell Failed - Out of Range!"
+                }, 'row')
+                return;
+            }
+            let casterActor = game.actors.get(caster.data.actorId);
+            //console.log("Caster Actor: ", casterActor);
+            let saveDC = casterActor.data.data.attributes.spelldc;
+            //console.log("Save DC: ", saveDC);
+            const boltStyle = stormCloudTile.getFlag("advancedspelleffects", 'boltStyle');
+            //console.log("Storm cloud tile:", stormCloudTile);
+            
+            playEffect(template, stormCloudTile, boltStyle);
+           
+            let tokens = canvas.tokens.objects.children.map(t => {
+                let distance = canvas.grid.measureDistance({ x: template.x, y: template.y }, { x: t.data.x + (canvas.grid.size / 2), y: t.data.y + (canvas.grid.size / 2) });
+               // console.log("bolt Loc", { x: template.x, y: template.y });
+                let returnObj = { token: t, distance: distance };
+                //console.log("Returning object: ", returnObj);
+                return (returnObj);
+            }).filter(t => t.distance <= 7.5);
+            //console.log("Tokens in range: ", tokens);
+            let failedSaves = [];
+            let passedSaves = [];
+
+            for (const currentTarget of tokens) {
+                let currentTargetActor = currentTarget.token.actor;
+                let saveResult = await currentTargetActor.rollAbilitySave("dex", { fastForward: true, flavor: "Thunder Step Saving Throw" });;
+
+                if (saveResult.total < saveDC) {
+                    failedSaves.push(currentTarget.token);
+                }
+                else if (saveResult.total >= saveDC) {
+                    passedSaves.push(currentTarget.token);
+                }
+            }
+            //console.log("Failed Saves - ", failedSaves);
+           // console.log("Passed Saves - ", passedSaves);
+            let spellLevel = stormCloudTile.getFlag("advancedspelleffects", "spellLevel");
+            let item = casterActor.items.get(stormCloudTile.getFlag("advancedspelleffects", "itemID"));
+            let itemData = item.data;
+            itemData.data.components.concentration = false;
+           // console.log("ItemData: ", itemData);
+           // console.log("Item: ", item);
+            let fullDamageRoll = new Roll(`${spellLevel}d10`).evaluate();
+            if (game.modules.get("dice-so-nice")?.active) {
+                game.dice3d?.showForRoll(fullDamageRoll);
+            }
+            //console.log("Thunder Step Full Damage roll: ", fullDamageRoll);
+            let halfdamageroll = new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: false });
+            if (failedSaves.length > 0) {
+                new MidiQOL.DamageOnlyWorkflow(casterActor, caster, fullDamageRoll.total, "lightning", failedSaves, fullDamageRoll, { flavor: `Lightning Bolt Full Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
+            }
+            if (passedSaves.length > 0) {
+                new MidiQOL.DamageOnlyWorkflow(casterActor, caster, halfdamageroll.total, "lightning", passedSaves, halfdamageroll, { flavor: `Lightning Bolt Half Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
+            }
+        }
+
+        async function playEffect(template, cloud, boltStyle) {
+            let boltEffect;
+            switch (boltStyle) {
+                case 'chain':
+                    boltEffect = 'jb2a.chain_lightning.primary.blue'
+                    break;
+                case 'strike':
+                    boltEffect = 'jb2a.lightning_strike'
+                    break;
+                default:
+                    boltEffect = 'jb2a.chain_lightning.primary.blue'
+            }
+            function getRandomInt(min, max) {
+                min = Math.ceil(min);
+                max = Math.floor(max);
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+            async function placeAsTile(template, effectFilePath) {
+                //console.log("Template Data: ", template);
+                let templateData = template;
+                let tileWidth;
+                let tileHeight;
+                let tileX;
+                let tileY;
+
+                tileWidth = templateData.width * (canvas.grid.size);
+                tileHeight = templateData.width * (canvas.grid.size);
+                tileX = templateData.x - (tileWidth / 2);
+                tileY = templateData.y - (tileHeight / 2);
+                data = {
+                    alpha: 1,
+                    width: tileWidth,
+                    height: tileHeight,
+                    img: effectFilePath,
+                    overhead: false,
+                    occlusion: {
+                        alpha: 0,
+                        mode: 0,
+                    },
+                    video: {
+                        autoplay: true,
+                        loop: true,
+                        volume: 0,
+                    },
+                    x: tileX,
+                    y: tileY,
+                    z: 100,
+                }
+                let createdTiles = await ASEsocket.executeAsGM("placeTiles", [data]);
+            }
+            let cloudCenter = { x: cloud.data.x + (cloud.data.width / 2), y: cloud.data.y + (cloud.data.width / 2) };
+            let strikeRay = new Ray(template, cloudCenter);
+            let strikeAngle = strikeRay.angle * (180 / Math.PI)
+            let strikeRotation = (-strikeAngle) - 90;
+            let groundCrackVersion = getRandomInt(1, 3);
+            let groundCrackAnim = `jb2a.impact.ground_crack.blue.0${groundCrackVersion}`;
+            let groundCrackImg = `jb2a.impact.ground_crack.still_frame.0${groundCrackVersion}`;
+            let boltSeq = new Sequence()
+                .effect()
+                .file(boltEffect)
+                .JB2A()
+                .atLocation(cloud)
+                .reachTowards(template)
+                .anchor(0.5)
+                .waitUntilFinished(-1100)
+                .playIf(boltStyle == "chain")
+                .effect()
+                .file(boltEffect)
+                .atLocation({ x: template.x, y: template.y })
+                .playIf(boltStyle == "strike")
+                .rotate(strikeRotation)
+                .randomizeMirrorX()
+                .scale(2)
+                .effect()
+                .file(groundCrackAnim)
+                .atLocation(template)
+                .belowTokens()
+                .scale(0.5)
+                .waitUntilFinished(-3000)
+                .thenDo(async () => {
+                    placeAsTile(template, Sequencer.Database.getEntry(groundCrackImg).file);
+                })
+            await boltSeq.play();
+        }
+
+
+    }
     //Effect functions to be called from a macro in the "OnUseMacro" field of MIDI-QOL
     //Each function is excuted via socketlib to ensure proper permissions for the effect
     async function removeTiles(tileIds) {
@@ -526,7 +696,7 @@ magicalObjects = objects.map(o => {
                     }
                     await game.AdvancedSpellEffects.updateFlag(magical.obj.id, "magicDetected", false);
                     Sequencer.EffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
-                    Sequencer.EffectManager.endEffects({name: ` + "`${token.id}-detectMagicAura`" + `, object: token});
+                    Sequencer.EffectManager.endEffects({name: ` + "`${args[1].tokenId}-detectMagicAura`" + `, object: token});
                     new Sequence()
                     .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                     .forUsers(users)
@@ -705,7 +875,7 @@ else if(args[0] != "on" && args[0] != "off"){
                         newItemMacro = `/*ASE_REPLACED*/
 if(args[0] === "off"){
     console.log("token: ", token)
-    let fogCloudTiles = Tagger.getByTag(`+ "`FogCloudTile-${token.id}`" + `);
+    let fogCloudTiles = Tagger.getByTag(`+ "`FogCloudTile-${args[1].tokenId}`" + `);
         fogCloudTiles.then(async (tiles) => {
             console.log("tiles to delete: ", tiles);
             if(tiles.length>0){
@@ -1381,7 +1551,7 @@ if(args[0] === "off"){
                                 .JB2A()
                                 .scale(1.5)
                                 .belowTokens()
-                            .play()
+                                .play()
                         }
 
                         async function postEffects(template, token) {
@@ -1571,7 +1741,7 @@ if(args[0] === "off"){
                                 }
                             }
                         }
-                        
+
                         const options = { controllingActor: game.actors.get(midiData.actor._id) };
 
                         const callbacks = {
@@ -1598,6 +1768,102 @@ if(args[0] === "off"){
                 return;
         }
     }
+
+    async function callLightning(options) {
+        let color = options.color?.toLowerCase() ?? "blue";
+        let res = options.resolution?.toLowerCase() ?? "low";
+        let boltStyle = options.boltStyle?.toLowerCase() ?? 'chain';
+        switch (options.version) {
+            case "MIDI":
+                let midiData = options.args[0];
+                //console.log(midiData);
+                let template = await warpgate.crosshairs.show(25, midiData.item.img, "Call Lightning");
+                let effectFile = `jb2a.call_lightning.${res}_res.${color}`
+                let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
+                let stormTile = await placeCloudAsTile(template, midiData.tokenId);
+                let spellItem =  midiData.actor.items.get(midiData.item._id);
+                await changeSelfItemMacro();
+                await game.AdvancedSpellEffects.callBolt(canvas.scene.tiles.get(stormTile._id));
+
+                async function placeCloudAsTile(template, casterId) {
+                    let templateData = template;
+                    let tileWidth;
+                    let tileHeight;
+                    let tileX;
+                    let tileY;
+
+                    tileWidth = templateData.distance * 40;
+                    tileHeight = templateData.distance * 40;
+                    tileX = templateData.x - (tileWidth / 2);
+                    tileY = templateData.y - (tileHeight / 2);
+                    data = {
+                        alpha: 0.5,
+                        width: tileWidth,
+                        height: tileHeight,
+                        img: effectFilePath,
+                        overhead: true,
+                        occlusion: {
+                            alpha: 0,
+                            mode: 0,
+                        },
+                        video: {
+                            autoplay: true,
+                            loop: true,
+                            volume: 0,
+                        },
+                        x: tileX,
+                        y: tileY,
+                        z: 100,
+                        flags: {
+                            advancedspelleffects: {
+                                'stormCloudTile': casterId,
+                                'boltStyle': boltStyle,
+                                'spellLevel': midiData.spellLevel,
+                                'itemID': midiData.item._id
+                            }
+                        }
+                    }
+                    let createdTiles = await ASEsocket.executeAsGM("placeTiles", [data]);
+                    return (createdTiles[0]);
+                }
+                async function changeSelfItemMacro() {
+                    let concentrationActiveEffect = midiData.actor.effects.filter((effect) => effect.data.label === "Concentrating")[0];
+                    await concentrationActiveEffect.update({
+                        changes: [{
+                            key: "macro.itemMacro",
+                            mode: 0,
+                            value: 0
+                        }]
+                    });
+                    let newItemMacro;
+                    let oldItemMacro =spellItem.getFlag("itemacro", "macro.data.command");
+                    if (!oldItemMacro.includes("/*ASE_REPLACED*/")) {
+                        newItemMacro = `/*ASE_REPLACED*/
+if(args[0] === "off"){
+    //console.log("token: ", token)
+    let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == args[1].tokenId);
+        //console.log("tiles to delete: ", [tiles[0].id]);
+        if(stormCloudTiles.length>0){
+            game.AdvancedSpellEffects.removeTiles([stormCloudTiles[0].id]);
+        }
+}
+else
+{
+    ${oldItemMacro}
+}`;
+                        //console.log(newItemMacro);
+                        await spellItem.setFlag("itemacro", "macro.data.command", newItemMacro)
+                    }
+                }
+                break;
+            case "ItemMacro":
+                break;
+            default:
+                break;
+
+        }
+
+    }
     // List of effects that can be called
     game.AdvancedSpellEffects = {};
     game.AdvancedSpellEffects.removeTiles = removeTiles;
@@ -1608,6 +1874,8 @@ if(args[0] === "off"){
     game.AdvancedSpellEffects.steelWindStrike = steelWindStrike;
     game.AdvancedSpellEffects.thunderStep = thunderStep;
     game.AdvancedSpellEffects.summon = summon;
+    game.AdvancedSpellEffects.callLightning = callLightning;
+    game.AdvancedSpellEffects.callBolt = callBolt;
     /*
     game.AdvancedSpellEffects.tollTheDead = tollTheDead;*/
 
@@ -1799,7 +2067,7 @@ Hooks.once("socketlib.ready", () => {
             if (!item.getFlag("itemacro", "macro.data.command").includes("/*ASE_REPLACED*/")) {
                 newItemMacro = `/*ASE_REPLACED*/if(args[0] === "off"){
                         //console.log("token: ", token)
-                        let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${token.id}`" + `);
+                        let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${args[1].tokenId}`" + `);
                         darknessTiles.then(async (tiles) => {
                             //console.log("tiles to delete: ", [tiles[0].id]);
                             if(tiles.length>0){
@@ -1994,7 +2262,7 @@ Hooks.once("socketlib.ready", () => {
                 newItemMacro = `/*ASE_REPLACED*/if(args.length > 0){
     if(args[0] === "off"){
         //console.log("token: ", token)
-        let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${token.id}`" + `);
+        let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${args[1].tokenId}`" + `);
         darknessTiles.then(async (tiles) => {
             console.log("tiles to delete: ", [tiles[0].id]);
             if(tiles.length>0){
