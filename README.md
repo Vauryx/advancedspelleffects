@@ -97,3 +97,36 @@ game.AdvancedSpellEffects.thunderStep(options);
 https://user-images.githubusercontent.com/32877348/134231083-7f34c364-fa93-4e13-aaba-20c2bea9a925.mp4
 
 ![thunder-step-details](https://user-images.githubusercontent.com/32877348/134231109-02af38d6-9149-494c-8a29-3b4271a089c0.png)
+
+### Call Lightning:
+- Make sure to remove the range/target from the spell and to use "Utility/Other" for the "Action Type" 
+- Also make sure to remove any damage forumla on the spell as the spell will roll an attack and damage for target as it goes through them. 
+- An additional optional parameter 'boltStyle' can be set to change the lightning bolt effect.
+- Possible bolt versions are
+    #### "chain", "strike"
+#### *MIDI*
+```javascript
+let options = {version: "MIDI", args: args, boltStyle: "chain"};
+game.AdvancedSpellEffects.callLightning(options);
+```
+https://user-images.githubusercontent.com/32877348/134980507-710b9c41-cf61-40f1-ab46-c725cdffa0dc.mp4
+
+https://user-images.githubusercontent.com/32877348/134980564-7df4b15f-0f07-4086-85ff-024cff34d202.mp4
+
+![call-lightning-spell-details](https://user-images.githubusercontent.com/32877348/134980725-94643dbb-f9c2-4a87-9373-9e048996949d.png)
+
+### Spiritual Weapon
+- Make sure to remove the range/target from the spell and to use "Utility/Other" for the "Action Type" 
+- Also make sure to remove any damage forumla on the spell as the attack itself will be made through the summoned token
+- Make sure to configre an actor in the game world like shown below - make sure the actor has an ability set up as a melee spell attack like shown as well
+#### MIDI
+```javascript
+let options = {version: "MIDI", args: args, type: "Spiritual Weapon"};
+game.AdvancedSpellEffects.summon(options);
+```
+![spiritual-weapon-actor-abilites](https://user-images.githubusercontent.com/32877348/134981880-bd6b7aa1-517d-4264-b68c-c0d8a1874309.png)
+
+![spiritual-weapon-attack-details](https://user-images.githubusercontent.com/32877348/134981887-917f3796-2571-439b-9daf-4772d28a10b7.png)
+
+https://user-images.githubusercontent.com/32877348/134981937-bdb3b361-d5e3-48f6-abce-4ccf6f8d141e.mp4
+
