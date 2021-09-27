@@ -130,3 +130,7 @@ game.AdvancedSpellEffects.summon(options);
 
 https://user-images.githubusercontent.com/32877348/134981937-bdb3b361-d5e3-48f6-abce-4ccf6f8d141e.mp4
 
+
+
+##### Contributions - 
+Special thanks to siliconsaint for contributing his spiritual weapon macro for this module
