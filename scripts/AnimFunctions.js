@@ -296,7 +296,7 @@ Hooks.once('init', async function () {
                 .atLocation(cloud)
                 .reachTowards(template)
                 .anchor(0.5)
-                .waitUntilFinished(-1100)
+                .waitUntilFinished(-1500)
                 .playIf(boltStyle == "chain")
                 .effect()
                 .file(boltEffect)
