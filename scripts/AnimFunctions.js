@@ -4,11 +4,14 @@ let ASEsocket;
 
 Hooks.once('ready', async function () {
     Hooks.on("updateToken", async (tokenDocument, updateData, options) => {
-
+        //console.log("Executing detect magic hook!...");
         if ((!updateData.x && !updateData.y)) return;
         //console.log("hook fired!...", tokenDocument, updateData);
-        if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length == 0) return;
-
+        if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic - MIDI").length == 0) {
+            //console.log("ASE Detect Magic effect not found...", tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic - MIDI"));
+            return;
+        }
+        //console.log("Found token with Detect Magic concentration!...");
         let users = [];
         for (const user in tokenDocument.actor.data.permission) {
             if (user == "default") continue;
@@ -18,13 +21,14 @@ Hooks.once('ready', async function () {
         newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
         newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
         //console.log("Controlled token: " , tokenDocument);
-        let magicalObjects = [];
+        let magicalObjectsOutOfRange = [];
+        let magicalObjectsInRange = [];
         let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
         let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
 
         let objects = await Tagger.getByTag("magical", { ignore: [tokenDocument] });
 
-        magicalObjects = objects.map(o => {
+        magicalObjectsOutOfRange = objects.map(o => {
             let distance = canvas.grid.measureDistance(newPos, o);
             return {
                 delay: 0,
@@ -34,11 +38,12 @@ Hooks.once('ready', async function () {
                 color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
             }
         }).filter(o => o.distance > 32.5)
-        for (let magical of magicalObjects) {
+        for (let magical of magicalObjectsOutOfRange) {
             if (!magical.school) {
                 continue;
             }
-            new Sequence()
+            //console.log("Magical Object out of range...Removing rune effect: ", magical.obj);
+            new Sequence("Advanced Spell Effects")
                 .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                 .forUsers(users)
                 .atLocation(magical.obj)
@@ -51,7 +56,7 @@ Hooks.once('ready', async function () {
             //console.log("magical object out of range: ", magical.obj, magical.obj.document.getFlag("world", "magicDetected"));
             SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
         }
-        magicalObjects = objects.map(o => {
+        magicalObjectsInRange = objects.map(o => {
             let distance = canvas.grid.measureDistance(newPos, o);
             //console.log("distance: ", distance);
             return {
@@ -64,7 +69,7 @@ Hooks.once('ready', async function () {
         }).filter(o => o.distance <= 32.5)
 
         //console.log("Magical Objects in Range: " , magicalObjects);
-        for (let magical of magicalObjects) {
+        for (let magical of magicalObjectsInRange) {
             if (!magical.school) {
                 continue;
             }
@@ -73,8 +78,9 @@ Hooks.once('ready', async function () {
             //console.log("Intros displaying: ", runeIntros);
             //console.log("magical object in range: ", magical.obj,magical.obj.document.getFlag("world", "magicDetected"));
             if (!(magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) && runeDisplayed.length == 0 /*&& runeIntros.length == 0*/) {
+                //console.log("Magical Object In range with no flag...Playing rune effect: ", magical.obj);
                 await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
-                new Sequence()
+                new Sequence("Advanced Spell Effects")
                     .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
                     .forUsers(users)
                     .atLocation(magical.obj)
@@ -104,7 +110,7 @@ Hooks.once('ready', async function () {
     Hooks.on("updateCombat", async function (combat) {
         let currentCombatantId = combat.current.tokenId;
         let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == currentCombatantId);
-        console.log("update hook fired...", stormCloudTiles);
+        //console.log("update hook fired...", stormCloudTiles);
         if (stormCloudTiles.length > 0 && !game.user.isGM) {
             console.log("Detected Storm Cloud! Prompting for Bolt...");
             await game.AdvancedSpellEffects.callBolt(stormCloudTiles[0]);
@@ -188,7 +194,7 @@ Hooks.once('init', async function () {
             
             playEffect(template, stormCloudTile, boltStyle);
            
-            let tokens = canvas.tokens.objects.children.map(t => {
+            let tokens = canvas.tokens.placeables.map(t => {
                 let distance = canvas.grid.measureDistance({ x: template.x, y: template.y }, { x: t.data.x + (canvas.grid.size / 2), y: t.data.y + (canvas.grid.size / 2) });
                // console.log("bolt Loc", { x: template.x, y: template.y });
                 let returnObj = { token: t, distance: distance };
@@ -201,7 +207,7 @@ Hooks.once('init', async function () {
 
             for (const currentTarget of tokens) {
                 let currentTargetActor = currentTarget.token.actor;
-                let saveResult = await currentTargetActor.rollAbilitySave("dex", { fastForward: true, flavor: "Thunder Step Saving Throw" });;
+                let saveResult = await currentTargetActor.rollAbilitySave("dex", { fastForward: true, flavor: "Thunder Step Saving Throw" });
 
                 if (saveResult.total < saveDC) {
                     failedSaves.push(currentTarget.token);
@@ -289,7 +295,7 @@ Hooks.once('init', async function () {
             let groundCrackVersion = getRandomInt(1, 3);
             let groundCrackAnim = `jb2a.impact.ground_crack.blue.0${groundCrackVersion}`;
             let groundCrackImg = `jb2a.impact.ground_crack.still_frame.0${groundCrackVersion}`;
-            let boltSeq = new Sequence()
+            let boltSeq = new Sequence("Advanced Spell Effects")
                 .effect()
                 .file(boltEffect)
                 .JB2A()
@@ -443,7 +449,7 @@ Hooks.once('init', async function () {
                         .filter(o => o.distance <= 32.5)
                 }
                 //console.log("Detected Magical Objects: ", magicalObjects);
-                sequence = new Sequence()
+                sequence = new Sequence("Advanced Spell Effects")
                     .effect(`jb2a.detect_magic.circle.${waveColor}`)
                     .atLocation(caster)
                     .attachTo(caster)
@@ -514,7 +520,7 @@ Hooks.once('init', async function () {
                             await game.AdvancedSpellEffects.updateFlag(magical.obj.id, "magicDetected", false);
                             Sequencer.EffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
                             Sequencer.EffectManager.endEffects({name: ` + "`${caster.id}-detectMagicAura`" + `, object: caster});
-                            new Sequence()
+                            new Sequence("Advanced Spell Effects")
                                 .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                                 .forUsers(users)
                                 .atLocation(magical.obj)
@@ -546,7 +552,7 @@ Hooks.once('init', async function () {
                     await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
 
                     //console.log("Magical OBJ: ", magical.obj)
-                    new Sequence()
+                    new Sequence("Advanced Spell Effects")
                         .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
                         .forUsers(users)
                         .atLocation(magical.obj)
@@ -637,7 +643,7 @@ Hooks.once('init', async function () {
                         .filter(o => o.distance <= 32.5)
                 }
                 //console.log("Detected Magical Objects: ", magicalObjects);
-                sequence = new Sequence()
+                sequence = new Sequence("Advanced Spell Effects")
                     .effect(`jb2a.detect_magic.circle.${waveColor}`)
                     .atLocation(caster)
                     .JB2A()
@@ -697,7 +703,7 @@ magicalObjects = objects.map(o => {
                     await game.AdvancedSpellEffects.updateFlag(magical.obj.id, "magicDetected", false);
                     Sequencer.EffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
                     Sequencer.EffectManager.endEffects({name: ` + "`${args[1].tokenId}-detectMagicAura`" + `, object: token});
-                    new Sequence()
+                    new Sequence("Advanced Spell Effects")
                     .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                     .forUsers(users)
                     .atLocation(magical.obj)
@@ -729,7 +735,7 @@ else if(args[0] != "on" && args[0] != "off"){
                     await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
 
                     //console.log("Magical OBJ: ", magical.obj)
-                    new Sequence()
+                    new Sequence("Advanced Spell Effects")
                         .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
                         .forUsers(users)
                         .atLocation(magical.obj)
@@ -871,7 +877,7 @@ else if(args[0] != "on" && args[0] != "off"){
                         }]
                     });
                     let newItemMacro;
-                    if (!item.getFlag("itemacro", "macro.data.command").includes("/*ASE_REPLACED*/")) {
+                    if (!item.getFlag("itemacro", "macro.data.command")?.includes("/*ASE_REPLACED*/")) {
                         newItemMacro = `/*ASE_REPLACED*/
 if(args[0] === "off"){
     console.log("token: ", token)
@@ -1081,7 +1087,7 @@ if(args[0] === "off"){
                     //let adjustedLocation = { x: location.x - (canvas.grid.size / 2), y: location.y - (canvas.grid.size / 2) }
                     let distance = Math.sqrt(Math.pow((location.x - caster.x), 2) + Math.pow((location.y - caster.y), 2));
 
-                    let steelWindSequence = new Sequence()
+                    let steelWindSequence = new Sequence("Advanced Spell Effects")
                         .animation()
                         .on(caster)
                         .rotateTowards(location)
@@ -1157,7 +1163,7 @@ if(args[0] === "off"){
                         targetY = target.y;
                         distance = Math.sqrt(Math.pow((targetX - currentX), 2) + Math.pow((targetY - currentY), 2));
                         //console.log(distance);
-                        let steelWindSequence = new Sequence()
+                        let steelWindSequence = new Sequence("Advanced Spell Effects")
                             .effect()
                             .atLocation(caster)
                             .JB2A()
@@ -1287,7 +1293,7 @@ if(args[0] === "off"){
                 //console.log("Caster: ", caster);
                 let saveDC = casterActor.data.data.attributes.spelldc;
                 //console.log("Save DC: ", saveDC);
-                let tokens = canvas.tokens.objects.children.filter((token) => token.id != caster.id).map(t => {
+                let tokens = canvas.tokens.placeables.filter((token) => token.id != caster.id).map(t => {
                     let distance = canvas.grid.measureDistance(caster, t);
                     return { token: t, distance: distance }
                 }).filter(t => t.distance <= 12.5);
@@ -1362,7 +1368,7 @@ if(args[0] === "off"){
 
                 });
                 async function playTargetTeleportEffect(target, targetImageScale, teleportLocation) {
-                    let sequence = new Sequence()
+                    let sequence = new Sequence("Advanced Spell Effects")
                         .effect()
                         .file("jb2a.eldritch_blast.lightblue.05ft")
                         .atLocation(target)
@@ -1408,7 +1414,7 @@ if(args[0] === "off"){
                 }
 
                 async function playCasterTeleportEffect(caster, casterImageScale, teleportLocation) {
-                    let sequence = new Sequence()
+                    let sequence = new Sequence("Advanced Spell Effects")
                         .effect()
                         .file("jb2a.eldritch_blast.lightblue.05ft")
                         .atLocation(caster)
@@ -1531,7 +1537,7 @@ if(args[0] === "off"){
                             else {
                                 effect = `jb2a.bless.400px.intro.blue`;
                             }
-                            new Sequence()
+                            new Sequence("Advanced Spell Effects")
                                 .effect()
                                 .file(effectFile)
                                 .atLocation(template)
@@ -1556,7 +1562,7 @@ if(args[0] === "off"){
 
                         async function postEffects(template, token) {
 
-                            new Sequence()
+                            new Sequence("Advanced Spell Effects")
                                 .animation()
                                 .on(token)
                                 .fadeIn(500)
@@ -1696,7 +1702,7 @@ if(args[0] === "off"){
 
             if (attackTarget) {
                 if (!hitTarget) {
-                    let onMissSequence = new Sequence()
+                    let onMissSequence = new Sequence("Advanced Spell Effects")
                         .animation()
                             .on(caster)
                             .opacity(1)
@@ -1717,7 +1723,7 @@ if(args[0] === "off"){
                     onMissSequence.play();
                 }
                 else {
-                    let onHitSequence = new Sequence()
+                    let onHitSequence = new Sequence("Advanced Spell Effects")
                         .animation()
                             .on(caster)
                             .opacity(1)
@@ -1901,7 +1907,8 @@ Hooks.once("socketlib.ready", () => {
 
     async function updateFlag(objectId, flag, value) {
         //console.log("Tile ID: ", objectId);
-        const object = canvas.scene.tiles.get(objectId);
+        let object = canvas.scene.tiles.get(objectId) || canvas.scene.tokens.get(objectId) || canvas.scene.lights.get(objectId);
+        console.log("Flag updating for object: ", object);
         await object.setFlag("advancedspelleffects", flag, value);
     }
     async function deleteTiles(tileIds) {
@@ -2383,7 +2390,7 @@ else
                 }
                 new MidiQOL.DamageOnlyWorkflow(rollData.actor, rollData.tokenId, damageRoll.total, "necrotic", [target], damageRoll, { flavor: `Toll the Dead - Damage Roll (${damageDie} Necrotic)`, itemCardId: rollData.itemCardId });
                 //await SequencerPreloader.preloadForClients([animFilePath, audioFilePath], true);
-                let sequence = new Sequence()
+                let sequence = new Sequence("Advanced Spell Effects")
                     .effect()
                     .file(spawnEffect)
                     .atLocation(target)
@@ -2507,7 +2514,7 @@ else
                 targetY = target.y;
                 distance = Math.sqrt(Math.pow((targetX - currentX), 2) + Math.pow((targetY - currentY), 2));
                 //console.log(distance);
-                let steelWindSequence = new Sequence()
+                let steelWindSequence = new Sequence("Advanced Spell Effects")
                     .effect()
                     .atLocation(caster)
                     .JB2A()
@@ -2658,7 +2665,7 @@ else
             let adjustedLocation = { x: location.data.x - (canvas.grid.size / 2), y: location.data.y - (canvas.grid.size / 2) }
             let distance = Math.sqrt(Math.pow((adjustedLocation.x - caster.x), 2) + Math.pow((adjustedLocation.y - caster.y), 2));
 
-            let steelWindSequence = new Sequence()
+            let steelWindSequence = new Sequence("Advanced Spell Effects")
                 .effect()
                 .atLocation(caster)
                 .JB2A()
