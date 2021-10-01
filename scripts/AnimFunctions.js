@@ -550,7 +550,7 @@ Hooks.once('init', async function () {
                         continue;
                     }
                     await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
-
+                    console.log("Playing effect for: ",magical.obj);
                     //console.log("Magical OBJ: ", magical.obj)
                     new Sequence("Advanced Spell Effects")
                         .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
@@ -720,7 +720,7 @@ magicalObjects = objects.map(o => {
                 }
 }
 else if(args[0] != "on" && args[0] != "off"){
-    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id, waveColor: "`+ waveColor + `", auraColor: "` + auraColor + `"};
+    let options = {version: "ItemMacro", itemId: item.id, tokenId: args[1].tokenId, waveColor: "`+ waveColor + `", auraColor: "` + auraColor + `"};
     game.AdvancedSpellEffects.detectMagic(options);
 }`;
                             //console.log(newItemMacro);
@@ -1834,7 +1834,7 @@ if(args[0] === "off"){
                 }
                 async function changeSelfItemMacro() {
                     let concentrationActiveEffect = midiData.actor.effects.filter((effect) => effect.data.label === "Concentrating")[0];
-                    await concentrationActiveEffect.update({
+                    await concentrationActiveEffect?.update({
                         changes: [{
                             key: "macro.itemMacro",
                             mode: 0,
@@ -1893,7 +1893,6 @@ Hooks.once("socketlib.ready", () => {
     //register module with socketlib
     ASEsocket = window.socketlib.registerModule("advancedspelleffects");
     //register all effect functions defined above with socketlib here
-    //ASEsocket.register("registeredFogCloudWithWalls", fogCloudWithWallsSocketFunction);
     ASEsocket.register("registeredDarknessMIDI", darknessMIDISocketFunction);
     ASEsocket.register("registeredDarknessItemMacro", darknessItemMacroSocketFunction);
     ASEsocket.register("registeredTollTheDead", tollTheDeadSocketFunction);
@@ -1907,7 +1906,7 @@ Hooks.once("socketlib.ready", () => {
 
     async function updateFlag(objectId, flag, value) {
         //console.log("Tile ID: ", objectId);
-        let object = canvas.scene.tiles.get(objectId) || canvas.scene.tokens.get(objectId) || canvas.scene.lights.get(objectId);
+        let object = canvas.scene.tiles.get(objectId) || canvas.scene.tokens.get(objectId) || canvas.scene.drawings.get(objectId) || canvas.scene.walls.get(objectId) || canvas.scene.lights.get(objectId);
         console.log("Flag updating for object: ", object);
         await object.setFlag("advancedspelleffects", flag, value);
     }
@@ -2280,7 +2279,7 @@ Hooks.once("socketlib.ready", () => {
 }
 else
 {
-    let options = {version: "ItemMacro", itemId: item.id, tokenId: token.id};
+    let options = {version: "ItemMacro", itemId: item.id, tokenId: args[1].tokenId};
     game.AdvancedSpellEffects.darkness(options);
 }`;
                 //console.log(newItemMacro);
