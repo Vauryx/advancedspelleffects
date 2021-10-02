@@ -1,0 +1,47 @@
+<form class="flexcol" autocomplete="off" novalidate>
+    <section class="content">
+        <div class="tab">
+            <div class="ase-enable-checkbox">
+                <div class="form-group">
+                    <label>Enable Advanced Spell Effect</label>
+                    <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
+                        flags.advancedspelleffects.enableASE}}>
+                </div>
+                {{#if flags.advancedspelleffects.enableASE}}
+                <div class="form-group">
+                    {{item}}
+                </div>
+                {{#ifCond item '==' 'Detect Magic'}}
+                <div class="ase-detectMagic-settings">
+                    <div class="form-group">
+                        <label>Select Wave Color:
+                            <select name="flags.advancedspelleffects.effectOptions.waveColor">
+                                {{#select flags.advancedspelleffects.effectOptions.waveColor}}
+                                {{#each detectMagicWaveColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                        <label>Select Aura Color:
+                            <select name="flags.advancedspelleffects.effectOptions.auraColor">
+                                {{#select flags.advancedspelleffects.effectOptions.auraColor}}
+                                {{#each detectMagicAuraColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                {{/ifCond}}
+                {{/if}}
+            </div>
+        </div>
+    </section>
+    <footer class="sheet-footer flexrow">
+        <button type="submit" name="submit">
+            <i class="fa fa-save"></i> Save and Close
+        </button>
+    </footer>
+</form>
