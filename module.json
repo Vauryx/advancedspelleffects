@@ -40,7 +40,8 @@
   ],
   "conflicts": [],
   "esmodules": [
-    "/scripts/setup.js"
+    "/scripts/setup.js",
+    "/scripts/AnimFunctions.js"
   ],
   "scripts": [],
   "styles": [
