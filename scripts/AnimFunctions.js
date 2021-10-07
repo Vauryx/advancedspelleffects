@@ -228,6 +228,9 @@ Hooks.once('init', async function () {
             //console.log("Failed Saves - ", failedSaves);
             // console.log("Passed Saves - ", passedSaves);
             let spellLevel = stormCloudTile.getFlag("advancedspelleffects", "spellLevel");
+            if(stormCloudTile.getFlag("advancedspelleffects","stormDamage")){
+                spellLevel += 1;
+            }
             let item = casterActor.items.get(stormCloudTile.getFlag("advancedspelleffects", "itemID"));
             let itemData = item.data;
             itemData.data.components.concentration = false;
@@ -2004,12 +2007,18 @@ if(args[0] === "off"){
                 }
                 let midiData = options.args[0];
                 //console.log(midiData);
+                let weatherDialogData = {
+                    buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
+                    title: "Is there a storm?"
+                };
+                let stormyWeather = await warpgate.buttonDialog(weatherDialogData, 'row');
                 let template = await warpgate.crosshairs.show(25, midiData.item.img, "Call Lightning");
                 let effectFile = `jb2a.call_lightning.${res}_res.${color}`
                 let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
                 let stormTile = await placeCloudAsTile(template, midiData.tokenId);
                 let spellItem = midiData.actor.items.get(midiData.item._id);
                 await changeSelfItemMacro();
+                await game.AdvancedSpellEffects.updateFlag(stormTile._id, "stormDamage", stormyWeather);
                 await game.AdvancedSpellEffects.callBolt(canvas.scene.tiles.get(stormTile._id));
 
                 async function placeCloudAsTile(template, casterId) {
@@ -2128,7 +2137,7 @@ Hooks.once("socketlib.ready", () => {
     async function updateFlag(objectId, flag, value) {
         //console.log("Tile ID: ", objectId);
         let object = canvas.scene.tiles.get(objectId) || canvas.scene.tokens.get(objectId) || canvas.scene.drawings.get(objectId) || canvas.scene.walls.get(objectId) || canvas.scene.lights.get(objectId);
-        console.log("Flag updating for object: ", object);
+        //console.log("Flag updating for object: ", object);
         await object.setFlag("advancedspelleffects", flag, value);
     }
     async function deleteTiles(tileIds) {
