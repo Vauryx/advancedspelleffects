@@ -1,0 +1,94 @@
+<form class="flexcol" autocomplete="off" novalidate>
+    <section class="content">
+        <div class="tab">
+            <div class="ase-enable-checkbox">
+                <div class="form-group">
+                    <label>Convert to Advanced Spell Effect</label>
+                    <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
+                        flags.advancedspelleffects.enableASE}}>
+                </div>
+                {{#if flags.advancedspelleffects.enableASE}}
+                <div class="form-group">
+                    {{itemName}}
+                </div>
+                {{#ifCond itemName '==' 'Detect Magic'}}
+                <div class="ase-detectMagic-settings">
+                    <div class="form-group">
+                        <label>Select Wave Color:
+                            <select name="flags.advancedspelleffects.effectOptions.waveColor">
+                                {{#select flags.advancedspelleffects.effectOptions.waveColor}}
+                                {{#each effectData.dmWaveColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                        <label>Select Aura Color:
+                            <select name="flags.advancedspelleffects.effectOptions.auraColor">
+                                {{#select flags.advancedspelleffects.effectOptions.auraColor}}
+                                {{#each effectData.dmAuraColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                {{/ifCond}}
+                {{#ifCond itemName '==' 'Fog Cloud'}}
+                <div class="ase-detectMagic-settings">
+                    <div class="form-group">
+                        <label>Number of Walls: </label>
+                        <input type="number" name="flags.advancedspelleffects.effectOptions.wallNumber"
+                            value="{{effectData.wallNumber}}"">
+                    </div>
+                </div>
+                {{/ifCond}}
+                {{#ifCond itemName '==' 'Steel Wind Strike'}}
+                <div class="ase-detectMagic-settings">
+                    <div class="form-group">
+                        <label>Select Weapon:
+                            <select name="flags.advancedspelleffects.effectOptions.weapon">
+                                {{#select flags.advancedspelleffects.effectOptions.weapon}}
+                                {{#each effectData.swsWeapons as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                        <label>Select Weapon Color:
+                            <select name="flags.advancedspelleffects.effectOptions.weaponColor">
+                                {{#select flags.advancedspelleffects.effectOptions.weaponColor}}
+                                {{#each effectData.weaponColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                {{/ifCond}}
+                {{#ifCond itemName '==' 'Call Lightning'}}
+                <div class="ase-detectMagic-settings">
+                    <div class="form-group">
+                        <label>Select Bolt Style:
+                            <select name="flags.advancedspelleffects.effectOptions.boltStyle">
+                                {{#select flags.advancedspelleffects.effectOptions.boltStyle}}
+                                <option value="chain">Chain</option>
+                                <option value="strike">Strike</option>
+                                {{/select}}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                {{/ifCond}}
+                {{/if}}
+            </div>
+        </div>
+    </section>
+    <footer class="sheet-footer flexrow">
+        <button type="submit" name="submit">
+            <i class="fa fa-save"></i> Save and Close
+        </button>
+    </footer>
+</form>

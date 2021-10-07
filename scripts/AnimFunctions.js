@@ -7,7 +7,7 @@ Hooks.once('ready', async function () {
         //console.log("Executing detect magic hook!...");
         if ((!updateData.x && !updateData.y)) return;
         //console.log("hook fired!...", tokenDocument, updateData);
-        if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic - MIDI").length == 0) {
+        if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length == 0) {
             //console.log("ASE Detect Magic effect not found...", tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic - MIDI"));
             return;
         }
@@ -83,7 +83,6 @@ Hooks.once('ready', async function () {
                 new Sequence("Advanced Spell Effects")
                     .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
                     .forUsers(users)
-                    .atLocation(magical.obj)
                     .scale(0.25)
                     .delay(magical.delay)
                     .setMustache(magical)
@@ -95,7 +94,6 @@ Hooks.once('ready', async function () {
                     .name(`${magical.obj.document.id}-magicRune`)
                     .delay(magical.delay)
                     .forUsers(users)
-                    .atLocation(magical.obj)
                     .scale(0.25)
                     .attachTo(magical.obj)
                     .persist(true)
@@ -109,6 +107,8 @@ Hooks.once('ready', async function () {
     });
     Hooks.on("updateCombat", async function (combat) {
         let currentCombatantId = combat.current.tokenId;
+        let caster = canvas.tokens.get(currentCombatantId);
+        if (!caster.actor.isOwner) return;
         let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == currentCombatantId);
         //console.log("update hook fired...", stormCloudTiles);
         if (stormCloudTiles.length > 0 && !game.user.isGM) {
@@ -176,9 +176,18 @@ Hooks.once('init', async function () {
             let casterID = stormCloudTile.getFlag("advancedspelleffects", "stormCloudTile");
             //console.log("Call Lightning caster id: ", casterID);
             let caster = canvas.tokens.get(casterID);
+
+            //NEW DISTANCE MEASUREMENTS
+            const ray = new Ray({ x: caster.data.x + (canvas.grid.size / 2), y: caster.data.y + (canvas.grid.size / 2) }, template);
+            const segments = [{ ray }];
+            let dist = canvas.grid.measureDistances(segments, { gridSpaces: true })[0]
+            console.log(dist);
+            //
+
+
             let boltLength = canvas.grid.measureDistance({ x: caster.data.x + (canvas.grid.size / 2), y: caster.data.y + (canvas.grid.size / 2) }, template);
             //console.log("Bolt Length: ", boltLength);
-            if(boltLength > 60){
+            if (dist > 60) {
                 await warpgate.buttonDialog({
                     buttons: [{ label: "Ok", value: true }],
                     title: "Spell Failed - Out of Range!"
@@ -191,12 +200,12 @@ Hooks.once('init', async function () {
             //console.log("Save DC: ", saveDC);
             const boltStyle = stormCloudTile.getFlag("advancedspelleffects", 'boltStyle');
             //console.log("Storm cloud tile:", stormCloudTile);
-            
+
             playEffect(template, stormCloudTile, boltStyle);
-           
+
             let tokens = canvas.tokens.placeables.map(t => {
                 let distance = canvas.grid.measureDistance({ x: template.x, y: template.y }, { x: t.data.x + (canvas.grid.size / 2), y: t.data.y + (canvas.grid.size / 2) });
-               // console.log("bolt Loc", { x: template.x, y: template.y });
+                // console.log("bolt Loc", { x: template.x, y: template.y });
                 let returnObj = { token: t, distance: distance };
                 //console.log("Returning object: ", returnObj);
                 return (returnObj);
@@ -217,13 +226,13 @@ Hooks.once('init', async function () {
                 }
             }
             //console.log("Failed Saves - ", failedSaves);
-           // console.log("Passed Saves - ", passedSaves);
+            // console.log("Passed Saves - ", passedSaves);
             let spellLevel = stormCloudTile.getFlag("advancedspelleffects", "spellLevel");
             let item = casterActor.items.get(stormCloudTile.getFlag("advancedspelleffects", "itemID"));
             let itemData = item.data;
             itemData.data.components.concentration = false;
-           // console.log("ItemData: ", itemData);
-           // console.log("Item: ", item);
+            // console.log("ItemData: ", itemData);
+            // console.log("Item: ", item);
             let fullDamageRoll = new Roll(`${spellLevel}d10`).evaluate();
             if (game.modules.get("dice-so-nice")?.active) {
                 game.dice3d?.showForRoll(fullDamageRoll);
@@ -301,7 +310,6 @@ Hooks.once('init', async function () {
                 .JB2A()
                 .atLocation(cloud)
                 .reachTowards(template)
-                .anchor(0.5)
                 .waitUntilFinished(-1500)
                 .playIf(boltStyle == "chain")
                 .effect()
@@ -342,6 +350,41 @@ Hooks.once('init', async function () {
         let template;
         switch (options.version) {
             case "MIDI":
+                let error = false;
+                if (typeof args !== 'undefined' && args.length === 0) {
+                    error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+                }
+                if (!(game.modules.get("jb2a_patreon"))) {
+                    error = `You need to have JB2A's patreon only module installed to run this macro!`;
+                }
+                if (!game.modules.get("advanced-macros")?.active) {
+                    let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+                    error = `You need to have Advanced Macros ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("socketlib")?.active) {
+                    let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+                    error = `You need to have SocketLib ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("tagger")?.active) {
+                    let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+                    error = `You need to have TTagger${installed} to run this macro!`;
+                }
+                if (!game.modules.get("sequencer")?.active) {
+                    let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+                    error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("warpgate")?.active) {
+                    let installed = game.modules.get("warpgate") && !game.modules.get("warpgate").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("itemacro")?.active) {
+                    let installed = game.modules.get("itemacro") && !game.modules.get("itemacro").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (error) {
+                    ui.notifications.error(error);
+                    return;
+                }
                 // code block
                 let rollData = options.args[0];
                 itemId = rollData.id;
@@ -411,7 +454,14 @@ Hooks.once('init', async function () {
                     let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
                     error = `You need to have Sequencer ${installed} to run this macro!`;
                 }
-
+                if (!game.modules.get("itemacro")?.active) {
+                    let installed = game.modules.get("itemacro") && !game.modules.get("itemacro").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (error) {
+                    ui.notifications.error(error);
+                    return;
+                }
                 actor = game.actors.get(args[0].actor._id);
                 //console.log("Actor: ", actorD);
 
@@ -423,13 +473,6 @@ Hooks.once('init', async function () {
                 caster = canvas.tokens.get(args[0].tokenId);
                 item = actor.items.getName(args[0].item.name);
                 //console.log(itemD);
-                if (error) {
-                    ui.notifications.error(error);
-                    return;
-                }
-
-
-
                 if (game.modules.get("tagger")?.active) {
 
                     let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
@@ -451,14 +494,12 @@ Hooks.once('init', async function () {
                 //console.log("Detected Magical Objects: ", magicalObjects);
                 sequence = new Sequence("Advanced Spell Effects")
                     .effect(`jb2a.detect_magic.circle.${waveColor}`)
-                    .atLocation(caster)
                     .attachTo(caster)
                     .JB2A()
                     .belowTiles()
                     .scale(2.33333)
                     .effect()
                     .file(`jb2a.magic_signs.circle.02.divination.intro.${auraColor}`)
-                    .atLocation(caster)
                     .attachTo(caster)
                     .scale(0.2)
                     .belowTokens()
@@ -466,7 +507,6 @@ Hooks.once('init', async function () {
                     .fadeOut(1000, { ease: "easeInQuint" })
                     .effect()
                     .file(`jb2a.magic_signs.circle.02.divination.loop.${auraColor}`)
-                    .atLocation(caster)
                     .attachTo(caster)
                     .persist()
                     .extraEndDuration(750)
@@ -529,7 +569,6 @@ Hooks.once('init', async function () {
                                 .zIndex(0)
                                 .effect()
                                 .file("jb2a.magic_signs.circle.02.divination.outro.` + auraColor + `")
-                                .atLocation(caster)
                                 .scale(0.2)
                                 .belowTokens()
                                 .attachTo(caster)
@@ -550,7 +589,7 @@ Hooks.once('init', async function () {
                         continue;
                     }
                     await ASEsocket.executeAsGM("updateObjectFlag", magical.obj.id, "magicDetected", true);
-                    console.log("Playing effect for: ",magical.obj);
+                    console.log("Playing effect for: ", magical.obj);
                     //console.log("Magical OBJ: ", magical.obj)
                     new Sequence("Advanced Spell Effects")
                         .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
@@ -565,7 +604,6 @@ Hooks.once('init', async function () {
                         .name(`${magical.obj.document.id}-magicRune`)
                         .delay(magical.delay)
                         .forUsers(users)
-                        .atLocation(magical.obj)
                         .scale(0.25)
                         .attachTo(magical.obj)
                         .persist(true)
@@ -645,14 +683,12 @@ Hooks.once('init', async function () {
                 //console.log("Detected Magical Objects: ", magicalObjects);
                 sequence = new Sequence("Advanced Spell Effects")
                     .effect(`jb2a.detect_magic.circle.${waveColor}`)
-                    .atLocation(caster)
                     .JB2A()
                     .belowTiles()
                     .attachTo(caster)
                     .scale(2.33333)
                     .effect()
                     .file(`jb2a.magic_signs.circle.02.divination.intro.${auraColor}`)
-                    .atLocation(caster)
                     .attachTo(caster)
                     .scale(0.2)
                     .belowTokens()
@@ -660,7 +696,6 @@ Hooks.once('init', async function () {
                     .fadeOut(1000, { ease: "easeInQuint" })
                     .effect()
                     .file(`jb2a.magic_signs.circle.02.divination.loop.${auraColor}`)
-                    .atLocation(caster)
                     .attachTo(caster)
                     .persist()
                     .extraEndDuration(750)
@@ -712,7 +747,6 @@ magicalObjects = objects.map(o => {
                     .zIndex(0)
                     .effect()
                     .file("jb2a.magic_signs.circle.02.divination.outro.` + auraColor + `")
-                    .atLocation(caster)
                     .scale(0.2)
                     .belowTokens()
                     .attachTo(caster)
@@ -748,7 +782,6 @@ else if(args[0] != "on" && args[0] != "off"){
                         .name(`${magical.obj.document.id}-magicRune`)
                         .delay(magical.delay)
                         .forUsers(users)
-                        .atLocation(magical.obj)
                         .scale(0.25)
                         .attachTo(magical.obj)
                         .persist(true)
@@ -854,6 +887,14 @@ else if(args[0] != "on" && args[0] != "off"){
                 if (!game.modules.get("sequencer")?.active) {
                     let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
                     error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("warpgate")?.active) {
+                    let installed = game.modules.get("warpgate") && !game.modules.get("warpgate").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("itemacro")?.active) {
+                    let installed = game.modules.get("itemacro") && !game.modules.get("itemacro").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
                 }
                 if (error) {
                     ui.notifications.error(error);
@@ -1000,6 +1041,36 @@ if(args[0] === "off"){
         let tokenId;
         switch (options.version) {
             case "MIDI":
+                let error = false;
+                if (typeof args !== 'undefined' && args.length === 0) {
+                    error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+                }
+                if (!(game.modules.get("jb2a_patreon"))) {
+                    error = `You need to have JB2A's patreon only module installed to run this macro!`;
+                }
+                if (!game.modules.get("advanced-macros")?.active) {
+                    let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+                    error = `You need to have Advanced Macros ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("sequencer")?.active) {
+                    let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+                    error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("warpgate")?.active) {
+                    let installed = game.modules.get("warpgate") && !game.modules.get("warpgate").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("itemacro")?.active) {
+                    let installed = game.modules.get("itemacro") && !game.modules.get("itemacro").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (error) {
+                    ui.notifications.error(error);
+                    return;
+                }
+                console.log(options.args[0]);
+                options.weapon = options.args[0].item.flags.advancedspelleffects?.effectOptions?.weapon ?? 'sword';
+                options.color = options.args[0].item.flags.advancedspelleffects?.effectOptions?.weaponColor ?? 'blue';
                 //console.log("rollData", rollData);
                 function easeOutElasticCustom(x) {
                     const c4 = (2 * Math.PI) / 10;
@@ -1025,16 +1096,35 @@ if(args[0] === "off"){
                 //console.log('Files about to be preloaded...',allFiles);
                 //await SequencerPreloader.preloadForClients(allFiles, true);
 
+                let validSwingTypes = [0, 2, 4];
+
+
                 let animStartTimeMap = {
-                    "sword": 1050,
-                    "mace": 825,
-                    "greataxe": 1400,
-                    "greatsword": 1400,
-                    "handaxe": 1000,
-                    "spear": 825,
-                    "dagger": 700
+                    0: 750,
+                    1: 500,
+                    2: 850,
+                    3: 850,
+                    4: 1000,
+                    5: 500
                 };
-                swordAnim = `jb2a.${options.weapon}.melee${dagger}.${options.color}`;
+                let animEndTimeMap = {
+                    0: 1250,
+                    1: 1250,
+                    2: 2000,
+                    3: 1250,
+                    4: 1700,
+                    5: 1250
+                };
+                let weaponsPathMap = {
+                    "sword": "melee.01",
+                    "mace": "melee",
+                    "greataxe": "melee",
+                    "greatsword": "melee",
+                    "handaxe": "melee",
+                    "spear": "melee.01"
+                };
+
+
 
                 await caster.document.setFlag("autorotate", "enabled", false);
                 //console.log ("Auto Rotate Flag status: ",caster.document.getFlag("autorotate", "enabled"));
@@ -1113,7 +1203,47 @@ if(args[0] === "off"){
                         })
                     await steelWindSequence.play();
                 }
+                function getFreePosition(origin) {
+                    const center = canvas.grid.getCenter(origin.x, origin.y)
+                    origin = { x: center[0], y: center[1] };
+                    const positions = generatePositions(origin);
+                    //console.log("Generated Positions: ",positions);
+                    for (let position of positions) {
+                        //console.log(`Checking if position {${position.x}, ${position.y}} is free...`);
+                        if (isFree(position)) {
+                            return position;
+                        }
+                    }
 
+                }
+                function generatePositions(origin) {
+                    let positions = [canvas.grid.getSnappedPosition(origin.x - 1, origin.y - 1)];
+                    for (let r = canvas.scene.dimensions.size; r < canvas.scene.dimensions.size * 2; r += canvas.scene.dimensions.size) {
+
+                        for (let theta = 0; theta < 2 * Math.PI; theta += Math.PI / (4 * r / canvas.scene.dimensions.size)) {
+                            const newPos = canvas.grid.getTopLeft(origin.x + r * Math.cos(theta), origin.y + r * Math.sin(theta))
+                            positions.push({ x: newPos[0], y: newPos[1] });
+                        }
+                    }
+                    return positions;
+                }
+                function isFree(position) {
+                    for (let token of canvas.tokens.placeables) {
+                        const hitBox = new PIXI.Rectangle(token.x, token.y, token.w, token.h);
+                        //console.log(`Checking hitbox for ${token.name}`, hitBox);
+                        if (hitBox.contains(position.x, position.y)) {
+                            //console.log("Not free...Checking next position");
+                            return false;
+                        }
+                    }
+                    //console.log("Free!");
+                    return true;
+                }
+                function getRandomInt(min, max) {
+                    min = Math.ceil(min);
+                    max = Math.floor(max);
+                    return Math.floor(Math.random() * (max - min + 1)) + min;
+                }
                 async function steelWindStrike(caster, targets) {
                     let currentX;
                     let targetX;
@@ -1149,44 +1279,57 @@ if(args[0] === "off"){
                                 }
                             }
                         }];
+                    let swingType;
+                    let swingStartDelay = -600;
                     await caster.TMFXaddUpdateFilters(params);
                     //console.log(targets);
                     for (let i = 0; i < targets.length; i++) {
-
+                        if (i == targets.length - 1) {
+                            swingType = 5;
+                            swingStartDelay = -250;
+                        }
+                        else {
+                            swingType = validSwingTypes[getRandomInt(0, 2)];
+                        }
+                        swordAnim = `jb2a.${options.weapon}.${weaponsPathMap[options.weapon]}.${options.color}.${swingType}`;
                         //console.log(targets[i]);
                         let target = targets[i];
                         evaluateAttack(target);
-
+                        //debugger;
+                        const openPosition = getFreePosition({ x: target.x, y: target.y });
+                        let rotateAngle = new Ray(openPosition, target).angle * (180 / Math.PI);
                         currentX = caster.x;
-                        targetX = target.x;
+                        targetX = openPosition.x;
                         currentY = caster.y;
-                        targetY = target.y;
+                        targetY = openPosition.y;
                         distance = Math.sqrt(Math.pow((targetX - currentX), 2) + Math.pow((targetY - currentY), 2));
                         //console.log(distance);
                         let steelWindSequence = new Sequence("Advanced Spell Effects")
                             .effect()
-                            .atLocation(caster)
+                            .atLocation({x: caster.x + (canvas.grid.size / 2), y: caster.y + (canvas.grid.size / 2)})
                             .JB2A()
                             .file(gustAnim)
-                            .reachTowards(target)
+                            .reachTowards({ x: openPosition.x + (canvas.grid.size / 2), y: openPosition.y + (canvas.grid.size / 2) })
                             .opacity(0.8)
                             .fadeOut(250)
                             .belowTokens()
-                            .effect()
-                            .atLocation(caster)
-                            .JB2A()
-                            .file(swordAnim)
-                            .startTime(animStartTimeMap[options.weapon] || 1050)
-                            .moveTowards(target, { ease: "easeOutElasticCustom" })
-                            .moveSpeed(distance)
                             .animation()
                             .on(caster)
-                            .rotateTowards(target)
+                            .rotate(rotateAngle - 90)
                             .animation()
                             .on(caster)
-                            .moveTowards(target, { ease: "easeOutElasticCustom" })
+                            .moveTowards(openPosition, { ease: "easeOutElasticCustom" })
                             .moveSpeed(distance / 60)
                             .duration(800)
+                            .waitUntilFinished(swingStartDelay)
+                            .effect()
+                            .atLocation(caster, { cacheLocation: false })
+                            .JB2A()
+                            .file(swordAnim)
+                            .startTime(animStartTimeMap[swingType])
+                            .endTime(animEndTimeMap[swingType])
+                            .reachTowards(target)
+                            .fadeOut(250, { ease: "easeOutQuint" })
                             .waitUntilFinished()
                         await steelWindSequence.play();
                     }
@@ -1280,6 +1423,14 @@ if(args[0] === "off"){
                 if (!game.modules.get("sequencer")?.active) {
                     let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
                     error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("warpgate")?.active) {
+                    let installed = game.modules.get("warpgate") && !game.modules.get("warpgate").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("itemacro")?.active) {
+                    let installed = game.modules.get("itemacro") && !game.modules.get("itemacro").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
                 }
                 if (error) {
                     ui.notifications.error(error);
@@ -1476,6 +1627,41 @@ if(args[0] === "off"){
     async function summon(options) {
         switch (options.version) {
             case "MIDI":
+                let error = false;
+                if (typeof args !== 'undefined' && args.length === 0) {
+                    error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+                }
+                if (!(game.modules.get("jb2a_patreon"))) {
+                    error = `You need to have JB2A's patreon only module installed to run this macro!`;
+                }
+                if (!game.modules.get("advanced-macros")?.active) {
+                    let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+                    error = `You need to have Advanced Macros ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("socketlib")?.active) {
+                    let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+                    error = `You need to have SocketLib ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("tagger")?.active) {
+                    let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+                    error = `You need to have TTagger${installed} to run this macro!`;
+                }
+                if (!game.modules.get("sequencer")?.active) {
+                    let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+                    error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("warpgate")?.active) {
+                    let installed = game.modules.get("warpgate") && !game.modules.get("warpgate").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("itemacro")?.active) {
+                    let installed = game.modules.get("itemacro") && !game.modules.get("itemacro").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (error) {
+                    ui.notifications.error(error);
+                    return;
+                }
                 let midiData = options.args[0];
                 switch (options.type.toLowerCase()) {
                     case "spiritual weapon":
@@ -1781,13 +1967,48 @@ if(args[0] === "off"){
         let boltStyle = options.boltStyle?.toLowerCase() ?? 'chain';
         switch (options.version) {
             case "MIDI":
+                let error = false;
+                if (typeof args !== 'undefined' && args.length === 0) {
+                    error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+                }
+                if (!(game.modules.get("jb2a_patreon"))) {
+                    error = `You need to have JB2A's patreon only module installed to run this macro!`;
+                }
+                if (!game.modules.get("advanced-macros")?.active) {
+                    let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+                    error = `You need to have Advanced Macros ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("socketlib")?.active) {
+                    let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+                    error = `You need to have SocketLib ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("tagger")?.active) {
+                    let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+                    error = `You need to have TTagger${installed} to run this macro!`;
+                }
+                if (!game.modules.get("sequencer")?.active) {
+                    let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+                    error = `You need to have Sequencer ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("warpgate")?.active) {
+                    let installed = game.modules.get("warpgate") && !game.modules.get("warpgate").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (!game.modules.get("itemacro")?.active) {
+                    let installed = game.modules.get("itemacro") && !game.modules.get("itemacro").active ? "enabled" : "installed";
+                    error = `You need to have Warpgate ${installed} to run this macro!`;
+                }
+                if (error) {
+                    ui.notifications.error(error);
+                    return;
+                }
                 let midiData = options.args[0];
                 //console.log(midiData);
                 let template = await warpgate.crosshairs.show(25, midiData.item.img, "Call Lightning");
                 let effectFile = `jb2a.call_lightning.${res}_res.${color}`
                 let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
                 let stormTile = await placeCloudAsTile(template, midiData.tokenId);
-                let spellItem =  midiData.actor.items.get(midiData.item._id);
+                let spellItem = midiData.actor.items.get(midiData.item._id);
                 await changeSelfItemMacro();
                 await game.AdvancedSpellEffects.callBolt(canvas.scene.tiles.get(stormTile._id));
 
@@ -1798,8 +2019,8 @@ if(args[0] === "off"){
                     let tileX;
                     let tileY;
 
-                    tileWidth = templateData.distance * 40;
-                    tileHeight = templateData.distance * 40;
+                    tileWidth = (templateData.width * canvas.grid.size);
+                    tileHeight = (templateData.width * canvas.grid.size);
                     tileX = templateData.x - (tileWidth / 2);
                     tileY = templateData.y - (tileHeight / 2);
                     data = {
@@ -1842,7 +2063,7 @@ if(args[0] === "off"){
                         }]
                     });
                     let newItemMacro;
-                    let oldItemMacro =spellItem.getFlag("itemacro", "macro.data.command");
+                    let oldItemMacro = spellItem.getFlag("itemacro", "macro.data.command");
                     if (!oldItemMacro.includes("/*ASE_REPLACED*/")) {
                         newItemMacro = `/*ASE_REPLACED*/
 if(args[0] === "off"){
@@ -2026,34 +2247,6 @@ Hooks.once("socketlib.ready", () => {
         //console.log("Actor: ", actor);
         //console.log("Caster: ", caster);
         //console.log("Item: ", item);
-        let error = false;
-        if (typeof args !== 'undefined' && args.length === 0) {
-            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
-        }
-        if (!(game.modules.get("jb2a_patreon"))) {
-            error = `You need to have JB2A's patreon only module installed to run this macro!`;
-        }
-        if (!game.modules.get("advanced-macros")?.active) {
-            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
-            error = `You need to have Advanced Macros ${installed} to run this macro!`;
-        }
-        if (!game.modules.get("socketlib")?.active) {
-            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
-            error = `You need to have SocketLib ${installed} to run this macro!`;
-        }
-        if (!game.modules.get("tagger")?.active) {
-            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
-            error = `You need to have TTagger${installed} to run this macro!`;
-        }
-        if (!game.modules.get("sequencer")?.active) {
-            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
-            error = `You need to have Sequencer ${installed} to run this macro!`;
-        }
-        if (error) {
-            ui.notifications.error(error);
-            return;
-        }
-
         await placeCloudAsTile(template, caster.id);
 
         await changeSelfItemMacro();
@@ -2087,7 +2280,7 @@ Hooks.once("socketlib.ready", () => {
                     game.AdvancedSpellEffects.darkness(options);
                 }`;
                 //console.log(newItemMacro);
-                await item.setFlag("itemacro", "macro.data.command", newItemMacro)
+                await item.setFlag("itemacro", "macro.data.command", newItemMacro);
             }
         }
 
