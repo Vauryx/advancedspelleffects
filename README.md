@@ -4,6 +4,7 @@
 Eligible spells will display an "ASE" tab at the top of the item - this can be used to convert a spell to an ASE spell like shown in the example video below.
 - Make sure the name of the spell is exactly correct or the "ASE" tab will not be visible.
 - CONVERTING THE SPELL WILL CHANGE CERTAIN DATA ON THE ITEM ITSELF INCLUDING IT'S ITEM MACRO - ONLY CONVERT A SPELL THAT YOU DO NOT CARE ABOUT BEING OVERWRITTEN
+
 https://user-images.githubusercontent.com/32877348/136321401-f3b6467e-30b1-487e-baf5-b2bde6e8f59c.mp4
 
 
