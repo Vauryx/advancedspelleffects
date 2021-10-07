@@ -1,5 +1,15 @@
 # Advanced Spell Effects
 
+## This module requires the following modules to fully function
+- JB2A (Patreon Version)
+- Sequencer
+- Warpgate
+- Item Macro
+- MIDI-QOL
+- Advanced Macros
+- SocketLib
+- Tagger
+
 ## Usage Instructions
 Eligible spells will display an "ASE" tab at the top of the item - this can be used to convert a spell to an ASE spell like shown in the example video below.
 - Make sure the name of the spell is exactly correct or the "ASE" tab will not be visible.
