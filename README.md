@@ -46,5 +46,13 @@ https://user-images.githubusercontent.com/32877348/134980507-710b9c41-cf61-40f1-
 ### Spiritual Weapon
 https://user-images.githubusercontent.com/32877348/134981937-bdb3b361-d5e3-48f6-abce-4ccf6f8d141e.mp4
 
+### Summon Creature (Functionally Tasha's Summons)
+- This video explains the setup for this spell. You must have a folder of actors called "ASE-Summons" which must contain the actors that you wish to use for the summons.
+- When the spell is cast, a prompt will be displayed with the types defined previously. 
+
+https://user-images.githubusercontent.com/32877348/136510094-e1d8e50f-5175-42e3-b66e-14247f4e48fb.mp4
+
+https://user-images.githubusercontent.com/32877348/136510123-e4452f6c-48d4-46b4-9bd5-aa38f9c4010f.mp4
+
 ##### Contributions - 
 Special thanks to siliconsaint for contributing his spiritual weapon macro for this module
