@@ -55,4 +55,5 @@ https://user-images.githubusercontent.com/32877348/136510094-e1d8e50f-5175-42e3-
 https://user-images.githubusercontent.com/32877348/136510123-e4452f6c-48d4-46b4-9bd5-aa38f9c4010f.mp4
 
 ##### Contributions - 
+I want to take an opportunity here to thank HoneyBadger and Wasp - The Sequencer Guy for their never-ending reservoir of help and advice for a new dev. This module only exists thanks to them and others who've contributed their time or their code!
 Special thanks to siliconsaint for contributing his spiritual weapon macro for this module
