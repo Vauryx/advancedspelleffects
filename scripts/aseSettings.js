@@ -31,7 +31,6 @@ export class ASESettings extends FormApplication {
             "damage": { "parts": [], "versatile": "" },
             "formula": "",
             "save": { "ability": "", "dc": null, "scaling": "spell" },
-            "level": 1,
             "materials": { "value": "", "consumed": false, "cost": 0, "supply": 0 },
             "scaling": { "mode": "none", "formula": "" }
         };
@@ -60,7 +59,7 @@ export class ASESettings extends FormApplication {
                 data.level = 3;
                 data.duration = { "value": 10, "units": "minute" };
                 break;
-            }
+        }
         let updates = { data };
         await item.update(updates);
     }
@@ -73,6 +72,7 @@ export class ASESettings extends FormApplication {
         let itemName = item.name;
         let newItemMacro = "";
         let returnOBJ = {};
+        console.log("Detected item name: ", itemName);
         await this.setItemDetails(item);
         switch (itemName) {
             case 'Detect Magic':
@@ -245,10 +245,63 @@ else
 {
     let options = {version: "MIDI", args: args, boltStyle: "${currentBoltStyle}"};
 game.AdvancedSpellEffects.callLightning(options);
-}`; 
+}`;
                 returnOBJ = { boltStyle: currentBoltStyle };
                 break;
+        }
+        if (itemName.includes("Summon")) {
+            let magicSigns = `jb2a.magic_signs.circle.02`;
+            let magicSchools = Sequencer.Database.getEntry(magicSigns);
+            magicSchools = Object.keys(magicSchools);
+            let magicSchoolOptions = {};
+            magicSchools.forEach((color) => {
+                magicSchoolOptions[color] = capitalizeFirstLetter(color);
+            });
+            let magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${flags.advancedspelleffects?.effectOptions?.magicSchool ?? 'abjuration'}.intro`;
+            let magicSchoolColors = Sequencer.Database.getEntry(magicSchoolColorsRaw);
+            magicSchoolColors = Object.keys(magicSchoolColors);
+            let magicSchoolColorOptions = {};
+            magicSchoolColors.forEach((color) => {
+                magicSchoolColorOptions[color] = capitalizeFirstLetter(color);
+            });
+
+            let effectAColorsRaw = `jb2a.eldritch_blast`;
+            let effectAColors = Sequencer.Database.getEntry(effectAColorsRaw);
+            effectAColors = Object.keys(effectAColors);
+            let templateIndex = effectAColors.indexOf("_template");
+            if (templateIndex > -1) {
+                effectAColors.splice(templateIndex, 1);
             }
+            let effectAColorOptions = {};
+            effectAColors.forEach((color) => {
+                effectAColorOptions[color] = capitalizeFirstLetter(color);
+            });
+
+            let effectBColorsRaw = `jb2a.energy_strands.complete`;
+            let effectBColors = Sequencer.Database.getEntry(effectBColorsRaw);
+            effectBColors = Object.keys(effectBColors);
+            let effectBColorOptions = {};
+            effectBColors.forEach((color) => {
+                effectBColorOptions[color] = capitalizeFirstLetter(color);
+            });
+
+            let summonActorsList = game.folders?.getName("ASE-Summons")?.entities ?? [];
+            let summonOptions = {};
+            let currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { typeA: { name: "", actor: "" }, typeB: { name: "", actor: "" }, typeC: { name: "", actor: "" } };
+            summonActorsList.forEach((actor) => {
+                summonOptions[actor.name] = actor.id;
+            });
+            newItemMacro = `/*ASE_REPLACED*/let options = {version: "MIDI", args: args};
+game.AdvancedSpellEffects.summonCreature(options);`;
+            returnOBJ = {
+                summonOptions: summonOptions,
+                summons: currentSummonTypes,
+                magicSchoolOptions: magicSchoolOptions,
+                magicSchoolColorOptions: magicSchoolColorOptions,
+                effectAColorOptions: effectAColorOptions,
+                effectBColorOptions: effectBColorOptions
+            };
+        }
         await item.setFlag("itemacro", "macro.data.command", newItemMacro);
         await item.setFlag("itemacro", "macro.data.name", itemName);
         await item.setFlag("midi-qol", "onUseMacroName", "ItemMacro");
@@ -324,6 +377,8 @@ Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
             return (v1 && v2) ? options.fn(this) : options.inverse(this);
         case '||':
             return (v1 || v2) ? options.fn(this) : options.inverse(this);
+        case 'includes':
+            return (v1.includes(v2)) ? options.fn(this) : options.inverse(this);
         default:
             return options.inverse(this);
     }

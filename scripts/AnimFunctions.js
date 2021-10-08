@@ -228,7 +228,7 @@ Hooks.once('init', async function () {
             //console.log("Failed Saves - ", failedSaves);
             // console.log("Passed Saves - ", passedSaves);
             let spellLevel = stormCloudTile.getFlag("advancedspelleffects", "spellLevel");
-            if(stormCloudTile.getFlag("advancedspelleffects","stormDamage")){
+            if (stormCloudTile.getFlag("advancedspelleffects", "stormDamage")) {
                 spellLevel += 1;
             }
             let item = casterActor.items.get(stormCloudTile.getFlag("advancedspelleffects", "itemID"));
@@ -1309,7 +1309,7 @@ if(args[0] === "off"){
                         //console.log(distance);
                         let steelWindSequence = new Sequence("Advanced Spell Effects")
                             .effect()
-                            .atLocation({x: caster.x + (canvas.grid.size / 2), y: caster.y + (canvas.grid.size / 2)})
+                            .atLocation({ x: caster.x + (canvas.grid.size / 2), y: caster.y + (canvas.grid.size / 2) })
                             .JB2A()
                             .file(gustAnim)
                             .reachTowards({ x: openPosition.x + (canvas.grid.size / 2), y: openPosition.y + (canvas.grid.size / 2) })
@@ -1666,16 +1666,18 @@ if(args[0] === "off"){
                     return;
                 }
                 let midiData = options.args[0];
+                //console.log("MIDI Data: ", midiData);
+                const actorD = game.actors.get(midiData.actor._id);
+                const tokenD = canvas.tokens.get(midiData.tokenId);
                 switch (options.type.toLowerCase()) {
                     case "spiritual weapon":
-                        const actorD = game.actors.get(midiData.actor._id);
-                        const tokenD = canvas.tokens.get(midiData.tokenId);
                         const level = midiData.spellLevel;
                         let summonType = "Spiritual Weapon";
                         const summonerDc = actorD.data.data.attributes.spelldc;
                         const summonerAttack = summonerDc - 8;
                         const summonerMod = getProperty(tokenD.actor, `data.data.abilities.${getProperty(tokenD.actor, 'data.data.attributes.spellcasting')}.mod`);
                         let damageScale = '';
+
                         function componentToHex(c) {
                             var hex = c.toString(16);
                             return hex.length == 1 ? "0" + hex : hex;
@@ -1684,6 +1686,7 @@ if(args[0] === "off"){
                         function rgbToHex(r, g, b) {
                             return "0x" + componentToHex(r) + componentToHex(g) + componentToHex(b);
                         }
+
                         async function myEffectFunction(template, color, update) {
                             console.log("Color: ", color);
                             let glowColor;
@@ -1735,7 +1738,6 @@ if(args[0] === "off"){
                                 .endTime(3300)
                                 .playbackRate(0.7)
                                 .scaleOut(0, 250)
-                                .belowTokens()
                                 .filter("Glow", { color: glowColor, distance: 35, outerStrength: 2, innerStrength: 0.25 })
                                 .center()
                                 .belowTokens()
@@ -1761,7 +1763,6 @@ if(args[0] === "off"){
                         function capitalizeFirstLetter(string) {
                             return string.charAt(0).toUpperCase() + string.slice(1);
                         }
-
                         let weaponData = [{
                             type: "select",
                             label: "Weapon",
@@ -1951,8 +1952,6 @@ if(args[0] === "off"){
                         };
                         warpgate.spawn(summonType, updates, callbacks, options);
                         break;
-                    case "beast":
-                        break;
                     default:
                         break;
                 }
@@ -1963,6 +1962,148 @@ if(args[0] === "off"){
                 return;
         }
     }
+
+    async function summonCreature(options) {
+        let error = false;
+        if (typeof args !== 'undefined' && args.length === 0) {
+            error = `You can't run this macro from the hotbar! This is a callback macro. To use this, enable MidiQOL settings in "Workflow" -> "Add macro to call on use", then add this macro's name to the bottom of the Misty Step spell in the "On Use Macro" field.`;
+        }
+        if (!(game.modules.get("jb2a_patreon"))) {
+            error = `You need to have JB2A's patreon only module installed to run this macro!`;
+        }
+        if (!game.modules.get("advanced-macros")?.active) {
+            let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
+            error = `You need to have Advanced Macros ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("socketlib")?.active) {
+            let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
+            error = `You need to have SocketLib ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("tagger")?.active) {
+            let installed = game.modules.get("tagger") && !game.modules.get("tagger").active ? "enabled" : "installed";
+            error = `You need to have TTagger${installed} to run this macro!`;
+        }
+        if (!game.modules.get("sequencer")?.active) {
+            let installed = game.modules.get("sequencer") && !game.modules.get("sequencer").active ? "enabled" : "installed";
+            error = `You need to have Sequencer ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("warpgate")?.active) {
+            let installed = game.modules.get("warpgate") && !game.modules.get("warpgate").active ? "enabled" : "installed";
+            error = `You need to have Warpgate ${installed} to run this macro!`;
+        }
+        if (!game.modules.get("itemacro")?.active) {
+            let installed = game.modules.get("itemacro") && !game.modules.get("itemacro").active ? "enabled" : "installed";
+            error = `You need to have Warpgate ${installed} to run this macro!`;
+        }
+        if (error) {
+            ui.notifications.error(error);
+            return;
+        }
+        function componentToHex(c) {
+            var hex = c.toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "0x" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+        }
+        async function myEffectFunction(template, effectInfo) {
+            //console.log("Color: ", color);
+
+            let portalAnimIntro = `jb2a.magic_signs.circle.02.${effectInfo.magicSchool}.intro.${effectInfo.magicSchoolColor}`;
+            let portalAnimLoop = `jb2a.magic_signs.circle.02.${effectInfo.magicSchool}.loop.${effectInfo.magicSchoolColor}`;
+            let effectAAnim = `jb2a.eldritch_blast.${effectInfo.effectAColor}.05ft`;
+            let effectBAnim = `jb2a.energy_strands.complete.${effectInfo.effectBColor}.01`;
+
+            new Sequence("Advanced Spell Effects")
+                .effect()
+                .file(portalAnimIntro)
+                .atLocation(template)
+                .belowTokens()
+                .scale(0.25)
+                .waitUntilFinished(-2000)
+                .effect()
+                .file(portalAnimLoop)
+                .atLocation(template)
+                .belowTokens()
+                .scale(0.25)
+                .persist()
+                .fadeOut(750, { ease: "easeInQuint" })
+                .name("portalAnimLoop")
+                .effect()
+                .file(effectAAnim)
+                .atLocation(template)
+                .JB2A()
+                .waitUntilFinished(-1000)
+                .endTime(3300)
+                .playbackRate(0.7)
+                .scaleOut(0, 500)
+                .scale(1.5)
+                .zIndex(1)
+                .belowTokens()
+                .center()
+                .belowTokens()
+                .effect()
+                .file(effectBAnim)
+                .atLocation(template)
+                .zIndex(1)
+                .scale(0.4)
+                .fadeOut(500)
+                .scaleIn(0, 1000, { ease: "easeInOutBack" })
+                .waitUntilFinished(-2250)
+                .play()
+        }
+
+        async function postEffects(template, token, effectInfo) {
+            let portalAnimOutro = `jb2a.magic_signs.circle.02.${effectInfo.magicSchool}.outro.${effectInfo.magicSchoolColor}`;
+            new Sequence("Advanced Spell Effects")
+                .effect()
+                .file(portalAnimOutro)
+                .atLocation(template)
+                .belowTokens()
+                .scale(0.25)
+                .thenDo(async () => {
+                    Sequencer.EffectManager.endEffects({ name: "portalAnimLoop" });
+                })
+                .wait(500)
+                .animation()
+                .on(token)
+                .fadeIn(1000, {ease: "easeInQuint"})
+                .play()
+        }
+        let midiData = options.args[0];
+        //console.log("MIDI Data: ", midiData);
+        const actorD = game.actors.get(midiData.actor._id);
+        const tokenD = canvas.tokens.get(midiData.tokenId);
+        let item = actorD.items.get(midiData.item._id);
+        let summonInfo = item.getFlag("advancedspelleffects", "effectOptions.summons");
+        let effectInfo = item.getFlag("advancedspelleffects", "effectOptions");
+        console.log("Summon Info: ", summonInfo);
+        let summonOptionsData = {
+            buttons: [{ label: summonInfo.typeA.name, value: game.actors.get(summonInfo.typeA.actor).name },
+            { label: summonInfo.typeB.name, value: game.actors.get(summonInfo.typeB.actor).name },
+            { label: summonInfo.typeC.name, value: game.actors.get(summonInfo.typeC.actor).name }]
+        };
+        const warpgateOptions = { controllingActor: game.actors.get(midiData.actor._id) };
+        let chosenSummon = await warpgate.buttonDialog(summonOptionsData, 'row');
+        let summonEffectCallbacks = {
+            pre: async (template, update) => {
+                myEffectFunction(template, effectInfo);
+                await warpgate.wait(1750);
+            },
+            post: async (template, token) => {
+                postEffects(template, token, effectInfo);
+                await warpgate.wait(500);
+            }
+        };
+        let updates = {
+            token: {
+                'alpha': 0,
+            }
+        }
+        await warpgate.spawn(chosenSummon, updates, summonEffectCallbacks, warpgateOptions);
+    }
+
 
     async function callLightning(options) {
         let color = options.color?.toLowerCase() ?? "blue";
@@ -2112,6 +2253,7 @@ else
     game.AdvancedSpellEffects.summon = summon;
     game.AdvancedSpellEffects.callLightning = callLightning;
     game.AdvancedSpellEffects.callBolt = callBolt;
+    game.AdvancedSpellEffects.summonCreature = summonCreature;
     /*
     game.AdvancedSpellEffects.tollTheDead = tollTheDead;*/
 
