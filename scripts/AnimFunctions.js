@@ -1206,6 +1206,8 @@ if(args[0] === "off"){
                         })
                     await steelWindSequence.play();
                 }
+                //FREE POSITION CODE TAKEN FROM WARPGATE MODULE
+                //Permission for free re-use was granted by Matthew Haentschke----------
                 function getFreePosition(origin) {
                     const center = canvas.grid.getCenter(origin.x, origin.y)
                     origin = { x: center[0], y: center[1] };
@@ -1242,6 +1244,7 @@ if(args[0] === "off"){
                     //console.log("Free!");
                     return true;
                 }
+                //---------------------------------------------------------------------------
                 function getRandomInt(min, max) {
                     min = Math.ceil(min);
                     max = Math.floor(max);
@@ -2007,7 +2010,7 @@ if(args[0] === "off"){
         function rgbToHex(r, g, b) {
             return "0x" + componentToHex(r) + componentToHex(g) + componentToHex(b);
         }
-        async function myEffectFunction(template, effectInfo) {
+        async function summonCreatureEffect(template, effectInfo) {
             //console.log("Color: ", color);
 
             let portalAnimIntro = `jb2a.magic_signs.circle.02.${effectInfo.magicSchool}.intro.${effectInfo.magicSchoolColor}`;
@@ -2054,7 +2057,7 @@ if(args[0] === "off"){
                 .play()
         }
 
-        async function postEffects(template, token, effectInfo) {
+        async function summonCreaturePostEffects(template, token, effectInfo) {
             let portalAnimOutro = `jb2a.magic_signs.circle.02.${effectInfo.magicSchool}.outro.${effectInfo.magicSchoolColor}`;
             new Sequence("Advanced Spell Effects")
                 .effect()
@@ -2078,7 +2081,7 @@ if(args[0] === "off"){
         let item = actorD.items.get(midiData.item._id);
         let summonInfo = item.getFlag("advancedspelleffects", "effectOptions.summons");
         let effectInfo = item.getFlag("advancedspelleffects", "effectOptions");
-        console.log("Summon Info: ", summonInfo);
+        //console.log("Summon Info: ", summonInfo);
         let summonOptionsData = {
             buttons: [{ label: summonInfo.typeA.name, value: game.actors.get(summonInfo.typeA.actor).name },
             { label: summonInfo.typeB.name, value: game.actors.get(summonInfo.typeB.actor).name },
@@ -2088,11 +2091,11 @@ if(args[0] === "off"){
         let chosenSummon = await warpgate.buttonDialog(summonOptionsData, 'row');
         let summonEffectCallbacks = {
             pre: async (template, update) => {
-                myEffectFunction(template, effectInfo);
+                summonCreatureEffect(template, effectInfo);
                 await warpgate.wait(1750);
             },
             post: async (template, token) => {
-                postEffects(template, token, effectInfo);
+                summonCreaturePostEffects(template, token, effectInfo);
                 await warpgate.wait(500);
             }
         };
