@@ -5,7 +5,6 @@ export async function handleConcentration(activeEffect) {
     if (activeEffect.data.label != "Concentrating") return;
     let casterActor = activeEffect.parent;
     let casterToken = casterActor.getActiveTokens()[0];
-    console.log("Caster Token: ", casterToken);
     let effectSource = activeEffect.sourceName;
     let item = casterActor.items.filter((item) => item.name == effectSource)[0] ?? undefined;
     if (!item) return;
@@ -66,11 +65,10 @@ export async function handleConcentration(activeEffect) {
             }
             break;
         case "Call Lightning":
-            console.log("StormCloud CasterID: ", casterToken.tokenId);
-            let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == casterToken.tokenId);
+            let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == casterToken.id);
             //console.log("tiles to delete: ", [tiles[0].id]);
             if (stormCloudTiles.length > 0) {
-                console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
+                //console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
                 aseSocket.executeAsGM("deleteTiles",[stormCloudTiles[0].id]);
             }
             break;

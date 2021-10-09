@@ -18,12 +18,13 @@ export async function createStormCloud(midiData) {
     let castTemplate = await warpgate.crosshairs.show(25, midiData.item.img, "Call Lightning");
     let effectFile = `jb2a.call_lightning.${res}_res.${color}`
     let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
-    let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId);
+    let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId, stormyWeather);
     console.log("StomeTileID: ", stormTileId);
-    await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", stormyWeather);
+
+    //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
     await callLightningBolt(canvas.scene.tiles.get(stormTileId));
 
-    async function placeCloudAsTile(castTemplate, casterId) {
+    async function placeCloudAsTile(castTemplate, casterId, isStorm) {
         let templateData = castTemplate;
         let tileWidth;
         let tileHeight;
@@ -57,7 +58,8 @@ export async function createStormCloud(midiData) {
                     'stormCloudTile': casterId,
                     'boltStyle': boltStyle,
                     'spellLevel': midiData.itemLevel,
-                    'itemID': midiData.item._id
+                    'itemID': midiData.item._id,
+                    'stormDamage': isStorm
                 }
             }
         }
