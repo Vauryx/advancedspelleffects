@@ -6,7 +6,7 @@ import { handleConcentration } from "./concentrationHandler.js";
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
 import * as callLightning from "./spells/callLightning.js";
-
+import {fogCloud} from "./spells/fogCloud.js";
 
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
@@ -31,6 +31,7 @@ Hooks.on('init', () => {
         let missingModule = utilFunctions.checkModules();
         if (missingModule) {
             ui.notifications.error(missingModule);
+            return;
         }
 
         switch (item.name) {
@@ -44,6 +45,9 @@ Hooks.on('init', () => {
                 if(!midiData.flavor?.includes("Lightning Bolt")){
                     await callLightning.createStormCloud(midiData);
                 }
+                break;
+            case "Fog Cloud":
+                await fogCloud(midiData);
                 break;
             default:
                 console.log("--SPELL NAME NOT RECOGNIZED--");
@@ -165,7 +169,12 @@ Hooks.once('ready', async function () {
     if (!game.user.isGM) return;
 
     Hooks.on("updateTile", async function (tileD) {
-        aseSocket.executeAsGM("moveDarknessWalls", tileD.id);
+        let wallNum = 12;
+        if (tileD.getFlag("advancedspelleffects", "fogCloudWallNum")) {
+            wallNum = tileD.getFlag("advancedspelleffects", "fogCloudWallNum");
+            await aseSocket.executeAsGM("moveWalls", tileD.id, 'FogCloud', wallNum);
+        }
+        await aseSocket.executeAsGM("moveWalls", tileD.id, 'Darkness', wallNum);
     });
 
     Hooks.on("deleteTile", async function deleteAttachedWalls(tileD) {

@@ -3,7 +3,7 @@ import * as utilFunctions from "../utilityFunctions.js";
 
 export async function createStormCloud(midiData) {
     let item = midiData.item;
-    console.log(midiData);
+    //console.log(midiData);
     let aseFlags = item.getFlag("advancedspelleffects", 'effectOptions');
     let color = "blue";
     let res = "low";

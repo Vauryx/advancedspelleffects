@@ -95,25 +95,6 @@ export class ASESettings extends FormApplication {
                     dmAuraColors: detectMagicAuraColorOptions
                 };
                 break;
-            case 'Fog Cloud':
-                let currentWallNumber = flags.advancedspelleffects?.effectOptions?.wallNumber ?? 12;
-                newItemMacro = `/*ASE_REPLACED*/
-if(args[0] === "off"){
-    console.log("token: ", token)
-    let fogCloudTiles = Tagger.getByTag(`+ "`FogCloudTile-${args[1].tokenId}`" + `);
-        fogCloudTiles.then(async (tiles) => {
-            console.log("tiles to delete: ", tiles);
-            if(tiles.length>0){
-            game.AdvancedSpellEffects.removeTiles([tiles[0].id]);
-            }
-        })
-        }
-    else if(args[0] != "on" && args[0] != "off"){
-        let options = {version: "MIDI", args: args, numberWalls: ${currentWallNumber}};
-        game.AdvancedSpellEffects.fogCloud(options);
-    }`;
-                returnOBJ = { wallNumber: currentWallNumber };
-                break;
             case 'Steel Wind Strike':
                 let weaponsPathMap = {
                     "sword": "melee.01"/*,

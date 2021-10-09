@@ -69,7 +69,14 @@ export async function handleConcentration(activeEffect) {
             //console.log("tiles to delete: ", [tiles[0].id]);
             if (stormCloudTiles.length > 0) {
                 //console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
-                aseSocket.executeAsGM("deleteTiles",[stormCloudTiles[0].id]);
+                aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
+            }
+            break;
+        case "Fog Cloud":
+            console.log(casterActor.id);
+            let fogCloudTiles = await Tagger.getByTag(`FogCloudTile-${casterActor.id}`);
+            if (fogCloudTiles.length > 0) {
+                aseSocket.executeAsGM("deleteTiles", [fogCloudTiles[0].id]);
             }
             break;
         default:
