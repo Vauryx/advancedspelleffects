@@ -1207,7 +1207,7 @@ if(args[0] === "off"){
                     await steelWindSequence.play();
                 }
                 //FREE POSITION CODE TAKEN FROM WARPGATE MODULE
-                //Permission for free re-use was granted by Matthew Haentschke----------
+                //Permission for free re-use was granted by Matthew Haentschke
                 function getFreePosition(origin) {
                     const center = canvas.grid.getCenter(origin.x, origin.y)
                     origin = { x: center[0], y: center[1] };

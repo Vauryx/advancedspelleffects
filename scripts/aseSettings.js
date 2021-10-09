@@ -151,21 +151,7 @@ game.AdvancedSpellEffects.detectMagic(options);
                 };
                 break;
             case 'Darkness':
-                newItemMacro = `/*ASE_REPLACED*/if(args[0] === "off"){
-                            //console.log("token: ", token)
-                            let darknessTiles = Tagger.getByTag(`+ "`DarknessTile-${args[1].tokenId}`" + `);
-                            darknessTiles.then(async (tiles) => {
-                                //console.log("tiles to delete: ", [tiles[0].id]);
-                                if(tiles.length>0){
-                                game.AdvancedSpellEffects.removeTiles([tiles[0].id]);
-                            }
-                            })
-                        }
-                    else
-                    {
-                        let options = {version: "MIDI", args: args};
-                        game.AdvancedSpellEffects.darkness(options);
-                    }`;
+                newItemMacro = ``;
                 break;
             case 'Fog Cloud':
                 let currentWallNumber = flags.advancedspelleffects?.effectOptions?.wallNumber ?? 12;

@@ -41,7 +41,7 @@
   "conflicts": [],
   "esmodules": [
     "/scripts/setup.js",
-    "/scripts/AnimFunctions.js"
+    "/scripts/advancedSpellEffects.js"
   ],
   "scripts": [],
   "styles": [
