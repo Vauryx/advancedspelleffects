@@ -8,6 +8,7 @@ import { detectMagic } from "./spells/detectMagic.js";
 import * as callLightning from "./spells/callLightning.js";
 import {fogCloud} from "./spells/fogCloud.js";
 import {spiritualWeapon} from "./spells/spiritualWeapon.js";
+import {steelWindStrike} from "./spells/steelWindStrike.js";
 
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
@@ -52,6 +53,9 @@ Hooks.on('init', () => {
                 break;
             case "Spiritual Weapon":
                 await spiritualWeapon(midiData);
+                break;
+            case "Steel Wind Strike":
+                await steelWindStrike(midiData);
                 break;
             default:
                 console.log("--SPELL NAME NOT RECOGNIZED--");

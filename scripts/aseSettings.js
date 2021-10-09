@@ -124,8 +124,7 @@ export class ASESettings extends FormApplication {
                 weaponsColors[currentWeapon].forEach((color) => {
                     colorOptions[color] = capitalizeFirstLetter(color);
                 });
-                newItemMacro = `/*ASE_REPLACED*/let options = {version: "MIDI", args: args};
-game.AdvancedSpellEffects.steelWindStrike(options);`;
+                newItemMacro = ``;
                 returnOBJ = {
                     swsWeapons: weaponOptions,
                     weaponColors: colorOptions
