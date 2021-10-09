@@ -135,10 +135,6 @@ game.AdvancedSpellEffects.steelWindStrike(options);`;
                 newItemMacro = `/*ASE_REPLACED*/let options = {version: "MIDI", args: args};
 game.AdvancedSpellEffects.thunderStep(options);`;
                 break;
-            case 'Spiritual Weapon':
-                newItemMacro = `/*ASE_REPLACED*/let options = {version: "MIDI", args: args, type: "Spiritual Weapon"};
-game.AdvancedSpellEffects.summon(options);`;
-                break;
         }
         if (itemName.includes("Summon")) {
             let magicSigns = `jb2a.magic_signs.circle.02`;

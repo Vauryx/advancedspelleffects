@@ -40,3 +40,16 @@ export function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+export function rgbToHex(r, g, b) {
+    return "0x" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+export function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
