@@ -5,6 +5,8 @@ import { handleConcentration } from "./concentrationHandler.js";
 // Importing spells
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
+import * as callLightning from "./spells/callLightning.js";
+
 
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
@@ -15,6 +17,7 @@ Hooks.on('init', () => {
     //Hook onto MIDI- roll complete to activate effects
     if (game.modules.get("midi-qol")?.active) {
         Hooks.on("midi-qol.RollComplete", (workflow) => {
+            console.log("MIDI Workflow: ", workflow);
             handleASE(workflow)
         });
     }
@@ -36,6 +39,11 @@ Hooks.on('init', () => {
                 break;
             case "Detect Magic":
                 await detectMagic(midiData);
+                break;
+            case "Call Lightning":
+                if(!midiData.flavor?.includes("Lightning Bolt")){
+                    await callLightning.createStormCloud(midiData);
+                }
                 break;
             default:
                 console.log("--SPELL NAME NOT RECOGNIZED--");
@@ -139,6 +147,18 @@ Hooks.once('ready', async function () {
                     .fadeOut(750, { ease: "easeInQuint" })
                     .play()
             }
+        }
+    });
+
+    Hooks.on("updateCombat", async function (combat) {
+        let currentCombatantId = combat.current.tokenId;
+        let caster = canvas.tokens.get(currentCombatantId);
+        if (!caster.actor.isOwner) return;
+        let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == currentCombatantId);
+        //console.log("update hook fired...", stormCloudTiles);
+        if (stormCloudTiles.length > 0) {
+            console.log("Detected Storm Cloud! Prompting for Bolt...");
+            await callLightning.callLightningBolt(stormCloudTiles[0]);
         }
     });
 

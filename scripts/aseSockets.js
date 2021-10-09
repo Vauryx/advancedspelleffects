@@ -13,8 +13,8 @@ export function setupASESocket() {
 };
 
 async function updateFlag(objectId, flag, value) {
-    let object = canvas.scene.tiles.get(objectId) || canvas.scene.tokens.get(objectId) || canvas.scene.drawings.get(objectId) || canvas.scene.walls.get(objectId) || canvas.scene.lights.get(objectId);
-    await object.setFlag("advancedspelleffects", flag, value);
+let object = canvas.scene.tiles.get(objectId) || canvas.scene.tokens.get(objectId) || canvas.scene.drawings.get(objectId) || canvas.scene.walls.get(objectId) || canvas.scene.lights.get(objectId);
+await object.setFlag("advancedspelleffects", flag, value);
 }
 async function deleteTiles(tileIds) {
     await canvas.scene.deleteEmbeddedDocuments("Tile", tileIds);

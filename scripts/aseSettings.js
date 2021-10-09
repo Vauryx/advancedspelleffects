@@ -90,68 +90,10 @@ export class ASESettings extends FormApplication {
                 detectMagicAuraColors.forEach((color) => {
                     detectMagicAuraColorOptions[color] = capitalizeFirstLetter(color);
                 });
-                let currentAuraColor = flags.advancedspelleffects?.effectOptions?.auraColor ?? `blue`;
-                let currentWaveColor = flags.advancedspelleffects?.effectOptions?.waveColor ?? `blue`;
-                //console.log("Current ItemMacro: ", item.getFlag("itemacro", "macro.data.command"));
-
-                //console.log("Replacing current item macro...");
-                newItemMacro = `/*ASE_REPLACED*/if(args[0] === "off"){
-let midiData = args[args.length-1];
-let caster = canvas.tokens.get(midiData.tokenId);
-let users = [];
-for (const user in game.actors.get(midiData.actorId).data.permission) {
-if (user == "default") continue;
-users.push(user);
-}
-let objects = await Tagger.getByTag("magical", { ignore: [caster] });
-let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
-let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-let magicalObjects = [];
-
-magicalObjects = objects.map(o => {
-            let distance = canvas.grid.measureDistance(caster, o);
-            return {
-                delay: 0,
-                distance: distance,
-                obj: o,
-                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-            }
-        })
-        for (let magical of magicalObjects) {
-            if (!magical.school) {
-                continue;
-            }
-            await game.AdvancedSpellEffects.updateFlag(magical.obj.id, "magicDetected", false);
-            Sequencer.EffectManager.endEffects({name: ` + "`${magical.obj.document.id}-magicRune`" + `, object: magical.obj});
-            Sequencer.EffectManager.endEffects({name: ` + "`${caster.id}-detectMagicAura`" + `, object: caster});
-            new Sequence("Advanced Spell Effects")
-                .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                .forUsers(users)
-                .atLocation(magical.obj)
-                .scale(0.25)
-                .setMustache(magical)
-                .zIndex(0)
-                .effect()
-                .file("jb2a.magic_signs.circle.02.divination.outro.` + currentAuraColor + `")
-                .scale(0.2)
-                .belowTokens()
-                .attachTo(caster)
-            .play()
-        }
-}
-else if(args[0] != "on" && args[0] != "off"){
-let options = {version: "MIDI", args: args, waveColor: "`+ currentWaveColor + `", auraColor: "` + currentAuraColor + `"};
-game.AdvancedSpellEffects.detectMagic(options);
-}`;
-                //console.log(newItemMacro);
                 returnOBJ = {
                     dmWaveColors: detectMagicWaveColorOptions,
                     dmAuraColors: detectMagicAuraColorOptions
                 };
-                break;
-            case 'Darkness':
-                newItemMacro = ``;
                 break;
             case 'Fog Cloud':
                 let currentWallNumber = flags.advancedspelleffects?.effectOptions?.wallNumber ?? 12;
@@ -215,24 +157,6 @@ game.AdvancedSpellEffects.thunderStep(options);`;
             case 'Spiritual Weapon':
                 newItemMacro = `/*ASE_REPLACED*/let options = {version: "MIDI", args: args, type: "Spiritual Weapon"};
 game.AdvancedSpellEffects.summon(options);`;
-                break;
-            case 'Call Lightning':
-                let currentBoltStyle = flags.advancedspelleffects?.effectOptions?.boltStyle ?? "chain";
-                newItemMacro = `/*ASE_REPLACED*/
-if(args[0] === "off"){
-    //console.log("token: ", token)
-    let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == args[1].tokenId);
-        //console.log("tiles to delete: ", [tiles[0].id]);
-        if(stormCloudTiles.length>0){
-            game.AdvancedSpellEffects.removeTiles([stormCloudTiles[0].id]);
-        }
-}
-else
-{
-    let options = {version: "MIDI", args: args, boltStyle: "${currentBoltStyle}"};
-game.AdvancedSpellEffects.callLightning(options);
-}`;
-                returnOBJ = { boltStyle: currentBoltStyle };
                 break;
         }
         if (itemName.includes("Summon")) {
