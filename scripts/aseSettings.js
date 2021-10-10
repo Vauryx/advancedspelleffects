@@ -70,7 +70,6 @@ export class ASESettings extends FormApplication {
         }
         let flags = this.object.data.flags;
         let itemName = item.name;
-        let newItemMacro = "";
         let returnOBJ = {};
         console.log("Detected item name: ", itemName);
         await this.setItemDetails(item);
@@ -124,15 +123,10 @@ export class ASESettings extends FormApplication {
                 weaponsColors[currentWeapon].forEach((color) => {
                     colorOptions[color] = capitalizeFirstLetter(color);
                 });
-                newItemMacro = ``;
                 returnOBJ = {
                     swsWeapons: weaponOptions,
                     weaponColors: colorOptions
                 }
-                break;
-            case 'Thunder Step':
-                newItemMacro = `/*ASE_REPLACED*/let options = {version: "MIDI", args: args};
-game.AdvancedSpellEffects.thunderStep(options);`;
                 break;
         }
         if (itemName.includes("Summon")) {
@@ -188,9 +182,6 @@ game.AdvancedSpellEffects.summonCreature(options);`;
                 effectBColorOptions: effectBColorOptions
             };
         }
-        await item.setFlag("itemacro", "macro.data.command", newItemMacro);
-        await item.setFlag("itemacro", "macro.data.name", itemName);
-        await item.setFlag("midi-qol", "onUseMacroName", "ItemMacro");
         return returnOBJ;
     }
 

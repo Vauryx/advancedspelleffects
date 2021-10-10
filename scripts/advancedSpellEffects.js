@@ -6,9 +6,10 @@ import { handleConcentration } from "./concentrationHandler.js";
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
 import * as callLightning from "./spells/callLightning.js";
-import {fogCloud} from "./spells/fogCloud.js";
-import {spiritualWeapon} from "./spells/spiritualWeapon.js";
-import {steelWindStrike} from "./spells/steelWindStrike.js";
+import { fogCloud } from "./spells/fogCloud.js";
+import { spiritualWeapon } from "./spells/spiritualWeapon.js";
+import { steelWindStrike } from "./spells/steelWindStrike.js";
+import { thunderStep } from "./spells/thunderStep.js";
 
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
@@ -44,7 +45,7 @@ Hooks.on('init', () => {
                 await detectMagic(midiData);
                 break;
             case "Call Lightning":
-                if(!midiData.flavor?.includes("Lightning Bolt")){
+                if (!midiData.flavor?.includes("Lightning Bolt")) {
                     await callLightning.createStormCloud(midiData);
                 }
                 break;
@@ -56,6 +57,11 @@ Hooks.on('init', () => {
                 break;
             case "Steel Wind Strike":
                 await steelWindStrike(midiData);
+                break;
+            case "Thunder Step":
+                if (!midiData.flavor?.includes("Damage - Damage Roll")) {
+                    await thunderStep(midiData);
+                }
                 break;
             default:
                 console.log("--SPELL NAME NOT RECOGNIZED--");
