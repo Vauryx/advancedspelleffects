@@ -187,16 +187,12 @@ game.AdvancedSpellEffects.summonCreature(options);`;
 
     async getData() {
         let flags = this.object.data.flags;
-        //console.log('Advanced Spell Effects Flags: ', flags.advancedspelleffects);
-
         let item = this.object;
         let itemName = item.name;
-        //console.log("Item: ", item);
         let content = "";
         let effectData;
         if (flags.advancedspelleffects?.enableASE) {
             effectData = await this.setEffectData(item);
-            //console.log("Effect Data: ", effectData);
         }
         return {
             flags: this.object.data.flags,
