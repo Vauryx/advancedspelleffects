@@ -171,8 +171,6 @@ export class ASESettings extends FormApplication {
             summonActorsList.forEach((actor) => {
                 summonOptions[actor.name] = actor.id;
             });
-            newItemMacro = `/*ASE_REPLACED*/let options = {version: "MIDI", args: args};
-game.AdvancedSpellEffects.summonCreature(options);`;
             returnOBJ = {
                 summonOptions: summonOptions,
                 summons: currentSummonTypes,

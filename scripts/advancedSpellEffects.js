@@ -10,6 +10,7 @@ import { fogCloud } from "./spells/fogCloud.js";
 import { spiritualWeapon } from "./spells/spiritualWeapon.js";
 import { steelWindStrike } from "./spells/steelWindStrike.js";
 import { thunderStep } from "./spells/thunderStep.js";
+import { summonCreature } from "./spells/summonCreature.js";
 
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
@@ -62,8 +63,13 @@ Hooks.on('init', () => {
             case "Thunder Step":
                 await thunderStep.doTeleport(midiData);
                 break;
-            default:
-                console.log("--SPELL NAME NOT RECOGNIZED--");
+        }
+        if(item.name.includes("Summon")){
+            await summonCreature.doSummon(midiData);
+        }
+        else
+        {
+            console.log("--SPELL NAME NOT RECOGNIZED--");
         }
     }
 });
@@ -78,7 +84,8 @@ const aseModules = {
     darkness,
     spiritualWeapon,
     steelWindStrike,
-    thunderStep
+    thunderStep,
+    summonCreature
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());
