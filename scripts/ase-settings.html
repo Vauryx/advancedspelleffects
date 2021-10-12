@@ -11,7 +11,7 @@
                 <div class="form-group">
                     {{itemName}}
                 </div>
-                {{#ifCond itemName '==' 'Detect Magic'}}
+                {{#ifCondASE itemName '==' 'Detect Magic'}}
                 <div class="ase-detectMagic-settings">
                     <div class="form-group">
                         <label>Select Wave Color:
@@ -34,8 +34,8 @@
                         </label>
                     </div>
                 </div>
-                {{/ifCond}}
-                {{#ifCond itemName '==' 'Fog Cloud'}}
+                {{/ifCondASE}}
+                {{#ifCondASE itemName '==' 'Fog Cloud'}}
                 <div class="ase-fogCloud-settings">
                     <div class="form-group">
                         <label>Number of Walls: </label>
@@ -43,8 +43,8 @@
                             value="{{flags.advancedspelleffects.effectOptions.wallNumber}}">
                     </div>
                 </div>
-                {{/ifCond}}
-                {{#ifCond itemName '==' 'Steel Wind Strike'}}
+                {{/ifCondASE}}
+                {{#ifCondASE itemName '==' 'Steel Wind Strike'}}
                 <div class=" ase-steelWindStrike-settings">
                     <div class="form-group">
                         <label>Select Weapon:
@@ -67,8 +67,8 @@
                         </label>
                     </div>
                 </div>
-                {{/ifCond}}
-                {{#ifCond itemName '==' 'Call Lightning'}}
+                {{/ifCondASE}}
+                {{#ifCondASE itemName '==' 'Call Lightning'}}
                 <div class="ase-callLightning-settings">
                     <div class="form-group">
                         <label>Select Bolt Style:
@@ -81,8 +81,8 @@
                         </label>
                     </div>
                 </div>
-                {{/ifCond}}
-                {{#ifCond itemName 'includes' 'Summon'}}
+                {{/ifCondASE}}
+                {{#ifCondASE itemName 'includes' 'Summon'}}
                 <section class="flexcol">
                     <div class="flexrow">
                         <div class="ase-column">
@@ -188,7 +188,7 @@
                         </div>
                     </div>
                 </section>
-                {{/ifCond}}
+                {{/ifCondASE}}
                 {{/if}}
             </div>
         </div>
