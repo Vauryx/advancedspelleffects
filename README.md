@@ -44,7 +44,13 @@ https://user-images.githubusercontent.com/32877348/134231083-7f34c364-fa93-4e13-
 https://user-images.githubusercontent.com/32877348/134980507-710b9c41-cf61-40f1-ab46-c725cdffa0dc.mp4
 
 ### Spiritual Weapon
+- There must be an actor in your actors directory called "Spiritual Weapon", with an attack action already on the actor like shown below.
+
 https://user-images.githubusercontent.com/32877348/134981937-bdb3b361-d5e3-48f6-abce-4ccf6f8d141e.mp4
+
+![spiritual-weapon-actor-abilites](https://user-images.githubusercontent.com/32877348/137159698-2050736b-5a47-4b43-af8a-8450638a0ed8.png)
+![spiritual-weapon-attack-details](https://user-images.githubusercontent.com/32877348/137159712-efb603e8-d6a2-4b42-a09d-1de381a52471.png)
+
 
 ### Summon Creature (Functionally Tasha's Summons)
 - This video explains the setup for this spell. You must have a folder of actors called "ASE-Summons" which must contain the actors that you wish to use for the summons.
