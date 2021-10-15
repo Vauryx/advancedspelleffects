@@ -6,7 +6,7 @@ export class ASESettings extends FormApplication {
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            template: './modules/advancedspelleffects/scripts/ase-settings.html',
+            template: './modules/advancedspelleffects/scripts/templates/ase-settings.html',
             id: 'ase-item-settings',
             title: "Advanced Spell Effects Settings",
             resizable: true,
@@ -129,7 +129,7 @@ export class ASESettings extends FormApplication {
                 }
                 break;
         }
-        if (itemName.includes("Summon")) {
+        if (itemName.includes("Summon") || itemName == "Animate Dead") {
             let magicSigns = `jb2a.magic_signs.circle.02`;
             let magicSchools = Sequencer.Database.getEntry(magicSigns);
             magicSchools = Object.keys(magicSchools);
@@ -167,7 +167,14 @@ export class ASESettings extends FormApplication {
 
             let summonActorsList = game.folders?.getName("ASE-Summons")?.entities ?? [];
             let summonOptions = {};
-            let currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { typeA: { name: "", actor: "" }, typeB: { name: "", actor: "" }, typeC: { name: "", actor: "" } };
+            let currentSummonTypes = {};
+            if(itemName == "Animate Dead"){
+                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" }};
+            }
+            else {
+                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { typeA: { name: "", actor: "" }, typeB: { name: "", actor: "" }, typeC: { name: "", actor: "" } };
+            }
+            
             summonActorsList.forEach((actor) => {
                 summonOptions[actor.name] = actor.id;
             });
@@ -201,6 +208,7 @@ export class ASESettings extends FormApplication {
 
     }
     activateListeners(html) {
+        console.log(html);
         super.activateListeners(html);
         html.find('.ase-enable-checkbox input[type="checkbox"]').click(evt => {
             this.submit({ preventClose: true }).then(() => this.render());

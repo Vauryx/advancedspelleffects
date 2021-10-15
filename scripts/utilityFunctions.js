@@ -53,3 +53,13 @@ export function rgbToHex(r, g, b) {
 export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+export function getCenter(pos) {
+    return ({ x: pos.x + (canvas.grid.size / 2), y: pos.y + (canvas.grid.size / 2) })
+}
+
+export async function wait(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}

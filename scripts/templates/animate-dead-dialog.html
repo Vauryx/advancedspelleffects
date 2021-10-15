@@ -1,0 +1,31 @@
+<form id="animateDeadForm" class="flexcol" autocomplete="off" novalidate>
+    <section class="content">
+        <p>You can raise <b><input type="number" id="raiseLimit" readonly value="{{data.raiseLimit}}"></input></b> corpses.</p>
+        <table width="100%">
+            <tbody>
+                <tr>
+                    <th>Corpse</th>
+                    <th>Raise</th>
+                </tr>
+                {{#each data.corpses as |corpse|}}
+                <tr class='corpseToken' id={{corpse.id}}>
+                    <td><img src="{{corpse.data.img}}" width="30" height="30" style="border:0px"> - {{corpse.name}}</td>
+                    <td><button class = 'raiseCorpse' type="button" id="{{corpse.id}}">Zombie</td>
+                    <td><button class = 'raiseCorpse' type="button" id="{{corpse.id}}">Skeleton</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        <input type="hidden" id="hdnEffectAColor" value="{{data.effectSettings.effectAColor}}" />
+        <input type="hidden" id="hdnEffectBColor" value="{{data.effectSettings.effectBColor}}" />
+        <input type="hidden" id="hdnMagicSchool" value="{{data.effectSettings.magicSchool}}" />
+        <input type="hidden" id="hdnMagicSchoolColor" value="{{data.effectSettings.magicSchoolColor}}" />
+        <input type="hidden" id="hdnZombieActorId" value="{{data.effectSettings.summons.zombie.actor}}" />
+        <input type="hidden" id="hdnSkeletonActorId" value="{{data.effectSettings.summons.skeleton.actor}}" />
+    </section>
+    <footer class="sheet-footer flexrow">
+        <button type="submit" name="submit">
+            <i class="fa fa-check-square"></i> Done
+        </button>
+    </footer>
+</form>

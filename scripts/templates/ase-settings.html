@@ -1,0 +1,281 @@
+<form class="flexcol" autocomplete="off" novalidate>
+    <section class="content">
+        <div class="tab">
+            <div class="ase-enable-checkbox">
+                <div class="form-group">
+                    <label>Convert to Advanced Spell Effect</label>
+                    <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
+                        flags.advancedspelleffects.enableASE}}>
+                </div>
+                {{#if flags.advancedspelleffects.enableASE}}
+                <div class="form-group">
+                    {{itemName}}
+                </div>
+                {{#ifCondASE itemName '==' 'Detect Magic'}}
+                <div class="ase-detectMagic-settings">
+                    <div class="form-group">
+                        <label>Select Wave Color:
+                            <select name="flags.advancedspelleffects.effectOptions.waveColor">
+                                {{#select flags.advancedspelleffects.effectOptions.waveColor}}
+                                {{#each effectData.dmWaveColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                        <label>Select Aura Color:
+                            <select name="flags.advancedspelleffects.effectOptions.auraColor">
+                                {{#select flags.advancedspelleffects.effectOptions.auraColor}}
+                                {{#each effectData.dmAuraColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                {{/ifCondASE}}
+                {{#ifCondASE itemName '==' 'Fog Cloud'}}
+                <div class="ase-fogCloud-settings">
+                    <div class="form-group">
+                        <label>Number of Walls: </label>
+                        <input type="number" name="flags.advancedspelleffects.effectOptions.wallNumber"
+                            value="{{flags.advancedspelleffects.effectOptions.wallNumber}}">
+                    </div>
+                </div>
+                {{/ifCondASE}}
+                {{#ifCondASE itemName '==' 'Steel Wind Strike'}}
+                <div class=" ase-steelWindStrike-settings">
+                    <div class="form-group">
+                        <label>Select Weapon:
+                            <select name="flags.advancedspelleffects.effectOptions.weapon">
+                                {{#select flags.advancedspelleffects.effectOptions.weapon}}
+                                {{#each effectData.swsWeapons as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                        <label>Select Weapon Color:
+                            <select name="flags.advancedspelleffects.effectOptions.weaponColor">
+                                {{#select flags.advancedspelleffects.effectOptions.weaponColor}}
+                                {{#each effectData.weaponColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                {{/ifCondASE}}
+                {{#ifCondASE itemName '==' 'Call Lightning'}}
+                <div class="ase-callLightning-settings">
+                    <div class="form-group">
+                        <label>Select Bolt Style:
+                            <select name="flags.advancedspelleffects.effectOptions.boltStyle">
+                                {{#select flags.advancedspelleffects.effectOptions.boltStyle}}
+                                <option value="chain">Chain</option>
+                                <option value="strike">Strike</option>
+                                {{/select}}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                {{/ifCondASE}}
+                {{#ifCondASE itemName 'includes' 'Summon'}}
+                <section class="flexcol">
+                    <div class="flexrow">
+                        <div class="ase-column">
+                            <label><b>Summon Type Name:</b> </label>
+                            <input type="text" name="flags.advancedspelleffects.effectOptions.summons.typeA.name"
+                                value="{{effectData.summons.typeA.name}}">
+                        </div>
+                        <div class="ase-column">
+                            <label><b>Associated Actor:</b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.summons.typeA.actor">
+                                {{#select flags.advancedspelleffects.effectOptions.summons.typeA.actor}}
+                                {{#each effectData.summonOptions as |key name|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flexrow">
+                        <div class="ase-column">
+                            <label><b>Summon Type Name:</b> </label>
+                            <input type="text" name="flags.advancedspelleffects.effectOptions.summons.typeB.name"
+                                value="{{effectData.summons.typeB.name}}">
+                        </div>
+                        <div class="ase-column">
+                            <label><b>Associated Actor:</b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.summons.typeB.actor">
+                                {{#select flags.advancedspelleffects.effectOptions.summons.typeB.actor}}
+                                {{#each effectData.summonOptions as |key name|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flexrow">
+                        <div class="ase-column">
+                            <label><b>Summon Type Name:</b> </label>
+                            <input type="text" name="flags.advancedspelleffects.effectOptions.summons.typeC.name"
+                                value="{{effectData.summons.typeC.name}}">
+                        </div>
+                        <div class="ase-column">
+                            <label><b>Associated Actor: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.summons.typeC.actor">
+                                {{#select flags.advancedspelleffects.effectOptions.summons.typeC.actor}}
+                                {{#each effectData.summonOptions as |key name|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                    </div>
+                </section>
+                <section class="flexcol">
+                    <div class="flexrow">
+                    </div>
+                    <div class="flexrow">
+                        <div class="ase-column">
+                            <label><b>Magic School: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.magicSchool">
+                                {{#select flags.advancedspelleffects.effectOptions.magicSchool}}
+                                {{#each effectData.magicSchoolOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                        <div class="ase-column">
+                            <label><b>Magic School Color: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.magicSchoolColor">
+                                {{#select flags.advancedspelleffects.effectOptions.magicSchoolColor}}
+                                {{#each effectData.magicSchoolColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                    </div>
+                </section>
+                <section class="flexcol">
+                    <div class="flexrow">
+                    </div>
+                    <div class="flexrow">
+                        <div class="ase-column">
+                            <label><b>Effect 1 Color: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.effectAColor">
+                                {{#select flags.advancedspelleffects.effectOptions.effectAColor}}
+                                {{#each effectData.effectAColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                        <div class="ase-column">
+                            <label><b>Effect 2 Color: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.effectBColor">
+                                {{#select flags.advancedspelleffects.effectOptions.effectBColor}}
+                                {{#each effectData.effectBColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                    </div>
+                </section>
+                {{/ifCondASE}}
+                {{#ifCondASE itemName '==' 'Animate Dead'}}
+                <section class="flexcol">
+                    <div class="flexrow">
+                        <div class="ase-column">
+                            <label><b>Associated Zombie Actor:</b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.summons.zombie.actor">
+                                {{#select flags.advancedspelleffects.effectOptions.summons.zombie.actor}}
+                                {{#each effectData.summonOptions as |key name|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flexrow">
+                        <div class="ase-column">
+                            <label><b>Associated Skeleton Actor:</b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.summons.skeleton.actor">
+                                {{#select flags.advancedspelleffects.effectOptions.summons.skeleton.actor}}
+                                {{#each effectData.summonOptions as |key name|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                    </div>
+                </section>
+                <section class="flexcol">
+                    <div class="flexrow">
+                    </div>
+                    <div class="flexrow">
+                        <div class="ase-column">
+                            <label><b>Magic School: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.magicSchool">
+                                {{#select flags.advancedspelleffects.effectOptions.magicSchool}}
+                                {{#each effectData.magicSchoolOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                        <div class="ase-column">
+                            <label><b>Magic School Color: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.magicSchoolColor">
+                                {{#select flags.advancedspelleffects.effectOptions.magicSchoolColor}}
+                                {{#each effectData.magicSchoolColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                    </div>
+                </section>
+                <section class="flexcol">
+                    <div class="flexrow">
+                    </div>
+                    <div class="flexrow">
+                        <div class="ase-column">
+                            <label><b>Effect 1 Color: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.effectAColor">
+                                {{#select flags.advancedspelleffects.effectOptions.effectAColor}}
+                                {{#each effectData.effectAColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                        <div class="ase-column">
+                            <label><b>Effect 2 Color: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.effectBColor">
+                                {{#select flags.advancedspelleffects.effectOptions.effectBColor}}
+                                {{#each effectData.effectBColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                    </div>
+                </section>
+                {{/ifCondASE}}
+                {{/if}}
+            </div>
+        </div>
+    </section>
+    <footer class="sheet-footer flexrow">
+        <button type="submit" name="submit">
+            <i class="fa fa-save"></i> Save and Close
+        </button>
+    </footer>
+</form>

@@ -36,7 +36,6 @@ export class summonCreature{
                 .scaleOut(0, 500)
                 .scale(1.5)
                 .zIndex(1)
-                .belowTokens()
                 .center()
                 .belowTokens()
                 .effect()

@@ -11,6 +11,7 @@ import { spiritualWeapon } from "./spells/spiritualWeapon.js";
 import { steelWindStrike } from "./spells/steelWindStrike.js";
 import { thunderStep } from "./spells/thunderStep.js";
 import { summonCreature } from "./spells/summonCreature.js";
+import {animateDead} from "./spells/animateDead.js";
 
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
@@ -42,34 +43,39 @@ Hooks.on('init', () => {
         switch (item.name) {
             case "Darkness":
                 await darkness.createDarkness(midiData);
-                break;
+                return;
             case "Detect Magic":
                 await detectMagic.activateDetectMagic(midiData);
-                break;
+                return;
             case "Call Lightning":
                 if (!midiData.flavor?.includes("Lightning Bolt")) {
                     await callLightning.createStormCloud(midiData);
                 }
-                break;
+                return;
             case "Fog Cloud":
                 await fogCloud.createFogCloud(midiData);
-                break;
+                return;
             case "Spiritual Weapon":
                 await spiritualWeapon.createSpiritualWeapon(midiData);
-                break;
+                return;
             case "Steel Wind Strike":
                 await steelWindStrike.doStrike(midiData);
-                break;
+                return;
             case "Thunder Step":
                 await thunderStep.doTeleport(midiData);
-                break;
+                return;
+            case "Animate Dead":
+                await animateDead.rise(midiData);
+                return;
         }
         if(item.name.includes("Summon")){
             await summonCreature.doSummon(midiData);
+            return;
         }
         else
         {
             console.log("--SPELL NAME NOT RECOGNIZED--");
+            return;
         }
     }
 });
@@ -85,7 +91,8 @@ const aseModules = {
     spiritualWeapon,
     steelWindStrike,
     thunderStep,
-    summonCreature
+    summonCreature,
+    animateDead
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());
