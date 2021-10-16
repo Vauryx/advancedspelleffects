@@ -58,8 +58,14 @@ export class animateDeadDialog extends FormApplication {
         let zombieTokenData;
         let skeletonTokenData;
         if (zombieActorId && skeletonActorId) {
-            zombieTokenData = await game.actors.get(zombieActorId).getTokenData();
-            skeletonTokenData = await game.actors.get(skeletonActorId).getTokenData();
+            zombieTokenData = (await game.actors.get(zombieActorId).getTokenData()).toObject();
+            skeletonTokenData = (await game.actors.get(skeletonActorId).getTokenData()).toObject();
+            delete zombieTokenData.x;
+            delete zombieTokenData.y;
+            delete skeletonTokenData.x;
+            delete skeletonTokenData.y;
+            zombieTokenData = mergeObject(corpseToken.data.toObject(), zombieTokenData, { inplace: false });
+            skeletonTokenData = mergeObject(corpseToken.data.toObject(), skeletonTokenData, { inplace: false });
         }
         else {
             ui.notifications.error("Associated actor for summon not found!");
@@ -82,6 +88,8 @@ export class animateDeadDialog extends FormApplication {
             document.querySelector('button[type="submit"]').click();
         }
         async function playEffect(token, summonTokenData, colorA, colorB, schoolName, schoolColor) {
+           
+           // console.log("Corpse to Mutate: ", corpseDoc);
             let animLoc = utilFunctions.getCenter(token);
             let corpseId = token.id;
             let portalAnimIntro = `jb2a.magic_signs.circle.02.${schoolName}.intro.${schoolColor}`;
@@ -89,40 +97,7 @@ export class animateDeadDialog extends FormApplication {
             let portalAnimOutro = `jb2a.magic_signs.circle.02.${schoolName}.outro.${schoolColor}`;
             let effectAAnim = `jb2a.eldritch_blast.${colorA}.05ft`;
             let effectBAnim = `jb2a.energy_strands.complete.${colorB}.01`;
-            let warpGateUpdates = {
-                token: {
-                    'alpha': 0,
-                }
-            };
-            let summonCallbacks = {
-                post: async (location, spawnedToken) => {
-                    await new Sequence("Advanced Spell Effects")
-                        .animation()
-                        .on(spawnedToken)
-                        .fadeIn(1000, { ease: "easeInQuint" })
-                        .effect()
-                        .file(portalAnimOutro)
-                        .name(`animateDeadAnimOutro-${corpseId}`)
-                        .atLocation(location)
-                        .belowTokens()
-                        .scale(0.25)
-                        .thenDo(async () => {
-                            let aseSeqADHookId = Hooks.on("endedSequencerEffect", async (effectData) => {
-                                if(effectData.name == `animateDeadAnimOutro-${corpseId}`){
-                                    let corpseToDelete = canvas.tokens.get(corpseId);
-                                    await corpseToDelete.delete();
-                                    Hooks.off("endedSequencerEffect", aseSeqADHookId);
-                                }
-                            });
-                            Sequencer.EffectManager.endEffects({ name: "portalAnimLoop" });
-                        })
-                        .animation()
-                        .on(token)
-                        .fadeOut(250, { ease: "easeInQuint" })
-                        .waitUntilFinished()
-                        .play()
-                }
-            };
+            
             new Sequence("Advanced Spell Effects")
                 .effect()
                 .file(portalAnimIntro)
@@ -158,7 +133,26 @@ export class animateDeadDialog extends FormApplication {
                 .scaleIn(0, 1000, { ease: "easeInOutBack" })
                 .waitUntilFinished(-2250)
                 .thenDo(async () => {
-                    await warpgate.spawnAt(animLoc, summonTokenData, warpGateUpdates, summonCallbacks);
+                    let corpseDoc = token.document;
+                    let summonActorData = game.actors.get(summonTokenData.actorId).data.toObject();
+                    delete summonActorData.items;
+                    delete summonActorData.effects;
+                    delete summonActorData._id;
+                    const sheet = token.actor.sheet;
+                    await token.actor.sheet.close();
+                    token.actor._sheet = null;
+                    delete token.actor.apps[sheet.appId]
+                    let mutateUpdates = { token: summonTokenData, actor: summonActorData }
+                    await warpgate.mutate(corpseDoc, mutateUpdates);
+                })
+                .effect()
+                .file(portalAnimOutro)
+                .name(`animateDeadAnimOutro-${corpseId}`)
+                .atLocation(location)
+                .belowTokens()
+                .scale(0.25)
+                .thenDo(async () => {
+                    Sequencer.EffectManager.endEffects({ name: "portalAnimLoop" });
                 })
                 .play()
         }
