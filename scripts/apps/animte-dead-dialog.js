@@ -91,7 +91,6 @@ export class animateDeadDialog extends FormApplication {
            
            // console.log("Corpse to Mutate: ", corpseDoc);
             let animLoc = utilFunctions.getCenter(token);
-            let corpseId = token.id;
             let portalAnimIntro = `jb2a.magic_signs.circle.02.${schoolName}.intro.${schoolColor}`;
             let portalAnimLoop = `jb2a.magic_signs.circle.02.${schoolName}.loop.${schoolColor}`;
             let portalAnimOutro = `jb2a.magic_signs.circle.02.${schoolName}.outro.${schoolColor}`;
@@ -147,8 +146,7 @@ export class animateDeadDialog extends FormApplication {
                 })
                 .effect()
                 .file(portalAnimOutro)
-                .name(`animateDeadAnimOutro-${corpseId}`)
-                .atLocation(location)
+                .atLocation(animLoc)
                 .belowTokens()
                 .scale(0.25)
                 .thenDo(async () => {
