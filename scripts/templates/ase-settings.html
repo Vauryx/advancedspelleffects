@@ -177,10 +177,20 @@
                             </select>
                         </div>
                         <div class="ase-column">
-                            <label><b>Effect 2 Color: </b></label>
-                            <select name="flags.advancedspelleffects.effectOptions.effectBColor">
-                                {{#select flags.advancedspelleffects.effectOptions.effectBColor}}
-                                {{#each effectData.effectBColorOptions as |name key|}}
+                            <label><b>Portal Color: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.portalColor">
+                                {{#select flags.advancedspelleffects.effectOptions.portalColor}}
+                                {{#each effectData.portalColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </div>
+                        <div class="ase-column">
+                            <label><b>Portal Closing Impact Color: </b></label>
+                            <select name="flags.advancedspelleffects.effectOptions.portalImpactColor">
+                                {{#select flags.advancedspelleffects.effectOptions.portalImpactColor}}
+                                {{#each effectData.portalImpactColorOptions as |name key|}}
                                 <option value="{{key}}">{{name}}</option>
                                 {{/each}}
                                 {{/select}}

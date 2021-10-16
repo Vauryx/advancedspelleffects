@@ -1,4 +1,4 @@
-import ASESettings from "./aseSettings.js";
+import ASESettings from "./apps/aseSettings.js";
 Hooks.once('ready', async function () {
   if(!game.user.isGM) return;
   Hooks.on(`renderItemSheet5e`, async (app, html, data) => {

@@ -63,7 +63,7 @@ export class callLightning {
                         'stormCloudTile': casterId,
                         'boltStyle': boltStyle,
                         'spellLevel': midiData.itemLevel,
-                        'itemID': midiData.item._id,
+                        'itemID': midiData.item.data._id,
                         'stormDamage': isStorm
                     }
                 }
@@ -143,10 +143,10 @@ export class callLightning {
             //console.log("Thunder Step Full Damage roll: ", fullDamageRoll);
             let halfdamageroll = new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: false });
             if (failedSaves.length > 0) {
-                new MidiQOL.DamageOnlyWorkflow(casterActor, caster, fullDamageRoll.total, "lightning", failedSaves, fullDamageRoll, { flavor: `Lightning Bolt Full Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
+                new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, fullDamageRoll.total, "lightning", failedSaves, fullDamageRoll, { flavor: `Lightning Bolt Full Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
             }
             if (passedSaves.length > 0) {
-                new MidiQOL.DamageOnlyWorkflow(casterActor, caster, halfdamageroll.total, "lightning", passedSaves, halfdamageroll, { flavor: `Lightning Bolt Half Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
+                new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, halfdamageroll.total, "lightning", passedSaves, halfdamageroll, { flavor: `Lightning Bolt Half Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
             }
         }
 

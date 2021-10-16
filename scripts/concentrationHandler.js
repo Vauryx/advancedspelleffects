@@ -3,16 +3,18 @@ import * as utilFunctions from "./utilityFunctions.js";
 
 export class concentrationHandler {
 
-    static registerHooks(){
+    static registerHooks() {
         Hooks.on("deleteActiveEffect", concentrationHandler._handleConcentration);
     }
-    
+
     static async _handleConcentration(activeEffect) {
         console.log("Handling removal of Concentration: ", activeEffect);
         if (activeEffect.data.label != "Concentrating") return;
-        let casterActor = activeEffect.parent;
-        let casterToken = casterActor.getActiveTokens()[0];
-        let effectSource = activeEffect.sourceName;
+        let origin = activeEffect.data.origin;
+        origin = origin.split(".");
+        let casterActor = game.actors.get(origin[1]);
+        let casterToken = await casterActor.getActiveTokens()[0];
+        let effectSource = casterActor.items.get(origin[3]).name;
         let item = casterActor.items.filter((item) => item.name == effectSource)[0] ?? undefined;
         if (!item) return;
         let aseEnabled = item.getFlag("advancedspelleffects", 'enableASE') ?? false;
@@ -25,7 +27,7 @@ export class concentrationHandler {
                 if (darknessTiles.length > 0) {
                     aseSocket.executeAsGM("deleteTiles", [darknessTiles[0].id]);
                 }
-                break;
+                return;
             case "Detect Magic":
                 let users = [];
                 for (const user in casterActor.data.permission) {
@@ -36,7 +38,7 @@ export class concentrationHandler {
                 let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
                 let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
                 let magicalObjects = [];
-    
+
                 magicalObjects = objects.map(o => {
                     let pointA = { x: casterToken.data.x + (canvas.grid.size / 2), y: casterToken.data.y + (canvas.grid.size / 2) };
                     let pointB = { x: o.x + (canvas.grid.size / 2), y: o.y + (canvas.grid.size / 2) }
@@ -70,7 +72,7 @@ export class concentrationHandler {
                         .attachTo(casterToken)
                         .play()
                 }
-                break;
+                return;
             case "Call Lightning":
                 let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == casterToken.id);
                 //console.log("tiles to delete: ", [tiles[0].id]);
@@ -78,18 +80,24 @@ export class concentrationHandler {
                     //console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
                     aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
                 }
-                break;
+                return;
             case "Fog Cloud":
-                console.log(casterActor.id);
+                //console.log(casterActor.id);
                 let fogCloudTiles = await Tagger.getByTag(`FogCloudTile-${casterActor.id}`);
                 if (fogCloudTiles.length > 0) {
                     aseSocket.executeAsGM("deleteTiles", [fogCloudTiles[0].id]);
                 }
-                break;
-            default:
-                console.log("ASE: Effect source not recognized...");
+                return;
         }
-    
+        if (effectSource.includes("Summon")) {
+            console.log("Detected summon concentration removal...");
+            let summonedTokens = canvas.tokens.placeables.filter((token) => { return token.document.getFlag("advancedspelleffects", "summoner") == casterActor.id });
+            if(summonedTokens.length>0){
+                await warpgate.dismiss(summonedTokens[0].id);
+            }
+            return;
+        }
+        console.log("ASE: Effect source not recognized...");
     }
 
 }
