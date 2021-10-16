@@ -27,7 +27,7 @@ List of currently avaiable spells:
 
 ### Animate Dead:
 ![animate-dead-settings](https://user-images.githubusercontent.com/32877348/137574620-aa562d2b-0dbb-419e-a413-0c1c98a2f85a.png)
-![animate-dead-demo](https://user-images.githubusercontent.com/32877348/137574627-41fd7b30-9e2a-49e9-93d0-593f6bfac82a.gif)
+![animate-dead-demov2](https://user-images.githubusercontent.com/32877348/137574840-67bec1e0-3c53-4a3f-9784-6e30434418a7.gif)
 
 ### Darkness:
 https://user-images.githubusercontent.com/32877348/134225849-22115c32-5a6e-47d5-93aa-5c429d3ee9a5.mp4
