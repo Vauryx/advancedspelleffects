@@ -23,8 +23,9 @@ The currently available spells are outlined below.
 
 There is a compendium that includes some of the spells pre-configured called "Advanced Spell Effects - MIDI Spells".
 
-List of currently avaiable spells: 
-### Animate Dead
+List of currently avaiable spells:
+
+### Animate Dead:
 ![animate-dead-settings](https://user-images.githubusercontent.com/32877348/137574620-aa562d2b-0dbb-419e-a413-0c1c98a2f85a.png)
 ![animate-dead-demo](https://user-images.githubusercontent.com/32877348/137574627-41fd7b30-9e2a-49e9-93d0-593f6bfac82a.gif)
 
