@@ -24,6 +24,9 @@ The currently available spells are outlined below.
 There is a compendium that includes some of the spells pre-configured called "Advanced Spell Effects - MIDI Spells".
 
 List of currently avaiable spells: 
+### Animate Dead
+![animate-dead-settings](https://user-images.githubusercontent.com/32877348/137574620-aa562d2b-0dbb-419e-a413-0c1c98a2f85a.png)
+![animate-dead-demo](https://user-images.githubusercontent.com/32877348/137574627-41fd7b30-9e2a-49e9-93d0-593f6bfac82a.gif)
 
 ### Darkness:
 https://user-images.githubusercontent.com/32877348/134225849-22115c32-5a6e-47d5-93aa-5c429d3ee9a5.mp4
@@ -68,6 +71,4 @@ https://user-images.githubusercontent.com/32877348/136510123-e4452f6c-48d4-46b4-
 - Warpgate code used with permission for free re-use by Matthew Haentschke
 https://github.com/trioderegion/warpgate
  - Huge thanks to siliconsaint as well for contributing his spiritual weapon macro for this module.
- 
-
 
