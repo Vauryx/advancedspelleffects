@@ -4,7 +4,6 @@
 - JB2A (Patreon Version)
 - Sequencer
 - Warpgate
-- Item Macro
 - MIDI-QOL
 - Advanced Macros
 - SocketLib
