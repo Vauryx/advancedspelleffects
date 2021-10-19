@@ -55,16 +55,16 @@ https://user-images.githubusercontent.com/32877348/134981937-bdb3b361-d5e3-48f6-
 ![spiritual-weapon-attack-details](https://user-images.githubusercontent.com/32877348/137159712-efb603e8-d6a2-4b42-a09d-1de381a52471.png)
 
 
-### Summon Creature (Functionally Tasha's Summons)
-- This video explains the setup for this spell. You must have a folder of actors called "ASE-Summons" which must contain the actors that you wish to use for the summons.
+### Summon Creature
+- Any spell with "Summon" in the name is eligible.
+- You must have a folder of actors called "ASE-Summons" which must contain the actors that you wish to use for the summons.
+- What can be summoned is set in the ASE settings for the spell.
 - When the spell is cast, a prompt will be displayed with the types defined previously. 
 
-https://user-images.githubusercontent.com/32877348/136510094-e1d8e50f-5175-42e3-b66e-14247f4e48fb.mp4
-
-https://user-images.githubusercontent.com/32877348/136510123-e4452f6c-48d4-46b4-9bd5-aa38f9c4010f.mp4
-
+![summon-creature-settings](https://user-images.githubusercontent.com/32877348/137860669-6949b85e-b36a-48d2-8461-7a130a43a0cb.png)
 ![summon-creature-folder](https://user-images.githubusercontent.com/32877348/137201659-29796792-b71f-4a00-b266-f16897a8305e.png)
-![summon-creature-dialog](https://user-images.githubusercontent.com/32877348/137201645-86a4fdd7-4341-4bfc-8887-19ff866c957e.png)
+
+![summon-creature-demo](https://user-images.githubusercontent.com/32877348/137860726-30ceb7f7-c222-455c-bd12-71a912c2bf9e.gif)
 
 ##### Contributions - 
 - I want to take an opportunity here to thank HoneyBadger and Wasp - The Sequencer Guy for their never-ending reservoir of help and advice for a new dev. This module only exists thanks to them and others who've contributed their time or their code!
