@@ -5,7 +5,6 @@
 - Sequencer
 - Warpgate
 - MIDI-QOL
-- Advanced Macros
 - SocketLib
 - Tagger
 
