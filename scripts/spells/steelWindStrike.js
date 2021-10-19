@@ -115,7 +115,7 @@ export class steelWindStrike{
                 .rotateTowards(location)
                 .animation()
                 .on(caster)
-                .snapToSquare()
+                .snapToGrid()
                 .moveTowards(location, { ease: "easeOutElasticCustom" })
                 .moveSpeed(distance / 60)
                 .duration(800)
@@ -130,7 +130,6 @@ export class steelWindStrike{
                 .belowTokens()
                 .waitUntilFinished()
                 .thenDo(async () => {
-                    await caster.TMFXdeleteFilters("SWSBlur");
                     await caster.document.setFlag("autorotate", "enabled", currentAutoRotateState);
                 })
             await steelWindSequence.play();
@@ -180,38 +179,8 @@ export class steelWindStrike{
             let currentY;
             let targetY;
             let distance;
-            let params =
-                [{
-                    filterType: "blur",
-                    filterId: "SWSBlur",
-                    padding: 10,
-                    quality: 4.0,
-                    blur: 0,
-                    blurX: 0,
-                    blurY: 0,
-                    animated:
-                    {
-                        blurX:
-                        {
-                            active: true,
-                            animType: "syncCosOscillation",
-                            loopDuration: 500,
-                            val1: 0,
-                            val2: 8
-                        },
-                        blurY:
-                        {
-                            active: true,
-                            animType: "syncCosOscillation",
-                            loopDuration: 250,
-                            val1: 0,
-                            val2: 8
-                        }
-                    }
-                }];
             let swingType;
             let swingStartDelay = -600;
-            await caster.TMFXaddUpdateFilters(params);
             //console.log(targets);
             for (let i = 0; i < targets.length; i++) {
                 if (i == targets.length - 1) {
@@ -287,7 +256,16 @@ export class steelWindStrike{
             });
             contentHTML = contentHTML + `</form>`
             async function chooseFinalLocation() {
-                let template = await warpgate.crosshairs.show(1, midiData.item.img, "End At");
+                let crosshairsConfig = {
+                    size:1,
+                    icon: caster.data.img,
+                    label: 'End At',
+                    tag: 'end-at-crosshairs',
+                    drawIcon: true,
+                    drawOutline: false,
+                    interval: 2
+                }
+                let template = await warpgate.crosshairs.show(crosshairsConfig);
                 await finalTeleport(caster, template);
     
             }
