@@ -12,6 +12,7 @@ export class concentrationHandler {
         if (activeEffect.data.label != "Concentrating") return;
         let origin = activeEffect.data.origin;
         origin = origin.split(".");
+        if(origin.length < 4) return;
         let casterActor = game.actors.get(origin[1]);
         let casterToken = await casterActor.getActiveTokens()[0];
         let effectSource = casterActor.items.get(origin[3]).name;
@@ -88,11 +89,15 @@ export class concentrationHandler {
                     aseSocket.executeAsGM("deleteTiles", [fogCloudTiles[0].id]);
                 }
                 return;
+            case "Witch Bolt":
+                Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-witchBolt` });
+                await casterToken.document.unsetFlag("advancedspelleffects", "witchBolt");
+                return;
         }
         if (effectSource.includes("Summon")) {
             console.log("Detected summon concentration removal...");
             let summonedTokens = canvas.tokens.placeables.filter((token) => { return token.document.getFlag("advancedspelleffects", "summoner") == casterActor.id });
-            for (const summonedToken of summonedTokens){
+            for (const summonedToken of summonedTokens) {
                 await warpgate.dismiss(summonedToken.id);
             }
             return;
