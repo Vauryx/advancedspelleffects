@@ -1,13 +1,11 @@
 export function checkModules() {
     let error = false;
-
-    if (!(game.modules.get("jb2a_patreon"))) {
-        error = `You need to have JB2A's patreon only module installed to cast this spell!`;
+    
+    if (!game.modules.get("jb2a_patreon")?.active) {
+        let installed = game.modules.get("jb2a_patreon") && !game.modules.get("jb2a_patreon").active ? "enabled" : "installed";
+        error = `You need to have the JB2A Patreon module ${installed} to cast this spell!`;
     }
-    if (!game.modules.get("advanced-macros")?.active) {
-        let installed = game.modules.get("advanced-macros") && !game.modules.get("advanced-macros").active ? "enabled" : "installed";
-        error = `You need to have Advanced Macros ${installed} to cast this spell!`;
-    }
+    
     if (!game.modules.get("socketlib")?.active) {
         let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
         error = `You need to have SocketLib ${installed} to cast this spell!`;

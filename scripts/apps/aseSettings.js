@@ -1,7 +1,12 @@
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
-        this.flags = this.object.data.flags.advancedspelleffects
+        this.flags = this.object.data.flags.advancedspelleffects;
+        if(this.flags){
+            if (!this.flags.effectOptions){
+                this.flags.effectOptions = {};
+            }
+        }
     }
 
     static get defaultOptions() {
@@ -65,8 +70,26 @@ export class ASESettings extends FormApplication {
     }
 
     async setEffectData(item) {
+        //console.log(item);
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+        function getDBOptions(rawSet, removeTemplate = false) {
+            let options = {};
+            let setOptions = Sequencer.Database.getEntry(rawSet);
+            if (setOptions) {
+                let setKeys = Object.keys(setOptions);
+                if (removeTemplate) {
+                    let templateIndex = setKeys.indexOf("_template");
+                    if (templateIndex > -1) {
+                        setKeys.splice(templateIndex, 1);
+                    }
+                }
+                setKeys.forEach((elem) => {
+                    options[elem] = capitalizeFirstLetter(elem);
+                });
+            }
+            return options;
         }
         let flags = this.object.data.flags;
         let itemName = item.name;
@@ -76,19 +99,11 @@ export class ASESettings extends FormApplication {
         switch (itemName) {
             case 'Detect Magic':
                 let detectMagicWaves = `jb2a.detect_magic.circle`;
-                let detectMagicWaveColors = Sequencer.Database.getEntry(detectMagicWaves);
-                detectMagicWaveColors = Object.keys(detectMagicWaveColors);
-                let detectMagicWaveColorOptions = {};
-                detectMagicWaveColors.forEach((color) => {
-                    detectMagicWaveColorOptions[color] = capitalizeFirstLetter(color);
-                });
+                let detectMagicWaveColorOptions = getDBOptions(detectMagicWaves);
+
                 let detectMagicAuras = `jb2a.magic_signs.circle.02.divination.intro`;
-                let detectMagicAuraColors = Sequencer.Database.getEntry(detectMagicAuras);
-                detectMagicAuraColors = Object.keys(detectMagicAuraColors);
-                let detectMagicAuraColorOptions = {};
-                detectMagicAuraColors.forEach((color) => {
-                    detectMagicAuraColorOptions[color] = capitalizeFirstLetter(color);
-                });
+                let detectMagicAuraColorOptions = getDBOptions(detectMagicAuras);
+
                 returnOBJ = {
                     dmWaveColors: detectMagicWaveColorOptions,
                     dmAuraColors: detectMagicAuraColorOptions
@@ -130,61 +145,28 @@ export class ASESettings extends FormApplication {
                 break;
         }
         if (itemName.includes("Summon") || itemName == "Animate Dead") {
-            let magicSigns = `jb2a.magic_signs.circle.02`;
-            let magicSchools = Sequencer.Database.getEntry(magicSigns);
-            magicSchools = Object.keys(magicSchools);
-            let magicSchoolOptions = {};
-            magicSchools.forEach((color) => {
-                magicSchoolOptions[color] = capitalizeFirstLetter(color);
-            });
+            let magicSignsRaw = `jb2a.magic_signs.circle.02`;
+            let magicSchoolOptions = getDBOptions(magicSignsRaw);
+
             let magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${flags.advancedspelleffects?.effectOptions?.magicSchool ?? 'abjuration'}.intro`;
-            let magicSchoolColors = Sequencer.Database.getEntry(magicSchoolColorsRaw);
-            magicSchoolColors = Object.keys(magicSchoolColors);
-            let magicSchoolColorOptions = {};
-            magicSchoolColors.forEach((color) => {
-                magicSchoolColorOptions[color] = capitalizeFirstLetter(color);
-            });
+            let magicSchoolColorOptions = getDBOptions(magicSchoolColorsRaw);
 
             let effectAColorsRaw = `jb2a.eldritch_blast`;
-            let effectAColors = Sequencer.Database.getEntry(effectAColorsRaw);
-            effectAColors = Object.keys(effectAColors);
-            let templateIndex = effectAColors.indexOf("_template");
-            if (templateIndex > -1) {
-                effectAColors.splice(templateIndex, 1);
-            }
-            let effectAColorOptions = {};
-            effectAColors.forEach((color) => {
-                effectAColorOptions[color] = capitalizeFirstLetter(color);
-            });
+            let effectAColorOptions = getDBOptions(effectAColorsRaw, true);
 
             let effectBColorsRaw = `jb2a.energy_strands.complete`;
-            let effectBColors = Sequencer.Database.getEntry(effectBColorsRaw);
-            effectBColors = Object.keys(effectBColors);
-            let effectBColorOptions = {};
-            effectBColors.forEach((color) => {
-                effectBColorOptions[color] = capitalizeFirstLetter(color);
-            });
+            let effectBColorOptions = getDBOptions(effectBColorsRaw);
 
             let portalColorsRaw = `jb2a.portals.vertical.vortex`;
-            let portalColors = Sequencer.Database.getEntry(portalColorsRaw);
-            portalColors = Object.keys(portalColors);
-            let portalColorOptions = {};
-            portalColors.forEach((color) => {
-                portalColorOptions[color] = capitalizeFirstLetter(color);
-            });
+            let portalColorOptions = getDBOptions(portalColorsRaw);
 
-            let portalImpactColorsRaw = `jb2a.portals.vertical.vortex`;
-            let portalImpactColors = Sequencer.Database.getEntry(portalImpactColorsRaw);
-            portalImpactColors = Object.keys(portalImpactColors);
-            let portalImpactColorOptions = {};
-            portalImpactColors.forEach((color) => {
-                portalImpactColorOptions[color] = capitalizeFirstLetter(color);
-            });
+            let portalImpactColorsRaw = `jb2a.impact.010`;
+            let portalImpactColorOptions = getDBOptions(portalImpactColorsRaw);
 
             let summonActorsList = game.folders?.getName("ASE-Summons")?.entities ?? [];
             let summonOptions = {};
             let currentSummonTypes = {};
-            
+
             summonActorsList.forEach((actor) => {
                 summonOptions[actor.name] = actor.id;
             });
@@ -196,17 +178,24 @@ export class ASESettings extends FormApplication {
                 magicSchoolColorOptions: magicSchoolColorOptions,
                 effectAColorOptions: effectAColorOptions
             };
-            if(itemName == "Animate Dead"){
-                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" }};
+            if (itemName == "Animate Dead") {
+                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" } };
                 returnOBJ["effectBColorOptions"] = effectBColorOptions;
             }
             else {
-                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { typeA: { name: "", actor: "" }, typeB: { name: "", actor: "" }, typeC: { name: "", actor: "" } };
+                    currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? [{ name: "", actor: "", qty: 1}];
+                    returnOBJ["itemId"] = item.id;
+                    if (item.parent) {
+                        returnOBJ["summonerId"] = item.parent.id;
+                    }
+                    else {
+                        returnOBJ["summonerId"] = "";
+                    }
                 returnOBJ["portalColorOptions"] = portalColorOptions;
                 returnOBJ["portalImpactColorOptions"] = portalImpactColorOptions;
-                
             }
             returnOBJ.summons = currentSummonTypes;
+            console.log(returnOBJ);
         }
         return returnOBJ;
     }
@@ -229,7 +218,7 @@ export class ASESettings extends FormApplication {
 
     }
     activateListeners(html) {
-        console.log(html);
+        //console.log(html);
         super.activateListeners(html);
         html.find('.ase-enable-checkbox input[type="checkbox"]').click(evt => {
             this.submit({ preventClose: true }).then(() => this.render());
@@ -237,6 +226,65 @@ export class ASESettings extends FormApplication {
         html.find('.ase-enable-checkbox select').change(evt => {
             this.submit({ preventClose: true }).then(() => this.render());
         });
+        //console.log(this);
+        html.find('.addType').click(this._addSummonType.bind(this));
+        html.find('.removeType').click(this._removeSummonType.bind(this));
+    }
+
+    async _removeSummonType(e){
+        //console.log(e);
+        let summonsTable = document.getElementById("summonsTable").getElementsByTagName('tbody')[0];
+        let row = summonsTable.rows[summonsTable.rows.length-1];
+        let cells = row.cells;
+        //console.log(row, cells);
+        let summonTypeIndex = cells[1].children[0].name.match(/\d+/)[0];
+        //console.log(summonTypeIndex);
+        let itemId = document.getElementById("hdnItemId").value;
+        let actorId = document.getElementById("hdnSummonerId").value;
+        let item;
+        if (actorId != "") {
+            let summoner = game.actors.get(actorId);
+            item = summoner.items.get(itemId);
+            //console.log(summoner, item);
+        }
+        else {
+            item = game.items.get(itemId);
+            //console.log(item);
+        }
+        summonsTable.rows[summonsTable.rows.length-1].remove();
+        await item.unsetFlag("advancedspelleffects", `effectOptions.summons.${summonTypeIndex}`);
+        delete this.flags.effectOptions.summons[summonTypeIndex];
+        //console.log(this.flags);
+        this.submit({ preventClose: true }).then(() => this.render());
+    }
+
+    async _addSummonType(e) {
+        //console.log(e);
+        let summonsTable = document.getElementById("summonsTable").getElementsByTagName('tbody')[0];
+        //console.log(summonsTable);
+        //console.log(this);
+        let newSummonRow = summonsTable.insertRow(-1);
+        let newLabel1 = newSummonRow.insertCell(0);
+        let newTextInput = newSummonRow.insertCell(1);
+        let newLabel2 = newSummonRow.insertCell(2);
+        let newSelect = newSummonRow.insertCell(3);
+        let newLabel3 = newSummonRow.insertCell(4);
+        let newQtyInput = newSummonRow.insertCell(5);
+        newLabel1.innerHTML = `<label><b>Summon Type Name:</b></label>`;
+        newTextInput.innerHTML = `<input type="text"
+        name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length-1}.name"
+        value="">`;
+        newLabel2.innerHTML = `<label><b>Associated Actor:</b></label>`;
+        newSelect.innerHTML = ` <select name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length-1}.actor">
+        {{#each ../effectData.summonOptions as |id name|}}
+        <option value="">{{name}}</option>
+        {{/each}}
+    </select>`;
+    newLabel3.innerHTML = `<label><b>Summon Quantity:</b></label>`;
+    newQtyInput.innerHTML = `<input style='width: 3em;' type="text"
+    name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length-1}.qty"
+    value=1>`;
+        this.submit({ preventClose: true }).then(() => this.render());
     }
 
     async _updateObject(event, formData) {

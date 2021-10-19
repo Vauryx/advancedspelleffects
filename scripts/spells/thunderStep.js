@@ -103,8 +103,16 @@ export class thunderStep{
         }
         
         passengers.push(tokenD);
-        
-        let position = await warpgate.crosshairs.show();
+        let crosshairsConfig = {
+            size:1,
+            icon: tokenD.data.img,
+            label: 'Thunder Step',
+            tag: 'thunder-step-crosshairs',
+            drawIcon: true,
+            drawOutline: false,
+            interval: 2
+        }
+        let position = await warpgate.crosshairs.show(crosshairsConfig);
         
         teleport_range[0].delete();
         

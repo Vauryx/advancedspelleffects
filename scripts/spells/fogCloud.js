@@ -34,7 +34,16 @@ export class fogCloud {
         let aseFlags = item.getFlag("advancedspelleffects", 'effectOptions');
         let caster = await canvas.tokens.get(midiData.tokenId);
         let casterActor = caster.actor;
-        let fogCloudTemplate = await warpgate.crosshairs.show(8 * (midiData.itemLevel), item.img, "Fog Cloud");
+        let crosshairsConfig = {
+            size:8 * itemLevel,
+            icon: item.img,
+            label: 'Fog Cloud',
+            tag: 'fog-cloud-crosshairs',
+            drawIcon: true,
+            drawOutline: true,
+            interval: 2
+        }
+        let fogCloudTemplate = await warpgate.crosshairs.show(crosshairsConfig);
 
         await placeCloudAsTile(fogCloudTemplate, casterActor.id, itemLevel);
 

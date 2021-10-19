@@ -20,7 +20,16 @@ export class callLightning {
         };
 
         let stormyWeather = await warpgate.buttonDialog(weatherDialogData, 'row');
-        let castTemplate = await warpgate.crosshairs.show(25, midiData.item.img, "Call Lightning");
+        let crosshairsConfig = {
+            size: 25,
+            icon: item.img,
+            label: "Call Lightning",
+            tag: 'call-lightning-crosshairs',
+            drawIcon: true,
+            drawOutline: true,
+            interval: 2
+        }
+        let castTemplate = await warpgate.crosshairs.show(crosshairsConfig);
         let effectFile = `jb2a.call_lightning.${res}_res.${color}`
         let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
         let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId, stormyWeather);
@@ -81,7 +90,16 @@ export class callLightning {
         };
         let confirm = await warpgate.buttonDialog(confirmData, 'row');
         if (confirm) {
-            let boltTemplate = await warpgate.crosshairs.show(3, "icons/magic/lightning/bolt-strike-blue.webp", "Lightning Bolt");
+            let crosshairsConfig = {
+                size: 3,
+                icon: "icons/magic/lightning/bolt-strike-blue.webp",
+                label: "Lightning Bolt",
+                tag: 'lightning-bolt-crosshairs',
+                drawIcon: true,
+                drawOutline: true,
+                interval: 2
+            }
+            let boltTemplate = await warpgate.crosshairs.show(crosshairsConfig);
             let casterID = stormCloudTile.getFlag("advancedspelleffects", "stormCloudTile");
             //console.log("Call Lightning caster id: ", casterID);
             let caster = canvas.tokens.get(casterID);
@@ -136,7 +154,7 @@ export class callLightning {
             itemData.data.components.concentration = false;
             // console.log("ItemData: ", itemData);
             // console.log("Item: ", item);
-            let fullDamageRoll = new Roll(`${spellLevel}d10`).evaluate();
+            let fullDamageRoll = new Roll(`${spellLevel}d10`).evaluate({ async: false });
             if (game.modules.get("dice-so-nice")?.active) {
                 game.dice3d?.showForRoll(fullDamageRoll);
             }

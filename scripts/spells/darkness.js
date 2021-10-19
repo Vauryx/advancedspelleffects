@@ -26,7 +26,16 @@ export class darkness{
 
     static async createDarkness(midiData) {
         let item = midiData.item;
-        let template = await warpgate.crosshairs.show(6, midiData.item.img, "Darkness");
+        let crosshairsConfig = {
+            size:6,
+            icon: item.img,
+            label: 'Darkness',
+            tag: 'darkness-crosshairs',
+            drawIcon: true,
+            drawOutline: true,
+            interval: 2
+        }
+        let template = await warpgate.crosshairs.show(crosshairsConfig);
         let caster = await canvas.tokens.get(midiData.tokenId);
         let casterActor = caster.actor;
         await placeCloudAsTile(template, casterActor.id);

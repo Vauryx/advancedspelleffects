@@ -92,8 +92,8 @@ export class concentrationHandler {
         if (effectSource.includes("Summon")) {
             console.log("Detected summon concentration removal...");
             let summonedTokens = canvas.tokens.placeables.filter((token) => { return token.document.getFlag("advancedspelleffects", "summoner") == casterActor.id });
-            if(summonedTokens.length>0){
-                await warpgate.dismiss(summonedTokens[0].id);
+            for (const summonedToken of summonedTokens){
+                await warpgate.dismiss(summonedToken.id);
             }
             return;
         }
