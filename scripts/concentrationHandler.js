@@ -11,6 +11,7 @@ export class concentrationHandler {
         console.log("Handling removal of Concentration: ", activeEffect);
         if (activeEffect.data.label != "Concentrating") return;
         let origin = activeEffect.data.origin;
+        if(!origin) return;
         origin = origin.split(".");
         if(origin.length < 4) return;
         let casterActor = game.actors.get(origin[1]);
