@@ -12,6 +12,7 @@ import { steelWindStrike } from "./spells/steelWindStrike.js";
 import { thunderStep } from "./spells/thunderStep.js";
 import { summonCreature } from "./spells/summonCreature.js";
 import {animateDead} from "./spells/animateDead.js";
+import {witchBolt} from "./spells/witchBolt.js";
 
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
@@ -67,6 +68,9 @@ Hooks.on('init', () => {
             case "Animate Dead":
                 await animateDead.rise(midiData);
                 return;
+            case 'Witch Bolt':
+                await witchBolt.cast(midiData);
+                return;
         }
         if(item.name.includes("Summon")){
             await summonCreature.doSummon(midiData);
@@ -92,7 +96,8 @@ const aseModules = {
     steelWindStrike,
     thunderStep,
     summonCreature,
-    animateDead
+    animateDead,
+    witchBolt
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());

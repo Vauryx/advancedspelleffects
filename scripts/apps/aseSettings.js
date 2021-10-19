@@ -64,6 +64,14 @@ export class ASESettings extends FormApplication {
                 data.level = 3;
                 data.duration = { "value": 10, "units": "minute" };
                 break;
+            case 'Witch Bolt':
+                data.level = 1;
+                data.actionType = "rsak"
+                data.damage.parts.push(["1d12","lightning"])
+                data.duration = { "value": 10, "units": "minute" };
+                data.scaling.formula = "1d12";
+                data.scaling.mode = "level";
+                break;
         }
         let updates = { data };
         await item.update(updates);
@@ -163,7 +171,7 @@ export class ASESettings extends FormApplication {
             let portalImpactColorsRaw = `jb2a.impact.010`;
             let portalImpactColorOptions = getDBOptions(portalImpactColorsRaw);
 
-            let summonActorsList = game.folders?.getName("ASE-Summons")?.entities ?? [];
+            let summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
             let summonOptions = {};
             let currentSummonTypes = {};
 
