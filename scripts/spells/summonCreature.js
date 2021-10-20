@@ -121,7 +121,8 @@ export class summonCreature {
                 'alpha': 0,
                 'flags': { "advancedspelleffects": { "summoner": casterActor.id } }
             },
-            actor: {}
+            actor: {},
+            embedded: {}
         };
         if (effectInfo.isTashas) {
             console.log(`Scaling ${chosenSummon[0]} with spell level...`);
@@ -171,14 +172,28 @@ export class summonCreature {
             if(hpBonus<0){
                 hpBonus = 0;
             }
+            
             updates.actor = {
                 'data.attributes.hp': { value: summonActor.data.data.attributes.hp.max + hpBonus, max: summonActor.data.data.attributes.hp.max + hpBonus },
-                'data.attributes.ac.flat': summonActor.data.data.attributes.ac.base + acBonus,
                 'data.bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
                 'data.bonuses.mwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
                 'data.bonuses.rsak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
                 'data.bonuses.rwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` }
             }
+            updates.embedded = {
+                ActiveEffect: {
+                    "Spell Level Bonus - AC": {
+                        icon: 'icons/magic/defensive/shield-barrier-blue.webp',
+                        label: 'Spell Level Bonus - AC',
+                        changes: [{
+                            "key": "data.attributes.ac.bonus",
+                            "mode": 2,
+                            "value": acBonus,
+                            "priority": 0
+                            }]
+                    }
+                }
+            };
             /*damageItems.forEach((item)=> {
                 let currDamage = item.data.data.damage.parts[0][0];
                 console.log(currDamage);
