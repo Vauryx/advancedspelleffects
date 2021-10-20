@@ -24,4 +24,3 @@ The currently available spells are outlined below and their details can be viewe
 - Warpgate code used with permission for free re-use by Matthew Haentschke
 https://github.com/trioderegion/warpgate
  - Huge thanks to siliconsaint as well for contributing his spiritual weapon macro for this module.
-
