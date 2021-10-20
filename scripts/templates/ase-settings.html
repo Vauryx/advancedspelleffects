@@ -85,6 +85,11 @@
                 {{#ifCondASE itemName 'includes' 'Summon'}}
                 <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
                 <input type="hidden" id="hdnSummonerId" value="{{effectData.summonerId}}" />
+                <div class="form-group">
+                    <label>Use Tasha's Scaling</label>
+                    <input type="checkbox" name="flags.advancedspelleffects.effectOptions.isTashas" {{checked
+                        flags.advancedspelleffects.effectOptions.isTashas}}>
+                </div>
                 <table id="summonsTable" width="100%">
                     <tbody>
                         {{#each effectData.summons}}

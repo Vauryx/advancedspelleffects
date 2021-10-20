@@ -253,7 +253,10 @@ export class ASESettings extends FormApplication {
         }
         summonsTable.rows[summonsTable.rows.length-1].remove();
         await item.unsetFlag("advancedspelleffects", `effectOptions.summons.${summonTypeIndex}`);
-        delete this.flags.effectOptions.summons[summonTypeIndex];
+        if(this.flags){
+            delete this.flags.effectOptions.summons[summonTypeIndex];
+        }
+        
         //console.log(this.flags);
         this.submit({ preventClose: true }).then(() => this.render());
     }
