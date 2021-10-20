@@ -40,12 +40,12 @@ export class witchBolt {
         if ((!updateData.x && !updateData.y)) return;
         let casterActor = tokenDocument.actor;
         let animFile = "jb2a.witch_bolt.dark_purple";
-        let markerAnim = "jb2a.impact.011.dark_purple";
         let witchBoltCasters = canvas.tokens.placeables.filter((token) => {
             return (token.actor.effects.filter((effect) => {
                 let origin = effect.data.origin;
+                if(!origin || origin?.length<4) return false;
                 origin = origin.split(".");
-                let effectSource = token.actor.items.get(origin[3]).name;
+                let effectSource = token.actor.items.get(origin[3])?.name;
                 return effectSource == "Witch Bolt"
             }).length > 0)
         })
@@ -65,9 +65,22 @@ export class witchBolt {
             newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
             newPos = utilFunctions.getCenter(newPos);
             //console.log(newPos);
-            castersOnTarget.forEach((casterOnTarget) => {
+            castersOnTarget.forEach(async (casterOnTarget) => {
                 //console.log(casterOnTarget);
+                let distanceToTarget = utilFunctions.measureDistance(newPos, casterOnTarget);
+                //console.log(distanceToTarget);
                 Sequencer.EffectManager.endEffects({ name: `${casterOnTarget.id}-witchBolt` });
+                if (distanceToTarget > 30) {
+                    let witchBoltConcentration = casterOnTarget.actor.effects.filter((effect) => {
+                        let origin = effect.data.origin;
+                        origin = origin.split(".");
+                        let effectSource = casterOnTarget.actor.items.get(origin[3]).name;
+                        return effectSource == "Witch Bolt"
+                    })[0];
+                    console.log(witchBoltConcentration);
+                    await witchBoltConcentration.delete();
+                    return;
+                }
                 new Sequence()
                     .effect()
                     .file(animFile)
@@ -77,13 +90,13 @@ export class witchBolt {
                     .persist()
                     .name(`${casterOnTarget.id}-witchBolt`)
                     .play()
-
             });
         }
         else {
             let witchBoltConcentration = casterActor.effects.filter((effect) => {
                 //console.log(effect.data);
                 let origin = effect.data.origin;
+                if(!origin) return false;
                 origin = origin.split(".");
                 let effectSource = casterActor.items.get(origin[3]).name;
                 return effectSource == "Witch Bolt"
@@ -91,17 +104,28 @@ export class witchBolt {
             //console.log(witchBoltConcentration);
             //console.log(casterActor);
             if (witchBoltConcentration) {
-                let newPos = { x: 0, y: 0 };
-                newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
-                newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
-                newPos = utilFunctions.getCenter(newPos);
-                //console.log(newPos);
-                Sequencer.EffectManager.endEffects({ name: `${tokenDocument.id}-witchBolt` });
                 let effectInfo = tokenDocument.getFlag("advancedspelleffects", "witchBolt");
-
                 if (effectInfo) {
                     //console.log(effectInfo.casterId, effectInfo.targetId);
                     let target = canvas.tokens.get(effectInfo.targetId);
+                    let newPos = { x: 0, y: 0 };
+                    newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
+                    newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
+                    newPos = utilFunctions.getCenter(newPos);
+                    //console.log(newPos);
+                    Sequencer.EffectManager.endEffects({ name: `${tokenDocument.id}-witchBolt` });
+                    let casterToTargetDist = utilFunctions.measureDistance(newPos, target);
+                    if (casterToTargetDist > 30) {
+                        let witchBoltConcentration = casterActor.effects.filter((effect) => {
+                            let origin = effect.data.origin;
+                            origin = origin.split(".");
+                            let effectSource = casterActor.items.get(origin[3]).name;
+                            return effectSource == "Witch Bolt"
+                        })[0];
+                        console.log(witchBoltConcentration);
+                        await witchBoltConcentration.delete();
+                        return;
+                    }
                     new Sequence()
                         .effect()
                         .file(animFile)
@@ -111,9 +135,36 @@ export class witchBolt {
                         .persist()
                         .name(`${tokenDocument.id}-witchBolt`)
                         .play()
+
+
                 }
             }
         }
 
+
+    }
+
+    static async _updateCombat(combat) {
+        let currentCombatantId = combat.current.tokenId;
+        let caster = canvas.tokens.get(currentCombatantId);
+        let casterActor = caster.actor;
+        if (!casterActor.isOwner) return;
+        let witchBoltConcentration = casterActor.effects.filter((effect) => {
+            let origin = effect.data.origin;
+            origin = origin.split(".");
+            let effectSource = casterActor.items.get(origin[3]).name;
+            return effectSource == "Witch Bolt"
+        })[0];
+        console.log(witchBoltConcentration);
+        if(witchBoltConcentration){
+            let confirmData = {
+                buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
+                title: "Activate Witch Bolt?"
+            };
+            let target;
+
+            
+            
+        }
     }
 }

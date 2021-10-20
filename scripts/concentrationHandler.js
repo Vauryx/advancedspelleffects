@@ -22,6 +22,7 @@ export class concentrationHandler {
         let aseEnabled = item.getFlag("advancedspelleffects", 'enableASE') ?? false;
         let effectOptions = item.getFlag("advancedspelleffects", 'effectOptions') ?? {};
         if (!aseEnabled) return;
+        console.log(effectSource);
         switch (effectSource) {
             case "Darkness":
                 //console.log("Handling concentration removal for ASE Darknes...");
@@ -91,7 +92,8 @@ export class concentrationHandler {
                 }
                 return;
             case "Witch Bolt":
-                Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-witchBolt` });
+                console.log(`${casterToken.id}-witchBolt`);
+                await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-witchBolt` });
                 await casterToken.document.unsetFlag("advancedspelleffects", "witchBolt");
                 return;
         }
