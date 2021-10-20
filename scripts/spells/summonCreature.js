@@ -97,11 +97,12 @@ export class summonCreature {
         let item = midiData.item;
         let summonInfo = item.getFlag("advancedspelleffects", "effectOptions.summons");
         let effectInfo = item.getFlag("advancedspelleffects", "effectOptions");
-        console.log("Summon Info: ", summonInfo);
-        let summonOptionsData = {buttons: []};
-        for (let [type, info] of Object.entries(summonInfo)){
-            console.log(`${type},:` ,info);
-            let buttonData = { label: info.name, value: [game.actors.get(info.actor).name, info.qty]};
+        //console.log("Summon Info: ", summonInfo);
+        //console.log("Effect Info: ", effectInfo);
+        let summonOptionsData = { buttons: [] };
+        for (let [type, info] of Object.entries(summonInfo)) {
+            console.log(`${type},:`, info);
+            let buttonData = { label: info.name, value: [game.actors.get(info.actor).name, info.qty] };
             summonOptionsData.buttons.push(buttonData);
         }
         let chosenSummon = await warpgate.buttonDialog(summonOptionsData, 'row');
@@ -119,11 +120,75 @@ export class summonCreature {
             token: {
                 'alpha': 0,
                 'flags': { "advancedspelleffects": { "summoner": casterActor.id } }
+            },
+            actor: {}
+        };
+        if (effectInfo.isTashas) {
+            console.log(`Scaling ${chosenSummon[0]} with spell level...`);
+            let spellLevel = midiData.itemLevel;
+            let hpBonus = 0;
+            let acBonus = spellLevel;
+            let multiAttack = Math.floor(spellLevel / 2);
+            let damageBonus = spellLevel;
+            //let summonActor = game.actors.getName(chosenSummon[0]);
+            let attackBonus = casterActor.data.data.attributes.spelldc - 8;
+            let summonActor = game.actors.getName(chosenSummon[0]);
+            //console.log(summonActor);
+            let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
+            //console.log(damageItems);
+            switch (item.name) {
+                case "Summon Aberrant Spirit":
+                    hpBonus = 10 * (spellLevel - 4);
+                    break;
+                case "Summon Beast":
+                    hpBonus = 5 * (spellLevel - 2);
+                    break;
+                case "Summon Celestial":
+                    if (chosenSummon[0].includes("Defender")) {
+                        acBonus += 2;
+                    }
+                    hpBonus = 10 * (spellLevel - 5);
+                    break;
+                case "Summon Construct":
+                    hpBonus = 15 * (spellLevel - 3);
+                    break;
+                case "Summon Elemental":
+                    hpBonus = 10 * (spellLevel - 4);
+                    break;
+                case "Summon Fey":
+                    hpBonus = 10 * (spellLevel - 3);
+                    break;
+                case "Summon Fiend":
+                    hpBonus = 15 * (spellLevel - 6);
+                    break;
+                case "Summon Shadowspawn":
+                    hpBonus = 15 * (spellLevel - 3);
+                    break;
+                case "Summon Undead":
+                    hpBonus = 10 * (spellLevel - 3);
+                    break;
             }
+            if(hpBonus<0){
+                hpBonus = 0;
+            }
+            updates.actor = {
+                'data.attributes.hp': { value: summonActor.data.data.attributes.hp.max + hpBonus, max: summonActor.data.data.attributes.hp.max + hpBonus },
+                'data.attributes.ac.flat': summonActor.data.data.attributes.ac.base + acBonus,
+                'data.bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'data.bonuses.mwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'data.bonuses.rsak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'data.bonuses.rwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` }
+            }
+            /*damageItems.forEach((item)=> {
+                let currDamage = item.data.data.damage.parts[0][0];
+                console.log(currDamage);
+                updates.item[item.name] = {
+                    'data.attackBonus': `- @mod - @prof + ${attackBonus}`,
+                    'data.damage.parts': [[`${currDamage}+${damageBonus}`, `${item.data.data.damage.parts[0][1]}`]]
+                } 
+            });*/
         }
-        const warpgateOptions = { controllingActor: game.actors.get(midiData.actor.id), duplicates: chosenSummon[1]};
+        const warpgateOptions = { controllingActor: game.actors.get(midiData.actor.id), duplicates: chosenSummon[1] };
         await warpgate.spawn(chosenSummon[0], updates, summonEffectCallbacks, warpgateOptions);
-
-        
     }
 }
