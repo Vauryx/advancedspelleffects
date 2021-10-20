@@ -168,6 +168,9 @@ export class summonCreature {
                     hpBonus = 10 * (spellLevel - 3);
                     break;
             }
+            if(hpBonus<0){
+                hpBonus = 0;
+            }
             updates.actor = {
                 'data.attributes.hp': { value: summonActor.data.data.attributes.hp.max + hpBonus, max: summonActor.data.data.attributes.hp.max + hpBonus },
                 'data.attributes.ac.flat': summonActor.data.data.attributes.ac.base + acBonus,
