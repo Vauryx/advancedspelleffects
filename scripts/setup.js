@@ -10,14 +10,15 @@ Hooks.once('ready', async function () {
                         'Thunder Step', 
                         'Spiritual Weapon', 
                         'Call Lightning',
-                      'Animate Dead'];
+                        'Animate Dead',
+                        'Witch Bolt'];
     let isSummon = data.item.name.includes("Summon");
     if (!aseSpellList.includes(data.item.name) && !isSummon) {
       return;
     }
     const aseBtn = $(`<a class="ase-item-settings" title="ASE"><i class="fas fa-biohazard"></i>ASE</a>`);
     aseBtn.click(ev => {
-      new ASESettings(app.entity, {}).render(true);
+      new ASESettings(app.document, {}).render(true);
     });
     html.closest('.app').find('.ase-item-settings').remove();
     let titleElement = html.closest('.app').find('.window-title');

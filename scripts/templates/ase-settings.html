@@ -82,6 +82,40 @@
                     </div>
                 </div>
                 {{/ifCondASE}}
+                {{#ifCondASE itemName '==' 'Witch Bolt'}}
+                <table id="witchBoltTable" width="100%">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label><b>Initial Bolt Color:</b></label>
+                            </td>
+                            <td>
+                                <select name="flags.advancedspelleffects.effectOptions.initialBoltColor">
+                                    {{#select flags.advancedspelleffects.effectOptions.initialBoltColor}}
+                                    {{#each effectData.initialBoltColors as |name key|}}
+                                    <option value="{{key}}">{{name}}</option>
+                                    {{/each}}
+                                    {{/select}}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label><b>Continuous Stream Color:</b></label>
+                            </td>
+                            <td>
+                                <select name="flags.advancedspelleffects.effectOptions.streamColor">
+                                    {{#select flags.advancedspelleffects.effectOptions.streamColor}}
+                                    {{#each effectData.streamColors as |name key|}}
+                                    <option value="{{key}}">{{name}}</option>
+                                    {{/each}}
+                                    {{/select}}
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {{/ifCondASE}}
                 {{#ifCondASE itemName 'includes' 'Summon'}}
                 <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
                 <input type="hidden" id="hdnSummonerId" value="{{effectData.summonerId}}" />
