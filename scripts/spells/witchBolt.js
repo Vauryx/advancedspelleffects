@@ -120,7 +120,7 @@ export class witchBolt {
                 let origin = effect.data.origin;
                 if(!origin) return false;
                 origin = origin.split(".");
-                let effectSource = casterActor.items.get(origin[3]).name;
+                let effectSource = casterActor.items.get(origin[3])?.name;
                 return effectSource == "Witch Bolt"
             })[0];
             //console.log(witchBoltConcentration);
