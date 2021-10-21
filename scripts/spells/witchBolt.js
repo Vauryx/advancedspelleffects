@@ -3,13 +3,15 @@ import * as utilFunctions from "../utilityFunctions.js";
 export class witchBolt {
     static registerHooks() {
         Hooks.on("updateToken", witchBolt._updateToken);
+        Hooks.on("updateCombat", witchBolt._updateCombat);
     }
     static async cast(midiData) {
-        let actor = midiData.actor;
+        let casterActor = midiData.actor;
         let caster = canvas.tokens.get(midiData.tokenId);
         let target = Array.from(midiData.targets)[0];
-        let animFile = "jb2a.witch_bolt.dark_purple"
-        let boltFile = "jb2a.chain_lightning.primary.dark_purple"
+        let effectOptions =midiData.item.getFlag("advancedspelleffects", 'effectOptions');
+        let boltFile = `jb2a.chain_lightning.primary.${effectOptions.initialBoltColor}`;
+        let animFile = `jb2a.witch_bolt.${effectOptions.streamColor}`;
         let missed = Array.from(midiData.hitTargets).length == 0;
         new Sequence()
             .effect()
@@ -34,12 +36,29 @@ export class witchBolt {
         }
 
     }
+    static async activateBolt(midiData){
+        let casterActor = midiData.actor;
+        let caster = canvas.tokens.get(midiData.tokenId);
+        let target = Array.from(midiData.targets)[0];
+        let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
+        let boltFile = `jb2a.chain_lightning.primary.${effectOptions.initialBoltColor}`;
+        new Sequence()
+            .effect()
+            .file(boltFile)
+            .JB2A()
+            .atLocation(caster)
+            .reachTowards(target)
+            .play()
+    }
 
     static async _updateToken(tokenDocument, updateData) {
         //console.log("Registering Detect Magic Hook");
+        if (!game.user.isGM) return;
         if ((!updateData.x && !updateData.y)) return;
         let casterActor = tokenDocument.actor;
-        let animFile = "jb2a.witch_bolt.dark_purple";
+        let animFile = '';
+        let witchBoltItem;
+        let effectOptions;
         let witchBoltCasters = canvas.tokens.placeables.filter((token) => {
             return (token.actor.effects.filter((effect) => {
                 let origin = effect.data.origin;
@@ -70,17 +89,20 @@ export class witchBolt {
                 let distanceToTarget = utilFunctions.measureDistance(newPos, casterOnTarget);
                 //console.log(distanceToTarget);
                 Sequencer.EffectManager.endEffects({ name: `${casterOnTarget.id}-witchBolt` });
+                let witchBoltConcentration = casterOnTarget.actor.effects.filter((effect) => {
+                    let origin = effect.data.origin;
+                    origin = origin.split(".");
+                    let effectSource = casterOnTarget.actor.items.get(origin[3]).name;
+                    return effectSource == "Witch Bolt"
+                })[0];
                 if (distanceToTarget > 30) {
-                    let witchBoltConcentration = casterOnTarget.actor.effects.filter((effect) => {
-                        let origin = effect.data.origin;
-                        origin = origin.split(".");
-                        let effectSource = casterOnTarget.actor.items.get(origin[3]).name;
-                        return effectSource == "Witch Bolt"
-                    })[0];
-                    console.log(witchBoltConcentration);
+                    //console.log(witchBoltConcentration);
                     await witchBoltConcentration.delete();
                     return;
                 }
+                witchBoltItem = casterOnTarget.actor.items.get(witchBoltConcentration?.data?.origin?.split(".")[3]);
+                effectOptions = witchBoltItem.getFlag("advancedspelleffects", 'effectOptions');
+                let animFile = `jb2a.witch_bolt.${effectOptions.streamColor}`;
                 new Sequence()
                     .effect()
                     .file(animFile)
@@ -104,6 +126,9 @@ export class witchBolt {
             //console.log(witchBoltConcentration);
             //console.log(casterActor);
             if (witchBoltConcentration) {
+                witchBoltItem = casterActor.items.get(witchBoltConcentration?.data?.origin?.split(".")[3]);
+                effectOptions = witchBoltItem.getFlag("advancedspelleffects", 'effectOptions');
+                let animFile = `jb2a.witch_bolt.${effectOptions.streamColor}`;
                 let effectInfo = tokenDocument.getFlag("advancedspelleffects", "witchBolt");
                 if (effectInfo) {
                     //console.log(effectInfo.casterId, effectInfo.targetId);
@@ -122,7 +147,7 @@ export class witchBolt {
                             let effectSource = casterActor.items.get(origin[3]).name;
                             return effectSource == "Witch Bolt"
                         })[0];
-                        console.log(witchBoltConcentration);
+                        //console.log(witchBoltConcentration);
                         await witchBoltConcentration.delete();
                         return;
                     }
@@ -145,9 +170,11 @@ export class witchBolt {
     }
 
     static async _updateCombat(combat) {
+        
         let currentCombatantId = combat.current.tokenId;
         let caster = canvas.tokens.get(currentCombatantId);
         let casterActor = caster.actor;
+        //console.log(casterActor, casterActor.isOwner);
         if (!casterActor.isOwner) return;
         let witchBoltConcentration = casterActor.effects.filter((effect) => {
             let origin = effect.data.origin;
@@ -155,15 +182,23 @@ export class witchBolt {
             let effectSource = casterActor.items.get(origin[3]).name;
             return effectSource == "Witch Bolt"
         })[0];
-        console.log(witchBoltConcentration);
+        //console.log(witchBoltConcentration);
         if(witchBoltConcentration){
             let confirmData = {
                 buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
                 title: "Activate Witch Bolt?"
             };
-            let target;
-
-            
+            let target = canvas.tokens.get(caster.document.getFlag("advancedspelleffects", "witchBolt.targetId"));
+            let witchBoltItem = casterActor.items.get(witchBoltConcentration?.data?.origin?.split(".")[3]);
+            let itemData = witchBoltItem.data;
+            itemData.data.components.concentration = false;
+            //console.log(witchBoltItem);
+            let confirm = await warpgate.buttonDialog(confirmData, 'row');
+            if(confirm){
+                let damageRoll = await new Roll(`1d12`).evaluate({ async: true });
+                //console.log(damageRoll);
+                new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, "lightning", target ? [target]: [], damageRoll, { flavor: `Witch Bolt - Damage Roll (1d12 Lightning)`, itemCardId: "new", itemData: itemData });
+            }
             
         }
     }

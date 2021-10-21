@@ -69,7 +69,14 @@ Hooks.on('init', () => {
                 await animateDead.rise(midiData);
                 return;
             case 'Witch Bolt':
-                await witchBolt.cast(midiData);
+                if(midiData.flavor != "Witch Bolt - Damage Roll (1d12 Lightning)" || !midiData.flavor){
+                    console.log('Casting Witch Bolt!',midiData.flavor );
+                    await witchBolt.cast(midiData);
+                }
+                else{
+                    console.log('Activating Witch Bolt!',midiData.flavor);
+                    await witchBolt.activateBolt(midiData);
+                }
                 return;
         }
         if(item.name.includes("Summon")){

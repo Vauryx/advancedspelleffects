@@ -151,6 +151,18 @@ export class ASESettings extends FormApplication {
                     weaponColors: colorOptions
                 }
                 break;
+            case 'Witch Bolt':
+                let initialBoltAnim = 'jb2a.chain_lightning.primary';
+                let initialBoltColorOptions = getDBOptions(initialBoltAnim);
+
+                let streamAnim = 'jb2a.witch_bolt';
+                let streamColorOptions = getDBOptions(streamAnim, true);
+
+                returnOBJ = {
+                    initialBoltColors: initialBoltColorOptions,
+                    streamColors: streamColorOptions
+                }
+                break;
         }
         if (itemName.includes("Summon") || itemName == "Animate Dead") {
             let magicSignsRaw = `jb2a.magic_signs.circle.02`;
@@ -203,7 +215,7 @@ export class ASESettings extends FormApplication {
                 returnOBJ["portalImpactColorOptions"] = portalImpactColorOptions;
             }
             returnOBJ.summons = currentSummonTypes;
-            console.log(returnOBJ);
+            //console.log(returnOBJ);
         }
         return returnOBJ;
     }
