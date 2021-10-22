@@ -186,11 +186,12 @@ export class witchBolt {
         let caster = canvas.tokens.get(currentCombatantId);
         let casterActor = caster.actor;
         //console.log(casterActor, casterActor.isOwner);
-        if (!casterActor.isOwner) return;
+        if (!casterActor.isOwner || (game.user.isGM && caster.actor.hasPlayerOwner)) return;
         let witchBoltConcentration = casterActor.effects.filter((effect) => {
-            let origin = effect.data.origin;
-            origin = origin.split(".");
-            let effectSource = casterActor.items.get(origin[3]).name;
+            let origin = effect.data.origin?.split(".");
+            if (!origin || origin?.length < 4) return false;
+            let itemId = origin[5] ?? origin[3];
+            let effectSource = casterActor.items.get(itemId).name;
             return effectSource == "Witch Bolt"
         })[0];
         //console.log(witchBoltConcentration);
@@ -200,7 +201,10 @@ export class witchBolt {
                 title: "Activate Witch Bolt?"
             };
             let target = canvas.tokens.get(caster.document.getFlag("advancedspelleffects", "witchBolt.targetId"));
-            let witchBoltItem = casterActor.items.get(witchBoltConcentration?.data?.origin?.split(".")[3]);
+            let concOrigin = witchBoltConcentration.data.origin.split(".");
+            if (!concOrigin || concOrigin?.length < 4) return false;
+            let itemID = concOrigin[5] ?? concOrigin[3];
+            let witchBoltItem = casterActor.items.get(itemID);
             let itemData = witchBoltItem.data;
             itemData.data.components.concentration = false;
             //console.log(witchBoltItem);
