@@ -160,12 +160,6 @@ export class witchBolt {
                 await Sequencer.EffectManager.endEffects({ name: `${tokenDocument.id}-witchBolt` });
                 let casterToTargetDist = utilFunctions.measureDistance(newPos, target);
                 if (casterToTargetDist > 30) {
-                    witchBoltConcentration = casterActor.effects.filter((effect) => {
-                        let origin = effect.data.origin;
-                        origin = origin.split(".");
-                        let effectSource = casterActor.items.get(origin[3]).name;
-                        return effectSource == "Witch Bolt"
-                    })[0];
                     //console.log(witchBoltConcentration);
                     await witchBoltConcentration.delete();
                     return;
@@ -183,8 +177,6 @@ export class witchBolt {
 
             }
         }
-
-
 
     }
 
