@@ -103,6 +103,8 @@ export class callLightning {
             let casterID = stormCloudTile.getFlag("advancedspelleffects", "stormCloudTile");
             //console.log("Call Lightning caster id: ", casterID);
             let caster = canvas.tokens.get(casterID);
+            let casterActor = caster.document.actor;
+            //console.log(caster);
             let dist = utilFunctions.measureDistance({ x: caster.data.x + (canvas.grid.size / 2), y: caster.data.y + (canvas.grid.size / 2) }, boltTemplate);
             //console.log("Distance to bolt: ", dist);
             if (dist > 60) {
@@ -112,7 +114,7 @@ export class callLightning {
                 }, 'row')
                 return;
             }
-            let casterActor = game.actors.get(caster.data.actorId);
+            
             //console.log("Caster Actor: ", casterActor);
             let saveDC = casterActor.data.data.attributes.spelldc;
             //console.log("Save DC: ", saveDC);
@@ -254,7 +256,7 @@ export class callLightning {
     static async _updateCombat(combat) {
         let currentCombatantId = combat.current.tokenId;
         let caster = canvas.tokens.get(currentCombatantId);
-        if (!caster.actor.isOwner || game.user.isGM) return;
+        if (!caster.actor.isOwner || (game.user.isGM && caster.actor.hasPlayerOwner)) return;
         let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == currentCombatantId);
         //console.log("update hook fired...", stormCloudTiles);
         if (stormCloudTiles.length > 0) {

@@ -4,19 +4,27 @@ import * as utilFunctions from "./utilityFunctions.js";
 export class concentrationHandler {
 
     static registerHooks() {
-        Hooks.on("deleteActiveEffect", concentrationHandler._handleConcentration);
+        Hooks.on("preDeleteActiveEffect", concentrationHandler._handleConcentration);
     }
 
     static async _handleConcentration(activeEffect) {
         console.log("Handling removal of Concentration: ", activeEffect);
         if (activeEffect.data.label != "Concentrating") return;
-        let origin = activeEffect.data.origin;
-        if(!origin) return;
-        origin = origin.split(".");
-        if(origin.length < 4) return;
-        let casterActor = game.actors.get(origin[1]);
-        let casterToken = await casterActor.getActiveTokens()[0];
-        let effectSource = casterActor.items.get(origin[3]).name;
+        let origin = activeEffect.data.origin?.split(".");
+        if (!origin || origin?.length < 4) return false;
+        let itemId = origin[5] ?? origin[3];
+        let casterActor;
+        let casterToken;
+        let effectSource;
+        if(origin[0] == "Actor"){
+            casterActor = game.actors.get(origin[1]);
+            casterToken = await casterActor.getActiveTokens()[0];
+        }
+        else{
+            casterToken = canvas.tokens.get(origin[3]);
+            casterActor = casterToken.actor;
+        }
+        effectSource = casterActor.items.get(itemId).name;
         let item = casterActor.items.filter((item) => item.name == effectSource)[0] ?? undefined;
         if (!item) return;
         let aseEnabled = item.getFlag("advancedspelleffects", 'enableASE') ?? false;
@@ -59,8 +67,8 @@ export class concentrationHandler {
                         continue;
                     }
                     await aseSocket.executeAsGM("updateFlag", magical.obj.id, "magicDetected", false);
-                    Sequencer.EffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-                    Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-detectMagicAura`, object: casterToken });
+                    await Sequencer.EffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+                    await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-detectMagicAura`, object: casterToken });
                     new Sequence("Advanced Spell Effects")
                         .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                         .forUsers(users)

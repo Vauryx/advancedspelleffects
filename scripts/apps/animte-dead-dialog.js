@@ -150,7 +150,7 @@ export class animateDeadDialog extends FormApplication {
                 .belowTokens()
                 .scale(0.25)
                 .thenDo(async () => {
-                    Sequencer.EffectManager.endEffects({ name: "portalAnimLoop" });
+                    await Sequencer.EffectManager.endEffects({ name: "portalAnimLoop" });
                 })
                 .play()
         }

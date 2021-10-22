@@ -73,7 +73,7 @@ export class summonCreature {
                 .belowTokens()
                 .scale(0.25)
                 .thenDo(async () => {
-                    Sequencer.EffectManager.endEffects({ name: "magicSignLoop" });
+                    await Sequencer.EffectManager.endEffects({ name: "magicSignLoop" });
                 })
                 .wait(1500)
                 .effect()
@@ -101,7 +101,7 @@ export class summonCreature {
         //console.log("Effect Info: ", effectInfo);
         let summonOptionsData = { buttons: [] };
         for (let [type, info] of Object.entries(summonInfo)) {
-            console.log(`${type},:`, info);
+            //console.log(`${type},:`, info);
             let buttonData = { label: info.name, value: [game.actors.get(info.actor).name, info.qty] };
             summonOptionsData.buttons.push(buttonData);
         }

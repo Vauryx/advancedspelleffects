@@ -60,7 +60,9 @@ Hooks.on('init', () => {
                 await spiritualWeapon.createSpiritualWeapon(midiData);
                 return;
             case "Steel Wind Strike":
-                await steelWindStrike.doStrike(midiData);
+                if (!midiData.flavor?.includes("Steel Wind Strike")) {
+                    await steelWindStrike.doStrike(midiData);
+                }
                 return;
             case "Thunder Step":
                 await thunderStep.doTeleport(midiData);

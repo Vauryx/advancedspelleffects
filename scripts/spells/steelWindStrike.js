@@ -55,7 +55,7 @@ export class steelWindStrike{
             "handaxe": "melee",
             "spear": "melee.01"
         };
-        let currentAutoRotateState = caster.getFlag("autorotate", "enabled") ?? false;
+        let currentAutoRotateState = caster.document.getFlag("autorotate", "enabled") ?? false;
         if(currentAutoRotateState){
             await caster.setFlag("autorotate", "enabled", false);
         }
@@ -80,7 +80,7 @@ export class steelWindStrike{
             let currentRoll = new Roll('6d10', caster.actor.getRollData()).roll();
             //console.log("Current damage dice roll total: ", currentRoll.total);
             //game.dice3d?.showForRoll(currentRoll);
-            let damageData = new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: 'Steel Wind Strike - Damage Roll (6d10 force)', itemCardId: midiData.itemCardId });
+            let damageData = new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: 'Steel Wind Strike - Damage Roll (6d10 force)', itemCardId: "new" , itemData: midiData.item.data});
             //console.log("damage data: ", damageData);
             rollDataForDisplay.push({
                 "target": target.name,

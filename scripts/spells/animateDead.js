@@ -7,7 +7,7 @@ export class animateDead {
     }
     static async rise(midiData) {
 
-        const actorD = game.actors.get(midiData.actor.id);
+        const actorD = midiData.actor;
         const tokenD = canvas.tokens.get(midiData.tokenId);
         const itemD = actorD.items.getName(midiData.item.name);
         let aseSettings = itemD.getFlag("advancedspelleffects", "effectOptions");
