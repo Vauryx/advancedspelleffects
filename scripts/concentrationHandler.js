@@ -73,6 +73,7 @@ export class concentrationHandler {
                         .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                         .forUsers(users)
                         .atLocation(magical.obj)
+                        .playIf(magical.distance <= 30)
                         .scale(0.25)
                         .setMustache(magical)
                         .zIndex(0)
