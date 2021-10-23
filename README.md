@@ -4,7 +4,6 @@
 - JB2A (Patreon Version)
 - Sequencer
 - Warpgate
-- MIDI-QOL
 - SocketLib
 - Tagger
 
