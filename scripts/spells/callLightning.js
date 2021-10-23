@@ -5,7 +5,7 @@ export class callLightning {
     static registerHooks() {
         Hooks.on("updateCombat", callLightning._updateCombat);
     }
-    
+
     static async createStormCloud(midiData) {
         let item = midiData.item;
         //console.log(midiData);
@@ -33,7 +33,7 @@ export class callLightning {
         let effectFile = `jb2a.call_lightning.${res}_res.${color}`
         let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
         let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId, stormyWeather);
-        console.log("StomeTileID: ", stormTileId);
+        //console.log("StomeTileID: ", stormTileId);
 
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         await callLightning.callLightningBolt(canvas.scene.tiles.get(stormTileId));
@@ -84,9 +84,10 @@ export class callLightning {
     }
 
     static async callLightningBolt(stormCloudTile) {
+
         let confirmData = {
             buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
-            title: "Call forth Lightning Bolt?"
+            title: `Call forth Level ${stormCloudTile.getFlag("advancedspelleffects", "spellLevel")} Lightning Bolt?`
         };
         let confirm = await warpgate.buttonDialog(confirmData, 'row');
         if (confirm) {
@@ -114,7 +115,7 @@ export class callLightning {
                 }, 'row')
                 return;
             }
-            
+
             //console.log("Caster Actor: ", casterActor);
             let saveDC = casterActor.data.data.attributes.spelldc;
             //console.log("Save DC: ", saveDC);
@@ -123,51 +124,55 @@ export class callLightning {
 
             playEffect(boltTemplate, stormCloudTile, boltStyle);
 
-            let tokens = canvas.tokens.placeables.map(t => {
-                let distance = canvas.grid.measureDistance({ x: boltTemplate.x, y: boltTemplate.y }, { x: t.data.x + (canvas.grid.size / 2), y: t.data.y + (canvas.grid.size / 2) });
-                // console.log("bolt Loc", { x: template.x, y: template.y });
-                let returnObj = { token: t, distance: distance };
-                //console.log("Returning object: ", returnObj);
-                return (returnObj);
-            }).filter(t => t.distance <= 7.5);
-            //console.log("Tokens in range: ", tokens);
-            let failedSaves = [];
-            let passedSaves = [];
+            if (game.modules.get("midi-qol")?.active) {
+                let tokens = canvas.tokens.placeables.map(t => {
+                    let distance = canvas.grid.measureDistance({ x: boltTemplate.x, y: boltTemplate.y }, { x: t.data.x + (canvas.grid.size / 2), y: t.data.y + (canvas.grid.size / 2) });
+                    // console.log("bolt Loc", { x: template.x, y: template.y });
+                    let returnObj = { token: t, distance: distance };
+                    //console.log("Returning object: ", returnObj);
+                    return (returnObj);
+                }).filter(t => t.distance <= 7.5);
+                //console.log("Tokens in range: ", tokens);
+                let failedSaves = [];
+                let passedSaves = [];
 
-            for (const currentTarget of tokens) {
-                let currentTargetActor = currentTarget.token.actor;
-                let saveResult = await currentTargetActor.rollAbilitySave("dex", { fastForward: true, flavor: "Thunder Step Saving Throw" });
+                for (const currentTarget of tokens) {
+                    let currentTargetActor = currentTarget.token.actor;
+                    let saveResult = await currentTargetActor.rollAbilitySave("dex", { fastForward: true, flavor: "Thunder Step Saving Throw" });
 
-                if (saveResult.total < saveDC) {
-                    failedSaves.push(currentTarget.token);
+                    if (saveResult.total < saveDC) {
+                        failedSaves.push(currentTarget.token);
+                    }
+                    else if (saveResult.total >= saveDC) {
+                        passedSaves.push(currentTarget.token);
+                    }
                 }
-                else if (saveResult.total >= saveDC) {
-                    passedSaves.push(currentTarget.token);
+                //console.log("Failed Saves - ", failedSaves);
+                // console.log("Passed Saves - ", passedSaves);
+                let spellLevel = stormCloudTile.getFlag("advancedspelleffects", "spellLevel");
+                if (stormCloudTile.getFlag("advancedspelleffects", "stormDamage")) {
+                    spellLevel += 1;
+                }
+                let item = casterActor.items.get(stormCloudTile.getFlag("advancedspelleffects", "itemID"));
+                let itemData = item.data;
+                itemData.data.components.concentration = false;
+                // console.log("ItemData: ", itemData);
+                // console.log("Item: ", item);
+                let fullDamageRoll = new Roll(`${spellLevel}d10`).evaluate({ async: false });
+                if (game.modules.get("dice-so-nice")?.active) {
+                    game.dice3d?.showForRoll(fullDamageRoll);
+                }
+                //console.log("Thunder Step Full Damage roll: ", fullDamageRoll);
+                let halfdamageroll = new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: false });
+
+                if (failedSaves.length > 0) {
+                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, fullDamageRoll.total, "lightning", failedSaves, fullDamageRoll, { flavor: `Lightning Bolt Full Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
+                }
+                if (passedSaves.length > 0) {
+                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, halfdamageroll.total, "lightning", passedSaves, halfdamageroll, { flavor: `Lightning Bolt Half Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
                 }
             }
-            //console.log("Failed Saves - ", failedSaves);
-            // console.log("Passed Saves - ", passedSaves);
-            let spellLevel = stormCloudTile.getFlag("advancedspelleffects", "spellLevel");
-            if (stormCloudTile.getFlag("advancedspelleffects", "stormDamage")) {
-                spellLevel += 1;
-            }
-            let item = casterActor.items.get(stormCloudTile.getFlag("advancedspelleffects", "itemID"));
-            let itemData = item.data;
-            itemData.data.components.concentration = false;
-            // console.log("ItemData: ", itemData);
-            // console.log("Item: ", item);
-            let fullDamageRoll = new Roll(`${spellLevel}d10`).evaluate({ async: false });
-            if (game.modules.get("dice-so-nice")?.active) {
-                game.dice3d?.showForRoll(fullDamageRoll);
-            }
-            //console.log("Thunder Step Full Damage roll: ", fullDamageRoll);
-            let halfdamageroll = new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: false });
-            if (failedSaves.length > 0) {
-                new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, fullDamageRoll.total, "lightning", failedSaves, fullDamageRoll, { flavor: `Lightning Bolt Full Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
-            }
-            if (passedSaves.length > 0) {
-                new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, halfdamageroll.total, "lightning", passedSaves, halfdamageroll, { flavor: `Lightning Bolt Half Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
-            }
+
         }
 
         async function playEffect(boltTemplate, cloud, boltStyle) {

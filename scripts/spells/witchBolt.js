@@ -12,7 +12,10 @@ export class witchBolt {
         let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
         let boltFile = `jb2a.chain_lightning.primary.${effectOptions.initialBoltColor}`;
         let animFile = `jb2a.witch_bolt.${effectOptions.streamColor}`;
-        let missed = Array.from(midiData.hitTargets).length == 0;
+        let missed = false;
+        if (game.modules.get("midi-qol")?.active) {
+            missed = Array.from(midiData.hitTargets).length == 0;
+        }
         new Sequence()
             .effect()
             .file(boltFile)

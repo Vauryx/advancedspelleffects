@@ -114,42 +114,43 @@ export class thunderStep {
             .thenDo(async () => {
 
                 if (targets.length) {
+                    if (game.modules.get("midi-qol")?.active) {
+                        let chatMessageContent = await duplicate(chatMessage.data.content);
 
-                    let chatMessageContent = await duplicate(chatMessage.data.content);
+                        let targetTokens = new Set();
+                        let saves = new Set();
 
-                    let targetTokens = new Set();
-                    let saves = new Set();
+                        let newChatmessageContent = $(chatMessageContent);
 
-                    let newChatmessageContent = $(chatMessageContent);
+                        newChatmessageContent.find(".midi-qol-saves-display").empty();
+                        let damage = new Roll(`${spellLevel}d10`).roll();
+                        for (let targetToken of targets) {
 
-                    newChatmessageContent.find(".midi-qol-saves-display").empty();
-                    let damage = new Roll(`${spellLevel}d10`).roll();
-                    for (let targetToken of targets) {
+                            let save = new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.con.save }).roll().total;
 
-                        let save = new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.con.save }).roll().total;
+                            targetTokens.add(targetToken)
+                            if (save >= spellSaveDC) {
+                                saves.add(targetToken)
+                            }
 
-                        targetTokens.add(targetToken)
-                        if (save >= spellSaveDC) {
-                            saves.add(targetToken)
+                            newChatmessageContent.find(".midi-qol-saves-display").append(
+                                $(addTokenToText(targetToken, save, spellSaveDC))
+                            );
+
                         }
 
-                        newChatmessageContent.find(".midi-qol-saves-display").append(
-                            $(addTokenToText(targetToken, save, spellSaveDC))
-                        );
+                        await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
 
+                        await ui.chat.scrollBottom();
+
+                        MidiQOL.applyTokenDamage(
+                            [{ damage: damage.total, type: "thunder" }],
+                            damage.total,
+                            targetTokens,
+                            itemD,
+                            saves
+                        )
                     }
-
-                    await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
-
-                    await ui.chat.scrollBottom();
-
-                    MidiQOL.applyTokenDamage(
-                        [{ damage: damage.total, type: "thunder" }],
-                        damage.total,
-                        targetTokens,
-                        itemD,
-                        saves
-                    )
                 }
 
                 for (let passenger of passengers) {

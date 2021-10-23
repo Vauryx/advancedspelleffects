@@ -2,7 +2,7 @@ import * as utilFunctions from "../utilityFunctions.js";
 
 export class spiritualWeapon {
 
-    static registerHooks(){
+    static registerHooks() {
         return;
     }
 
@@ -15,7 +15,7 @@ export class spiritualWeapon {
         const summonerAttack = summonerDc - 8;
         const summonerMod = getProperty(casterActor, `data.data.abilities.${getProperty(casterActor, 'data.data.attributes.spellcasting')}.mod`);
         let damageScale = '';
-    
+
         async function myEffectFunction(template, color, update) {
             let glowColor;
             switch (color) {
@@ -78,9 +78,9 @@ export class spiritualWeapon {
                 .belowTokens()
                 .play()
         }
-    
+
         async function postEffects(template, token) {
-    
+
             new Sequence("Advanced Spell Effects")
                 .animation()
                 .on(token)
@@ -94,17 +94,17 @@ export class spiritualWeapon {
         }]
         let weaponChoice = await warpgate.dialog(weaponData);
         weaponChoice = weaponChoice[0].toLowerCase();
-    
+
         let spiritWeapon = `jb2a.spiritual_weapon.${weaponChoice}`;
-    
+
         let types = Sequencer.Database.getEntry(spiritWeapon);
         types = Object.keys(types);
         let typeOptions = [];
-    
+
         types.forEach((type) => {
             typeOptions.push(utilFunctions.capitalizeFirstLetter(type));
         });
-    
+
         let typeData = [{
             type: "select",
             label: "Spirit Type",
@@ -112,19 +112,19 @@ export class spiritualWeapon {
         }];
         let typeChoice = await warpgate.dialog(typeData);
         typeChoice = typeChoice[0].toLowerCase();
-    
+
         spiritWeapon = spiritWeapon + `.${typeChoice}`;
-    
+
         let colors = Sequencer.Database.getEntry(spiritWeapon);
         colors = Object.keys(colors);
         let colorOptions = [];
-    
+
         colors.forEach((color) => {
             colorOptions.push(utilFunctions.capitalizeFirstLetter(color));
         });
         let attackColors;
-    
-        if(weaponChoice == "sword"){
+
+        if (weaponChoice == "sword") {
             attackColors = Sequencer.Database.getEntry(`jb2a.${weaponChoice}.melee.fire`);
             attackColors = Object.keys(attackColors);
         }
@@ -137,17 +137,17 @@ export class spiritualWeapon {
             attackColors = Object.keys(attackColors);
         }
         const templateIndex = attackColors.indexOf("_template");
-    
+
         if (templateIndex > -1) {
             attackColors.splice(templateIndex, 1);
         }
-    
+
         let attackColorOptions = [];
-    
+
         attackColors.forEach((attackColor) => {
             attackColorOptions.push(utilFunctions.capitalizeFirstLetter(attackColor));
         });
-    
+
         let colorData = [{
             type: "select",
             label: "Spirit Color",
@@ -157,14 +157,14 @@ export class spiritualWeapon {
             label: "Spirit Attack Color",
             options: attackColorOptions
         }];
-    
+
         let colorChoices = await warpgate.dialog(colorData);
         let spiritColorChoice = colorChoices[0].toLowerCase();
         let attackColorChoice = colorChoices[1].toLowerCase();
-    
+
         spiritWeapon = spiritWeapon + `.${spiritColorChoice}`;
         let spiritAttackAnim
-        if(weaponChoice == "sword"){
+        if (weaponChoice == "sword") {
             spiritAttackAnim = `jb2a.sword.melee.fire.${attackColorChoice}`;
         }
         else if (weaponChoice != "scythe") {
@@ -174,12 +174,12 @@ export class spiritualWeapon {
             spiritAttackAnim = `jb2a.sword.melee.${attackColorChoice}`;
         }
         let spiritualWeapon = Sequencer.Database.getEntry(spiritWeapon).file;
-    
+
         console.log("Spiritual Weapon path: ", spiritualWeapon);
         if ((level - 3) > 0) {
             damageScale = `+ ${Math.floor((level - 2) / 2)}d8[upcast]`;
         }
-    
+
         let updates = {
             token: {
                 'alpha': 0,
@@ -190,17 +190,18 @@ export class spiritualWeapon {
             actor: {
                 'name': `${summonType} of ${casterActor.name}`,
             },
-            item: {
-                "Attack": {
-                    'data.attackBonus': `- @mod - @prof + ${summonerAttack}`,
-                    'data.damage.parts': [[`1d8 ${damageScale} + ${summonerMod}`, 'force']],
-                    'data.attackBonus': `- @mod - @prof + ${summonerAttack}`,
-                    'data.damage.parts': [[`1d8 ${damageScale} + ${summonerMod}`, 'force']],
-                    'flags.midi-qol.onUseMacroName': 'ItemMacro',
-                    'flags.itemacro.macro.data.name': "Attack",
-                    'flags.itemacro.macro.data.type': "script",
-                    'flags.itemacro.macro.data.scope': "global",
-                    'flags.itemacro.macro.data.command': `let caster = canvas.tokens.get(args[0].tokenId);
+            embedded: {
+                Item: {
+                    "Attack": {
+                        'data.attackBonus': `- @mod - @prof + ${summonerAttack}`,
+                        'data.damage.parts': [[`1d8 ${damageScale} + ${summonerMod}`, 'force']],
+                        'data.attackBonus': `- @mod - @prof + ${summonerAttack}`,
+                        'data.damage.parts': [[`1d8 ${damageScale} + ${summonerMod}`, 'force']],
+                        'flags.midi-qol.onUseMacroName': 'ItemMacro',
+                        'flags.itemacro.macro.data.name': "Attack",
+                        'flags.itemacro.macro.data.type': "script",
+                        'flags.itemacro.macro.data.scope': "global",
+                        'flags.itemacro.macro.data.command': `let caster = canvas.tokens.get(args[0].tokenId);
             let attackTarget = args[0].targets[0];
             let hitTarget = args[0].hitTargets[0];
             if (caster) {
@@ -255,12 +256,13 @@ export class spiritualWeapon {
                     }
                 }
             }`
+                    }
                 }
             }
         }
-    
+
         const options = { controllingActor: game.actors.get(midiData.actor._id) };
-    
+
         const callbacks = {
             pre: async (template, update) => {
                 myEffectFunction(template, spiritColorChoice, update);
@@ -273,5 +275,5 @@ export class spiritualWeapon {
         };
         warpgate.spawn(summonType, updates, callbacks, options);
     }
-    
+
 }

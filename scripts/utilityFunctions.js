@@ -61,3 +61,65 @@ export async function wait(ms) {
         setTimeout(resolve, ms);
     });
 }
+
+export function convertDuration(itemDuration, inCombat) {
+    // TAKEN FROM DYNAMIC ACTIVE EFFECTS --
+    const useTurns = inCombat && game.modules.get("times-up")?.active;;
+    if (!itemDuration)
+        return { type: "seconds", seconds: 0, rounds: 0, turns: 0 };
+    if (!game.modules.get("times-up")?.active) {
+        switch (itemDuration.units) {
+            case "turn":
+            case "turns": return { type: useTurns ? "turns" : "seconds", seconds: 1, rounds: 0, turns: itemDuration.value };
+            case "round":
+            case "rounds": return { type: useTurns ? "turns" : "seconds", seconds: itemDuration.value * CONFIG.time.roundTime, rounds: itemDuration.value, turns: 0 };
+            case "second":
+            case "seconds":
+                return { type: useTurns ? "turns" : "seconds", seconds: itemDuration.value, rounds: itemDuration.value / CONFIG.time.roundTime, turns: 0 };
+            case "minute":
+            case "minutes":
+                let durSeconds = itemDuration.value * 60;
+                if (durSeconds / CONFIG.time.roundTime <= 10) {
+                    return { type: useTurns ? "turns" : "seconds", seconds: durSeconds, rounds: durSeconds / CONFIG.time.roundTime, turns: 0 };
+                }
+                else {
+                    return { type: "seconds", seconds: durSeconds, rounds: durSeconds / CONFIG.time.roundTime, turns: 0 };
+                }
+            case "hour":
+            case "hours": return { type: "seconds", seconds: itemDuration.value * 60 * 60, rounds: 0, turns: 0 };
+            case "day":
+            case "days": return { type: "seconds", seconds: itemDuration.value * 60 * 60 * 24, rounds: 0, turns: 0 };
+            case "week":
+            case "weeks": return { type: "seconds", seconds: itemDuration.value * 60 * 60 * 24 * 7, rounds: 0, turns: 0 };
+            case "month":
+            case "months": return { type: "seconds", seconds: itemDuration.value * 60 * 60 * 24 * 30, rounds: 0, turns: 0 };
+            case "year":
+            case "years": return { type: "seconds", seconds: itemDuration.value * 60 * 60 * 24 * 30 * 365, rounds: 0, turns: 0 };
+            case "inst": return { type: useTurns ? "turns" : "seconds", seconds: 1, rounds: 0, turns: 1 };
+            default:
+                console.warn("dae | unknown time unit found", itemDuration.units);
+                return { type: useTurns ? "none" : "seconds", seconds: undefined, rounds: undefined, turns: undefined };
+        }
+    }
+    else {
+        switch (itemDuration.units) {
+            case "turn":
+            case "turns": return { type: useTurns ? "turns" : "seconds", seconds: 1, rounds: 0, turns: itemDuration.value };
+            case "round":
+            case "rounds": return { type: useTurns ? "turns" : "seconds", seconds: itemDuration.value * CONFIG.time.roundTime, rounds: itemDuration.value, turns: 0 };
+            case "second": return { type: useTurns ? "turns" : "seconds", seconds: itemDuration.value, rounds: itemDuration.value / CONFIG.time.roundTime, turns: 0 };
+            default:
+                let interval = {};
+                interval[itemDuration.units] = itemDuration.value;
+                //@ts-ignore
+                const durationSeconds = window.SimpleCalendar.api.timestampPlusInterval(game.time.worldTime, interval) - game.time.worldTime;
+                if (durationSeconds / CONFIG.time.roundTime <= 10) {
+                    return { type: useTurns ? "turns" : "seconds", seconds: durationSeconds, rounds: Math.floor(durationSeconds / CONFIG.time.roundTime), turns: 0 };
+                }
+                else {
+                    return { type: "seconds", seconds: durationSeconds, rounds: Math.floor(durationSeconds / CONFIG.time.roundTime), turns: 0 };
+                }
+            //      default: return {type: combat ? "none" : "seconds", seconds: CONFIG.time.roundTime, rounds: 0, turns: 1};
+        }
+    }
+}

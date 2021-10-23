@@ -1,9 +1,9 @@
 import { aseSocket } from "../aseSockets.js";
 import * as utilFunctions from "../utilityFunctions.js";
 
-export class steelWindStrike{
+export class steelWindStrike {
 
-    static registerHooks(){
+    static registerHooks() {
         return;
     }
 
@@ -26,11 +26,11 @@ export class steelWindStrike{
         let rollDataForDisplay = [];
         let dagger = "";
         if (weapon == "dagger") dagger = ".02"
-    
+
         let swordAnim;
         let gustAnim = "jb2a.gust_of_wind.veryfast";
         let validSwingTypes = [0, 2, 4];
-    
+
         let animStartTimeMap = {
             0: 750,
             1: 500,
@@ -56,12 +56,12 @@ export class steelWindStrike{
             "spear": "melee.01"
         };
         let currentAutoRotateState = caster.document.getFlag("autorotate", "enabled") ?? false;
-        if(currentAutoRotateState){
+        if (currentAutoRotateState) {
             await caster.setFlag("autorotate", "enabled", false);
         }
         //console.log ("Auto Rotate Flag status: ",caster.document.getFlag("autorotate", "enabled"));
         await steelWindStrike(caster, targets);
-    
+
         async function evaluateAttack(target) {
             //console.log("Evalute attack target: ", target);
             let attackRoll = new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
@@ -73,14 +73,16 @@ export class steelWindStrike{
                 onHit(target, attackRoll);
             }
         }
-    
+
         async function onHit(target, attackRoll) {
             //console.log('Attack hit!');
             //console.log("Attack roll: ", attackRoll);
             let currentRoll = new Roll('6d10', caster.actor.getRollData()).roll();
             //console.log("Current damage dice roll total: ", currentRoll.total);
             //game.dice3d?.showForRoll(currentRoll);
-            let damageData = new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: 'Steel Wind Strike - Damage Roll (6d10 force)', itemCardId: "new" , itemData: midiData.item.data});
+            if (game.modules.get("midi-qol")?.active) {
+                let damageData = new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: 'Steel Wind Strike - Damage Roll (6d10 force)', itemCardId: "new", itemData: midiData.item.data });
+            }
             //console.log("damage data: ", damageData);
             rollDataForDisplay.push({
                 "target": target.name,
@@ -102,13 +104,13 @@ export class steelWindStrike{
             //game.dice3d?.showForRoll(currentRoll);
             //new MidiQOL.DamageOnlyWorkflow(midiDataactor, midiDatatokenId, currentRoll.total, "bludgeoning", [target], currentRoll, { flavor: `Flurry of Blows - Damage Roll (${damageDie} Bludgeoning)`, itemCardId: midiDataitemCardId });
         }
-    
+
         async function finalTeleport(caster, location) {
             console.log("template: ", location);
             let startLocation = { x: caster.x, y: caster.y };
             //let adjustedLocation = { x: location.x - (canvas.grid.size / 2), y: location.y - (canvas.grid.size / 2) }
             let distance = Math.sqrt(Math.pow((location.x - caster.x), 2) + Math.pow((location.y - caster.y), 2));
-    
+
             let steelWindSequence = new Sequence("Advanced Spell Effects")
                 .animation()
                 .on(caster)
@@ -147,12 +149,12 @@ export class steelWindStrike{
                     return position;
                 }
             }
-    
+
         }
         function generatePositions(origin) {
             let positions = [canvas.grid.getSnappedPosition(origin.x - 1, origin.y - 1)];
             for (let r = canvas.scene.dimensions.size; r < canvas.scene.dimensions.size * 2; r += canvas.scene.dimensions.size) {
-    
+
                 for (let theta = 0; theta < 2 * Math.PI; theta += Math.PI / (4 * r / canvas.scene.dimensions.size)) {
                     const newPos = canvas.grid.getTopLeft(origin.x + r * Math.cos(theta), origin.y + r * Math.sin(theta))
                     positions.push({ x: newPos[0], y: newPos[1] });
@@ -257,7 +259,7 @@ export class steelWindStrike{
             contentHTML = contentHTML + `</form>`
             async function chooseFinalLocation() {
                 let crosshairsConfig = {
-                    size:1,
+                    size: 1,
                     icon: caster.data.img,
                     label: 'End At',
                     tag: 'end-at-crosshairs',
@@ -267,7 +269,7 @@ export class steelWindStrike{
                 }
                 let template = await warpgate.crosshairs.show(crosshairsConfig);
                 await finalTeleport(caster, template);
-    
+
             }
             let done = await (new Promise((resolve) => {
                 new Dialog({
@@ -286,11 +288,11 @@ export class steelWindStrike{
                     { width: '500' },
                 ).render(true)
             }));
-    
+
             if (done) {
                 await chooseFinalLocation();
             }
-    
+
         }
     }
 }
