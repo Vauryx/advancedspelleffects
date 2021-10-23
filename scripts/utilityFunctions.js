@@ -123,3 +123,12 @@ export function convertDuration(itemDuration, inCombat) {
         }
     }
 }
+
+export function getSelfTarget(actor) {
+    if (actor.token)
+        return actor.token;
+    const speaker = ChatMessage.getSpeaker({ actor });
+    if (speaker.token)
+        return canvas.tokens?.get(speaker.token);
+    return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
+}

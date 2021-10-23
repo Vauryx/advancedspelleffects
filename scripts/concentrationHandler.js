@@ -116,4 +116,40 @@ export class concentrationHandler {
         console.log("ASE: Effect source not recognized...");
     }
 
+    static async addConcentration(actor, item) {
+        //console.log("item in addConcentration: ", item);
+        let selfTarget = item.actor.token ? item.actor.token.object : utilFunctions.getSelfTarget(item.actor);
+        if (!selfTarget)
+            return;
+
+        let concentrationName = "Concentrating";
+        const inCombat = (game.combat?.turns.some(combatant => combatant.token?.id === selfTarget.id));
+        const effectData = {
+            changes: [],
+            origin: item.uuid,
+            disabled: false,
+            icon: "modules/advancedspelleffects/icons/concentrate.png",
+            label: concentrationName,
+            duration: {},
+            flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
+        };
+        const convertedDuration = utilFunctions.convertDuration(item.data.data.duration, inCombat);
+        if (convertedDuration?.type === "seconds") {
+            effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
+        }
+        else if (convertedDuration?.type === "turns") {
+            effectData.duration = {
+                rounds: convertedDuration.rounds,
+                turns: convertedDuration.turns,
+                startRound: game.combat?.round,
+                startTurn: game.combat?.turn
+            };
+        }
+        await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+        //console.log("Done creating and adding effect to actor...");
+        return true;
+        // return await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+
+    }
+
 }
