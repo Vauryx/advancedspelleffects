@@ -16,7 +16,7 @@ export class witchBolt {
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
         }
-        new Sequence()
+        new Sequence("Advanced Spell Effects")
             .effect()
             .file(boltFile)
             .JB2A()
@@ -45,7 +45,7 @@ export class witchBolt {
         let target = Array.from(midiData.targets)[0];
         let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
         let boltFile = `jb2a.chain_lightning.primary.${effectOptions.initialBoltColor}`;
-        new Sequence()
+        new Sequence("Advanced Spell Effects")
             .effect()
             .file(boltFile)
             .JB2A()
@@ -121,7 +121,7 @@ export class witchBolt {
                     witchBoltItem = casterOnTarget.actor.items.get(itemId);
                     effectOptions = witchBoltItem.getFlag("advancedspelleffects", 'effectOptions');
                     animFile = `jb2a.witch_bolt.${effectOptions.streamColor}`;
-                    new Sequence()
+                    new Sequence("Advanced Spell Effects")
                         .effect()
                         .file(animFile)
                         .JB2A()
@@ -167,7 +167,7 @@ export class witchBolt {
                     await witchBoltConcentration.delete();
                     return;
                 }
-                new Sequence()
+                new Sequence("Advanced Spell Effects")
                     .effect()
                     .file(animFile)
                     .JB2A()

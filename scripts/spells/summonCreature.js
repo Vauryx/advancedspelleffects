@@ -106,6 +106,28 @@ export class summonCreature {
             summonOptionsData.buttons.push(buttonData);
         }
         let chosenSummon = await warpgate.buttonDialog(summonOptionsData, 'row');
+        const displayCrosshairs = async (crosshairs) => {
+            const loadImage = src =>
+                new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                    img.src = src;
+                });
+            let summonTokenData = (await game.actors.getName(chosenSummon[0]).getTokenData());
+            loadImage(summonTokenData.img).then(async (image) => {
+                const summonImageScale = (summonTokenData.width * canvas.grid.size) / image.width;
+                new Sequence("Advanced Spell Effects")
+                    .effect()
+                    .file(image.src)
+                    .attachTo(crosshairs)
+                    .persist()
+                    .scale(summonImageScale)
+                    .loopProperty("sprite", "rotation", { duration: 10000, from: 0, to: 360 })
+                    .opacity(0.5)
+                    .play()
+            });
+        };
         let summonEffectCallbacks = {
             pre: async (template, update) => {
                 myEffectFunction(template, effectInfo, chosenSummon[1]);
@@ -114,8 +136,18 @@ export class summonCreature {
             post: async (template, token) => {
                 postEffects(template, token, effectInfo);
                 await warpgate.wait(500);
-            }
+            },
+            show: displayCrosshairs
         };
+        let crosshairsConfig = {
+            size: 1,
+            label: chosenSummon[0],
+            tag: `summon-${chosenSummon[0]}-crosshairs`,
+            drawIcon: false,
+            drawOutline: false,
+            interval: 2
+        };
+
         let updates = {
             token: {
                 'alpha': 0,
@@ -169,10 +201,10 @@ export class summonCreature {
                     hpBonus = 10 * (spellLevel - 3);
                     break;
             }
-            if(hpBonus<0){
+            if (hpBonus < 0) {
                 hpBonus = 0;
             }
-            
+
             updates.actor = {
                 'data.attributes.hp': { value: summonActor.data.data.attributes.hp.max + hpBonus, max: summonActor.data.data.attributes.hp.max + hpBonus },
                 'data.bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
@@ -190,10 +222,11 @@ export class summonCreature {
                             "mode": 2,
                             "value": acBonus,
                             "priority": 0
-                            }]
+                        }]
                     }
                 }
             };
+
             /*damageItems.forEach((item)=> {
                 let currDamage = item.data.data.damage.parts[0][0];
                 console.log(currDamage);
@@ -203,7 +236,7 @@ export class summonCreature {
                 } 
             });*/
         }
-        const warpgateOptions = { controllingActor: game.actors.get(midiData.actor.id), duplicates: chosenSummon[1] };
+        const warpgateOptions = { controllingActor: game.actors.get(midiData.actor.id), duplicates: chosenSummon[1], crosshairs: crosshairsConfig };
         await warpgate.spawn(chosenSummon[0], updates, summonEffectCallbacks, warpgateOptions);
     }
 }

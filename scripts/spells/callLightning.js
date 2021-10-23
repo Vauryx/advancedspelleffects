@@ -20,16 +20,27 @@ export class callLightning {
         };
 
         let stormyWeather = await warpgate.buttonDialog(weatherDialogData, 'row');
+        const displayCrosshairs = async (crosshairs) => {
+            new Sequence("Advanced Spell Effects")
+                .effect()
+                .file("jb2a.call_lightning.low_res.blue")
+                .attachTo(crosshairs)
+                .persist()
+                .scaleToObject()
+                .opacity(0.5)
+                .play()
+
+        }
         let crosshairsConfig = {
             size: 25,
             icon: item.img,
             label: "Call Lightning",
             tag: 'call-lightning-crosshairs',
             drawIcon: true,
-            drawOutline: true,
-            interval: 2
+            drawOutline: false,
+            interval: 1
         }
-        let castTemplate = await warpgate.crosshairs.show(crosshairsConfig);
+        let castTemplate = await warpgate.crosshairs.show(crosshairsConfig, {show: displayCrosshairs});
         let effectFile = `jb2a.call_lightning.${res}_res.${color}`
         let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
         let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId, stormyWeather);
@@ -98,7 +109,7 @@ export class callLightning {
                 tag: 'lightning-bolt-crosshairs',
                 drawIcon: true,
                 drawOutline: true,
-                interval: 2
+                interval: 1
             }
             let boltTemplate = await warpgate.crosshairs.show(crosshairsConfig);
             let casterID = stormCloudTile.getFlag("advancedspelleffects", "stormCloudTile");

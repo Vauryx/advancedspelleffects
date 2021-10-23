@@ -259,10 +259,27 @@ export class spiritualWeapon {
                     }
                 }
             }
-        }
+        };
+        let crosshairsConfig = {
+            size: 1,
+            label: `${summonType} of ${casterActor.name}`,
+            tag: 'spiritual-weapon-crosshairs',
+            drawIcon: false,
+            drawOutline: false,
+            interval: 1
+        };
 
-        const options = { controllingActor: game.actors.get(midiData.actor._id) };
+        const options = { controllingActor: game.actors.get(midiData.actor._id), crosshairs: crosshairsConfig };
+        const displayCrosshairs = async (crosshairs) => {
+            new Sequence("Advanced Spell Effects")
+                .effect()
+                .file(spiritualWeapon)
+                .attachTo(crosshairs)
+                .persist()
+                .opacity(0.5)
+                .play()
 
+        };
         const callbacks = {
             pre: async (template, update) => {
                 myEffectFunction(template, spiritColorChoice, update);
@@ -271,8 +288,10 @@ export class spiritualWeapon {
             post: async (template, token) => {
                 postEffects(template, token);
                 await warpgate.wait(500);
-            }
+            },
+            show: displayCrosshairs
         };
+        
         warpgate.spawn(summonType, updates, callbacks, options);
     }
 

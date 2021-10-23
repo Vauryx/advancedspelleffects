@@ -41,7 +41,18 @@ export class fogCloud {
             tag: 'fog-cloud-crosshairs',
             drawIcon: true,
             drawOutline: true,
-            interval: 2
+            interval: 1
+        }
+        const displayCrosshairs = async (crosshairs) => {
+            new Sequence("Advanced Spell Effects")
+                .effect()
+                .file("jb2a.darkness.black")
+                .attachTo(crosshairs)
+                .persist()
+                .scaleToObject()
+                .opacity(0.5)
+                .play()
+
         }
         let fogCloudTemplate = await warpgate.crosshairs.show(crosshairsConfig);
 

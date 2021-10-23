@@ -1,18 +1,18 @@
 import { aseSocket } from "../aseSockets.js";
 
-export class darkness{
+export class darkness {
 
-    static registerHooks(){
+    static registerHooks() {
         if (!game.user.isGM) return;
         Hooks.on("updateTile", darkness._updateTile);
         Hooks.on("deleteTile", darkness._deleteTile);
     }
 
-    static async _updateTile(tileD){
+    static async _updateTile(tileD) {
         await aseSocket.executeAsGM("moveWalls", tileD.id, 'Darkness', 12);
     }
 
-    static async _deleteTile(tileD){
+    static async _deleteTile(tileD) {
         let walls = [];
         let wallDocuments = [];
         walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
@@ -26,21 +26,31 @@ export class darkness{
 
     static async createDarkness(midiData) {
         let item = midiData.item;
+        const displayCrosshairs = async (crosshairs) => {
+            new Sequence("Advanced Spell Effects")
+                .effect()
+                .file("jb2a.darkness.black")
+                .attachTo(crosshairs)
+                .persist()
+                .opacity(0.5)
+                .play()
+
+        }
         let crosshairsConfig = {
-            size:6,
+            size: 6,
             icon: item.img,
             label: 'Darkness',
             tag: 'darkness-crosshairs',
             drawIcon: true,
-            drawOutline: true,
-            interval: 2
+            drawOutline: false,
+            interval: 1
         }
-        let template = await warpgate.crosshairs.show(crosshairsConfig);
+        let template = await warpgate.crosshairs.show(crosshairsConfig, {show: displayCrosshairs});
         let caster = await canvas.tokens.get(midiData.tokenId);
         let casterActor = caster.actor;
         await placeCloudAsTile(template, casterActor.id);
         //await changeSelfItemMacro();
-    
+
         async function placeCloudAsTile(templateData, casterId) {
             // console.log("Template given: ", template);
             let tileWidth;
@@ -53,11 +63,11 @@ export class darkness{
             let walls = [];
             tileWidth = (templateData.width * canvas.grid.size);
             tileHeight = (templateData.width * canvas.grid.size);
-    
+
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
-    
+
             data = [{
                 alpha: 1,
                 width: tileWidth,
@@ -89,7 +99,7 @@ export class darkness{
                 let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
                 wallPoints.push({ x: x, y: y });
             }
-    
+
             for (let i = 0; i < wallPoints.length; i++) {
                 if (i < wallPoints.length - 1) {
                     walls.push({
@@ -106,7 +116,7 @@ export class darkness{
                     })
                 }
             }
-    
+
             await aseSocket.executeAsGM("placeWalls", walls);
         }
     }

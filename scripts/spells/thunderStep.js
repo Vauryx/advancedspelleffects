@@ -90,7 +90,27 @@ export class thunderStep {
 
         passengers.push(tokenD);
 
-        let position = await warpgate.crosshairs.show();
+        const displayCrosshairs = async (crosshairs) => {
+            new Sequence("Advanced Spell Effects")
+                .effect()
+                .from(tokenD)
+                .attachTo(crosshairs)
+                .persist()
+                .loopProperty("sprite", "rotation", { duration: 10000, from: 0, to: 360 })
+                .opacity(0.5)
+                .play()
+
+        };
+        let crosshairsConfig = {
+            size: 1,
+            label: 'Thunder Step',
+            tag: 'thunder-step-crosshairs',
+            drawIcon: false,
+            drawOutline: false,
+            interval: 2
+        };
+
+        let position = await warpgate.crosshairs.show(crosshairsConfig, {show: displayCrosshairs});
 
         teleport_range[0].delete();
 
@@ -100,7 +120,7 @@ export class thunderStep {
                 && passengers.indexOf(target) === -1;
         });
 
-        new Sequence()
+        new Sequence("Advanced Spell Effects")
             .effect()
             .file("jb2a.shatter.blue")
             .atLocation(tokenD, { cacheLocation: true })
