@@ -71,7 +71,7 @@ export class vampiricTouch {
             .effect()
             .file(casterAnim)
             .attachTo(tokenD)
-            .scaleToObject(1.5)
+            .scaleToObject(1.15)
             .zIndex(1)
             .persist()
             .name(`${tokenD.id}-vampiric-touch`)
