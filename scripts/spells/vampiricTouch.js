@@ -1,5 +1,5 @@
 import {concentrationHandler} from "../concentrationHandler.js"
-
+//Contributed by Wasp - The Sequencer Guy
 export class vampiricTouch {
     static async cast(midiData) {
         const tokenD = canvas.tokens.get(midiData.tokenId);
