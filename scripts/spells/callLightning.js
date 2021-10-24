@@ -40,7 +40,7 @@ export class callLightning {
             drawOutline: false,
             interval: 1
         }
-        let castTemplate = await warpgate.crosshairs.show(crosshairsConfig, {show: displayCrosshairs});
+        let castTemplate = await warpgate.crosshairs.show(crosshairsConfig, { show: displayCrosshairs });
         let effectFile = `jb2a.call_lightning.${res}_res.${color}`
         let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
         let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId, stormyWeather);
@@ -267,6 +267,15 @@ export class callLightning {
             await boltSeq.play();
         }
 
+    }
+
+    static async handleConcentration(casterActor, casterToken, effectOptions) {
+        let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == casterToken.id);
+        //console.log("tiles to delete: ", [tiles[0].id]);
+        if (stormCloudTiles.length > 0) {
+            //console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
+            aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
+        }
     }
 
     static async _updateCombat(combat) {

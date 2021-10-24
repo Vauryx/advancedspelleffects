@@ -1,17 +1,18 @@
 import ASESettings from "./apps/aseSettings.js";
 Hooks.once('ready', async function () {
-  if(!game.user.isGM) return;
+  if (!game.user.isGM) return;
   Hooks.on(`renderItemSheet5e`, async (app, html, data) => {
     //console.log("ASE: Caught actor sheet render hook!", data);
-    let aseSpellList = ['Darkness', 
-                        'Detect Magic', 
-                        'Fog Cloud', 
-                        'Steel Wind Strike', 
-                        'Thunder Step', 
-                        'Spiritual Weapon', 
-                        'Call Lightning',
-                        'Animate Dead',
-                        'Witch Bolt'];
+    let aseSpellList = ['Darkness',
+      'Detect Magic',
+      'Fog Cloud',
+      'Steel Wind Strike',
+      'Thunder Step',
+      'Spiritual Weapon',
+      'Call Lightning',
+      'Animate Dead',
+      'Witch Bolt',
+      'Vampiric Touch'];
     let isSummon = data.item.name.includes("Summon");
     if (!aseSpellList.includes(data.item.name) && !isSummon) {
       return;
@@ -25,4 +26,4 @@ Hooks.once('ready', async function () {
     aseBtn.insertAfter(titleElement);
   });
 });
-  
+

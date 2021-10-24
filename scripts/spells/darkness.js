@@ -24,6 +24,14 @@ export class darkness {
         }
     }
 
+    static async handleConcentration(casterActor, casterToken, effectOptions){
+        //console.log("Handling concentration removal for ASE Darknes...");
+        let darknessTiles = await Tagger.getByTag(`DarknessTile-${casterActor.id}`);
+        if (darknessTiles.length > 0) {
+            aseSocket.executeAsGM("deleteTiles", [darknessTiles[0].id]);
+        }
+    }
+
     static async createDarkness(midiData) {
         let item = midiData.item;
         const displayCrosshairs = async (crosshairs) => {
@@ -120,4 +128,5 @@ export class darkness {
             await aseSocket.executeAsGM("placeWalls", walls);
         }
     }
+    
 }

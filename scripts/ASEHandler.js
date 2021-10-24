@@ -11,6 +11,7 @@ import { thunderStep } from "./spells/thunderStep.js";
 import { summonCreature } from "./spells/summonCreature.js";
 import { animateDead } from "./spells/animateDead.js";
 import { witchBolt } from "./spells/witchBolt.js";
+import { vampiricTouch } from "./spells/vampiricTouch.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -64,6 +65,12 @@ export class ASEHandler {
                     console.log('Activating Witch Bolt!', data.flavor);
                     await witchBolt.activateBolt(data);
                 }
+                return;
+            case 'Vampiric Touch':
+                await vampiricTouch.cast(data);
+                return;
+            case 'Vampiric Touch (Attack)':
+                await vampiricTouch.activateTouch(data);
                 return;
         }
         if (item.name.includes("Summon")) {

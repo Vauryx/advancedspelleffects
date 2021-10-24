@@ -2,8 +2,8 @@ export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
         this.flags = this.object.data.flags.advancedspelleffects;
-        if(this.flags){
-            if (!this.flags.effectOptions){
+        if (this.flags) {
+            if (!this.flags.effectOptions) {
                 this.flags.effectOptions = {};
             }
         }
@@ -67,11 +67,18 @@ export class ASESettings extends FormApplication {
             case 'Witch Bolt':
                 data.level = 1;
                 data.actionType = "rsak"
-                data.damage.parts.push(["1d12","lightning"])
+                data.damage.parts.push(["1d12", "lightning"])
                 data.duration = { "value": 10, "units": "minute" };
                 data.scaling.formula = "1d12";
                 data.scaling.mode = "level";
                 break;
+            case 'Vampiric Touch':
+                data.level = 3;
+                data.actionType = "msak"
+                data.damage.parts.push(["3d6", "necrotic"])
+                data.duration = { "value": 1, "units": "minute" };
+                data.scaling.formula = "1d6";
+                data.scaling.mode = "level";
         }
         let updates = { data };
         await item.update(updates);
@@ -163,6 +170,20 @@ export class ASESettings extends FormApplication {
                     streamColors: streamColorOptions
                 }
                 break;
+            case 'Vampiric Touch':
+                let vampiricTouchCasterAnim = 'jb2a.energy_strands.overlay';
+                let vampiricTouchStrandAnim = `jb2a.energy_strands.range.standard`;
+                let vampiricTouchImpactAnim = `jb2a.impact.004`;
+
+                let vampiricTouchCasterColorOptions = getDBOptions(vampiricTouchCasterAnim);
+                let vampiricTouchStrandColorOptions = getDBOptions(vampiricTouchStrandAnim);
+                let vampiricTouchImpactColorOptions = getDBOptions(vampiricTouchImpactAnim);
+
+                returnOBJ = {
+                    vtCasterColors: vampiricTouchCasterColorOptions,
+                    vtStrandColors: vampiricTouchStrandColorOptions,
+                    vtImpactColors: vampiricTouchImpactColorOptions
+                }
         }
         if (itemName.includes("Summon") || itemName == "Animate Dead") {
             let magicSignsRaw = `jb2a.magic_signs.circle.02`;
@@ -203,14 +224,14 @@ export class ASESettings extends FormApplication {
                 returnOBJ["effectBColorOptions"] = effectBColorOptions;
             }
             else {
-                    currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? [{ name: "", actor: "", qty: 1}];
-                    returnOBJ["itemId"] = item.id;
-                    if (item.parent) {
-                        returnOBJ["summonerId"] = item.parent.id;
-                    }
-                    else {
-                        returnOBJ["summonerId"] = "";
-                    }
+                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? [{ name: "", actor: "", qty: 1 }];
+                returnOBJ["itemId"] = item.id;
+                if (item.parent) {
+                    returnOBJ["summonerId"] = item.parent.id;
+                }
+                else {
+                    returnOBJ["summonerId"] = "";
+                }
                 returnOBJ["portalColorOptions"] = portalColorOptions;
                 returnOBJ["portalImpactColorOptions"] = portalImpactColorOptions;
             }
@@ -251,10 +272,10 @@ export class ASESettings extends FormApplication {
         html.find('.removeType').click(this._removeSummonType.bind(this));
     }
 
-    async _removeSummonType(e){
+    async _removeSummonType(e) {
         //console.log(e);
         let summonsTable = document.getElementById("summonsTable").getElementsByTagName('tbody')[0];
-        let row = summonsTable.rows[summonsTable.rows.length-1];
+        let row = summonsTable.rows[summonsTable.rows.length - 1];
         let cells = row.cells;
         //console.log(row, cells);
         let summonTypeIndex = cells[1].children[0].name.match(/\d+/)[0];
@@ -271,12 +292,12 @@ export class ASESettings extends FormApplication {
             item = game.items.get(itemId);
             //console.log(item);
         }
-        summonsTable.rows[summonsTable.rows.length-1].remove();
+        summonsTable.rows[summonsTable.rows.length - 1].remove();
         await item.unsetFlag("advancedspelleffects", `effectOptions.summons.${summonTypeIndex}`);
-        if(this.flags){
+        if (this.flags) {
             delete this.flags.effectOptions.summons[summonTypeIndex];
         }
-        
+
         //console.log(this.flags);
         this.submit({ preventClose: true }).then(() => this.render());
     }
@@ -295,17 +316,17 @@ export class ASESettings extends FormApplication {
         let newQtyInput = newSummonRow.insertCell(5);
         newLabel1.innerHTML = `<label><b>Summon Type Name:</b></label>`;
         newTextInput.innerHTML = `<input type="text"
-        name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length-1}.name"
+        name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.name"
         value="">`;
         newLabel2.innerHTML = `<label><b>Associated Actor:</b></label>`;
-        newSelect.innerHTML = ` <select name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length-1}.actor">
+        newSelect.innerHTML = ` <select name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.actor">
         {{#each ../effectData.summonOptions as |id name|}}
         <option value="">{{name}}</option>
         {{/each}}
     </select>`;
-    newLabel3.innerHTML = `<label><b>Summon Quantity:</b></label>`;
-    newQtyInput.innerHTML = `<input style='width: 3em;' type="text"
-    name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length-1}.qty"
+        newLabel3.innerHTML = `<label><b>Summon Quantity:</b></label>`;
+        newQtyInput.innerHTML = `<input style='width: 3em;' type="text"
+    name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.qty"
     value=1>`;
         this.submit({ preventClose: true }).then(() => this.render());
     }

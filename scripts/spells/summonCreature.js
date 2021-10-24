@@ -239,4 +239,11 @@ export class summonCreature {
         const warpgateOptions = { controllingActor: game.actors.get(midiData.actor.id), duplicates: chosenSummon[1], crosshairs: crosshairsConfig };
         await warpgate.spawn(chosenSummon[0], updates, summonEffectCallbacks, warpgateOptions);
     }
+    static async handleConcentration(casterActor, casterToken, effectOptions) {
+        console.log("Detected summon concentration removal...");
+        let summonedTokens = canvas.tokens.placeables.filter((token) => { return token.document.getFlag("advancedspelleffects", "summoner") == casterActor.id });
+        for (const summonedToken of summonedTokens) {
+            await warpgate.dismiss(summonedToken.id);
+        }
+    }
 }

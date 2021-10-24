@@ -5,6 +5,7 @@ export class witchBolt {
         Hooks.on("updateToken", witchBolt._updateToken);
         Hooks.on("updateCombat", witchBolt._updateCombat);
     }
+
     static async cast(midiData) {
         let casterActor = midiData.actor;
         let caster = canvas.tokens.get(midiData.tokenId);
@@ -39,6 +40,14 @@ export class witchBolt {
         }
 
     }
+
+    static async handleConcentration(casterActor, casterToken, effectOptions) {
+        console.log(`${casterToken.id}-witchBolt`);
+        await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-witchBolt` });
+        await casterToken.document.unsetFlag("advancedspelleffects", "witchBolt");
+        return;
+    }
+
     static async activateBolt(midiData) {
         let casterActor = midiData.actor;
         let caster = canvas.tokens.get(midiData.tokenId);

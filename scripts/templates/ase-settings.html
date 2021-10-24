@@ -11,6 +11,54 @@
                 <div class="form-group">
                     {{itemName}}
                 </div>
+                {{#ifCondASE itemName '==' 'Vampiric Touch'}}
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label><b>Vampiric Touch Caster Effect</b></label>
+                            </td>
+                            <td>
+                                <select name="flags.advancedspelleffects.effectOptions.vtCasterColor">
+                                    {{#select flags.advancedspelleffects.effectOptions.vtCasterColor}}
+                                    {{#each effectData.vtCasterColors as |name key|}}
+                                    <option value="{{key}}">{{name}}</option>
+                                    {{/each}}
+                                    {{/select}}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label><b>Vampiric Touch Siphon Effect</b></label>
+                            </td>
+                            <td>
+                                <select name="flags.advancedspelleffects.effectOptions.vtStrandColor">
+                                    {{#select flags.advancedspelleffects.effectOptions.vtStrandColor}}
+                                    {{#each effectData.vtStrandColors as |name key|}}
+                                    <option value="{{key}}">{{name}}</option>
+                                    {{/each}}
+                                    {{/select}}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label><b>Vampiric Touch Impact Effect</b></label>
+                            </td>
+                            <td>
+                                <select name="flags.advancedspelleffects.effectOptions.vtImpactColor">
+                                    {{#select flags.advancedspelleffects.effectOptions.vtImpactColor}}
+                                    {{#each effectData.vtImpactColors as |name key|}}
+                                    <option value="{{key}}">{{name}}</option>
+                                    {{/each}}
+                                    {{/select}}
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {{/ifCondASE}}
                 {{#ifCondASE itemName '==' 'Detect Magic'}}
                 <div class="ase-detectMagic-settings">
                     <div class="form-group">

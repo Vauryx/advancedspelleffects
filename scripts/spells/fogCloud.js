@@ -27,7 +27,15 @@ export class fogCloud {
             await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
         }
     }
-    
+
+    static async handleConcentration(casterActor, casterToken, effectOptions) {
+        //console.log(casterActor.id);
+        let fogCloudTiles = await Tagger.getByTag(`FogCloudTile-${casterActor.id}`);
+        if (fogCloudTiles.length > 0) {
+            aseSocket.executeAsGM("deleteTiles", [fogCloudTiles[0].id]);
+        }
+    }
+
     static async createFogCloud(midiData) {
         let item = midiData.item;
         let itemLevel = midiData.itemLevel;
@@ -35,7 +43,7 @@ export class fogCloud {
         let caster = await canvas.tokens.get(midiData.tokenId);
         let casterActor = caster.actor;
         let crosshairsConfig = {
-            size:8 * itemLevel,
+            size: 8 * itemLevel,
             icon: item.img,
             label: 'Fog Cloud',
             tag: 'fog-cloud-crosshairs',
