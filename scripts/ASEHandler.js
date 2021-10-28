@@ -12,6 +12,7 @@ import { summonCreature } from "./spells/summonCreature.js";
 import { animateDead } from "./spells/animateDead.js";
 import { witchBolt } from "./spells/witchBolt.js";
 import { vampiricTouch } from "./spells/vampiricTouch.js";
+import { chaosBolt } from "./spells/chaosBolt.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -77,6 +78,8 @@ export class ASEHandler {
             case 'Vampiric Touch (Attack)':
                 await vampiricTouch.activateTouch(data);
                 return;
+            case 'Chaos Bolt':
+                await chaosBolt.createBolt(data);
         }
         if (item.name.includes("Summon")) {
             await summonCreature.doSummon(data);

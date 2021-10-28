@@ -22,7 +22,7 @@ export class detectMagic {
             if (user == "default") continue;
             users.push(user);
         }
-
+        console.log(users);
         let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
         let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
 
@@ -155,6 +155,7 @@ export class detectMagic {
             if (user == "default") continue;
             users.push(user);
         }
+        //console.log(users);
         let newPos = { x: 0, y: 0 };
         newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
         newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
