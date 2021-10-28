@@ -8,6 +8,7 @@ export class callLightning {
 
     static async createStormCloud(midiData) {
         let item = midiData.item;
+        let caster = canvas.tokens.get(midiData.tokenId);
         //console.log(midiData);
         let aseFlags = item.getFlag("advancedspelleffects", 'effectOptions');
         let color = "blue";
@@ -45,9 +46,39 @@ export class callLightning {
         let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
         let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId, stormyWeather);
         //console.log("StomeTileID: ", stormTileId);
-
+        const updates = {
+            embedded: {
+                Item: {
+                    "Call Lightning Bolt": {
+                        "type": "spell",
+                        "img": midiData.item.img,
+                        "data": {
+                            "ability": "",
+                            "actionType": "other",
+                            "activation": { "type": "action", "cost": 1, "condition": "" },
+                            "damage": { "parts": [], "versatile": "" },
+                            "level": midiData.itemLevel,
+                            "preparation": { "mode": 'atwill', "prepared": true },
+                            "range": { "value": null, "long": null, "units": "" },
+                            "school": "con",
+                            "description": {
+                                "value": "Call forth a bolt of lightning from the storm cloud above."
+                            }
+                        },
+                        "flags": {"advancedspelleffects": {
+                            "enableASE": true,
+                            'effectOptions': {
+                                'stormTileId': stormTileId
+                            }}}
+                    }
+                }
+            }
+        }
+        await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-call-lightning` });
+        ui.notifications.info(`Call Lightning Bolt has been added to your At-Will spells.`);
+        ChatMessage.create({ content: `${caster.actor.name} darkens the sky with a storm cloud...` });
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
-        await callLightning.callLightningBolt(canvas.scene.tiles.get(stormTileId));
+        await callLightning.callLightningBolt(stormTileId);
 
         async function placeCloudAsTile(castTemplate, casterId, isStorm) {
             let templateData = castTemplate;
@@ -94,8 +125,8 @@ export class callLightning {
         }
     }
 
-    static async callLightningBolt(stormCloudTile) {
-
+    static async callLightningBolt(stormTileId) {
+        let stormCloudTile = canvas.scene.tiles.get(stormTileId);
         let confirmData = {
             buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
             title: `Call forth Level ${stormCloudTile.getFlag("advancedspelleffects", "spellLevel")} Lightning Bolt?`
@@ -149,7 +180,7 @@ export class callLightning {
 
                 for (const currentTarget of tokens) {
                     let currentTargetActor = currentTarget.token.actor;
-                    let saveResult = await currentTargetActor.rollAbilitySave("dex", { fastForward: true, flavor: "Thunder Step Saving Throw" });
+                    let saveResult = await currentTargetActor.rollAbilitySave("dex", { fastForward: true, flavor: "Call Lightning Saving Throw" });
 
                     if (saveResult.total < saveDC) {
                         failedSaves.push(currentTarget.token);
@@ -173,7 +204,7 @@ export class callLightning {
                 if (game.modules.get("dice-so-nice")?.active) {
                     game.dice3d?.showForRoll(fullDamageRoll);
                 }
-                //console.log("Thunder Step Full Damage roll: ", fullDamageRoll);
+                //console.log("Lightning Bolt Full Damage roll: ", fullDamageRoll);
                 let halfdamageroll = new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: false });
 
                 if (failedSaves.length > 0) {
@@ -275,7 +306,11 @@ export class callLightning {
         if (stormCloudTiles.length > 0) {
             //console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
             aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
+            await warpgate.revert(casterToken.document, `${casterActor.id}-call-lightning`);
+            ui.notifications.info(`Call Lightning Bolt has been removed from your At-Will spells.`);
+            ChatMessage.create({ content: `The storm cloud dissipates...` });
         }
+
     }
 
     static async _updateCombat(combat) {
@@ -286,7 +321,7 @@ export class callLightning {
         //console.log("update hook fired...", stormCloudTiles);
         if (stormCloudTiles.length > 0) {
             //console.log("Detected Storm Cloud! Prompting for Bolt...");
-            await callLightning.callLightningBolt(stormCloudTiles[0]);
+            await callLightning.callLightningBolt(stormCloudTiles[0].id);
         }
     }
 }

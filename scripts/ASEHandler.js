@@ -39,6 +39,11 @@ export class ASEHandler {
                     await callLightning.createStormCloud(data);
                 }
                 return;
+            case "Call Lightning Bolt":
+                if(!data.flavor?.includes("Lightning Bolt")) {
+                    await callLightning.callLightningBolt(aseFlags.effectOptions.stormTileId);
+                }
+                return;
             case "Fog Cloud":
                 await fogCloud.createFogCloud(data);
                 return;

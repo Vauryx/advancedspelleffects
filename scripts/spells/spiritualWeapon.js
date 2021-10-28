@@ -128,6 +128,10 @@ export class spiritualWeapon {
             attackColors = Sequencer.Database.getEntry(`jb2a.${weaponChoice}.melee.fire`);
             attackColors = Object.keys(attackColors);
         }
+        else if(weaponChoice == "mace") {
+            attackColors = Sequencer.Database.getEntry(`jb2a.${weaponChoice}.melee.01`);
+            attackColors = Object.keys(attackColors);
+        }
         else if (Sequencer.Database.entryExists(`jb2a.${weaponChoice}.melee`)) {
             attackColors = Sequencer.Database.getEntry(`jb2a.${weaponChoice}.melee`);
             attackColors = Object.keys(attackColors);
@@ -166,6 +170,9 @@ export class spiritualWeapon {
         let spiritAttackAnim
         if (weaponChoice == "sword") {
             spiritAttackAnim = `jb2a.sword.melee.fire.${attackColorChoice}`;
+        }
+        else if (weaponChoice == "mace") {
+            spiritAttackAnim = `jb2a.mace.melee.01.${attackColorChoice}`;
         }
         else if (weaponChoice != "scythe") {
             spiritAttackAnim = `jb2a.${weaponChoice}.melee.${attackColorChoice}`;
@@ -266,7 +273,7 @@ export class spiritualWeapon {
             tag: 'spiritual-weapon-crosshairs',
             drawIcon: false,
             drawOutline: false,
-            interval: 1
+            interval: 2
         };
 
         const options = { controllingActor: game.actors.get(midiData.actor._id), crosshairs: crosshairsConfig };
@@ -276,6 +283,7 @@ export class spiritualWeapon {
                 .file(spiritualWeapon)
                 .attachTo(crosshairs)
                 .persist()
+                .name('ASE-spiritual-weapon-crosshairs')
                 .opacity(0.5)
                 .play()
 
@@ -288,6 +296,7 @@ export class spiritualWeapon {
             post: async (template, token) => {
                 postEffects(template, token);
                 await warpgate.wait(500);
+                Sequencer.EffectManager.endEffects({name: 'ASE-spiritual-weapon-crosshairs'});
             },
             show: displayCrosshairs
         };
