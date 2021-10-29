@@ -16,7 +16,7 @@ export class noMidiHandler {
         let aseSpell = spellItem?.data?.flags?.advancedspelleffects ?? false;
         if (!caster || !casterActor || !spellItem || !aseSpell) return;
         let chatContent = msg.data.content;
-        let spellLevel = chatContent.charAt(chatContent.indexOf("data-spell-level")+18);
+        let spellLevel = Number(chatContent.charAt(chatContent.indexOf("data-spell-level")+18));
         let spellTargets = Array.from(game.user.targets);
         let data = {
             actor: casterActor,
@@ -24,7 +24,8 @@ export class noMidiHandler {
             tokenId: msg.data.speaker.token,
             item: spellItem,
             itemLevel: spellLevel,
-            targets: spellTargets
+            targets: spellTargets,
+            itemCardId: msg.id
         };
         if(spellItem.data.data.components.concentration){
             await concentrationHandler.addConcentration(casterActor, spellItem);
