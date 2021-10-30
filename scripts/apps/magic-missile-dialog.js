@@ -11,6 +11,7 @@ export class magicMissileDialog extends FormApplication {
         this.data.numMissilesMax = options.numMissiles;
         this.data.caster = options.casterId;
         this.data.itemCardId = options.itemCardId;
+        this.data.effectOptions = options.effectOptions;
         this.data.targets = [];
         this.data.targetHookID;
     }
@@ -26,7 +27,7 @@ export class magicMissileDialog extends FormApplication {
         });
     }
     async _applyMarker(target) {
-        let markerAnim = "jb2a.markers.01.dark_bluewhite";
+        let markerAnim = `jb2a.markers.01.${this.data.effectOptions.targetMarkerColor}`;
         let baseScale = 0.1;
         let currMissile = target.document.getFlag("advancedspelleffects", "magicMissile.missileNum") ?? 0;
         //console.log("Current missile number: ", currMissile);
@@ -34,7 +35,7 @@ export class magicMissileDialog extends FormApplication {
         let offsetMod = (-(1 / 4) * currMissile) + 1;
         // console.log("offset Modifier: ", offsetMod);
         let offset = { x: baseOffset * offsetMod, y: baseOffset }
-        new Sequence()
+        new Sequence("Advanced Spell Effects")
             .effect()
             .attachTo(target)
             .persist()
@@ -150,8 +151,8 @@ export class magicMissileDialog extends FormApplication {
     }
 
     async _launchMissile(caster, target) {
-        let missileAnim = "jb2a.magic_missile.purple";
-        new Sequence()
+        let missileAnim = `jb2a.magic_missile.${this.data.effectOptions.dartColor}`;
+        new Sequence("Advanced Spell Effects")
             .effect()
             .file(missileAnim)
             .atLocation(caster)
@@ -176,14 +177,14 @@ export class magicMissileDialog extends FormApplication {
             }
             this.submit();
         });
-        
+
         return {
             data: this.data
         };
 
     }
     async _updateObject(event, formData) {
-        console.log(event);
+        //console.log(event);
         function addTokenToText(token, damage, numMissiles) {
 
             return `<div class="midi-qol-flex-container">
@@ -209,7 +210,7 @@ export class magicMissileDialog extends FormApplication {
             let targetToken = canvas.tokens.get(target.id);
             //console.log("Target: ", targetToken);
             let missileNum = targetToken.document.getFlag("advancedspelleffects", "magicMissile.missileNum") ?? 0;
-            if(missileNum == 0) {
+            if (missileNum == 0) {
                 return;
             }
             let damageRoll = new Roll(`${missileNum}d4 +${missileNum}`).evaluate({ async: false });

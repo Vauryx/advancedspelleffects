@@ -28,6 +28,8 @@ export class magicMissile {
         const casterToken = canvas.tokens.get(midiData.tokenId);
         const numMissiles = midiData.itemLevel + 2;
         const itemCardId = midiData.itemCardId;
-        new magicMissileDialog({casterId: casterToken.id, numMissiles: numMissiles, itemCardId: itemCardId}).render(true);
+        const spellItem = midiData.item;
+        const  aseEffectOptions = spellItem?.getFlag("advancedspelleffects", "effectOptions");
+        new magicMissileDialog({casterId: casterToken.id, numMissiles: numMissiles, itemCardId: itemCardId, effectOptions: aseEffectOptions}).render(true);
     }
 }

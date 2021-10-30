@@ -92,21 +92,13 @@ export class ASESettings extends FormApplication {
 
         function getDBOptions(rawSet, removeTemplate = false) {
             let options = {};
-            let setOptions = Sequencer.Database.getEntry(rawSet);
-            console.log(setOptions)
+            let setOptions = Sequencer.Database.getPathsUnder(rawSet);
+            //console.log(setOptions)
             if (setOptions) {
-                let setKeys = Object.keys(setOptions);
-                console.log(setKeys);
-                if (removeTemplate) {
-                    let templateIndex = setKeys.indexOf("_template");
-                    if (templateIndex > -1) {
-                        setKeys.splice(templateIndex, 1);
-                    }
-                }
-                setKeys.forEach((elem) => {
+                setOptions.forEach((elem) => {
                     options[elem] = capitalizeFirstLetter(elem);
                 });
-                console.log(options);
+                //console.log(options);
             }
             return options;
         }
@@ -191,7 +183,7 @@ export class ASESettings extends FormApplication {
                 }
             case 'Magic Missile':
                 let magicMissileAnim = 'jb2a.magic_missile';
-                let magicMissileColorOptions = getDBOptions(magicMissileAnim);
+                let magicMissileColorOptions = getDBOptions(magicMissileAnim, true);
 
                 let targetMarkerAnim = 'jb2a.markers.01';
                 let targetMarkerColorOptions = getDBOptions(targetMarkerAnim);
