@@ -33,6 +33,10 @@ export function measureDistance(pointA, pointB) {
     return dist;
 }
 
+export function getRandomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
 export function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);

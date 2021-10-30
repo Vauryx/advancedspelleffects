@@ -59,6 +59,40 @@
                     </tbody>
                 </table>
                 {{/ifCondASE}}
+                {{#ifCondASE itemName '==' 'Magic Missile'}}
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label><b>Target Marker Color </b></label>
+                            </td>
+                            <td>
+                                <select name="flags.advancedspelleffects.effectOptions.targetMarkerColor">
+                                    {{#select flags.advancedspelleffects.effectOptions.targetMarkerColor}}
+                                    {{#each effectData.targetMarkerColors as |name key|}}
+                                    <option value="{{key}}">{{name}}</option>
+                                    {{/each}}
+                                    {{/select}}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label><b>Dart Color</b></label>
+                            </td>
+                            <td>
+                                <select name="flags.advancedspelleffects.effectOptions.dartColor">
+                                    {{#select flags.advancedspelleffects.effectOptions.dartColor}}
+                                    {{#each effectData.mmColors as |name key|}}
+                                    <option value="{{key}}">{{name}}</option>
+                                    {{/each}}
+                                    {{/select}}
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {{/ifCondASE}}
                 {{#ifCondASE itemName '==' 'Detect Magic'}}
                 <div class="ase-detectMagic-settings">
                     <div class="form-group">

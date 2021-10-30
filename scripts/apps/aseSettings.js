@@ -89,23 +89,20 @@ export class ASESettings extends FormApplication {
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
+
         function getDBOptions(rawSet, removeTemplate = false) {
             let options = {};
-            let setOptions = Sequencer.Database.getEntry(rawSet);
+            let setOptions = Sequencer.Database.getPathsUnder(rawSet);
+            //console.log(setOptions)
             if (setOptions) {
-                let setKeys = Object.keys(setOptions);
-                if (removeTemplate) {
-                    let templateIndex = setKeys.indexOf("_template");
-                    if (templateIndex > -1) {
-                        setKeys.splice(templateIndex, 1);
-                    }
-                }
-                setKeys.forEach((elem) => {
+                setOptions.forEach((elem) => {
                     options[elem] = capitalizeFirstLetter(elem);
                 });
+                //console.log(options);
             }
             return options;
         }
+
         let flags = this.object.data.flags;
         let itemName = item.name;
         let returnOBJ = {};
@@ -184,6 +181,18 @@ export class ASESettings extends FormApplication {
                     vtStrandColors: vampiricTouchStrandColorOptions,
                     vtImpactColors: vampiricTouchImpactColorOptions
                 }
+            case 'Magic Missile':
+                let magicMissileAnim = 'jb2a.magic_missile';
+                let magicMissileColorOptions = getDBOptions(magicMissileAnim, true);
+
+                let targetMarkerAnim = 'jb2a.markers.01';
+                let targetMarkerColorOptions = getDBOptions(targetMarkerAnim);
+
+                returnOBJ = {
+                    mmColors: magicMissileColorOptions,
+                    targetMarkerColors: targetMarkerColorOptions
+                }
+                console.log(returnOBJ);
         }
         if (itemName.includes("Summon") || itemName == "Animate Dead") {
             let magicSignsRaw = `jb2a.magic_signs.circle.02`;
