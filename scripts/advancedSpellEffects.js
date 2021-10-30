@@ -2,8 +2,8 @@ import * as utilFunctions from "./utilityFunctions.js";
 import { setupASESocket } from "./aseSockets.js";
 import { aseSocket } from "./aseSockets.js";
 import { concentrationHandler } from "./concentrationHandler.js";
-import {midiHandler} from "./midiHandler.js"
-import {noMidiHandler} from "./noMidiHandler.js"
+import { midiHandler } from "./midiHandler.js"
+import { noMidiHandler } from "./noMidiHandler.js"
 // Importing spells
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
@@ -15,7 +15,7 @@ import { thunderStep } from "./spells/thunderStep.js";
 import { summonCreature } from "./spells/summonCreature.js";
 import { animateDead } from "./spells/animateDead.js";
 import { witchBolt } from "./spells/witchBolt.js";
-import {magicMissile} from "./spells/magicMissile.js"
+import { magicMissile } from "./spells/magicMissile.js"
 
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
@@ -41,5 +41,4 @@ const aseModules = {
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());
-    
 });

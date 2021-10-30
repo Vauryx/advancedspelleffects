@@ -8,12 +8,12 @@ export class magicMissile {
         return;
     }
 
-    static async _clearTargets(data) {
+    static async _clearTargets() {
         let tokens = Array.from(canvas.tokens.placeables);
             //console.log("ASE Magic Missile Targets Detected...", tokens);
             for (let target of tokens) {
                 //console.log('Target: ',target);
-                let effectsOnTarget = await Sequencer.EffectManager.getEffects({ object: target }).filter(async (e) => {
+                let effectsOnTarget = await Sequencer.EffectManager.getEffects({ object: target }).filter((e) => {
                     //console.log('e data name',e.data.name);
                     return e.data.name.startsWith("mm-target-")
                 }).forEach(async (e) => {
