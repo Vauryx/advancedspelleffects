@@ -4,6 +4,7 @@ import { aseSocket } from "./aseSockets.js";
 import { concentrationHandler } from "./concentrationHandler.js";
 import { midiHandler } from "./midiHandler.js"
 import { noMidiHandler } from "./noMidiHandler.js"
+import { MissileDialog } from "./apps/missile-dialog.js"
 // Importing spells
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
@@ -37,7 +38,8 @@ const aseModules = {
     witchBolt,
     magicMissile,
     midiHandler,
-    noMidiHandler
+    noMidiHandler,
+    MissileDialog
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());

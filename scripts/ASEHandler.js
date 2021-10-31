@@ -13,7 +13,8 @@ import { animateDead } from "./spells/animateDead.js";
 import { witchBolt } from "./spells/witchBolt.js";
 import { vampiricTouch } from "./spells/vampiricTouch.js";
 import { magicMissile } from "./spells/magicMissile.js";
-
+import { scorchingRay } from "./spells/scorchingRay.js";
+import { eldritchBlast } from "./spells/eldritchBlast.js";
 export class ASEHandler {
     static async handleASE(data) {
         // check if the spell being rolled is marked as an ASE spell
@@ -80,6 +81,12 @@ export class ASEHandler {
                 return;
             case 'Magic Missile':
                 await magicMissile.selectTargets(data);
+                return;
+            case 'Scorching Ray':
+                await scorchingRay.selectTargets(data);
+                return;
+            case 'Eldritch Blast':
+                await eldritchBlast.selectTargets(data);
                 return;
         }
         if (item.name.includes("Summon")) {

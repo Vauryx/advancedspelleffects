@@ -13,7 +13,9 @@ Hooks.once('ready', async function () {
       'Animate Dead',
       'Witch Bolt',
       'Vampiric Touch',
-      'Magic Missile'];
+      'Magic Missile',
+      'Scorching Ray',
+      'Eldritch Blast'];
     let isSummon = data.item.name.includes("Summon");
     if (!aseSpellList.includes(data.item.name) && !isSummon) {
       return;

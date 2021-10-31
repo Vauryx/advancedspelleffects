@@ -1,8 +1,8 @@
 import { aseSocket } from "../aseSockets.js";
 import * as utilFunctions from "../utilityFunctions.js";
 
-export class magicMissileDialog extends FormApplication {
-    constructor(options = { numMissiles: 0 }) {
+export class MissileDialog extends FormApplication {
+    constructor(options) {
         super(options);
         foundry.utils.mergeObject(this.options, options);
         //console.log(this);
@@ -15,11 +15,33 @@ export class magicMissileDialog extends FormApplication {
         this.data.targets = [];
         this.data.targetHookID;
     }
+
+    static async _clearTargets() {
+        let tokens = Array.from(canvas.tokens.placeables);
+            //console.log("ASE Magic Missile Targets Detected...", tokens);
+            for (let target of tokens) {
+                //console.log('Target: ',target);
+                let effectsOnTarget = await Sequencer.EffectManager.getEffects({ object: target }).filter((e) => {
+                    //console.log('e data name',e.data.name);
+                    return e.data.name.startsWith("missile-target-")
+                }).forEach(async (e) => {
+                    console.log('Cleaning up leftover ASE Missile Effects...',e);
+                    await Sequencer.EffectManager.endEffects({ object: target, name: e.data.name });
+                })
+                await target?.document.unsetFlag("advancedspelleffects", 'missileSpell');
+            }
+    }
+    static async registerHooks() {
+        console.log('Clearing ASE Magic Missile Targets...');
+        Hooks.on("sequencerEffectManagerReady", MissileDialog._clearTargets);
+        return;
+    }
     static get defaultOptions() {
+        //console.log(this);
         return mergeObject(super.defaultOptions, {
-            template: './modules/advancedspelleffects/scripts/templates/magic-missile-dialog.html',
-            id: 'magic-missile-dialog',
-            title: "Magic Missile Target Select",
+            template: './modules/advancedspelleffects/scripts/templates/missile-dialog.html',
+            id: 'missile-dialog',
+            title: `Select Targets`,
             resizable: true,
             width: "auto",
             height: "auto",
@@ -27,9 +49,9 @@ export class magicMissileDialog extends FormApplication {
         });
     }
     async _applyMarker(target) {
-        let markerAnim = `jb2a.markers.01.${this.data.effectOptions.targetMarkerColor}`;
-        let baseScale = 0.1;
-        let currMissile = target.document.getFlag("advancedspelleffects", "magicMissile.missileNum") ?? 0;
+        let markerAnim = `${this.data.effectOptions.targetMarkerType}.${this.data.effectOptions.targetMarkerColor}`;
+        let baseScale = this.data.effectOptions.baseScale;
+        let currMissile = target.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 0;
         //console.log("Current missile number: ", currMissile);
         let baseOffset = canvas.grid.size / 2;
         let offsetMod = (-(1 / 4) * currMissile) + 1;
@@ -41,12 +63,12 @@ export class magicMissileDialog extends FormApplication {
             .persist()
             .file(markerAnim)
             .scale(0.01)
-            .name(`mm-target-${target.id}-${currMissile}`)
+            .name(`missile-target-${target.id}-${currMissile}`)
             .offset(offset)
             .animateProperty("sprite", "scale.x", { from: 0.01, to: baseScale, delay: 200, duration: 700, ease: "easeOutBounce" })
             .animateProperty("sprite", "scale.y", { from: 0.01, to: baseScale, duration: 900, ease: "easeOutBounce" })
             .play()
-        await target.document.setFlag("advancedspelleffects", "magicMissile.missileNum", currMissile + 1);
+        await target.document.setFlag("advancedspelleffects", "missileSpell.missileNum", currMissile + 1);
         //console.log("Total Missiles assigned: ", currMissile + 1);
         let inTargetList = this.data.targets.find(t => t.id == target.id);
         if (!inTargetList) {
@@ -63,7 +85,7 @@ export class magicMissileDialog extends FormApplication {
         let numMissiles = Number(dialogData.numMissiles);
         //console.log('Missiles passed to target hook: ', numMissiles);
         if (numMissiles == 0) {
-            ui.notifications.info("Magic Missile Limit Reached!");
+            ui.notifications.info("Missile Limit Reached!");
         }
         if (this.data.targetHookID) {
             if (numMissiles > 0) {
@@ -82,7 +104,7 @@ export class magicMissileDialog extends FormApplication {
 
     async _addTargetToList(target) {
         //console.log(`Adding ${target.document.data.name} to target list...`, target);
-        let missilesAssigned = target.document.getFlag("advancedspelleffects", "magicMissile.missileNum") ?? 1;
+        let missilesAssigned = target.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 1;
         //console.log("Missles assigned: ", missilesAssigned);
         let targetsTable = document.getElementById("targetsTable").getElementsByTagName('tbody')[0];
         let targetAssignedMissiles = document.getElementById(`${target.document.id}-missiles`);
@@ -97,7 +119,7 @@ export class magicMissileDialog extends FormApplication {
             newRemoveMissileButton.innerHTML = `<button id="${target.document.id}-removeMissile" class="btnRemoveMissile" type="button"><i class="fas fa-minus"></i></button>`;
             let btnRemoveMissile = document.getElementById(`${target.document.id}-removeMissile`);
             //console.log(btnRemoveMissile);
-            btnRemoveMissile.addEventListener("click", this._removeMagicMissile.bind(this));
+            btnRemoveMissile.addEventListener("click", this._removeMissile.bind(this));
             newTargetRow.addEventListener("mouseenter", function (e) {
                 let token = canvas.tokens.get($(this).attr('id').split('-')[0]);
                 token._onHoverIn(e);
@@ -114,22 +136,22 @@ export class magicMissileDialog extends FormApplication {
     }
 
     async _removeMarker(target) {
-        let missilesAssigned = Number(target.document.getFlag("advancedspelleffects", "magicMissile.missileNum")) ?? 0;
+        let missilesAssigned = Number(target.document.getFlag("advancedspelleffects", "missileSpell.missileNum")) ?? 0;
         //console.log("Removing assigned missile...", missilesAssigned);
-        Sequencer.EffectManager.endEffects({ name: `mm-target-${target.id}-${missilesAssigned - 1}` });
+        Sequencer.EffectManager.endEffects({ name: `missile-target-${target.id}-${missilesAssigned - 1}` });
         if (missilesAssigned > 0) {
-            await target.document.setFlag("advancedspelleffects", "magicMissile.missileNum", missilesAssigned - 1);
+            await target.document.setFlag("advancedspelleffects", "missileSpell.missileNum", missilesAssigned - 1);
         }
         //console.log("Total missiles assigned: ", missilesAssigned - 1);
     }
 
-    async _removeMagicMissile(e) {
+    async _removeMissile(e) {
         //console.log("Removing magic missile...", e);
         let target = canvas.tokens.get(e.currentTarget.id.split('-')[0]);
-        console.log("Target: ", target);
+        //console.log("Target: ", target);
         if (target) {
-            let missilesAssigned = target.document.getFlag("advancedspelleffects", "magicMissile.missileNum");
-            console.log("Missles assigned: ", missilesAssigned);
+            let missilesAssigned = target.document.getFlag("advancedspelleffects", "missileSpell.missileNum");
+            //console.log("Missles assigned: ", missilesAssigned);
             let targetsTable = document.getElementById("targetsTable").getElementsByTagName('tbody')[0];
             let targetAssignedMissiles = document.getElementById(`${target.document.id}-missiles`);
             if (targetAssignedMissiles) {
@@ -151,7 +173,8 @@ export class magicMissileDialog extends FormApplication {
     }
 
     async _launchMissile(caster, target) {
-        let missileAnim = `jb2a.magic_missile.${this.data.effectOptions.dartColor}`;
+        //console.log('MISSILE ANIM: ', this.data.effectOptions);
+        let missileAnim= `${this.data.effectOptions.missileAnim}.${this.data.effectOptions.missileColor}`;
         new Sequence("Advanced Spell Effects")
             .effect()
             .file(missileAnim)
@@ -165,15 +188,15 @@ export class magicMissileDialog extends FormApplication {
 
     async getData() {
         this.data.targetHookID = Hooks.once('targetToken', async (user, token, targetState) => await this._onTargetHook(user, token, targetState, this.data));
-        Hooks.once('closemagicMissileDialog', async () => {
-            let tokens = Array.from(canvas.tokens.placeables).filter(t => t.data.flags.advancedspelleffects && t.data.flags.advancedspelleffects.magicMissile);
+        Hooks.once('closeMissileDialog', async () => {
+            let tokens = Array.from(canvas.tokens.placeables).filter(t => t.data.flags.advancedspelleffects && t.data.flags.advancedspelleffects.missileSpell);
             for (let target of tokens) {
                 await Sequencer.EffectManager.getEffects({ object: target }).filter(async (e) => {
-                    e.data.name.startsWith("mm-target-")
+                    e.data.name.startsWith("missile-target-")
                 }).forEach(async (e) => {
                     await Sequencer.EffectManager.endEffects({ object: target, name: e.data.name })
                 });
-                await target?.document.unsetFlag("advancedspelleffects", 'magicMissile');
+                await target?.document.unsetFlag("advancedspelleffects", 'missileSpell');
             }
             this.submit();
         });
@@ -185,15 +208,15 @@ export class magicMissileDialog extends FormApplication {
     }
     async _updateObject(event, formData) {
         //console.log(event);
-        function addTokenToText(token, damage, numMissiles) {
+        function addTokenToText(token, damage, numMissiles, missileType, damageFormula, damageType) {
 
             return `<div class="midi-qol-flex-container">
         <div>
-        Launched ${numMissiles} dart(s) at 
+        Launched ${numMissiles} ${missileType}(s) at 
         </div>
       <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
       <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
-      <div> dealing <b>${damage} </b>damage</div>
+      <div> dealing <b>${damageFormula} (${damage}) </b>${damageType} damage</div>
       <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
     </div>`;
 
@@ -204,16 +227,15 @@ export class magicMissileDialog extends FormApplication {
         //console.log(`${caster.name} is firing Missiles at Selected Targets...`);
         //console.log("Missile Data: ", this.data);
         Hooks.off('targetToken', this.data.targetHookID);
-        let missileAnim = "jb2a.magic_missile.purple";
-        let magicMissileSequence = new Sequence("Advanced Spell Effects");
         for (let target of this.data.targets) {
             let targetToken = canvas.tokens.get(target.id);
             //console.log("Target: ", targetToken);
-            let missileNum = targetToken.document.getFlag("advancedspelleffects", "magicMissile.missileNum") ?? 0;
+            let missileNum = targetToken.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 0;
             if (missileNum == 0) {
                 return;
             }
-            let damageRoll = new Roll(`${missileNum}d4 +${missileNum}`).evaluate({ async: false });
+            let damageRoll = await new Roll(`${missileNum*this.data.effectOptions.dmgDieCount}${this.data.effectOptions.dmgDie} +${missileNum*this.data.effectOptions.dmgMod}`).evaluate({ async: true });
+            console.log('Damage Roll: ',damageRoll);
             //console.log(`Launching ${missileNum} missiles at ${targetToken.name}...dealing ${damageRoll.total} damage!`);
             game.dice3d?.showForRoll(damageRoll);
             if (game.modules.get("midi-qol")?.active) {
@@ -221,16 +243,16 @@ export class magicMissileDialog extends FormApplication {
                 let newChatmessageContent = $(chatMessageContent);
                 //console.log(newChatmessageContent);
                 newChatmessageContent.find(".midi-qol-hits-display").append(
-                    $(addTokenToText(targetToken, damageRoll.total, missileNum))
+                    $(addTokenToText(targetToken, damageRoll.total, missileNum, this.data.effectOptions.missileType, damageRoll.formula, this.data.effectOptions.dmgType))
                 );
 
-                new MidiQOL.DamageOnlyWorkflow(caster.actor, caster.document, damageRoll.total, "force", [targetToken], damageRoll, { itemCardId: "new" });
+                new MidiQOL.DamageOnlyWorkflow(caster.actor, caster.document, damageRoll.total, this.data.effectOptions.dmgType , [targetToken], damageRoll, { itemCardId: "new" });
                 await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
                 await ui.chat.scrollBottom();
 
             }
             else {
-                let content = `Launching ${missileNum} missiles at ${targetToken.name}...dealing ${damageRoll.total} damage!`;
+                let content = `Launched </b>${missileNum}</b> ${this.data.effectOptions.missileType}(s) at <b>${targetToken.name}</b> dealing <b>${damageRoll.formula} (${damageRoll.total}) ${this.data.effectOptions.dmgType}</b> damage!`;
                 ChatMessage.create({ content: content, user: game.user.id })
             }
             for (let i = 0; i < missileNum; i++) {
@@ -238,7 +260,7 @@ export class magicMissileDialog extends FormApplication {
                 await warpgate.wait(utilFunctions.getRandomInt(20, 75));
             }
             await Sequencer.EffectManager.endEffects({ object: targetToken });
-            await targetToken.document.unsetFlag("advancedspelleffects", 'magicMissile');
+            await targetToken.document.unsetFlag("advancedspelleffects", 'missileSpell');
         }
 
         //magicMissileSequence.play();
@@ -253,4 +275,4 @@ export class magicMissileDialog extends FormApplication {
     }
 
 }
-export default magicMissileDialog;
+export default MissileDialog;

@@ -90,7 +90,7 @@ export class ASESettings extends FormApplication {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
-        function getDBOptions(rawSet, removeTemplate = false) {
+        function getDBOptions(rawSet) {
             let options = {};
             let setOptions = Sequencer.Database.getPathsUnder(rawSet);
             //console.log(setOptions)
@@ -106,7 +106,7 @@ export class ASESettings extends FormApplication {
         let flags = this.object.data.flags;
         let itemName = item.name;
         let returnOBJ = {};
-        console.log("Detected item name: ", itemName);
+        //console.log("Detected item name: ", itemName);
         await this.setItemDetails(item);
         switch (itemName) {
             case 'Detect Magic':
@@ -160,7 +160,7 @@ export class ASESettings extends FormApplication {
                 let initialBoltColorOptions = getDBOptions(initialBoltAnim);
 
                 let streamAnim = 'jb2a.witch_bolt';
-                let streamColorOptions = getDBOptions(streamAnim, true);
+                let streamColorOptions = getDBOptions(streamAnim);
 
                 returnOBJ = {
                     initialBoltColors: initialBoltColorOptions,
@@ -181,20 +181,34 @@ export class ASESettings extends FormApplication {
                     vtStrandColors: vampiricTouchStrandColorOptions,
                     vtImpactColors: vampiricTouchImpactColorOptions
                 }
-            case 'Magic Missile':
-                let magicMissileAnim = 'jb2a.magic_missile';
-                let magicMissileColorOptions = getDBOptions(magicMissileAnim, true);
-
-                let targetMarkerAnim = 'jb2a.markers.01';
-                let targetMarkerColorOptions = getDBOptions(targetMarkerAnim);
-
-                returnOBJ = {
-                    mmColors: magicMissileColorOptions,
-                    targetMarkerColors: targetMarkerColorOptions
-                }
-                console.log(returnOBJ);
+                break;
         }
-        if (itemName.includes("Summon") || itemName == "Animate Dead") {
+        if (itemName == 'Scorching Ray' || itemName == 'Magic Missile' || itemName == 'Eldritch Blast') {
+            let baseAnim;
+            let targetMarkerAnim;
+            switch (itemName) {
+                case 'Scorching Ray':
+                    baseAnim = 'jb2a.scorching_ray.01';
+                    targetMarkerAnim = 'jb2a.markers.01';
+                    break;
+                case 'Magic Missile':
+                    baseAnim = 'jb2a.magic_missile';
+                    targetMarkerAnim = 'jb2a.moonbeam.01.loop';
+                    break;
+                case 'Eldritch Blast':
+                    baseAnim = 'jb2a.eldritch_blast';
+                    targetMarkerAnim = 'jb2a.markers.02';
+                    break;
+            }
+            let missileColorOptions = getDBOptions(baseAnim);
+            let targetMarkerColorOptions = getDBOptions(targetMarkerAnim);
+            returnOBJ = {
+                missileColors: missileColorOptions,
+                targetMarkerColors: targetMarkerColorOptions
+            }
+            console.log(returnOBJ);
+        }
+        else if (itemName.includes("Summon") || itemName == "Animate Dead") {
             let magicSignsRaw = `jb2a.magic_signs.circle.02`;
             let magicSchoolOptions = getDBOptions(magicSignsRaw);
 
@@ -202,7 +216,7 @@ export class ASESettings extends FormApplication {
             let magicSchoolColorOptions = getDBOptions(magicSchoolColorsRaw);
 
             let effectAColorsRaw = `jb2a.eldritch_blast`;
-            let effectAColorOptions = getDBOptions(effectAColorsRaw, true);
+            let effectAColorOptions = getDBOptions(effectAColorsRaw);
 
             let effectBColorsRaw = `jb2a.energy_strands.complete`;
             let effectBColorOptions = getDBOptions(effectBColorsRaw);
