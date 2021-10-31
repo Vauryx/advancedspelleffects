@@ -132,22 +132,18 @@ export class ASESettings extends FormApplication {
                 };
                 let availWeapons = Object.keys(weaponsPathMap);
                 let weaponOptions = {};
-
                 availWeapons.forEach((weapon) => {
                     weaponOptions[weapon] = capitalizeFirstLetter(weapon);
                 })
                 let weaponsColors = {};
                 let colorOptions = {};
                 availWeapons.forEach(async (weapon) => {
-                    let availColors = Object.keys(Sequencer.Database.getEntry(`jb2a.${weapon}.${weaponsPathMap[weapon]}`));
-                    let templateIndex = availColors.indexOf("_template");
-                    if (templateIndex > -1) {
-                        availColors.splice(templateIndex, 1);
-                    }
+                    let availColors = Sequencer.Database.getPathsUnder(`jb2a.${weapon}.${weaponsPathMap[weapon]}`);
                     weaponsColors[weapon] = availColors;
                 });
                 let currentWeapon = flags.advancedspelleffects?.effectOptions?.weapon ?? `sword`;
                 weaponsColors[currentWeapon].forEach((color) => {
+                    console.log(color);
                     colorOptions[color] = capitalizeFirstLetter(color);
                 });
                 returnOBJ = {

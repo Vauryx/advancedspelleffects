@@ -97,8 +97,7 @@ export class spiritualWeapon {
 
         let spiritWeapon = `jb2a.spiritual_weapon.${weaponChoice}`;
 
-        let types = Sequencer.Database.getEntry(spiritWeapon);
-        types = Object.keys(types);
+        let types = Sequencer.Database.getPathsUnder(spiritWeapon);
         let typeOptions = [];
 
         types.forEach((type) => {
@@ -115,8 +114,7 @@ export class spiritualWeapon {
 
         spiritWeapon = spiritWeapon + `.${typeChoice}`;
 
-        let colors = Sequencer.Database.getEntry(spiritWeapon);
-        colors = Object.keys(colors);
+        let colors = Sequencer.Database.getPathsUnder(spiritWeapon);
         let colorOptions = [];
 
         colors.forEach((color) => {
@@ -125,27 +123,17 @@ export class spiritualWeapon {
         let attackColors;
 
         if (weaponChoice == "sword") {
-            attackColors = Sequencer.Database.getEntry(`jb2a.${weaponChoice}.melee.fire`);
-            attackColors = Object.keys(attackColors);
+            attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee.fire`);
         }
         else if(weaponChoice == "mace") {
-            attackColors = Sequencer.Database.getEntry(`jb2a.${weaponChoice}.melee.01`);
-            attackColors = Object.keys(attackColors);
+            attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee.01`);
         }
         else if (Sequencer.Database.entryExists(`jb2a.${weaponChoice}.melee`)) {
-            attackColors = Sequencer.Database.getEntry(`jb2a.${weaponChoice}.melee`);
-            attackColors = Object.keys(attackColors);
+            attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee`);
         }
         else {
-            attackColors = Sequencer.Database.getEntry(`jb2a.sword.melee`);
-            attackColors = Object.keys(attackColors);
+            attackColors = Sequencer.Database.getPathsUnder(`jb2a.sword.melee`);
         }
-        const templateIndex = attackColors.indexOf("_template");
-
-        if (templateIndex > -1) {
-            attackColors.splice(templateIndex, 1);
-        }
-
         let attackColorOptions = [];
 
         attackColors.forEach((attackColor) => {
