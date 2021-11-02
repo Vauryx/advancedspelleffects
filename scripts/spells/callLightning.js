@@ -42,9 +42,10 @@ export class callLightning {
             interval: 1
         }
         let castTemplate = await warpgate.crosshairs.show(crosshairsConfig, { show: displayCrosshairs });
-        let effectFile = `jb2a.call_lightning.${res}_res.${color}`
+        let effectFile = `jb2a.call_lightning.${res}_res.${color}`;
+        //console.log(effectFile);
         let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
-        let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId, stormyWeather);
+        let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId, stormyWeather,effectFilePath);
         //console.log("StomeTileID: ", stormTileId);
         const updates = {
             embedded: {
@@ -80,7 +81,7 @@ export class callLightning {
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         await callLightning.callLightningBolt(stormTileId);
 
-        async function placeCloudAsTile(castTemplate, casterId, isStorm) {
+        async function placeCloudAsTile(castTemplate, casterId, isStorm, effectFilePath) {
             let templateData = castTemplate;
             let tileWidth;
             let tileHeight;
@@ -91,7 +92,7 @@ export class callLightning {
             tileHeight = (templateData.width * canvas.grid.size);
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
-            data = {
+            let data = {
                 alpha: 0.5,
                 width: tileWidth,
                 height: tileHeight,
@@ -242,7 +243,7 @@ export class callLightning {
                 tileHeight = templateData.width * (canvas.grid.size);
                 tileX = templateData.x - (tileWidth / 2);
                 tileY = templateData.y - (tileHeight / 2);
-                data = [{
+                let data = [{
                     alpha: 1,
                     width: tileWidth,
                     height: tileHeight,
@@ -271,6 +272,7 @@ export class callLightning {
             let groundCrackVersion = utilFunctions.getRandomInt(1, 3);
             let groundCrackAnim = `jb2a.impact.ground_crack.blue.0${groundCrackVersion}`;
             let groundCrackImg = `jb2a.impact.ground_crack.still_frame.0${groundCrackVersion}`;
+            let groundCrackImgPath = Sequencer.Database.getEntry(groundCrackImg).file;
             let boltSeq = new Sequence("Advanced Spell Effects")
                 .effect()
                 .file(boltEffect)
@@ -293,7 +295,7 @@ export class callLightning {
                 .scale(0.5)
                 .waitUntilFinished(-3000)
                 .thenDo(async () => {
-                    placeCracksAsTile(boltTemplate, Sequencer.Database.getEntry(groundCrackImg).file);
+                    placeCracksAsTile(boltTemplate, groundCrackImgPath);
                 })
             await boltSeq.play();
         }
@@ -302,10 +304,11 @@ export class callLightning {
 
     static async handleConcentration(casterActor, casterToken, effectOptions) {
         let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == casterToken.id);
+        //console.log(casterToken);
         //console.log("tiles to delete: ", [tiles[0].id]);
         if (stormCloudTiles.length > 0) {
             //console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
-            aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
+            await aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
             await warpgate.revert(casterToken.document, `${casterActor.id}-call-lightning`);
             ui.notifications.info(`Call Lightning Bolt has been removed from your At-Will spells.`);
             ChatMessage.create({ content: `The storm cloud dissipates...` });

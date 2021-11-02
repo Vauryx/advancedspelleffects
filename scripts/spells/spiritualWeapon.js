@@ -284,7 +284,7 @@ export class spiritualWeapon {
             post: async (template, token) => {
                 postEffects(template, token);
                 await warpgate.wait(500);
-                Sequencer.EffectManager.endEffects({name: 'ASE-spiritual-weapon-crosshairs'});
+                await Sequencer.EffectManager.endEffects({name: 'ASE-spiritual-weapon-crosshairs'});
             },
             show: displayCrosshairs
         };

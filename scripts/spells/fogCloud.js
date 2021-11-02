@@ -85,7 +85,7 @@ export class fogCloud {
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
-            data = [{
+            let data = [{
                 alpha: 1,
                 width: tileWidth,
                 height: tileHeight,

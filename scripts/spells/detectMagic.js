@@ -191,7 +191,7 @@ export class detectMagic {
                 .playIf((magical.obj.document.getFlag("advancedspelleffects", "magicDetected")))
                 .play()
             await aseSocket.executeAsGM("updateFlag", magical.obj.id, "magicDetected", false);
-            SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+            await SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
         }
         magicalObjectsInRange = objects.map(o => {
             let pointA = { x: newPos.x + (canvas.grid.size / 2), y: newPos.y + (canvas.grid.size / 2) };

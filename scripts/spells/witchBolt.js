@@ -17,6 +17,7 @@ export class witchBolt {
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
         }
+       
         new Sequence("Advanced Spell Effects")
             .effect()
             .file(boltFile)
@@ -37,23 +38,61 @@ export class witchBolt {
         if (!missed) {
             await caster.document.setFlag("advancedspelleffects", "witchBolt.casterId", caster.id);
             await caster.document.setFlag("advancedspelleffects", "witchBolt.targetId", target.id);
+            const updates = {
+                embedded: {
+                    Item: {
+                        "Activate Witch Bolt": {
+                            "type": "spell",
+                            "img": midiData.item.img,
+                            "data": {
+                                "ability": "",
+                                "actionType": "other",
+                                "activation": { "type": "action", "cost": 1, "condition": "" },
+                                "damage": { "parts": [], "versatile": "" },
+                                "level": midiData.itemLevel,
+                                "preparation": { "mode": 'atwill', "prepared": true },
+                                "range": { "value": null, "long": null, "units": "" },
+                                "school": "con",
+                                "description": {
+                                    "value": "Send lightning along the arc."
+                                }
+                            },
+                            "flags": {"advancedspelleffects": {
+                                "enableASE": true,
+                                'effectOptions': effectOptions}}
+                        }
+                    }
+                }
+            }
+            //console.log(`${caster.actor.id}-witch-bolt`);
+            ui.notifications.info(`Activate Witch Bolt has been added to your At-Will spells.`);
+            await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-witch-bolt` });
         }
-
     }
 
     static async handleConcentration(casterActor, casterToken, effectOptions) {
         console.log(`${casterToken.id}-witchBolt`);
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-witchBolt` });
         await casterToken.document.unsetFlag("advancedspelleffects", "witchBolt");
+        //console.log(`${casterActor.id}-witch-bolt`);
+        ui.notifications.info(`Activate Witch Bolt has been removed from your At-Will spells.`);
+        await warpgate.revert(casterToken.document, `${casterActor.id}-witch-bolt`);
         return;
     }
 
     static async activateBolt(midiData) {
         let casterActor = midiData.actor;
         let caster = canvas.tokens.get(midiData.tokenId);
-        let target = Array.from(midiData.targets)[0];
+        let target = canvas.tokens.get(caster.document.getFlag("advancedspelleffects", "witchBolt.targetId"));
         let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
         let boltFile = `jb2a.chain_lightning.primary.${effectOptions.initialBoltColor}`;
+        let damageRoll = await new Roll(`1d12`).evaluate({ async: true });
+        let itemData = midiData.item.data;
+        itemData.data.components.concentration = false;
+        if(game.modules.get("midi-qol")?.active) {   
+            //console.log(damageRoll);
+            new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, "lightning", target ? [target] : [], damageRoll, { flavor: `Witch Bolt - Damage Roll (1d12 Lightning)`, itemCardId: "new", itemData: itemData });
+        }
         new Sequence("Advanced Spell Effects")
             .effect()
             .file(boltFile)
@@ -217,14 +256,11 @@ export class witchBolt {
             if (!concOrigin || concOrigin?.length < 4) return false;
             let itemID = concOrigin[5] ?? concOrigin[3];
             let witchBoltItem = casterActor.items.get(itemID);
-            let itemData = witchBoltItem.data;
-            itemData.data.components.concentration = false;
+            
             //console.log(witchBoltItem);
             let confirm = await warpgate.buttonDialog(confirmData, 'row');
             if (confirm) {
-                let damageRoll = await new Roll(`1d12`).evaluate({ async: true });
-                //console.log(damageRoll);
-                new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, "lightning", target ? [target] : [], damageRoll, { flavor: `Witch Bolt - Damage Roll (1d12 Lightning)`, itemCardId: "new", itemData: itemData });
+               await witchBolt.activateBolt({actor: casterActor, item: witchBoltItem, tokenId: caster.id});
             }
 
         }

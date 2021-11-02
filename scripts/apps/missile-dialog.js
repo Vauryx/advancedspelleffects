@@ -138,7 +138,7 @@ export class MissileDialog extends FormApplication {
     async _removeMarker(target) {
         let missilesAssigned = Number(target.document.getFlag("advancedspelleffects", "missileSpell.missileNum")) ?? 0;
         //console.log("Removing assigned missile...", missilesAssigned);
-        Sequencer.EffectManager.endEffects({ name: `missile-target-${target.id}-${missilesAssigned - 1}` });
+        await Sequencer.EffectManager.endEffects({ name: `missile-target-${target.id}-${missilesAssigned - 1}` });
         if (missilesAssigned > 0) {
             await target.document.setFlag("advancedspelleffects", "missileSpell.missileNum", missilesAssigned - 1);
         }

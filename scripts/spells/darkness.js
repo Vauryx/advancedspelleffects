@@ -24,7 +24,7 @@ export class darkness {
         }
     }
 
-    static async handleConcentration(casterActor, casterToken, effectOptions){
+    static async handleConcentration(casterActor, casterToken, effectOptions) {
         //console.log("Handling concentration removal for ASE Darknes...");
         let darknessTiles = await Tagger.getByTag(`DarknessTile-${casterActor.id}`);
         if (darknessTiles.length > 0) {
@@ -53,7 +53,7 @@ export class darkness {
             drawOutline: false,
             interval: 1
         }
-        let template = await warpgate.crosshairs.show(crosshairsConfig, {show: displayCrosshairs});
+        let template = await warpgate.crosshairs.show(crosshairsConfig, { show: displayCrosshairs });
         let caster = await canvas.tokens.get(midiData.tokenId);
         let casterActor = caster.actor;
         await placeCloudAsTile(template, casterActor.id);
@@ -76,7 +76,7 @@ export class darkness {
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
 
-            data = [{
+            let data = [{
                 alpha: 1,
                 width: tileWidth,
                 height: tileHeight,
@@ -128,5 +128,5 @@ export class darkness {
             await aseSocket.executeAsGM("placeWalls", walls);
         }
     }
-    
+
 }

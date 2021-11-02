@@ -88,15 +88,15 @@ export class animateDeadDialog extends FormApplication {
             document.querySelector('button[type="submit"]').click();
         }
         async function playEffect(token, summonTokenData, colorA, colorB, schoolName, schoolColor) {
-           
-           // console.log("Corpse to Mutate: ", corpseDoc);
+
+            // console.log("Corpse to Mutate: ", corpseDoc);
             let animLoc = utilFunctions.getCenter(token);
             let portalAnimIntro = `jb2a.magic_signs.circle.02.${schoolName}.intro.${schoolColor}`;
             let portalAnimLoop = `jb2a.magic_signs.circle.02.${schoolName}.loop.${schoolColor}`;
             let portalAnimOutro = `jb2a.magic_signs.circle.02.${schoolName}.outro.${schoolColor}`;
             let effectAAnim = `jb2a.eldritch_blast.${colorA}.05ft`;
             let effectBAnim = `jb2a.energy_strands.complete.${colorB}.01`;
-            
+
             new Sequence("Advanced Spell Effects")
                 .effect()
                 .file(portalAnimIntro)
@@ -132,17 +132,22 @@ export class animateDeadDialog extends FormApplication {
                 .scaleIn(0, 1000, { ease: "easeInOutBack" })
                 .waitUntilFinished(-2250)
                 .thenDo(async () => {
-                    let corpseDoc = token.document;
-                    let summonActorData = game.actors.get(summonTokenData.actorId).data.toObject();
-                    delete summonActorData.items;
-                    delete summonActorData.effects;
-                    delete summonActorData._id;
-                    const sheet = token.actor.sheet;
-                    await token.actor.sheet.close();
-                    token.actor._sheet = null;
-                    delete token.actor.apps[sheet.appId]
-                    let mutateUpdates = { token: summonTokenData, actor: summonActorData }
-                    await warpgate.mutate(corpseDoc, mutateUpdates);
+                    try {
+                        let corpseDoc = token.document;
+                        let summonActorData = game.actors.get(summonTokenData.actorId).data.toObject();
+                        delete summonActorData.items;
+                        delete summonActorData.effects;
+                        delete summonActorData._id;
+                        const sheet = token.actor.sheet;
+                        await token.actor.sheet.close();
+                        token.actor._sheet = null;
+                        delete token.actor.apps[sheet.appId]
+                        let mutateUpdates = { token: summonTokenData, actor: summonActorData }
+                        await warpgate.mutate(corpseDoc, mutateUpdates);
+                    }
+                    catch (err) {
+                        console.log(err);
+                    };
                 })
                 .effect()
                 .file(portalAnimOutro)

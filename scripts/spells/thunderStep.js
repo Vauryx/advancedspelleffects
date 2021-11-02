@@ -152,9 +152,9 @@ export class thunderStep {
                             if (save >= spellSaveDC) {
                                 saves.add(targetToken)
                             }
-
+                            console.log("Adding token to chat card...");
                             newChatmessageContent.find(".midi-qol-saves-display").append(
-                                $(addTokenToText(targetToken, save, spellSaveDC))
+                                $(addTokenToText(targetToken, save, spellSaveDC, damage))
                             );
 
                         }
@@ -201,14 +201,17 @@ export class thunderStep {
             .play();
 
 
-        function addTokenToText(token, roll, dc) {
+        function addTokenToText(token, roll, dc, damageRoll) {
+            console.log(damageRoll);
+            let saveResult = roll >= dc ? true : false;
+           
 
             return `<div class="midi-qol-flex-container">
-      <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> ${token.name}</div>
-      <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> ${token.name}</div>
+      <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
+      <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
       <div>
-         ${roll >= dc ? "succeeds" : "fails"} with 
-        ${roll}
+      <b>${saveResult ? "succeeds" : "fails"}</b> with 
+      <b>${roll}</b> and takes <b>${saveResult ? Math.floor(damageRoll.total/2) : damageRoll.total}</b> damage.
         
       </div>
       <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>

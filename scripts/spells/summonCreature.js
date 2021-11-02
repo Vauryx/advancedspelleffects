@@ -139,8 +139,9 @@ export class summonCreature {
             },
             show: displayCrosshairs
         };
+        let summonData = await game.actors.getName(chosenSummon[0]).getTokenData();
         let crosshairsConfig = {
-            size: 1,
+            size: summonData.width,
             label: chosenSummon[0],
             tag: `summon-${chosenSummon[0]}-crosshairs`,
             drawIcon: false,

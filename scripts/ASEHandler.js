@@ -15,6 +15,8 @@ import { vampiricTouch } from "./spells/vampiricTouch.js";
 import { magicMissile } from "./spells/magicMissile.js";
 import { scorchingRay } from "./spells/scorchingRay.js";
 import { eldritchBlast } from "./spells/eldritchBlast.js";
+import { chainLightning } from "./spells/chainLightning.js";
+
 export class ASEHandler {
     static async handleASE(data) {
         // check if the spell being rolled is marked as an ASE spell
@@ -70,6 +72,11 @@ export class ASEHandler {
                 }
                 else {
                     console.log('Activating Witch Bolt!', data.flavor);
+                    //await witchBolt.activateBolt(data);
+                }
+                return;
+            case 'Activate Witch Bolt':
+                if (data.flavor != "Witch Bolt - Damage Roll (1d12 Lightning)" || !data.flavor) {
                     await witchBolt.activateBolt(data);
                 }
                 return;
@@ -87,6 +94,9 @@ export class ASEHandler {
                 return;
             case 'Eldritch Blast':
                 await eldritchBlast.selectTargets(data);
+                return;
+            case 'Chain Lightning':
+                await chainLightning.selectTargets(data);
                 return;
         }
         if (item.name.includes("Summon")) {
