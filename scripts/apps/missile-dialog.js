@@ -190,6 +190,7 @@ export class MissileDialog extends FormApplication {
     }
 
     async getData() {
+        game.user.updateTokenTargets([]);
         this.data.targetHookID = Hooks.once('targetToken', async (user, token, targetState) => await this._onTargetHook(user, token, targetState, this.data));
         Hooks.once('closeMissileDialog', async () => {
             let tokens = Array.from(canvas.tokens.placeables).filter(t => t.data.flags.advancedspelleffects && t.data.flags.advancedspelleffects.missileSpell);
@@ -288,20 +289,21 @@ export class MissileDialog extends FormApplication {
                     }
                 }
                 else {
+                    attackData['hit'] = true;
                     damageTotal += damageRoll.total;
                 }
                 await this._launchMissile(caster, targetToken, attackData);
 
                 await warpgate.wait(utilFunctions.getRandomInt(20, 75));
             }
+            let splitDamageFormula = damageFormula.split("+");
+            let newCountDie = Number(splitDamageFormula[0].split("d")[0]) * attacksHit.length;
+            let newDieMod = Number(splitDamageFormula[1]) * attacksHit.length;
+            let newDamageFormula = `${newCountDie}${this.data.effectOptions.dmgDie} ${Number(newDieMod) ? '+' + newDieMod : ''}`;
             if (game.modules.get("midi-qol")?.active) {
                 let chatMessageContent = await duplicate(chatMessage.data.content);
                 let newChatmessageContent = $(chatMessageContent);
                 //console.log(newChatmessageContent);
-                let splitDamageFormula = damageFormula.split("+");
-                let newCountDie = Number(splitDamageFormula[0].split("d")[0]) * attacksHit.length;
-                let newDieMod = Number(splitDamageFormula[1]) * attacksHit.length;
-                let newDamageFormula = `${newCountDie}${this.data.effectOptions.dmgDie} ${Number(newDieMod) ? '+' + newDieMod : ''}`;
                 newChatmessageContent.find(".midi-qol-hits-display").append(
                     $(addTokenToText(targetToken, damageTotal, missileNum, this.data.effectOptions.missileType, newDamageFormula, this.data.effectOptions.dmgType, attacksHit))
                 );
@@ -311,7 +313,7 @@ export class MissileDialog extends FormApplication {
 
             }
             else {
-                let content = `Launched </b>${missileNum}</b> ${this.data.effectOptions.missileType}(s) at <b>${targetToken.name}</b> dealing <b>${damageRoll.formula} (${damageRoll.total}) ${this.data.effectOptions.dmgType}</b> damage!`;
+                let content = `Launched </b>${missileNum}</b> ${this.data.effectOptions.missileType}(s) at <b>${targetToken.name}</b> dealing <b>${newDamageFormula} (${damageTotal}) ${this.data.effectOptions.dmgType}</b> damage!`;
                 ChatMessage.create({ content: content, user: game.user.id })
             }
             await Sequencer.EffectManager.endEffects({ object: targetToken });
