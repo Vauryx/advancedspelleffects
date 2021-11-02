@@ -135,9 +135,6 @@ export class animateDeadDialog extends FormApplication {
                     try {
                         let corpseDoc = token.document;
                         let summonActorData = game.actors.get(summonTokenData.actorId).data.toObject();
-                        delete summonActorData.items;
-                        delete summonActorData.effects;
-                        delete summonActorData._id;
                         const sheet = token.actor.sheet;
                         await token.actor.sheet.close();
                         token.actor._sheet = null;
