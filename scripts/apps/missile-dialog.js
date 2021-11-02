@@ -227,7 +227,7 @@ export class MissileDialog extends FormApplication {
         }
         async function evaluateAttack(caster, target) {
             //console.log("Evalute attack target: ", target);
-            let attackRoll = new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
+            let attackRoll = await new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).evaluate({async: true});
             let hit;
             game.dice3d?.showForRoll(attackRoll);
             if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
@@ -262,9 +262,10 @@ export class MissileDialog extends FormApplication {
             let damageTotal = 0;
 
             //console.log(`Launching ${missileNum} missiles at ${targetToken.name}...dealing ${damageRoll.total} damage!`);
-            game.dice3d?.showForRoll(damageRoll);
+            
             for (let i = 0; i < missileNum; i++) {
                 damageRoll = await new Roll(damageFormula).evaluate({ async: true });
+                game.dice3d?.showForRoll(damageRoll);
                 attackData['damageRoll'] = damageRoll;
                 //console.log("Adding to hit list...");
                 attacksHit.push(damageRoll);
