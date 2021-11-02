@@ -55,7 +55,10 @@ export class steelWindStrike {
             "handaxe": "melee",
             "spear": "melee.01"
         };
-        let currentAutoRotateState = caster.document.getFlag("autorotate", "enabled") ?? false;
+        let currentAutoRotateState = false;
+        if (game.modules.get("autorotate")?.active) {
+            currentAutoRotateState = caster.document.getFlag("autorotate", "enabled") ?? false;
+        }
         if (currentAutoRotateState) {
             await caster.setFlag("autorotate", "enabled", false);
         }
@@ -132,7 +135,9 @@ export class steelWindStrike {
                 .belowTokens()
                 .waitUntilFinished()
                 .thenDo(async () => {
-                    await caster.document.setFlag("autorotate", "enabled", currentAutoRotateState);
+                    if (game.modules.get("autorotate")?.active) {
+                        await caster.document.setFlag("autorotate", "enabled", currentAutoRotateState);
+                    }
                 })
             await steelWindSequence.play();
         }
