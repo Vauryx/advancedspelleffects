@@ -1,11 +1,11 @@
 export function checkModules() {
     let error = false;
-    
+
     if (!game.modules.get("jb2a_patreon")?.active) {
         let installed = game.modules.get("jb2a_patreon") && !game.modules.get("jb2a_patreon").active ? "enabled" : "installed";
         error = `You need to have the JB2A Patreon module ${installed} to cast this spell!`;
     }
-    
+
     if (!game.modules.get("socketlib")?.active) {
         let installed = game.modules.get("socketlib") && !game.modules.get("socketlib").active ? "enabled" : "installed";
         error = `You need to have SocketLib ${installed} to cast this spell!`;
@@ -135,4 +135,67 @@ export function getSelfTarget(actor) {
     if (speaker.token)
         return canvas.tokens?.get(speaker.token);
     return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
+}
+
+export function getAssetFilePaths(assetDBPaths) {
+    let assetFilePaths = [];
+    //console.log(assetDBPaths);
+    for (let DBPath of assetDBPaths) {
+        //console.log(DBPath);
+        let sequencesUnderPath = Sequencer.Database.getEntry(DBPath).constructor === Array ? Sequencer.Database.getEntry(DBPath) : [Sequencer.Database.getEntry(DBPath)];
+        //console.log(sequencesUnderPath);
+        for (let sequence of sequencesUnderPath) {
+            //console.log(sequence);
+            if (typeof sequence === "string") {
+                //console.log(sequencesUnderPath);
+                assetFilePaths.push(sequence);
+            }
+            else if (typeof sequence.file === "string") {
+                //console.log(sequencesUnderPath.file);
+                assetFilePaths.push(sequence.file);
+            }
+            else {
+                // iterate over sequencer.file using for...in
+                //console.log(sequence);
+                for (let file in sequence.file) {
+                    //console.log('Sequence under path not a string: ', file);
+                    if (sequence.file[file].constructor === Array) {
+                        for (let filePath of sequence.file[file]) {
+                            //console.log(filePath);
+                            assetFilePaths.push(filePath);
+                        }
+                    }
+                    else {
+                        //console.log(sequence.file[file]);
+                        assetFilePaths.push(sequence.file[file]);
+                    }
+                }
+            }
+
+        }
+    }
+
+    return assetFilePaths;
+}
+
+export function getAllItemsNamed(name) {
+    let actors = game.actors.contents;
+    let scenes = game.scenes.contents;
+    let itemsWithName = [];
+    for (let actor of actors) {
+        let items = actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects.enableASE);
+        items.forEach(item => {
+            itemsWithName.push(item);
+        });
+    }
+    for (let scene of scenes) {
+        let tokensInScene = Array.from(scene.tokens);
+        tokensInScene.forEach(token => {
+            let items = token.actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects.enableASE);
+            items.forEach(item => {
+                itemsWithName.push(item);
+            });
+        });
+    }
+    return itemsWithName;
 }
