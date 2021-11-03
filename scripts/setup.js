@@ -1,4 +1,16 @@
 import ASESettings from "./apps/aseSettings.js";
+Hooks.once('init', async function () {
+  console.log("Registering ASE game settings...");
+  game.settings.register("advancedspelleffects", "preloadFiles", {
+    name: "Preload animation files on start-up?",
+    hint: "This caches the video files when foundry starts for all users. This will use some extra bandwidth, but animations will play more smoothly the first time.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+  });
+});
+
 Hooks.once('ready', async function () {
   if (!game.user.isGM) return;
   Hooks.on(`renderItemSheet5e`, async (app, html, data) => {

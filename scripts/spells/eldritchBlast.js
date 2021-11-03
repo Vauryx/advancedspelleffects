@@ -8,15 +8,15 @@ export class eldritchBlast {
     static async selectTargets(midiData){
         const casterActor = midiData.actor;
         const casterToken = canvas.tokens.get(midiData.tokenId);
-        const warlockLevel =  casterActor.data?.data?.classes?.warlock?.levels ?? 1;
+        const characterLevel =  casterActor.data?.data?.details?.level ?? 1;
         let numMissiles = 1;
-        if(warlockLevel >= 5){
+        if(characterLevel >= 5){
             numMissiles+=1;
         }
-        if(warlockLevel >= 11){
+        if(characterLevel >= 11){
             numMissiles+=1;
         }
-        if(warlockLevel >= 17){
+        if(characterLevel >= 17){
             numMissiles+=1;
         }
         const itemCardId = midiData.itemCardId;

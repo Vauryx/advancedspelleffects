@@ -177,6 +177,7 @@ export class MissileDialog extends FormApplication {
         //console.log(attackData);
         let hit = attackData.hit;
         let missileAnim = `${this.data.effectOptions.missileAnim}.${this.data.effectOptions.missileColor}`;
+        //console.log(target);
         new Sequence("Advanced Spell Effects")
             .effect()
             .file(missileAnim)
@@ -185,6 +186,7 @@ export class MissileDialog extends FormApplication {
             .randomizeMirrorY()
             .missed(!hit)
             .reachTowards(target)
+            .randomOffset(0.65)
             .playbackRate(utilFunctions.getRandomNumber(0.7, 1.3))
             .play();
     }
@@ -212,7 +214,7 @@ export class MissileDialog extends FormApplication {
     }
     async _updateObject(event, formData) {
         //console.log(event);
-        function addTokenToText(token, damage, numMissiles, missileType, damageFormula, damageType, attacksHit) {
+        function addTokenToText(token, damage, numMissiles, missileType, damageFormula, damageType, attacksHit, attacksCrit) {
             //console.log(attacksHit);
             return `<div class="midi-qol-flex-container">
         <div>
@@ -221,13 +223,15 @@ export class MissileDialog extends FormApplication {
       <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
       <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
       <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
-      <div><span>${attacksHit.length} ${missileType}(s) hit${attacksHit.length ? `, dealing <b>${damageFormula} (${damage}) </b>${damageType} damage` : ''}</span></div>
+      <div><span>${attacksHit.length} ${missileType}(s) hit${attacksCrit>0 ? ', ' + attacksCrit + ' critical(s)!' : ''}${attacksHit.length ? `, dealing <b>${damageFormula} (${damage}) </b>${damageType} damage` : ''}</span></div>
     </div>`;
 
         }
         async function evaluateAttack(caster, target) {
             //console.log("Evalute attack target: ", target);
-            let attackRoll = await new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).evaluate({async: true});
+            let attackRoll = await new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).evaluate({ async: true });
+            console.log("Attack roll die result: ", attackRoll.terms[0].results[0].result);
+            let crit = attackRoll.terms[0].results[0].result == 20;
             let hit;
             game.dice3d?.showForRoll(attackRoll);
             if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
@@ -238,7 +242,7 @@ export class MissileDialog extends FormApplication {
                 console.log(`${caster.name} hits ${target.name} with roll ${attackRoll.total}`);
                 hit = true;
             }
-            return { roll: attackRoll, hit: hit };
+            return { roll: attackRoll, hit: hit, crit: crit };
         }
         //console.log(this);
         let caster = canvas.tokens.get(this.data.caster);
@@ -255,33 +259,52 @@ export class MissileDialog extends FormApplication {
             }
             //let damageRoll = await new Roll(`${missileNum*this.data.effectOptions.dmgDieCount}${this.data.effectOptions.dmgDie} +${missileNum*this.data.effectOptions.dmgMod}`).evaluate({ async: true });
             let damageRoll;
-            let damageFormula = `${this.data.effectOptions.dmgDieCount}${this.data.effectOptions.dmgDie} ${Number(this.data.effectOptions.dmgMod) ? '+' + this.data.effectOptions.dmgMod : ''}`;
             //console.log("Damage Formula: ", damageFormula);
             let attackData = {};
             let attacksHit = [];
+            let attacksCrit = 0;
             let damageTotal = 0;
-
+            let damageFormula;
+            let totalDamageFormula = {
+                dieCount: 0,
+                mod: 0
+            };
             //console.log(`Launching ${missileNum} missiles at ${targetToken.name}...dealing ${damageRoll.total} damage!`);
-            
+
             for (let i = 0; i < missileNum; i++) {
+                if (this.data.effectOptions.missileType == 'dart') {
+                    attackData['hit'] = true;
+                }
+                else {
+                    attackData = await evaluateAttack(caster, targetToken);
+                    if(attackData.crit){
+                        attacksCrit+=1;
+                    }
+                }
+                damageFormula = `${attackData.crit ? this.data.effectOptions.dmgDieCount * 2 : this.data.effectOptions.dmgDieCount}${this.data.effectOptions.dmgDie} ${Number(this.data.effectOptions.dmgMod) ? '+' + this.data.effectOptions.dmgMod : ''}`;
+                //console.log(damageFormula);
                 damageRoll = await new Roll(damageFormula).evaluate({ async: true });
                 game.dice3d?.showForRoll(damageRoll);
                 attackData['damageRoll'] = damageRoll;
                 //console.log("Adding to hit list...");
                 attacksHit.push(damageRoll);
-                console.log('Damage Roll: ', damageRoll);
+                //console.log('Damage Roll: ', damageRoll);
+
                 //console.log('Missile Type: ', this.data.effectOptions.missileType);
                 if (game.modules.get("midi-qol")?.active) {
-                    if (this.data.effectOptions.missileType == 'dart') {
-                        attackData['hit'] = true;
-                    }
-                    else {
-                        attackData = await evaluateAttack(caster, targetToken);
-                    }
                     //console.log(attackData);
                     if (attackData.hit) {
                         new MidiQOL.DamageOnlyWorkflow(caster.actor, caster.document, damageRoll.total, this.data.effectOptions.dmgType, [targetToken], damageRoll, { itemCardId: "new" });
                         damageTotal += damageRoll.total;
+                        for (let i = 0; i < damageRoll.terms.length; i++) {
+                            //console.log("Term: ", damageRoll.terms[i]);
+                            if (i == 0) {
+                                totalDamageFormula.dieCount += damageRoll.terms[i].number;
+                            }
+                            else if (!damageRoll.terms[i].operator) {
+                                totalDamageFormula.mod += damageRoll.terms[i].number;
+                            }
+                        }
                     }
                     if ((!attackData.hit) && this.data.effectOptions.missileType != 'dart') {
                         //remove pushed attack from attacksHit
@@ -297,16 +320,14 @@ export class MissileDialog extends FormApplication {
 
                 await warpgate.wait(utilFunctions.getRandomInt(20, 75));
             }
-            let splitDamageFormula = damageFormula.split("+");
-            let newCountDie = Number(splitDamageFormula[0].split("d")[0]) * attacksHit.length;
-            let newDieMod = Number(splitDamageFormula[1]) * attacksHit.length;
-            let newDamageFormula = `${newCountDie}${this.data.effectOptions.dmgDie} ${Number(newDieMod) ? '+' + newDieMod : ''}`;
+            let newDamageFormula = `${totalDamageFormula.dieCount}${this.data.effectOptions.dmgDie} ${Number(totalDamageFormula.mod) ? '+' + totalDamageFormula.mod : ''}`;
+            console.log(attackData);
             if (game.modules.get("midi-qol")?.active) {
                 let chatMessageContent = await duplicate(chatMessage.data.content);
                 let newChatmessageContent = $(chatMessageContent);
                 //console.log(newChatmessageContent);
                 newChatmessageContent.find(".midi-qol-hits-display").append(
-                    $(addTokenToText(targetToken, damageTotal, missileNum, this.data.effectOptions.missileType, newDamageFormula, this.data.effectOptions.dmgType, attacksHit))
+                    $(addTokenToText(targetToken, damageTotal, missileNum, this.data.effectOptions.missileType, newDamageFormula, this.data.effectOptions.dmgType, attacksHit, attacksCrit))
                 );
 
                 await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });

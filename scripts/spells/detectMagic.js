@@ -5,8 +5,55 @@ export class detectMagic {
 
     static registerHooks() {
         Hooks.on("updateToken", detectMagic._updateToken);
+        if (game.settings.get("advancedspelleffects", "preloadFiles")) {
+            //console.log("Starting Preload of ASE Animate Dead...");
+            Hooks.on("sequencer.ready", detectMagic._preloadAssets);
+        }
     }
+    static async _preloadAssets() {
+        console.log('Preloading assets for ASE Detect Magic...');
+        let assetDBPaths = [];
+        let animateDeadItems = utilFunctions.getAllItemsNamed("Detect Magic");
+        if (animateDeadItems.length > 0) {
+            for (let item of animateDeadItems) {
+                let aseSettings = item.getFlag("advancedspelleffects", "effectOptions");
+                //console.log(aseSettings);
+                let waveAnim = `jb2a.detect_magic.circle.${aseSettings.waveColor ?? 'blue'}`;
+                let auraLoopAnim = `jb2a.magic_signs.circle.02.divination.loop.${aseSettings.auraColor ?? 'blue'}`;
+                let auraIntroAnim = `jb2a.magic_signs.circle.02.divination.intro.${aseSettings.auraColor ?? 'blue'}`;
 
+                if(!assetDBPaths.includes(waveAnim)) assetDBPaths.push(waveAnim);
+                if(!assetDBPaths.includes(auraLoopAnim)) assetDBPaths.push(auraLoopAnim);
+                if(!assetDBPaths.includes(auraIntroAnim)) assetDBPaths.push(auraIntroAnim);
+
+                let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+                let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
+                
+                let objects = await Tagger.getByTag("magical");
+                let magicalObjects = objects.map(o => {
+                    return {
+                        obj: o,
+                        school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                        color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                    }
+                });
+                for (let magical of magicalObjects) {
+                    if (!magical.school) {
+                        continue;
+                    }
+                    let runeIntroAnim = `jb2a.magic_signs.rune.${magical.school}.intro.${magical.color}`;
+                    let runeLoopAnim = `jb2a.magic_signs.rune.${magical.school}.loop.${magical.color}`;
+                    if(!assetDBPaths.includes(runeIntroAnim)) assetDBPaths.push(runeIntroAnim);
+                    if(!assetDBPaths.includes(runeLoopAnim)) assetDBPaths.push(runeLoopAnim);
+                }
+            }
+        }
+        //console.log('DB Paths about to be preloaded...', assetDBPaths);
+        //console.log('Files about to be preloaded...', assetFilePaths);
+        console.log(`Preloaded ${assetDBPaths.length} assets for Detect Magic!`);
+        await Sequencer.Preloader.preloadForClients(assetDBPaths, true);
+        return;
+    }
     static async activateDetectMagic(midiData) {
         //console.log("Detect Magic MIDI Data: ", midiData);
         let item = midiData.item;
