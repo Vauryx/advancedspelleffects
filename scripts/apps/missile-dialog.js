@@ -133,6 +133,7 @@ export class MissileDialog extends FormApplication {
             else if(parsedEventData.button == 2){
                 this._removeMissile(token);
             }
+            //console.log(this);
         }
 
     }
@@ -268,8 +269,8 @@ export class MissileDialog extends FormApplication {
                 //console.log("Evalute attack target: ", target);
 
                 let attackRoll = await new Roll(`${mod=='' ? 1 : 2}d20${mod} + @mod + @prof`, caster.actor.getRollData()).evaluate({ async: true });
-                //console.log("Attack roll: ", attackRoll);
-                let crit = attackRoll.terms[0].results[0].result == 20;
+                console.log("Attack roll: ", attackRoll);
+                let crit = attackRoll.terms[0].total == 20;
                 let hit;
                 game.dice3d?.showForRoll(attackRoll);
                 if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
