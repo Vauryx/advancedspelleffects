@@ -13,7 +13,13 @@ export function setupASESocket() {
 };
 
 async function updateFlag(objectId, flag, value) {
-    let object = canvas.scene.tiles.get(objectId) || canvas.scene.tokens.get(objectId) || canvas.scene.drawings.get(objectId) || canvas.scene.walls.get(objectId) || canvas.scene.lights.get(objectId);
+    let object = canvas.scene.tiles.get(objectId) 
+                || canvas.scene.tokens.get(objectId) 
+                || canvas.scene.drawings.get(objectId) 
+                || canvas.scene.walls.get(objectId) 
+                || canvas.scene.lights.get(objectId) 
+                || game.scenes.get(objectId) 
+                || game.users.get(objectId);
     await object.setFlag("advancedspelleffects", flag, value);
 }
 
@@ -71,3 +77,4 @@ async function moveWalls(tileId, wallType, numWalls) {
     }
     await canvas.scene.createEmbeddedDocuments("Wall", walls);
 }
+
