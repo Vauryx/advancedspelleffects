@@ -1,6 +1,9 @@
 <form id="missileForm" class="flexcol" autocomplete="off" novalidate>
     <section class="content">
-        <p>'Target' a token to assign a {{data.effectOptions.missileType}}</p>
+        <p>Left-Click on a token to assign a {{data.effectOptions.missileType}}</p>
+        <p>alt+click will add advantage to attack</p>
+        <p>ctrl+click will add disadvantage to attack</p>
+        <p>Right-Click on a token to remove a {{data.effectOptions.missileType}}</p>
         <p>You can assign <b><input style='width: 2em;' type="number" class="txtNumMissiles" id="txtNumMissilesId" readonly value="{{data.numMissiles}}"></input></b> more {{data.effectOptions.missileType}}(s)</p>
         <table id="targetsTable" width="100%">
             <tbody>
