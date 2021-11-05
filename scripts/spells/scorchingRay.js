@@ -45,6 +45,6 @@ export class scorchingRay {
         aseEffectOptions['dmgDieCount'] = 2;
         aseEffectOptions['dmgType'] = 'fire';
         aseEffectOptions['dmgMod'] = 0;
-        new MissileDialog({casterId: casterToken.id, numMissiles: numMissiles, itemCardId: itemCardId, effectOptions: aseEffectOptions}).render(true);
+        new MissileDialog({casterId: casterToken.id, numMissiles: numMissiles, itemCardId: itemCardId, effectOptions: aseEffectOptions, item: spellItem}).render(true);
     }
 }

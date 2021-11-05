@@ -115,7 +115,7 @@ export class witchBolt {
         let origin;
         let witchBoltCasters = canvas.tokens.placeables.filter((token) => {
             //console.log('Scanning Token: ',token.name);
-            return (token.actor.effects.filter((effect) => {
+            return (token.actor?.effects.filter((effect) => {
                 //console.log('Active Effect: ', effect);
                 let origin = effect.data.origin?.split(".");
                 if (!origin || origin?.length < 4) return false;
