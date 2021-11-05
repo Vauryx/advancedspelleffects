@@ -37,6 +37,13 @@ export function getRandomNumber(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+export function strikeThrough(text) {
+    return text
+        .split('')
+        .map(char => char + '\u0336')
+        .join('')
+}
+
 export function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -183,7 +190,7 @@ export function getAllItemsNamed(name) {
     let scenes = game.scenes.contents;
     let itemsWithName = [];
     for (let actor of actors) {
-        let items = actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects.enableASE);
+        let items = actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects?.enableASE);
         items.forEach(item => {
             itemsWithName.push(item);
         });
@@ -191,7 +198,7 @@ export function getAllItemsNamed(name) {
     for (let scene of scenes) {
         let tokensInScene = Array.from(scene.tokens);
         tokensInScene.forEach(token => {
-            let items = token.actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects.enableASE);
+            let items = token.actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects?.enableASE);
             items.forEach(item => {
                 itemsWithName.push(item);
             });

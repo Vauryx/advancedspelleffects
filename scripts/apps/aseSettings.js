@@ -184,7 +184,7 @@ export class ASESettings extends FormApplication {
             let targetMarkerAnim;
             switch (itemName) {
                 case 'Scorching Ray':
-                    baseAnim = 'jb2a.scorching_ray.01';
+                    baseAnim = 'jb2a.scorching_ray.02';
                     targetMarkerAnim = 'jb2a.markers.01';
                     break;
                 case 'Magic Missile':

@@ -13,7 +13,10 @@ export class MissileDialog extends FormApplication {
         this.data.numMissilesMax = options.numMissiles;
         this.data.caster = options.casterId;
         this.data.itemCardId = options.itemCardId;
+        this.data.item = options.item;
         this.data.effectOptions = options.effectOptions;
+        this.data.allAttackRolls = [];
+        this.data.allDamRolls = [];
         this.data.targets = [];
     }
 
@@ -75,19 +78,19 @@ export class MissileDialog extends FormApplication {
             .offset(offset)
             .animateProperty("sprite", "scale.x", { from: 0.01, to: baseScale, delay: 200, duration: 700, ease: "easeOutBounce" })
             .animateProperty("sprite", "scale.y", { from: 0.01, to: baseScale, duration: 900, ease: "easeOutBounce" })
-        if(type == 'kh'){
-            markerSeq.loopProperty("sprite", "position.y", { from: 0, to: -10 , duration: 1000, ease: "easeInOutSine", pingPong: true });
-            
+        if (type == 'kh') {
+            markerSeq.loopProperty("sprite", "position.y", { from: 0, to: -10, duration: 1000, ease: "easeInOutSine", pingPong: true });
+
         }
-        else if(type == 'kl'){
-            markerSeq.loopProperty("sprite", "position.y", { from: 0, to: 10 , duration: 1000, ease: "easeInOutSine", pingPong: true });
+        else if (type == 'kl') {
+            markerSeq.loopProperty("sprite", "position.y", { from: 0, to: 10, duration: 1000, ease: "easeInOutSine", pingPong: true });
         }
         markerSeq.play();
-        if(!this.data.attackMods[target.id]){
-            this.data.attackMods[target.id] = [{index: currMissile, type: type}];
+        if (!this.data.attackMods[target.id]) {
+            this.data.attackMods[target.id] = [{ index: currMissile, type: type }];
         }
-        else{
-            this.data.attackMods[target.id].push({index: currMissile, type: type});
+        else {
+            this.data.attackMods[target.id].push({ index: currMissile, type: type });
         }
         await target.document.setFlag("advancedspelleffects", "missileSpell.missileNum", currMissile + 1);
         //console.log("Total Missiles assigned: ", currMissile + 1);
@@ -130,7 +133,7 @@ export class MissileDialog extends FormApplication {
                     this.data.numMissiles--;
                 }
             }
-            else if(parsedEventData.button == 2){
+            else if (parsedEventData.button == 2) {
                 this._removeMissile(token);
             }
             //console.log(this);
@@ -248,7 +251,25 @@ export class MissileDialog extends FormApplication {
         };
 
     }
+    async _evaluateAttack(caster, target, mod) {
+        //console.log("Evalute attack target: ", target);
 
+        let attackRoll = await new Roll(`${mod == '' ? 1 : 2}d20${mod} + @mod + @prof`, caster.actor.getRollData()).evaluate({ async: true });
+        //console.log("Attack roll: ", attackRoll);
+        let crit = attackRoll.terms[0].total == 20;
+        let hit;
+        game.dice3d?.showForRoll(attackRoll);
+        if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
+            console.log(`${caster.name} missed ${target.name} with roll ${attackRoll.total}${mod == '' ? '' : (mod == 'kh' ? ', with advantage!' : ', with dis-advantage!')}`);
+            hit = false;
+        }
+        else {
+            console.log(`${caster.name} hits ${target.name} with roll ${attackRoll.total}${mod == '' ? '' : (mod == 'kh' ? ', with advantage!' : ', with dis-advantage!')}`);
+            hit = true;
+        }
+        this.data.allAttackRolls.push({ roll: attackRoll, target: target.name, hit: hit, crit: crit });
+        return { roll: attackRoll, hit: hit, crit: crit };
+    }
     async _updateObject(event, formData) {
         //console.log(event);
         if (event.target) {
@@ -265,24 +286,7 @@ export class MissileDialog extends FormApplication {
         </div>`;
 
             }
-            async function evaluateAttack(caster, target, mod) {
-                //console.log("Evalute attack target: ", target);
 
-                let attackRoll = await new Roll(`${mod=='' ? 1 : 2}d20${mod} + @mod + @prof`, caster.actor.getRollData()).evaluate({ async: true });
-                console.log("Attack roll: ", attackRoll);
-                let crit = attackRoll.terms[0].total == 20;
-                let hit;
-                game.dice3d?.showForRoll(attackRoll);
-                if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
-                    console.log(`${caster.name} missed ${target.name} with roll ${attackRoll.total}${mod==''? '': (mod=='kh'?', with advantage!':', with dis-advantage!')}`);
-                    hit = false;
-                }
-                else {
-                    console.log(`${caster.name} hits ${target.name} with roll ${attackRoll.total}${mod==''? '': (mod=='kh'?', with advantage!':', with dis-advantage!')}`);
-                    hit = true;
-                }
-                return { roll: attackRoll, hit: hit, crit: crit };
-            }
             //console.log(this);
             //console.log('Attack Mods Info: ', this.data.attackMods);
             let caster = canvas.tokens.get(this.data.caster);
@@ -317,7 +321,7 @@ export class MissileDialog extends FormApplication {
                     else {
                         let attackMod = this.data.attackMods[targetToken.id][i].type;
                         //console.log(attackMod);
-                        attackData = await evaluateAttack(caster, targetToken, attackMod);
+                        attackData = await this._evaluateAttack(caster, targetToken, attackMod);
                         if (attackData.crit) {
                             attacksCrit += 1;
                         }
@@ -325,17 +329,19 @@ export class MissileDialog extends FormApplication {
                     damageFormula = `${attackData.crit ? this.data.effectOptions.dmgDieCount * 2 : this.data.effectOptions.dmgDieCount}${this.data.effectOptions.dmgDie} ${Number(this.data.effectOptions.dmgMod) ? '+' + this.data.effectOptions.dmgMod : ''}`;
                     //console.log(damageFormula);
                     damageRoll = await new Roll(damageFormula).evaluate({ async: true });
+                    this.data.allDamRolls.push({ roll: damageRoll, target: targetToken.name });
                     game.dice3d?.showForRoll(damageRoll);
                     attackData['damageRoll'] = damageRoll;
                     //console.log("Adding to hit list...");
                     attacksHit.push(damageRoll);
+
                     //console.log('Damage Roll: ', damageRoll);
 
                     //console.log('Missile Type: ', this.data.effectOptions.missileType);
                     if (game.modules.get("midi-qol")?.active) {
                         //console.log(attackData);
                         if (attackData.hit) {
-                            new MidiQOL.DamageOnlyWorkflow(caster.actor, caster.document, damageRoll.total, this.data.effectOptions.dmgType, [targetToken], damageRoll, { itemCardId: "new" });
+                            new MidiQOL.DamageOnlyWorkflow(caster.actor, caster.document, damageRoll.total, this.data.effectOptions.dmgType, [targetToken], damageRoll, { itemCardId: this.data.item });
                             damageTotal += damageRoll.total;
                             for (let i = 0; i < damageRoll.terms.length; i++) {
                                 //console.log("Term: ", damageRoll.terms[i]);
@@ -361,8 +367,10 @@ export class MissileDialog extends FormApplication {
 
                     await warpgate.wait(utilFunctions.getRandomInt(20, 75));
                 }
+                //console.log('all attack rolls: ', this.data.allAttackRolls);
+                //console.log('all damage rolls: ', this.data.allDamRolls);
                 let newDamageFormula = `${totalDamageFormula.dieCount}${this.data.effectOptions.dmgDie} ${Number(totalDamageFormula.mod) ? '+' + totalDamageFormula.mod : ''}`;
-                console.log(attackData);
+                //console.log(attackData);
                 if (game.modules.get("midi-qol")?.active) {
                     let chatMessageContent = await duplicate(chatMessage.data.content);
                     let newChatmessageContent = $(chatMessageContent);
@@ -370,18 +378,18 @@ export class MissileDialog extends FormApplication {
                     newChatmessageContent.find(".midi-qol-hits-display").append(
                         $(addTokenToText(targetToken, damageTotal, missileNum, this.data.effectOptions.missileType, newDamageFormula, this.data.effectOptions.dmgType, attacksHit, attacksCrit))
                     );
-
+                    //let playerChatCardConetnt = `Launched </b>${missileNum}</b> ${this.data.effectOptions.missileType}(s) at <b>${targetToken.name}</b> dealing <b>${totalDamageFormula.formula} (${damageTotal}) ${this.data.effectOptions.dmgType}</b> damage!`
+                    //await ChatMessage.create({content: playerChatCardConetnt, user: game.user.id});
                     await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
                     await ui.chat.scrollBottom();
 
                 }
-                else {
-                    let content = `Launched </b>${missileNum}</b> ${this.data.effectOptions.missileType}(s) at <b>${targetToken.name}</b> dealing <b>${newDamageFormula} (${damageTotal}) ${this.data.effectOptions.dmgType}</b> damage!`;
-                    ChatMessage.create({ content: content, user: game.user.id })
-                }
+
                 await Sequencer.EffectManager.endEffects({ object: targetToken });
                 await targetToken.document.unsetFlag("advancedspelleffects", 'missileSpell');
             }
+            let content = this._buildChatData(this.data.allAttackRolls, this.data.allDamRolls, caster);
+            await ChatMessage.create({ content: content, user: game.user.id })
         }
         $(document.body).off("mouseup", MissileDialog._handleClick);
         await aseSocket.executeAsGM("updateFlag", game.user.id, "missileDialogPos", { left: this.position.left, top: this.position.top });
@@ -391,6 +399,74 @@ export class MissileDialog extends FormApplication {
         //console.log(html);
         super.activateListeners(html);
         $(document.body).on("mouseup", this._handleClick.bind(this));
+    }
+    // list both results in case of adv/dis and strikethrough the one that is not used and underline the one that is used
+    // for crtical hits, replace the attack roll with the word "crit"
+    // add the breakdown of the attack and damage rolls as a tooltip on the roll results
+    _buildChatData(attackRolls, damageRolls, caster) {
+        let content = `<table id="missileDialogChatTable"><tr><th>Target</th><th>Attack Roll</th><th>Damage</th>`
+
+        console.log('Building chat data...');
+        console.log('Attack Rolls: ', attackRolls);
+        console.log('Damage Rolls: ', damageRolls);
+        //iterate through attackRolls using for in loop
+        if (this.data.effectOptions.missileType == 'dart') {
+            //console.log("Magic Missile fired!");
+            for (let i = 0; i < damageRolls.length; i++) {
+                let currDamageData = damageRolls[i];
+                let currTarget = currDamageData.target;
+                let currDamageRoll = currDamageData.roll;
+                let currDamageBreakdown = currDamageRoll.terms[0].formula + ': ';
+                let currDamageValues = currDamageRoll.terms[0].values;
+                for (let j = 0; j < currDamageValues.length; j++) {
+                    //console.log("Damage Value: ", currDamageValues[j]);
+                    currDamageBreakdown += `[${currDamageValues[j]}]`;
+                }
+                let currExtraDamage = currDamageRoll.formula.split('+')[1];
+                currDamageBreakdown += ` ${currExtraDamage ? '+ ' : ''}${currExtraDamage ? currExtraDamage : ''}`;
+                content += `<tr><td>${currTarget}</td><td>--</td><td title = '${currDamageBreakdown}'>${currDamageRoll.total}</td></tr>`;
+            }
+        }
+        else {
+            for (let i = 0; i < attackRolls.length; i++) {
+                //console.log("Attack Roll Data: ", attackRolls[i]);
+                //console.log("Damage Roll Data: ", damageRolls[i]);
+                let currAttackData = attackRolls[i];
+                let currDamageData = damageRolls[i];
+                let currTarget = currAttackData.target;
+                let currAttackRoll = currAttackData.roll;
+                let currDamageRoll = currDamageData.roll;
+                let currDamageBreakdown = currDamageRoll.terms[0].formula + ': ';
+                let currDamageValues = currDamageRoll.terms[0].values;
+                for (let j = 0; j < currDamageValues.length; j++) {
+                    //console.log("Damage Value: ", currDamageValues[j]);
+                    currDamageBreakdown += `[${currDamageValues[j]}]`;
+                }
+                let currExtraDamage = currDamageRoll.formula.split('+')[1];
+                currDamageBreakdown += ` ${currExtraDamage ? '+ ' : ''}${currExtraDamage ? currExtraDamage : ''}`;
+
+                let currAttackRollResult = currAttackRoll.result.split("+");
+                if (currAttackData.crit) {
+                    currAttackRoll._total = "Critical!";
+                }
+                if (currAttackRoll.formula.includes("kh")) {
+                    let lowerRoll = Math.min(currAttackRoll.terms[0].results[0].result, currAttackRoll.terms[0].results[1].result);
+                    let higherRoll = Math.max(currAttackRoll.terms[0].results[0].result, currAttackRoll.terms[0].results[1].result);
+                    currAttackRollResult[0] = `Adv: ${lowerRoll}, ${higherRoll} `;
+                }
+                else if (currAttackRoll.formula.includes("kl")) {
+                    let lowerRoll = Math.min(currAttackRoll.terms[0].results[0].result, currAttackRoll.terms[0].results[1].result);
+                    let higherRoll = Math.max(currAttackRoll.terms[0].results[0].result, currAttackRoll.terms[0].results[1].result);
+                    currAttackRollResult[0] = `Dis: ${lowerRoll}, ${higherRoll} `;
+                }
+                currAttackRollResult = `[ ${currAttackRollResult[0]}] + ${currAttackRollResult[1]} + ${currAttackRollResult[2]}`;
+                //console.log("Attack Roll Result: ", currAttackRollResult);
+                //console.log("Damage Breakdown: ", currDamageBreakdown);
+                //console.log("Damage Roll: ", damageRoll);
+                content += `<tr><td>${currTarget}</td><td title = '${currAttackRollResult}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${currDamageRoll.total}</td></tr>`;
+            }
+        }
+        return content;
     }
 
 }
