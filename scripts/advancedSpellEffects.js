@@ -19,6 +19,7 @@ import { witchBolt } from "./spells/witchBolt.js";
 import {magicMissile} from "./spells/magicMissile.js";
 import {scorchingRay} from "./spells/scorchingRay.js";
 import {eldritchBlast} from "./spells/eldritchBlast.js";
+import {moonBeam} from "./spells/moonBeam.js";
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
     setupASESocket();
@@ -42,7 +43,9 @@ const aseModules = {
     noMidiHandler,
     MissileDialog,
     scorchingRay,
-    eldritchBlast
+    eldritchBlast,
+    moonBeam
+
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());

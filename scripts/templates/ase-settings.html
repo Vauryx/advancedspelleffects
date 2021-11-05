@@ -11,6 +11,26 @@
                 <div class="form-group">
                     {{itemName}}
                 </div>
+                {{#ifCondASE itemName '==' 'Moonbeam'}}
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label><b>Moonbeam Color</b></label>
+                            </td>
+                            <td>
+                                <select name="flags.advancedspelleffects.effectOptions.moonbeamColor">
+                                    {{#select flags.advancedspelleffects.effectOptions.moonbeamColor}}
+                                    {{#each effectData.moonbeamColors as |name key|}}
+                                    <option value="{{key}}">{{name}}</option>
+                                    {{/each}}
+                                    {{/select}}
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {{/ifCondASE}}
                 {{#ifCondASE itemName '==' 'Vampiric Touch'}}
                 <table>
                     <tbody>

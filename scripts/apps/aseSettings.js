@@ -178,6 +178,14 @@ export class ASESettings extends FormApplication {
                     vtImpactColors: vampiricTouchImpactColorOptions
                 }
                 break;
+            case 'Moonbeam':
+                let moonbeamAnim = 'jb2a.moonbeam.01.intro';
+                let moonbeamColorOptions = getDBOptions(moonbeamAnim);
+
+                returnOBJ = {
+                    moonbeamColors: moonbeamColorOptions
+                }
+                break;
         }
         if (itemName == 'Scorching Ray' || itemName == 'Magic Missile' || itemName == 'Eldritch Blast') {
             let baseAnim;

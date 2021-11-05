@@ -15,6 +15,7 @@ import { vampiricTouch } from "./spells/vampiricTouch.js";
 import { magicMissile } from "./spells/magicMissile.js";
 import { scorchingRay } from "./spells/scorchingRay.js";
 import { eldritchBlast } from "./spells/eldritchBlast.js";
+import {moonBeam} from "./spells/moonBeam.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -93,6 +94,9 @@ export class ASEHandler {
                 return;
             case 'Eldritch Blast':
                 await eldritchBlast.selectTargets(data);
+                return;
+            case 'Moonbeam':
+                await moonBeam.callBeam(data);
                 return;
         }
         if (item.name.includes("Summon")) {
