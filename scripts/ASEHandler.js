@@ -98,6 +98,9 @@ export class ASEHandler {
             case 'Moonbeam':
                 await moonBeam.callBeam(data);
                 return;
+            case 'Move Moonbeam':
+                await moonBeam.moveBeam(data);
+                return;
         }
         if (item.name.includes("Summon")) {
             await summonCreature.doSummon(data);

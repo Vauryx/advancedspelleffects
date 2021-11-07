@@ -8,6 +8,7 @@ import { fogCloud } from "./spells/fogCloud.js";
 import { summonCreature } from "./spells/summonCreature.js";
 import { witchBolt } from "./spells/witchBolt.js";
 import { vampiricTouch } from "./spells/vampiricTouch.js";
+import { moonBeam } from "./spells/moonBeam.js";
 
 export class concentrationHandler {
 
@@ -57,6 +58,9 @@ export class concentrationHandler {
                 return;
             case "Vampiric Touch":
                 vampiricTouch.handleConcentration(casterActor, casterToken, effectOptions);
+                return;
+            case "Moonbeam":
+                moonBeam.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }
         if (effectSource.includes("Summon")) {

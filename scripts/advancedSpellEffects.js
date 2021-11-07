@@ -49,4 +49,15 @@ const aseModules = {
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());
+    Hooks.on('sequencerReady', ()=> {
+        function easeOutElasticCustom(x) {
+            const c4 = (2 * Math.PI) / 10;
+            return x === 0
+                ? 0
+                : x === 1
+                    ? 1
+                    : Math.pow(2, -12 * x) * Math.sin((x * 12 - 0.75) * c4) + 1;
+        }
+        Sequencer.registerEase("easeOutElasticCustom", easeOutElasticCustom);
+    });
 });
