@@ -12,11 +12,14 @@ import { vampiricTouch } from "./spells/vampiricTouch.js";
 export class concentrationHandler {
 
     static registerHooks() {
-        Hooks.on("preDeleteActiveEffect", concentrationHandler._handleConcentration);
+        Hooks.on("deleteActiveEffect", concentrationHandler._handleConcentration);
     }
 
     static async _handleConcentration(activeEffect) {
         console.log("Handling removal of Concentration: ", activeEffect);
+        const isGM = utilFunctions.isFirstGM();
+        console.log("Is first GM: ", isGM);
+        if(!isGM) return;
         if (activeEffect.data.label != "Concentrating") return;
         let origin = activeEffect.data.origin?.split(".");
         if (!origin || origin?.length < 4) return false;
