@@ -210,3 +210,24 @@ export function getAllItemsNamed(name) {
     }
     return itemsWithName;
 }
+
+function firstGM() {
+    return game.users.find(u => u.isGM && u.active);
+}
+
+export function isFirstGM() {
+    return game.user.id === firstGM()?.id;
+}
+
+export function getDBOptions(rawSet) {
+    let options = {};
+    let setOptions = Sequencer.Database.getPathsUnder(rawSet);
+    //console.log(setOptions)
+    if (setOptions) {
+        setOptions.forEach((elem) => {
+            options[elem] = capitalizeFirstLetter(elem);
+        });
+        //console.log(options);
+    }
+    return options;
+}

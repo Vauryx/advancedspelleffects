@@ -48,13 +48,50 @@ export class animateDeadDialog extends FormApplication {
 
     async _raiseCorpse(event) {
         let corpseToken = canvas.tokens.get($(this).attr('id'));
-        let corpseType = event.currentTarget.innerText.toLowerCase();
-        let effectAColor = document.getElementById("hdnEffectAColor").value;
-        let effectBColor = document.getElementById("hdnEffectBColor").value;
-        let magicSchool = document.getElementById("hdnMagicSchool").value;
-        let magicSchoolColor = document.getElementById("hdnMagicSchoolColor").value;
-        let zombieActorId = document.getElementById("hdnZombieActorId").value;
-        let skeletonActorId = document.getElementById("hdnSkeletonActorId").value;
+        const corpseType = event.currentTarget.innerText.toLowerCase();
+
+        const effectAColor = document.getElementById("hdnEffectAColor").value;
+        const effectASound = document.getElementById("hdnEffectASound").value;
+        const effectASoundDelay = document.getElementById("hdnEffectASoundDelay").value;
+        const effectASoundVolume = document.getElementById("hdnEffectASoundVolume").value;
+
+        const effectBColor = document.getElementById("hdnEffectBColor").value;
+        const effectBSound = document.getElementById("hdnEffectBSound").value;
+        const effectBSoundDelay = document.getElementById("hdnEffectBSoundDelay").value;
+        const effectBSoundVolume = document.getElementById("hdnEffectBSoundVolume").value;
+
+        const magicSchool = document.getElementById("hdnMagicSchool").value;
+        const magicSchoolColor = document.getElementById("hdnMagicSchoolColor").value;
+        const magicSchoolSound = document.getElementById("hdnMagicSchoolSound").value;
+        const magicSchoolSoundDelay = document.getElementById("hdnMagicSchoolSoundDelay").value;
+        const magicSchoolVolume = document.getElementById("hdnMagicSchoolVolume").value;
+        const magicSchoolSoundOutro = document.getElementById("hdnMagicSchoolSoundOutro").value;
+        const magicSchoolSoundDelayOutro = document.getElementById("hdnMagicSchoolSoundDelayOutro").value;
+        const magicSchoolVolumeOutro = document.getElementById("hdnMagicSchoolVolumeOutro").value;
+
+        const effectSettings = {
+            token: corpseToken,
+            summonTokenData: {},
+            colorA: effectAColor,
+            soundA: effectASound,
+            soundADelay: effectASoundDelay,
+            soundAVolume: effectASoundVolume,
+            colorB: effectBColor,
+            soundB: effectBSound,
+            soundBDelay: effectBSoundDelay,
+            soundBVolume: effectBSoundVolume,
+            magicSchool: magicSchool,
+            magicSchoolColor: magicSchoolColor,
+            magicSchoolSound: magicSchoolSound,
+            magicSchoolSoundDelay: magicSchoolSoundDelay,
+            magicSchoolVolume: magicSchoolVolume,
+            magicSchoolSoundOutro: magicSchoolSoundOutro,
+            magicSchoolSoundDelayOutro: magicSchoolSoundDelayOutro,
+            magicSchoolVolumeOutro: magicSchoolVolumeOutro
+        };
+
+        const zombieActorId = document.getElementById("hdnZombieActorId").value;
+        const skeletonActorId = document.getElementById("hdnSkeletonActorId").value;
         let zombieTokenData;
         let skeletonTokenData;
         if (zombieActorId && skeletonActorId) {
@@ -73,12 +110,13 @@ export class animateDeadDialog extends FormApplication {
         }
         switch (corpseType) {
             case "zombie":
-                await playEffect(corpseToken, zombieTokenData, effectAColor, effectBColor, magicSchool, magicSchoolColor);
+                effectSettings.summonTokenData = zombieTokenData;
                 break;
             case "skeleton":
-                await playEffect(corpseToken, skeletonTokenData, effectAColor, effectBColor, magicSchool, magicSchoolColor);
+                effectSettings.summonTokenData = skeletonTokenData;
                 break;
         }
+        await playEffect(effectSettings);
 
         console.log(`Raised ${corpseToken.name} as a ${event.currentTarget.innerText}!`);
         document.getElementById("raiseLimit").value--;
@@ -87,7 +125,48 @@ export class animateDeadDialog extends FormApplication {
             ui.notifications.info("Raised all corpses!");
             document.querySelector('button[type="submit"]').click();
         }
-        async function playEffect(token, summonTokenData, colorA, colorB, schoolName, schoolColor) {
+        async function playEffect(effectSettings) {
+
+            console.log(effectSettings);
+            const colorA = effectSettings.colorA;
+            const soundA = effectSettings.soundA ?? "";
+            const soundADelay = Number(effectSettings.soundADelay) ?? 0;
+            const soundAVolume = effectSettings.soundAVolume=="" ? 1 : Number(effectSettings.soundAVolume);
+
+            const colorB = effectSettings.colorB;
+            const soundB = effectSettings.soundB ?? "";
+            const soundBDelay = Number(effectSettings.soundBDelay) ?? 0;
+            const soundBVolume = effectSettings.soundBVolume=="" ? 1 : Number(effectSettings.soundBVolume);
+
+            const schoolName = effectSettings.magicSchool;
+            const schoolColor = effectSettings.magicSchoolColor;
+            const schoolSound = effectSettings.magicSchoolSound ?? "";
+            const SchoolSoundDelay = Number(effectSettings.magicSchoolSoundDelay) ?? 0;
+            const schoolVolume = effectSettings.magicSchoolVolume=="" ? 1 : Number(effectSettings.magicSchoolVolume);
+
+            const schoolSoundOutro = effectSettings.magicSchoolSoundOutro ?? "";
+            const schoolSoundDelayOutro = Number(effectSettings.magicSchoolSoundDelayOutro) ?? 0;
+            const schoolVolumeOutro = effectSettings.magicSchoolVolumeOutro=="" ? 1 : Number(effectSettings.magicSchoolVolumeOutro);
+
+            const token = effectSettings.token;
+            const summonTokenData = effectSettings.summonTokenData;
+            /*
+            console.log('Sound A: ',soundA);
+            console.log('Sound A Delay: ', soundADelay);
+            console.log('Sound A Volume: ', soundAVolume);
+
+            console.log('Sound B: ',soundB);
+            console.log('Sound B Delay: ', soundBDelay);
+            console.log('Sound B Volume: ', soundBVolume);
+
+            console.log('School Sound: ',schoolSound);
+            console.log('School Sound Delay: ', SchoolSoundDelay);
+            console.log('School Sound Volume: ', schoolVolume);
+
+            console.log('School Sound Outro: ',schoolSoundOutro);
+            console.log('School Sound Delay Outro: ', schoolSoundDelayOutro);
+            console.log('School Sound Volume Outro: ', schoolVolumeOutro);
+            */
 
             // console.log("Corpse to Mutate: ", corpseDoc);
             let animLoc = utilFunctions.getCenter(token);
@@ -98,6 +177,11 @@ export class animateDeadDialog extends FormApplication {
             let effectBAnim = `jb2a.energy_strands.complete.${colorB}.01`;
 
             new Sequence("Advanced Spell Effects")
+                .sound()
+                .file(schoolSound)
+                .delay(SchoolSoundDelay)
+                .volume(schoolVolume)
+                .playIf(schoolSound != "")
                 .effect()
                 .file(portalAnimIntro)
                 .atLocation(animLoc)
@@ -112,6 +196,11 @@ export class animateDeadDialog extends FormApplication {
                 .persist()
                 .fadeOut(750, { ease: "easeInQuint" })
                 .name("portalAnimLoop")
+                .sound()
+                .file(soundA)
+                .delay(soundADelay)
+                .volume(soundAVolume)
+                .playIf(soundA != "")
                 .effect()
                 .file(effectAAnim)
                 .atLocation(animLoc)
@@ -123,6 +212,11 @@ export class animateDeadDialog extends FormApplication {
                 .scale(1.5)
                 .zIndex(1)
                 .center()
+                .sound()
+                .file(soundB)
+                .delay(soundBDelay)
+                .volume(soundBVolume)
+                .playIf(soundB != "")
                 .effect()
                 .file(effectBAnim)
                 .atLocation(animLoc)
@@ -149,6 +243,11 @@ export class animateDeadDialog extends FormApplication {
                         console.log(err);
                     };
                 })
+                .sound()
+                .file(schoolSoundOutro)
+                .delay(schoolSoundDelayOutro)
+                .volume(schoolVolumeOutro)
+                .playIf(schoolSoundOutro != "")
                 .effect()
                 .file(portalAnimOutro)
                 .atLocation(animLoc)

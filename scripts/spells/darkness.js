@@ -33,7 +33,7 @@ export class darkness {
     }
 
     static async createDarkness(midiData) {
-        let item = midiData.item;
+        const item = midiData.item;
         const displayCrosshairs = async (crosshairs) => {
             new Sequence("Advanced Spell Effects")
                 .effect()
@@ -54,12 +54,23 @@ export class darkness {
             interval: 1
         }
         let template = await warpgate.crosshairs.show(crosshairsConfig, { show: displayCrosshairs });
-        let caster = await canvas.tokens.get(midiData.tokenId);
-        let casterActor = caster.actor;
-        await placeCloudAsTile(template, casterActor.id);
+        const caster = await canvas.tokens.get(midiData.tokenId);
+        const casterActor = caster.actor;
+        const effectOptions = item.getFlag("advancedspelleffects", "effectOptions");
+        const sound = effectOptions.darknessSound ?? "";
+        const soundDelay = Number(effectOptions.darknessSoundDelay) ?? 0;
+        const volume = effectOptions.darknessVolume ?? 1;
+
+        const soundOptions = {
+            sound: sound,
+            volume: volume,
+            delay: soundDelay
+        };
+
+        await placeCloudAsTile(template, casterActor.id, soundOptions);
         //await changeSelfItemMacro();
 
-        async function placeCloudAsTile(templateData, casterId) {
+        async function placeCloudAsTile(templateData, casterId, soundOptions) {
             // console.log("Template given: ", template);
             let tileWidth;
             let tileHeight;
@@ -99,6 +110,13 @@ export class darkness {
             //console.log("Placing as tile: ", data);
             let createdTiles = await aseSocket.executeAsGM("placeTiles", data);
             let tileId = createdTiles[0].id ?? createdTiles[0]._id;
+            new Sequence("Advanced Spell Effects")
+                .sound()
+                .file(soundOptions.sound)
+                .delay(soundOptions.delay)
+                .volume(soundOptions.volume)
+                .playIf(soundOptions.sound !== "")
+            .play();
             //console.log("ASE DARKNESS: Darknes Tile Created: ",tileD);
             let wall_number = 12;
             let wall_angles = 2 * Math.PI / wall_number

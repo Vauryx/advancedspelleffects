@@ -1,17 +1,16 @@
 <form class="flexcol" id="aseSettingsForm" autocomplete="off" novalidate>
     <section class="content">
-        <div class="tab">
-            <div class="ase-enable-checkbox">
-                <div class="form-group">
-                    <label>Convert to Advanced Spell Effect</label>
-                    <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
-                        flags.advancedspelleffects.enableASE}}>
-                </div>
-                {{#if flags.advancedspelleffects.enableASE}}
-                <div class="form-group">
-                    {{itemName}}
-                </div>
-                {{#ifCondASE itemName '==' 'Moonbeam'}}
+        <div class="ase-enable-checkbox">
+            <div class="form-group">
+                <label>Convert to Advanced Spell Effect</label>
+                <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
+                    flags.advancedspelleffects.enableASE}}>
+            </div>
+            {{#if flags.advancedspelleffects.enableASE}}
+            <div class="form-group">
+                <p>ASE Settings: <b>{{itemName}}</b></p>
+            </div>
+            {{#ifCondASE itemName '==' 'Moonbeam'}}
                 <table>
                     <tbody>
                         <tr>
@@ -31,169 +30,627 @@
                     </tbody>
                 </table>
                 {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Vampiric Touch'}}
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <label><b>Vampiric Touch Caster Effect</b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.vtCasterColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.vtCasterColor}}
-                                    {{#each effectData.vtCasterColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><b>Vampiric Touch Siphon Effect</b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.vtStrandColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.vtStrandColor}}
-                                    {{#each effectData.vtStrandColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><b>Vampiric Touch Impact Effect</b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.vtImpactColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.vtImpactColor}}
-                                    {{#each effectData.vtImpactColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Magic Missile'}}
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <label><b>Target Marker Color </b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.targetMarkerColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.targetMarkerColor}}
-                                    {{#each effectData.targetMarkerColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><b>Dart Color</b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.missileColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.missileColor}}
-                                    {{#each effectData.missileColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Scorching Ray'}}
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <label><b>Target Marker Color </b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.targetMarkerColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.targetMarkerColor}}
-                                    {{#each effectData.targetMarkerColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><b>Ray Color</b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.missileColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.missileColor}}
-                                    {{#each effectData.missileColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Eldritch Blast'}}
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <label>Agonizing Blast: </label>
-                            </td>
-                            <td>
-                                <input type="checkbox" name="flags.advancedspelleffects.effectOptions.invocations.agonizingBlast" {{checked
-                                    flags.advancedspelleffects.effectOptions.invocations.agonizingBlast}}>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><b>Target Marker Color </b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.targetMarkerColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.targetMarkerColor}}
-                                    {{#each effectData.targetMarkerColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><b>Beam Color</b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.missileColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.missileColor}}
-                                    {{#each effectData.missileColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Detect Magic'}}
-                <div class="ase-detectMagic-settings">
-                    <div class="form-group">
-                        <label>Select Wave Color:
+            {{#ifCondASE itemName '==' 'Vampiric Touch'}}
+            <table>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Caster Effect: </b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.vtCasterColor">
+                                {{#select flags.advancedspelleffects.effectOptions.vtCasterColor}}
+                                {{#each effectData.vtCasterColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Caster Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.vtCasterSound"
+                                value={{flags.advancedspelleffects.effectOptions.vtCasterSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.vtCasterSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Caster Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.vtCasterSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.vtCasterSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Caster Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.vtCasterVolume"
+                                value={{flags.advancedspelleffects.effectOptions.vtCasterVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Siphon Effect: </b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.vtStrandColor">
+                                {{#select flags.advancedspelleffects.effectOptions.vtStrandColor}}
+                                {{#each effectData.vtStrandColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Siphon Effect Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.vtSiphonSound"
+                                value={{flags.advancedspelleffects.effectOptions.vtSiphonSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.vtSiphonSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Siphon Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.vtSiphonSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.vtSiphonSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Siphon Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.vtSiphonVolume"
+                                value={{flags.advancedspelleffects.effectOptions.vtSiphonVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Impact Effect: </b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.vtImpactColor">
+                                {{#select flags.advancedspelleffects.effectOptions.vtImpactColor}}
+                                {{#each effectData.vtImpactColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Impact Effect Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.vtImpactSound"
+                                value={{flags.advancedspelleffects.effectOptions.vtImpactSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.vtImpactSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Impact Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.vtImpactSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.vtImpactSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Impact Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.vtImpactVolume"
+                                value={{flags.advancedspelleffects.effectOptions.vtImpactVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Magic Missile'}}
+            <table>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Color </b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.targetMarkerColor">
+                                {{#select flags.advancedspelleffects.effectOptions.targetMarkerColor}}
+                                {{#each effectData.targetMarkerColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files" name="flags.advancedspelleffects.effectOptions.markerSound"
+                                value={{flags.advancedspelleffects.effectOptions.markerSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.markerSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.markerSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.markerSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.markerVolume"
+                                value={{flags.advancedspelleffects.effectOptions.markerVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Dart Color</b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.missileColor">
+                                {{#select flags.advancedspelleffects.effectOptions.missileColor}}
+                                {{#each effectData.missileColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Dart Intro Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.missileIntroSound"
+                                value={{flags.advancedspelleffects.effectOptions.missileIntroSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.missileIntroSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Dart Intro Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.missileIntroSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.missileIntroSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Dart Intro Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.missileIntroVolume"
+                                value={{flags.advancedspelleffects.effectOptions.missileIntroVolume}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Dart Impact Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.missileImpactSound"
+                                value={{flags.advancedspelleffects.effectOptions.missileImpactSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.missileImpactSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Dart Impact Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.missileImpactSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.missileImpactSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Dart Impact Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.missileImpactVolume"
+                                value={{flags.advancedspelleffects.effectOptions.missileImpactVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Scorching Ray'}}
+            <table>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Color </b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.targetMarkerColor">
+                                {{#select flags.advancedspelleffects.effectOptions.targetMarkerColor}}
+                                {{#each effectData.targetMarkerColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files" name="flags.advancedspelleffects.effectOptions.markerSound"
+                                value={{flags.advancedspelleffects.effectOptions.markerSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.markerSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.markerSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.markerSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.markerVolume"
+                                value={{flags.advancedspelleffects.effectOptions.markerVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Ray Color</b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.missileColor">
+                                {{#select flags.advancedspelleffects.effectOptions.missileColor}}
+                                {{#each effectData.missileColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Ray Intro Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.missileIntroSound"
+                                value={{flags.advancedspelleffects.effectOptions.missileIntroSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.missileIntroSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Ray Intro Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.missileIntroSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.missileIntroSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Ray Intro Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.missileIntroVolume"
+                                value={{flags.advancedspelleffects.effectOptions.missileIntroVolume}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Ray Impact Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.missileImpactSound"
+                                value={{flags.advancedspelleffects.effectOptions.missileImpactSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.missileImpactSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Ray Impact Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.missileImpactSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.missileImpactSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Ray Impact Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.missileImpactVolume"
+                                value={{flags.advancedspelleffects.effectOptions.missileImpactVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Eldritch Blast'}}
+            <table>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label>Agonizing Blast: </label>
+                        </td>
+                        <td colspan="2">
+                            <input type="checkbox"
+                                name="flags.advancedspelleffects.effectOptions.invocations.agonizingBlast" {{checked
+                                flags.advancedspelleffects.effectOptions.invocations.agonizingBlast}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Color </b></label>
+                        </td>
+                        <td colspan="2">
+                            <select name="flags.advancedspelleffects.effectOptions.targetMarkerColor">
+                                {{#select flags.advancedspelleffects.effectOptions.targetMarkerColor}}
+                                {{#each effectData.targetMarkerColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files" name="flags.advancedspelleffects.effectOptions.markerSound"
+                                value={{flags.advancedspelleffects.effectOptions.markerSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.markerSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.markerSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.markerSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Target Marker Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.markerVolume"
+                                value={{flags.advancedspelleffects.effectOptions.markerVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Beam Color</b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.missileColor">
+                                {{#select flags.advancedspelleffects.effectOptions.missileColor}}
+                                {{#each effectData.missileColors as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Beam Intro Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.missileIntroSound"
+                                value={{flags.advancedspelleffects.effectOptions.missileIntroSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.missileIntroSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Beam Intro Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.missileIntroSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.missileIntroSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Beam Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.missileIntroVolume"
+                                value={{flags.advancedspelleffects.effectOptions.missileIntroVolume}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Beam Impact Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.missileImpactSound"
+                                value={{flags.advancedspelleffects.effectOptions.missileImpactSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.missileImpactSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Beam Impact Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.missileImpactSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.missileImpactSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Beam Impact Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.missileImpactVolume"
+                                value={{flags.advancedspelleffects.effectOptions.missileImpactVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Detect Magic'}}
+            <table>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Select Wave Color: </b></label>
+                        </td>
+                        <td colspan="2">
                             <select name="flags.advancedspelleffects.effectOptions.waveColor">
                                 {{#select flags.advancedspelleffects.effectOptions.waveColor}}
                                 {{#each effectData.dmWaveColors as |name key|}}
@@ -201,8 +658,51 @@
                                 {{/each}}
                                 {{/select}}
                             </select>
-                        </label>
-                        <label>Select Aura Color:
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Wave Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files" name="flags.advancedspelleffects.effectOptions.waveSound"
+                                value={{flags.advancedspelleffects.effectOptions.waveSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.waveSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Wave Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.waveSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.waveSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Wave Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.waveVolume"
+                                value={{flags.advancedspelleffects.effectOptions.waveVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Select Aura Color:</b></label>
+                        </td>
+                        <td colspan="2">
                             <select name="flags.advancedspelleffects.effectOptions.auraColor">
                                 {{#select flags.advancedspelleffects.effectOptions.auraColor}}
                                 {{#each effectData.dmAuraColors as |name key|}}
@@ -210,251 +710,274 @@
                                 {{/each}}
                                 {{/select}}
                             </select>
-                        </label>
-                    </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Darkness'}}
+            <table>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Darkness Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.darknessSound"
+                                value={{flags.advancedspelleffects.effectOptions.darknessSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.darknessSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Darkness Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.darknessSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.darknessSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Darkness Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.darknessVolume"
+                                value={{flags.advancedspelleffects.effectOptions.darknessVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Fog Cloud'}}
+            <div class="ase-fogCloud-settings">
+                <div class="form-group">
+                    <label>Number of Walls: </label>
+                    <input type="number" name="flags.advancedspelleffects.effectOptions.wallNumber"
+                        value="{{flags.advancedspelleffects.effectOptions.wallNumber}}">
                 </div>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Fog Cloud'}}
-                <div class="ase-fogCloud-settings">
-                    <div class="form-group">
-                        <label>Number of Walls: </label>
-                        <input type="number" name="flags.advancedspelleffects.effectOptions.wallNumber"
-                            value="{{flags.advancedspelleffects.effectOptions.wallNumber}}">
-                    </div>
+            </div>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Steel Wind Strike'}}
+            <div class=" ase-steelWindStrike-settings">
+                <div class="form-group">
+                    <label>Select Weapon:
+                        <select name="flags.advancedspelleffects.effectOptions.weapon">
+                            {{#select flags.advancedspelleffects.effectOptions.weapon}}
+                            {{#each effectData.swsWeapons as |name key|}}
+                            <option value="{{key}}">{{name}}</option>
+                            {{/each}}
+                            {{/select}}
+                        </select>
+                    </label>
+                    <label>Select Weapon Color:
+                        <select name="flags.advancedspelleffects.effectOptions.weaponColor">
+                            {{#select flags.advancedspelleffects.effectOptions.weaponColor}}
+                            {{#each effectData.weaponColors as |name key|}}
+                            <option value="{{key}}">{{name}}</option>
+                            {{/each}}
+                            {{/select}}
+                        </select>
+                    </label>
                 </div>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Steel Wind Strike'}}
-                <div class=" ase-steelWindStrike-settings">
-                    <div class="form-group">
-                        <label>Select Weapon:
-                            <select name="flags.advancedspelleffects.effectOptions.weapon">
-                                {{#select flags.advancedspelleffects.effectOptions.weapon}}
-                                {{#each effectData.swsWeapons as |name key|}}
-                                <option value="{{key}}">{{name}}</option>
-                                {{/each}}
-                                {{/select}}
-                            </select>
-                        </label>
-                        <label>Select Weapon Color:
-                            <select name="flags.advancedspelleffects.effectOptions.weaponColor">
-                                {{#select flags.advancedspelleffects.effectOptions.weaponColor}}
-                                {{#each effectData.weaponColors as |name key|}}
-                                <option value="{{key}}">{{name}}</option>
-                                {{/each}}
-                                {{/select}}
-                            </select>
-                        </label>
-                    </div>
-                </div>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Call Lightning'}}
-                <div class="ase-callLightning-settings">
-                    <div class="form-group">
-                        <label>Select Bolt Style:
+            </div>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Call Lightning'}}
+            <table>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Select Bolt Style: </b></label>
+                        </td>
+                        <td colspan="2">
                             <select name="flags.advancedspelleffects.effectOptions.boltStyle">
                                 {{#select flags.advancedspelleffects.effectOptions.boltStyle}}
                                 <option value="chain">Chain</option>
                                 <option value="strike">Strike</option>
                                 {{/select}}
                             </select>
-                        </label>
-                    </div>
-                </div>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Witch Bolt'}}
-                <table id="witchBoltTable" width="100%">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <label><b>Initial Bolt Color:</b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.initialBoltColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.initialBoltColor}}
-                                    {{#each effectData.initialBoltColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><b>Continuous Stream Color:</b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.streamColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.streamColor}}
-                                    {{#each effectData.streamColors as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName 'includes' 'Summon'}}
-                <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
-                <input type="hidden" id="hdnSummonerId" value="{{effectData.summonerId}}" />
-                <div class="form-group">
-                    <label>Use Tasha's Scaling</label>
-                    <input type="checkbox" name="flags.advancedspelleffects.effectOptions.isTashas" {{checked
-                        flags.advancedspelleffects.effectOptions.isTashas}}>
-                </div>
-                <table id="summonsTable" width="100%">
-                    <tbody>
-                        {{#each effectData.summons}}
-                        <tr>
-                            <td>
-                                <label><b>Summon Type Name:</b></label>
-                            </td>
-                            <td>
-                                <input type="text"
-                                    name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.name"
-                                    value="{{this.name}}">
-                            </td>
-                            <td>
-                                <label><b>Associated Actor:</b></label>
-                            </td>
-                            <td> <select name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.actor">
-                                    {{#select this.actor}}
-                                    {{#each ../effectData.summonOptions as |id name|}}
-                                    <option value="{{id}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                            <td>
-                                <label><b>Summon Quantity:</b></label>
-                            </td>
-                            <td>
-                                <input style='width: 3em;' type="text"
-                                    name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.qty"
-                                    value="{{this.qty}}">
-                            </td>
-                        </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
-                <div style="text-align:center;">
-                    <div style="margin:auto;">
-                        <button class='addType' type="button" style="width:50%;text-align:center;"> Add Type </button>
-                    </div>
-                    <div style="margin:auto;">
-                        <button class='removeType' type="button" style="width:50%;text-align:center;">
-                            <i class="fas fa-times"></i> Remove Type
-                        </button>
-                    </div>
-                </div>
-                <table width="100%">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <label><b>Magic School: </b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.magicSchool">
-                                    {{#select flags.advancedspelleffects.effectOptions.magicSchool}}
-                                    {{#each effectData.magicSchoolOptions as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                            <td>
-                                <label><b>Magic School Color: </b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.magicSchoolColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.magicSchoolColor}}
-                                    {{#each effectData.magicSchoolColorOptions as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><b>Effect 1 Color: </b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.effectAColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.effectAColor}}
-                                    {{#each effectData.effectAColorOptions as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                            <td>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><b>Portal Color: </b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.portalColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.portalColor}}
-                                    {{#each effectData.portalColorOptions as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                            <td>
-                                <label><b>Portal Impact Color: </b></label>
-                            </td>
-                            <td>
-                                <select name="flags.advancedspelleffects.effectOptions.portalImpactColor">
-                                    {{#select flags.advancedspelleffects.effectOptions.portalImpactColor}}
-                                    {{#each effectData.portalImpactColorOptions as |name key|}}
-                                    <option value="{{key}}">{{name}}</option>
-                                    {{/each}}
-                                    {{/select}}
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                {{/ifCondASE}}
-                {{#ifCondASE itemName '==' 'Animate Dead'}}
-                <section class="flexcol">
-                    <div class="flexrow">
-                        <div class="ase-column">
-                            <label><b>Associated Zombie Actor:</b></label>
-                            <select name="flags.advancedspelleffects.effectOptions.summons.zombie.actor">
-                                {{#select flags.advancedspelleffects.effectOptions.summons.zombie.actor}}
-                                {{#each effectData.summonOptions as |key name|}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Bolt Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files" name="flags.advancedspelleffects.effectOptions.boltSound"
+                                value={{flags.advancedspelleffects.effectOptions.boltSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.boltSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Bolt Sound Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.boltSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.boltSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Bolt Sound Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.boltVolume"
+                                value={{flags.advancedspelleffects.effectOptions.boltVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Storm Cloud Sound: </b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.stormCloudSound"
+                                value={{flags.advancedspelleffects.effectOptions.stormCloudSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.stormCloudSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    <tr>
+                        <td>
+                            <label><b>Storm Cloud Delay: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.stormCloudSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.stormCloudSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Storm Cloud Volume: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.stormCloudVolume"
+                                value={{flags.advancedspelleffects.effectOptions.stormCloudVolume}}>
+                        </td>
+                    </tr>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Witch Bolt'}}
+            <table id="witchBoltTable" width="100%">
+                <tbody>
+                    <tr>
+                        <td>
+                            <label><b>Initial Bolt Color:</b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.initialBoltColor">
+                                {{#select flags.advancedspelleffects.effectOptions.initialBoltColor}}
+                                {{#each effectData.initialBoltColors as |name key|}}
                                 <option value="{{key}}">{{name}}</option>
                                 {{/each}}
                                 {{/select}}
                             </select>
-                        </div>
-                    </div>
-                    <div class="flexrow">
-                        <div class="ase-column">
-                            <label><b>Associated Skeleton Actor:</b></label>
-                            <select name="flags.advancedspelleffects.effectOptions.summons.skeleton.actor">
-                                {{#select flags.advancedspelleffects.effectOptions.summons.skeleton.actor}}
-                                {{#each effectData.summonOptions as |key name|}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Continuous Stream Color:</b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.streamColor">
+                                {{#select flags.advancedspelleffects.effectOptions.streamColor}}
+                                {{#each effectData.streamColors as |name key|}}
                                 <option value="{{key}}">{{name}}</option>
                                 {{/each}}
                                 {{/select}}
                             </select>
-                        </div>
-                    </div>
-                </section>
-                <section class="flexcol">
-                    <div class="flexrow">
-                    </div>
-                    <div class="flexrow">
-                        <div class="ase-column">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName 'includes' 'Summon'}}
+            <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
+            <input type="hidden" id="hdnSummonerId" value="{{effectData.summonerId}}" />
+            <div class="form-group">
+                <label>Use Tasha's Scaling</label>
+                <input type="checkbox" name="flags.advancedspelleffects.effectOptions.isTashas" {{checked
+                    flags.advancedspelleffects.effectOptions.isTashas}}>
+            </div>
+            <table id="summonsTable" width="100%">
+                <tbody>
+                    {{#each effectData.summons}}
+                    <tr>
+                        <td>
+                            <label><b>Summon Type Name:</b></label>
+                        </td>
+                        <td>
+                            <input type="text" name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.name"
+                                value="{{this.name}}">
+                        </td>
+                        <td>
+                            <label><b>Associated Actor:</b></label>
+                        </td>
+                        <td> <select name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.actor">
+                                {{#select this.actor}}
+                                {{#each ../effectData.summonOptions as |id name|}}
+                                <option value="{{id}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                        <td>
+                            <label><b>Summon Quantity:</b></label>
+                        </td>
+                        <td>
+                            <input style='width: 3em;' type="text"
+                                name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.qty"
+                                value="{{this.qty}}">
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            <div style="text-align:center;">
+                <div style="margin:auto;">
+                    <button class='addType' type="button" style="width:50%;text-align:center;"> Add Type </button>
+                </div>
+                <div style="margin:auto;">
+                    <button class='removeType' type="button" style="width:50%;text-align:center;">
+                        <i class="fas fa-times"></i> Remove Type
+                    </button>
+                </div>
+            </div>
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td>
                             <label><b>Magic School: </b></label>
+                        </td>
+                        <td>
                             <select name="flags.advancedspelleffects.effectOptions.magicSchool">
                                 {{#select flags.advancedspelleffects.effectOptions.magicSchool}}
                                 {{#each effectData.magicSchoolOptions as |name key|}}
@@ -462,9 +985,11 @@
                                 {{/each}}
                                 {{/select}}
                             </select>
-                        </div>
-                        <div class="ase-column">
+                        </td>
+                        <td>
                             <label><b>Magic School Color: </b></label>
+                        </td>
+                        <td>
                             <select name="flags.advancedspelleffects.effectOptions.magicSchoolColor">
                                 {{#select flags.advancedspelleffects.effectOptions.magicSchoolColor}}
                                 {{#each effectData.magicSchoolColorOptions as |name key|}}
@@ -472,15 +997,13 @@
                                 {{/each}}
                                 {{/select}}
                             </select>
-                        </div>
-                    </div>
-                </section>
-                <section class="flexcol">
-                    <div class="flexrow">
-                    </div>
-                    <div class="flexrow">
-                        <div class="ase-column">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <label><b>Effect 1 Color: </b></label>
+                        </td>
+                        <td>
                             <select name="flags.advancedspelleffects.effectOptions.effectAColor">
                                 {{#select flags.advancedspelleffects.effectOptions.effectAColor}}
                                 {{#each effectData.effectAColorOptions as |name key|}}
@@ -488,9 +1011,238 @@
                                 {{/each}}
                                 {{/select}}
                             </select>
-                        </div>
-                        <div class="ase-column">
+                        </td>
+                        <td>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Portal Color: </b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.portalColor">
+                                {{#select flags.advancedspelleffects.effectOptions.portalColor}}
+                                {{#each effectData.portalColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                        <td>
+                            <label><b>Portal Impact Color: </b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.portalImpactColor">
+                                {{#select flags.advancedspelleffects.effectOptions.portalImpactColor}}
+                                {{#each effectData.portalImpactColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{#ifCondASE itemName '==' 'Animate Dead'}}
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <label><b>Associated Zombie Actor:</b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.summons.zombie.actor">
+                                {{#select flags.advancedspelleffects.effectOptions.summons.zombie.actor}}
+                                {{#each effectData.summonOptions as |key name|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Associated Skeleton Actor:</b></label>
+                        </td>
+                        <td>
+                            <select name="flags.advancedspelleffects.effectOptions.summons.skeleton.actor">
+                                {{#select flags.advancedspelleffects.effectOptions.summons.skeleton.actor}}
+                                {{#each effectData.summonOptions as |key name|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table style='border-collapse: collapse;'>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Magic School: </b></label>
+                        </td>
+                        <!-- span 2 columns -->
+                        <td colspan="2">
+                            <select name="flags.advancedspelleffects.effectOptions.magicSchool">
+                                {{#select flags.advancedspelleffects.effectOptions.magicSchool}}
+                                {{#each effectData.magicSchoolOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Magic School Color: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <select name="flags.advancedspelleffects.effectOptions.magicSchoolColor">
+                                {{#select flags.advancedspelleffects.effectOptions.magicSchoolColor}}
+                                {{#each effectData.magicSchoolColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Magic School Intro Sound:</b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.magicSchoolSound"
+                                value={{flags.advancedspelleffects.effectOptions.magicSchoolSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.magicSchoolSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Intro Sound Delay:</b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.magicSchoolSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.magicSchoolSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Intro Sound Volume:</b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.magicSchoolVolume"
+                                value={{flags.advancedspelleffects.effectOptions.magicSchoolVolume}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Magic School Outro Sound:</b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.magicSchoolSoundOutro"
+                                value={{flags.advancedspelleffects.effectOptions.magicSchoolSoundOutro}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.magicSchoolSoundOutro"
+                                tabindex="-1" title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Outro Sound Delay:</b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;" min="0"
+                                name="flags.advancedspelleffects.effectOptions.magicSchoolSoundDelayOutro"
+                                value={{flags.advancedspelleffects.effectOptions.magicSchoolSoundDelayOutro}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Outro Sound Volume:</b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.magicSchoolVolumeOutro"
+                                value={{flags.advancedspelleffects.effectOptions.magicSchoolVolumeOutro}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
+                            <label><b>Effect 1 Color: </b></label>
+                        </td>
+                        <td colspan="2">
+                            <select name="flags.advancedspelleffects.effectOptions.effectAColor">
+                                {{#select flags.advancedspelleffects.effectOptions.effectAColor}}
+                                {{#each effectData.effectAColorOptions as |name key|}}
+                                <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                                {{/select}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Effect 1 Sound:</b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.effectASound"
+                                value={{flags.advancedspelleffects.effectOptions.effectASound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.effectASound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Sound Delay:</b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;"
+                                name="flags.advancedspelleffects.effectOptions.effectASoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.effectASoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Sound Volume:</b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.effectASoundVolume"
+                                value={{flags.advancedspelleffects.effectOptions.effectASoundVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                    <tr>
+                        <td>
                             <label><b>Effect 2 Color: </b></label>
+                        </td>
+                        <td colspan="2">
                             <select name="flags.advancedspelleffects.effectOptions.effectBColor">
                                 {{#select flags.advancedspelleffects.effectOptions.effectBColor}}
                                 {{#each effectData.effectBColorOptions as |name key|}}
@@ -498,13 +1250,51 @@
                                 {{/each}}
                                 {{/select}}
                             </select>
-                        </div>
-                    </div>
-                </section>
-                {{/ifCondASE}}
-                {{/if}}
-            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Effect 2 Sound:</b></label>
+                        </td>
+                        <td>
+                            <input type="text" class="files"
+                                name="flags.advancedspelleffects.effectOptions.effectBSound"
+                                value={{flags.advancedspelleffects.effectOptions.effectBSound}}>
+                        </td>
+                        <td>
+                            <button type="button" class="file-picker" data-type="audio"
+                                data-target="flags.advancedspelleffects.effectOptions.effectBSound" tabindex="-1"
+                                title="Browse Files">
+                                <i class="fas fa-music fa-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Sound Delay:</b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="Number" style="width: 4em;"
+                                name="flags.advancedspelleffects.effectOptions.effectBSoundDelay"
+                                value={{flags.advancedspelleffects.effectOptions.effectBSoundDelay}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><b>Sound Volume:</b></label>
+                        </td>
+                        <td colspan="2">
+                            <input type="range" min="0" max="1" step="0.01"
+                                name="flags.advancedspelleffects.effectOptions.effectBSoundVolume"
+                                value={{flags.advancedspelleffects.effectOptions.effectBSoundVolume}}>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{/ifCondASE}}
+            {{/if}}
         </div>
+
     </section>
     <footer class="sheet-footer flexrow">
         <button type="submit" name="submit">

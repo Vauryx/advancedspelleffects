@@ -1,3 +1,4 @@
+import * as utilFunctions from "../utilityFunctions.js";
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
@@ -90,19 +91,6 @@ export class ASESettings extends FormApplication {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
-        function getDBOptions(rawSet) {
-            let options = {};
-            let setOptions = Sequencer.Database.getPathsUnder(rawSet);
-            //console.log(setOptions)
-            if (setOptions) {
-                setOptions.forEach((elem) => {
-                    options[elem] = capitalizeFirstLetter(elem);
-                });
-                //console.log(options);
-            }
-            return options;
-        }
-
         let flags = this.object.data.flags;
         let itemName = item.name;
         let returnOBJ = {};
@@ -111,10 +99,10 @@ export class ASESettings extends FormApplication {
         switch (itemName) {
             case 'Detect Magic':
                 let detectMagicWaves = `jb2a.detect_magic.circle`;
-                let detectMagicWaveColorOptions = getDBOptions(detectMagicWaves);
+                let detectMagicWaveColorOptions = utilFunctions.getDBOptions(detectMagicWaves);
 
                 let detectMagicAuras = `jb2a.magic_signs.circle.02.divination.intro`;
-                let detectMagicAuraColorOptions = getDBOptions(detectMagicAuras);
+                let detectMagicAuraColorOptions = utilFunctions.getDBOptions(detectMagicAuras);
 
                 returnOBJ = {
                     dmWaveColors: detectMagicWaveColorOptions,
@@ -153,10 +141,10 @@ export class ASESettings extends FormApplication {
                 break;
             case 'Witch Bolt':
                 let initialBoltAnim = 'jb2a.chain_lightning.primary';
-                let initialBoltColorOptions = getDBOptions(initialBoltAnim);
+                let initialBoltColorOptions = utilFunctions.getDBOptions(initialBoltAnim);
 
                 let streamAnim = 'jb2a.witch_bolt';
-                let streamColorOptions = getDBOptions(streamAnim);
+                let streamColorOptions = utilFunctions.getDBOptions(streamAnim);
 
                 returnOBJ = {
                     initialBoltColors: initialBoltColorOptions,
@@ -168,9 +156,9 @@ export class ASESettings extends FormApplication {
                 let vampiricTouchStrandAnim = `jb2a.energy_strands.range.standard`;
                 let vampiricTouchImpactAnim = `jb2a.impact.004`;
 
-                let vampiricTouchCasterColorOptions = getDBOptions(vampiricTouchCasterAnim);
-                let vampiricTouchStrandColorOptions = getDBOptions(vampiricTouchStrandAnim);
-                let vampiricTouchImpactColorOptions = getDBOptions(vampiricTouchImpactAnim);
+                let vampiricTouchCasterColorOptions = utilFunctions.getDBOptions(vampiricTouchCasterAnim);
+                let vampiricTouchStrandColorOptions = utilFunctions.getDBOptions(vampiricTouchStrandAnim);
+                let vampiricTouchImpactColorOptions = utilFunctions.getDBOptions(vampiricTouchImpactAnim);
 
                 returnOBJ = {
                     vtCasterColors: vampiricTouchCasterColorOptions,
@@ -204,8 +192,8 @@ export class ASESettings extends FormApplication {
                     targetMarkerAnim = 'jb2a.markers.02';
                     break;
             }
-            let missileColorOptions = getDBOptions(baseAnim);
-            let targetMarkerColorOptions = getDBOptions(targetMarkerAnim);
+            let missileColorOptions = utilFunctions.getDBOptions(baseAnim);
+            let targetMarkerColorOptions = utilFunctions.getDBOptions(targetMarkerAnim);
             returnOBJ = {
                 missileColors: missileColorOptions,
                 targetMarkerColors: targetMarkerColorOptions
@@ -214,22 +202,22 @@ export class ASESettings extends FormApplication {
         }
         else if (itemName.includes("Summon") || itemName == "Animate Dead") {
             let magicSignsRaw = `jb2a.magic_signs.circle.02`;
-            let magicSchoolOptions = getDBOptions(magicSignsRaw);
+            let magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
 
             let magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${flags.advancedspelleffects?.effectOptions?.magicSchool ?? 'abjuration'}.intro`;
-            let magicSchoolColorOptions = getDBOptions(magicSchoolColorsRaw);
+            let magicSchoolColorOptions = utilFunctions.getDBOptions(magicSchoolColorsRaw);
 
             let effectAColorsRaw = `jb2a.eldritch_blast`;
-            let effectAColorOptions = getDBOptions(effectAColorsRaw);
+            let effectAColorOptions = utilFunctions.getDBOptions(effectAColorsRaw);
 
             let effectBColorsRaw = `jb2a.energy_strands.complete`;
-            let effectBColorOptions = getDBOptions(effectBColorsRaw);
+            let effectBColorOptions = utilFunctions.getDBOptions(effectBColorsRaw);
 
             let portalColorsRaw = `jb2a.portals.vertical.vortex`;
-            let portalColorOptions = getDBOptions(portalColorsRaw);
+            let portalColorOptions = utilFunctions.getDBOptions(portalColorsRaw);
 
             let portalImpactColorsRaw = `jb2a.impact.010`;
-            let portalImpactColorOptions = getDBOptions(portalImpactColorsRaw);
+            let portalImpactColorOptions = utilFunctions.getDBOptions(portalImpactColorsRaw);
 
             let summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
             let summonOptions = {};

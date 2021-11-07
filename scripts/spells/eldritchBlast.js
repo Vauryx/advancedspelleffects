@@ -30,6 +30,7 @@ export class eldritchBlast {
         aseEffectOptions['dmgDieCount'] = 1;
         aseEffectOptions['dmgType'] = 'force';
         aseEffectOptions['dmgMod'] = 0;
+        aseEffectOptions['impactDelay'] = -3000;
         let invocations = aseEffectOptions.invocations;
         if(invocations.agonizingBlast){
             aseEffectOptions.dmgMod = casterActor?.data?.data?.abilities?.cha?.mod ?? 0;
