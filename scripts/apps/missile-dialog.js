@@ -61,6 +61,10 @@ export class MissileDialog extends FormApplication {
     async _applyMarker(target, type) {
         //console.log('type: ',type);
         let markerAnim = `${this.data.effectOptions.targetMarkerType}.${this.data.effectOptions.targetMarkerColor}`;
+        const markerSound = this.data.effectOptions.markerSound ?? "";
+        const markerSoundDelay = Number(this.data.effectOptions.markerSoundDelay) ?? 0;
+        const markerSoundVolume = Number(this.data.effectOptions.markerVolume) ?? 1;
+
         let baseScale = this.data.effectOptions.baseScale;
         let currMissile = target.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 0;
         //console.log("Current missile number: ", currMissile);
@@ -69,6 +73,11 @@ export class MissileDialog extends FormApplication {
         // console.log("offset Modifier: ", offsetMod);
         let offset = { x: baseOffset * offsetMod, y: baseOffset }
         let markerSeq = new Sequence("Advanced Spell Effects")
+            .sound()
+            .file(markerSound)
+            .delay(markerSoundDelay)
+            .volume(markerSoundVolume)
+            .playIf(markerSound != "")
             .effect()
             .attachTo(target)
             .persist()
@@ -216,8 +225,24 @@ export class MissileDialog extends FormApplication {
         //console.log(attackData);
         let hit = attackData.hit;
         let missileAnim = `${this.data.effectOptions.missileAnim}.${this.data.effectOptions.missileColor}`;
+
+        const missileIntroSound = this.data.effectOptions.missileIntroSound ?? "";
+        
+        let missileIntroSoundDelay = Number(this.data.effectOptions.missileIntroSoundDelay) ?? 0;
+        let missileIntroVolume = Number(this.data.effectOptions.missileIntroVolume) ?? 1;
+        const impactDelay = Number(this.data.effectOptions.impactDelay) ?? -1000;
+
+        const missileImpactSound = this.data.effectOptions.missileImpactSound ?? "";
+        let missileImpactSoundDelay = Number(this.data.effectOptions.missileImpactSoundDelay) ?? 0;
+        let missileImpactVolume = Number(this.data.effectOptions.missileImpactVolume) ?? 1;
+
         //console.log(target);
         new Sequence("Advanced Spell Effects")
+            .sound()
+            .file(missileIntroSound)
+            .delay(missileIntroSoundDelay)
+            .volume(missileIntroVolume)
+            .playIf(missileIntroSound != "")
             .effect()
             .file(missileAnim)
             .atLocation(caster)
@@ -226,7 +251,13 @@ export class MissileDialog extends FormApplication {
             .missed(!hit)
             .reachTowards(target)
             .randomOffset(0.65)
-            .playbackRate(utilFunctions.getRandomNumber(0.7, 1.3))
+            //.playbackRate(utilFunctions.getRandomNumber(0.7, 1.3))
+            .waitUntilFinished(impactDelay)
+            .sound()
+            .file(missileImpactSound)
+            .delay(missileImpactSoundDelay)
+            .volume(missileImpactVolume)
+            .playIf(missileImpactSound != "")
             .play();
     }
 
@@ -308,6 +339,7 @@ export class MissileDialog extends FormApplication {
                 let attacksCrit = 0;
                 let damageTotal = 0;
                 let damageFormula;
+                let missileDelay;
                 let totalDamageFormula = {
                     dieCount: 0,
                     mod: 0
@@ -317,9 +349,11 @@ export class MissileDialog extends FormApplication {
                 for (let i = 0; i < missileNum; i++) {
                     if (this.data.effectOptions.missileType == 'dart') {
                         attackData['hit'] = true;
+                        missileDelay = utilFunctions.getRandomInt(75,150);
                     }
                     else {
                         let attackMod = this.data.attackMods[targetToken.id][i].type;
+                        missileDelay = utilFunctions.getRandomInt(50, 100);
                         //console.log(attackMod);
                         attackData = await this._evaluateAttack(caster, targetToken, attackMod);
                         if (attackData.crit) {
@@ -363,9 +397,9 @@ export class MissileDialog extends FormApplication {
                         attackData['hit'] = true;
                         damageTotal += damageRoll.total;
                     }
+                    
                     await this._launchMissile(caster, targetToken, attackData);
-
-                    await warpgate.wait(utilFunctions.getRandomInt(20, 75));
+                    await warpgate.wait(missileDelay);
                 }
                 //console.log('all attack rolls: ', this.data.allAttackRolls);
                 //console.log('all damage rolls: ', this.data.allDamRolls);
