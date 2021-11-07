@@ -7,13 +7,23 @@ export class callLightning {
     }
 
     static async createStormCloud(midiData) {
-        let item = midiData.item;
-        let caster = canvas.tokens.get(midiData.tokenId);
+        const item = midiData.item;
+        const caster = canvas.tokens.get(midiData.tokenId);
+        const spellLevel = midiData.itemLevel;
         //console.log(midiData);
         let aseFlags = item.getFlag("advancedspelleffects", 'effectOptions');
         let color = "blue";
         let res = "low";
         let boltStyle = aseFlags?.boltStyle?.toLowerCase() ?? 'chain';
+
+        const boltSound = aseFlags?.boltSound ?? "";
+        const boltVolume = aseFlags?.boltVolume ?? 1;
+        const boltSoundDelay = aseFlags?.boltSoundDelay ?? 0;
+
+        const stormCloudSound = aseFlags?.stormCloudSound ?? "";
+        const stormCloudVolume = aseFlags?.stormCloudVolume ?? 1;
+        const stormCloudSoundDelay = aseFlags?.stormCloudSoundDelay ?? 0;
+
 
         let weatherDialogData = {
             buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
@@ -44,21 +54,36 @@ export class callLightning {
         let castTemplate = await warpgate.crosshairs.show(crosshairsConfig, { show: displayCrosshairs });
         let effectFile = `jb2a.call_lightning.${res}_res.${color}`;
         //console.log(effectFile);
-        let effectFilePath = Sequencer.Database.getEntry(effectFile).file;
-        let stormTileId = await placeCloudAsTile(castTemplate, midiData.tokenId, stormyWeather,effectFilePath);
+        const effectFilePath = Sequencer.Database.getEntry(effectFile).file;
+        const effectOptions = {
+            castTemplate: castTemplate,
+            casterId: midiData.tokenId,
+            isStorm: stormyWeather,
+            effectFilePath: effectFilePath,
+            stormCloudSound: stormCloudSound,
+            stormCloudVolume: stormCloudVolume,
+            stormCloudSoundDelay: stormCloudSoundDelay,
+            boltSound: boltSound,
+            boltVolume: boltVolume,
+            boltSoundDelay: boltSoundDelay,
+            boltStyle: boltStyle,
+            spellLevel: spellLevel,
+            itemId: item.id
+        };
+        let stormTileId = await placeCloudAsTile(effectOptions);
         //console.log("StomeTileID: ", stormTileId);
         const updates = {
             embedded: {
                 Item: {
                     "Call Lightning Bolt": {
                         "type": "spell",
-                        "img": midiData.item.img,
+                        "img": item.img,
                         "data": {
                             "ability": "",
                             "actionType": "other",
                             "activation": { "type": "action", "cost": 1, "condition": "" },
                             "damage": { "parts": [], "versatile": "" },
-                            "level": midiData.itemLevel,
+                            "level": spellLevel,
                             "preparation": { "mode": 'atwill', "prepared": true },
                             "range": { "value": null, "long": null, "units": "" },
                             "school": "con",
@@ -81,7 +106,21 @@ export class callLightning {
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         await callLightning.callLightningBolt(stormTileId);
 
-        async function placeCloudAsTile(castTemplate, casterId, isStorm, effectFilePath) {
+        async function placeCloudAsTile(effectOptions) {
+            const castTemplate = effectOptions.castTemplate;
+            const casterId = effectOptions.casterId;
+            const effectFilePath = effectOptions.effectFilePath;
+            const isStorm = effectOptions.isStorm;
+            const stormCloudSound = effectOptions.stormCloudSound;
+            const stormCloudVolume = effectOptions.stormCloudVolume;
+            const stormCloudSoundDelay = effectOptions.stormCloudSoundDelay;
+            const boltSound = effectOptions.boltSound;
+            const boltVolume = effectOptions.boltVolume;
+            const boltSoundDelay = effectOptions.boltSoundDelay;
+            const boltStyle = effectOptions.boltStyle;
+            const spellLevel = effectOptions.spellLevel;
+            const itemId = effectOptions.itemId;
+
             let templateData = castTemplate;
             let tileWidth;
             let tileHeight;
@@ -114,14 +153,25 @@ export class callLightning {
                     advancedspelleffects: {
                         'stormCloudTile': casterId,
                         'boltStyle': boltStyle,
-                        'spellLevel': midiData.itemLevel,
-                        'itemID': midiData.item.data._id,
-                        'stormDamage': isStorm
+                        'spellLevel': spellLevel,
+                        'itemID': itemId,
+                        'stormDamage': isStorm,
+                        'boltSound': boltSound,
+                        'boltVolume': boltVolume,
+                        'boltSoundDelay': boltSoundDelay
                     }
                 }
             }
             let createdTiles = await aseSocket.executeAsGM("placeTiles", [data]);
-            let tileId = createdTiles[0].id ?? createdTiles[0]._id;
+            const tileId = createdTiles[0].id ?? createdTiles[0]._id;
+
+            new Sequence("Advanced Spell Effects")
+                .sound()
+                .file(stormCloudSound)
+                .volume(stormCloudVolume)
+                .delay(stormCloudSoundDelay)
+                .playIf(stormCloudSound !== "")
+            .play()
             return (tileId);
         }
     }
@@ -162,10 +212,15 @@ export class callLightning {
             //console.log("Caster Actor: ", casterActor);
             let saveDC = casterActor.data.data.attributes.spelldc;
             //console.log("Save DC: ", saveDC);
-            const boltStyle = stormCloudTile.getFlag("advancedspelleffects", 'boltStyle');
+            const boltOptions = {
+                boltStyle: stormCloudTile.getFlag("advancedspelleffects", "boltStyle"),
+                boltSound: stormCloudTile.getFlag("advancedspelleffects", "boltSound") ?? "",
+                boltVolume: stormCloudTile.getFlag("advancedspelleffects", "boltVolume") ?? 0,
+                boltSoundDelay: Number(stormCloudTile.getFlag("advancedspelleffects", "boltSoundDelay")) ?? 0,
+            }
             //console.log("Storm cloud tile:", stormCloudTile);
 
-            playEffect(boltTemplate, stormCloudTile, boltStyle);
+            playEffect(boltTemplate, stormCloudTile, boltOptions);
 
             if (game.modules.get("midi-qol")?.active) {
                 let tokens = canvas.tokens.placeables.map(t => {
@@ -218,7 +273,12 @@ export class callLightning {
 
         }
 
-        async function playEffect(boltTemplate, cloud, boltStyle) {
+        async function playEffect(boltTemplate, cloud, boltOptions) {
+            const boltStyle = boltOptions.boltStyle;
+            const boltSound = boltOptions.boltSound;
+            const boltVolume = boltOptions.boltVolume;
+            const boltSoundDelay = boltOptions.boltSoundDelay;
+
             let boltEffect;
             switch (boltStyle) {
                 case 'chain':
@@ -274,6 +334,11 @@ export class callLightning {
             let groundCrackImg = `jb2a.impact.ground_crack.still_frame.0${groundCrackVersion}`;
             let groundCrackImgPath = Sequencer.Database.getEntry(groundCrackImg).file;
             let boltSeq = new Sequence("Advanced Spell Effects")
+                .sound()
+                .file(boltSound)
+                .volume(boltVolume)
+                .delay(boltSoundDelay)
+                .playIf(boltSound != "")
                 .effect()
                 .file(boltEffect)
                 .JB2A()

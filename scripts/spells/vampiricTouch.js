@@ -11,6 +11,20 @@ export class vampiricTouch {
         let casterAnim = `jb2a.energy_strands.overlay.${effectOptions.vtCasterColor}.01`;
         let strandAnim = `jb2a.energy_strands.range.standard.${effectOptions.vtStrandColor}`;
         let impactAnim = `jb2a.impact.004.${effectOptions.vtImpactColor}`;
+
+        const casterSound = effectOptions.vtCasterSound ?? "";
+        const casterSoundDelay = Number(effectOptions.vtCasterSoundDelay) ?? 0;
+        const casterSoundVolume = effectOptions.vtCasterVolume ?? 1;
+
+        const impactSound = effectOptions.vtImpactSound;
+        const impactSoundDelay = Number(effectOptions.vtImpactSoundDelay) ?? 0;
+        const impactSoundVolume = effectOptions.vtImpactVolume ?? 1;
+
+        const siphonSound = effectOptions.vtSiphonSound;
+        const siphonSoundDelay = Number(effectOptions.vtSiphonSoundDelay) ?? 0;
+        const siphonSoundVolume = effectOptions.vtSiphonVolume ?? 1;
+
+
         const updates = {
             embedded: {
                 Item: {
@@ -54,13 +68,24 @@ export class vampiricTouch {
                 await concentrationHandler.addConcentration(tactor, midiData.item);
             }
         }
+        
         new Sequence('Advanced Spell Effects')
+            .sound()
+            .file(impactSound)
+            .delay(impactSoundDelay + 100)
+            .volume(impactSoundVolume)
+            .playIf(impactSound != "") 
             .effect()
             .file(impactAnim)
             .atLocation(target)
             .scaleToObject()
             .missed(missed)
             .delay(100)
+            .sound()
+            .file(siphonSound)
+            .delay(siphonSoundDelay)
+            .volume(siphonSoundVolume)
+            .playIf(siphonSound != "")
             .effect()
             .file(strandAnim)
             .atLocation(target)
@@ -68,6 +93,11 @@ export class vampiricTouch {
             .reachTowards(tokenD)
             .repeats(Math.max(1, Math.floor(damageTotal)), 100, 200)
             .randomizeMirrorY()
+            .sound()
+            .file(casterSound)
+            .delay(casterSoundDelay)
+            .volume(casterSoundVolume)
+            .playIf(casterSound != "")
             .effect()
             .file(casterAnim)
             .attachTo(tokenD)

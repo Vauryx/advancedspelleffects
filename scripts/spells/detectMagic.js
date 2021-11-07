@@ -22,13 +22,13 @@ export class detectMagic {
                 let auraLoopAnim = `jb2a.magic_signs.circle.02.divination.loop.${aseSettings.auraColor ?? 'blue'}`;
                 let auraIntroAnim = `jb2a.magic_signs.circle.02.divination.intro.${aseSettings.auraColor ?? 'blue'}`;
 
-                if(!assetDBPaths.includes(waveAnim)) assetDBPaths.push(waveAnim);
-                if(!assetDBPaths.includes(auraLoopAnim)) assetDBPaths.push(auraLoopAnim);
-                if(!assetDBPaths.includes(auraIntroAnim)) assetDBPaths.push(auraIntroAnim);
+                if (!assetDBPaths.includes(waveAnim)) assetDBPaths.push(waveAnim);
+                if (!assetDBPaths.includes(auraLoopAnim)) assetDBPaths.push(auraLoopAnim);
+                if (!assetDBPaths.includes(auraIntroAnim)) assetDBPaths.push(auraIntroAnim);
 
                 let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
                 let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
-                
+
                 let objects = await Tagger.getByTag("magical");
                 let magicalObjects = objects.map(o => {
                     return {
@@ -43,8 +43,8 @@ export class detectMagic {
                     }
                     let runeIntroAnim = `jb2a.magic_signs.rune.${magical.school}.intro.${magical.color}`;
                     let runeLoopAnim = `jb2a.magic_signs.rune.${magical.school}.loop.${magical.color}`;
-                    if(!assetDBPaths.includes(runeIntroAnim)) assetDBPaths.push(runeIntroAnim);
-                    if(!assetDBPaths.includes(runeLoopAnim)) assetDBPaths.push(runeLoopAnim);
+                    if (!assetDBPaths.includes(runeIntroAnim)) assetDBPaths.push(runeIntroAnim);
+                    if (!assetDBPaths.includes(runeLoopAnim)) assetDBPaths.push(runeLoopAnim);
                 }
             }
         }
@@ -64,6 +64,9 @@ export class detectMagic {
         let magicalObjects = [];
         let waveColor = aseFlags.waveColor ?? 'blue';
         let auraColor = aseFlags.auraColor ?? 'blue';
+        const waveSound = aseFlags.waveSound ?? "";
+        const waveSoundDelay = Number(aseFlags.waveSoundDelay) ?? 0;
+        const waveVolume = Number(aseFlags.waveVolume) ?? 1;
 
         for (const user in actor.data.permission) {
             if (user == "default") continue;
@@ -88,6 +91,11 @@ export class detectMagic {
         }).filter(o => o.distance <= 30)
 
         let dmSequence = new Sequence("Advanced Spell Effects")
+            .sound()
+            .file(waveSound)
+            .volume(waveVolume)
+            .delay(waveSoundDelay)
+            .playIf(waveSound != "")
             .effect(`jb2a.detect_magic.circle.${waveColor}`)
             .attachTo(caster)
             .JB2A()
@@ -167,13 +175,12 @@ export class detectMagic {
                 color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
             }
         })
-        for (let magical of magicalObjects) {
+        for await (let magical of magicalObjects) {
             if (!magical.school) {
                 continue;
             }
             await aseSocket.executeAsGM("updateFlag", magical.obj.id, "magicDetected", false);
             await Sequencer.EffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-            await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-detectMagicAura`, object: casterToken });
             new Sequence("Advanced Spell Effects")
                 .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                 .forUsers(users)
@@ -182,18 +189,24 @@ export class detectMagic {
                 .scale(0.25)
                 .setMustache(magical)
                 .zIndex(0)
-                .effect()
-                .file(`jb2a.magic_signs.circle.02.divination.outro.${effectOptions.auraColor}`)
-                .scale(0.2)
-                .belowTokens()
-                .attachTo(casterToken)
                 .play()
         }
+        await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-detectMagicAura`, object: casterToken });
+        new Sequence("Advanced Spell Effects")
+            .effect()
+            .file(`jb2a.magic_signs.circle.02.divination.outro.${effectOptions.auraColor}`)
+            .scale(0.2)
+            .belowTokens()
+            .attachTo(casterToken)
+            .play()
     }
 
     static async _updateToken(tokenDocument, updateData) {
         //console.log("Registering Detect Magic Hook");
         if ((!updateData.x && !updateData.y)) return;
+        const isGM = utilFunctions.isFirstGM();
+        console.log("Is first GM: ", isGM);
+        if(!isGM) return;
         if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length == 0) {
             return;
         }
@@ -224,7 +237,7 @@ export class detectMagic {
                 color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
             }
         }).filter(o => o.distance > 30)
-        for (let magical of magicalObjectsOutOfRange) {
+        for await (let magical of magicalObjectsOutOfRange) {
             if (!magical.school) {
                 continue;
             }
@@ -237,7 +250,7 @@ export class detectMagic {
                 .zIndex(0)
                 .playIf((magical.obj.document.getFlag("advancedspelleffects", "magicDetected")))
                 .play()
-            await aseSocket.executeAsGM("updateFlag", magical.obj.id, "magicDetected", false);
+            await magical.obj.document.setFlag("advancedspelleffects", "magicDetected", false);
             await SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
         }
         magicalObjectsInRange = objects.map(o => {
@@ -253,13 +266,13 @@ export class detectMagic {
             }
         }).filter(o => o.distance <= 30)
 
-        for (let magical of magicalObjectsInRange) {
+        for await (let magical of magicalObjectsInRange) {
             if (!magical.school) {
                 continue;
             }
-            let runeDisplayed = Sequencer.EffectManager.getEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-            if (!(magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) && runeDisplayed.length == 0) {
-                await aseSocket.executeAsGM("updateFlag", magical.obj.id, "magicDetected", true);
+            //let runeDisplayed = Sequencer.EffectManager.getEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+            if (!magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) {
+                await magical.obj.document.setFlag("advancedspelleffects", "magicDetected", true);
                 new Sequence("Advanced Spell Effects")
                     .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
                     .forUsers(users)

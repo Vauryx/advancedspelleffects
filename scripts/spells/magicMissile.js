@@ -43,6 +43,7 @@ export class magicMissile {
         aseEffectOptions['dmgDieCount'] = 1;
         aseEffectOptions['dmgType'] = 'force';
         aseEffectOptions['dmgMod'] = 1;
+        aseEffectOptions['impactDelay'] = -1000;
         new MissileDialog({casterId: casterToken.id, numMissiles: numMissiles, itemCardId: itemCardId, effectOptions: aseEffectOptions, item: spellItem}).render(true);
     }
 }
