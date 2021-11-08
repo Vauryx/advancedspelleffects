@@ -1,4 +1,7 @@
 import * as utilFunctions from "../utilityFunctions.js";
+import { vampiricTouch } from "../spells/vampiricTouch.js";
+
+
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
@@ -12,7 +15,7 @@ export class ASESettings extends FormApplication {
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            template: './modules/advancedspelleffects/scripts/templates/ase-settings.html',
+            template: './modules/advancedspelleffects/scripts/templates/ase-settings-new.html',
             id: 'ase-item-settings',
             title: "Advanced Spell Effects Settings",
             resizable: true,
@@ -111,12 +114,13 @@ export class ASESettings extends FormApplication {
                 break;
             case 'Steel Wind Strike':
                 let weaponsPathMap = {
-                    "sword": "melee.01"/*,
-                    "mace": "melee",
-                    "greataxe": "melee",
-                    "greatsword": "melee",
-                    "handaxe": "melee",
-                    "spear": "melee.01"*/
+                    "sword": "melee.01"
+                    /*,
+                                        "mace": "melee",
+                                        "greataxe": "melee",
+                                        "greatsword": "melee",
+                                        "handaxe": "melee",
+                                        "spear": "melee.01"*/
                 };
                 let availWeapons = Object.keys(weaponsPathMap);
                 let weaponOptions = {};
@@ -152,18 +156,20 @@ export class ASESettings extends FormApplication {
                 }
                 break;
             case 'Vampiric Touch':
-                let vampiricTouchCasterAnim = 'jb2a.energy_strands.overlay';
-                let vampiricTouchStrandAnim = `jb2a.energy_strands.range.standard`;
-                let vampiricTouchImpactAnim = `jb2a.impact.004`;
+                let requiredSettings = await vampiricTouch.getRequiredSettings();
+                let animSettings = requiredSettings.animOptions;
+                requiredSettings.currentOptions = flags.advancedspelleffects.effectOptions;
+                //iterate over requiredSettings.animOptions and replace every flagName with the current value at that flag
+                for (let i = 0; i < animSettings.length; i++) {
+                    let animOption = animSettings[i];
+                    let flagName = animOption.flagName;
+                    let flagValue = flags.advancedspelleffects.effectOptions[flagName];
+                    requiredSettings.animOptions[i].flagName = flagValue;
+                }
 
-                let vampiricTouchCasterColorOptions = utilFunctions.getDBOptions(vampiricTouchCasterAnim);
-                let vampiricTouchStrandColorOptions = utilFunctions.getDBOptions(vampiricTouchStrandAnim);
-                let vampiricTouchImpactColorOptions = utilFunctions.getDBOptions(vampiricTouchImpactAnim);
-
+                console.log(requiredSettings);
                 returnOBJ = {
-                    vtCasterColors: vampiricTouchCasterColorOptions,
-                    vtStrandColors: vampiricTouchStrandColorOptions,
-                    vtImpactColors: vampiricTouchImpactColorOptions
+                    vtRequiredSettings: requiredSettings
                 }
                 break;
         }
@@ -191,8 +197,7 @@ export class ASESettings extends FormApplication {
                 targetMarkerColors: targetMarkerColorOptions
             }
             console.log(returnOBJ);
-        }
-        else if (itemName.includes("Summon") || itemName == "Animate Dead") {
+        } else if (itemName.includes("Summon") || itemName == "Animate Dead") {
             let magicSignsRaw = `jb2a.magic_signs.circle.02`;
             let magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
 
@@ -266,8 +271,35 @@ export class ASESettings extends FormApplication {
 
     }
     activateListeners(html) {
-        //console.log(html);
+        const body = $("#ase-item-settings");
+        const animSettings = $("#ase-anim-settings");
+        const animSettingsButton = $(".ase-anim-settingsButton");
+        const soundSettings = $("#ase-sound-settings");
+        const soundSettingsButton = $(".ase-sound-settingsButton");
+
+        let currentTab = animSettingsButton;
+        let currentBody = animSettings;
+
+
         super.activateListeners(html);
+        $(".nav-tab").click(function () {
+            currentBody.toggleClass("hide");
+            currentTab.toggleClass("selected");
+            if ($(this).hasClass("ase-anim-settingsButton")) {
+                //console.log("anim");
+                animSettings.toggleClass("hide");
+                currentBody = animSettings;
+                currentTab = animSettingsButton;
+            } else if ($(this).hasClass("ase-sound-settingsButton")) {
+                //console.log("sound");
+                soundSettings.toggleClass("hide");
+                currentBody = soundSettings;
+                currentTab = soundSettingsButton;
+            }
+            currentTab.toggleClass("selected");
+            body.height("auto");
+        });
+
         html.find('.ase-enable-checkbox input[type="checkbox"]').click(evt => {
             this.submit({ preventClose: true }).then(() => this.render());
         });
@@ -294,8 +326,7 @@ export class ASESettings extends FormApplication {
             let summoner = game.actors.get(actorId);
             item = summoner.items.get(itemId);
             //console.log(summoner, item);
-        }
-        else {
+        } else {
             item = game.items.get(itemId);
             //console.log(item);
         }
@@ -341,8 +372,9 @@ export class ASESettings extends FormApplication {
     async _updateObject(event, formData) {
         //console.log(formData);
         formData = expandObject(formData);
-        if (!formData.changes)
-            formData.changes = [];
+        console.log(formData);
+        if (!formData.changes) formData.changes = [];
+        console.log(formData.changes);
         formData.changes = Object.values(formData.changes);
         for (let c of formData.changes) {
             //@ts-ignore

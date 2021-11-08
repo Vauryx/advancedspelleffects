@@ -1,0 +1,58 @@
+<form class="flexcol" id="aseSettingsForm" autocomplete="off" novalidate>
+    <section class="content">
+        <div class="ase-enable-checkbox">
+            <div class="form-group">
+                <label>Convert to Advanced Spell Effect</label>
+                <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
+                    flags.advancedspelleffects.enableASE}}>
+            </div>
+            {{#if flags.advancedspelleffects.enableASE}}
+                <div class="form-group">
+                    <p>ASE Settings: <b>{{itemName}}</b></p>
+                </div>
+                <div class="ase-settings-tabs">
+                    <button class="nav-tab ase-anim-settingsButton selected" type="button">Animation Settings</button>
+                    <button class="nav-tab ase-sound-settingsButton" type="button">Sound Settings</button>
+                </div>
+                <div id="ase-settings-body">
+                    <div id="ase-anim-settings" class="show">
+                        <p>Animation settings tab...</p>
+                        <table>
+                            <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                                {{#each effectData.vtRequiredSettings.animOptions}}
+                                    <tr>
+                                        <td>
+                                            <label><b>{{this.label}}</b></label>
+                                        </td>
+                                        <td>
+                                            {{#ifCondASE this.type '==' 'dropdown'}}
+                                                <select name="{{this.name}}">
+                                                    {{#select this.flagName}}
+                                                        {{#each this.options as |name key|}}
+                                                            <option value="{{key}}">
+                                                                {{name}}
+                                                            </option>
+                                                        {{/each}}
+                                                    {{/select}}
+                                                </select>
+                                            {{/ifCondASE}}
+                                        </td>
+                                    </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="ase-sound-settings" class="hide">
+                        <p>Sound settings tab...</p>
+                    </div>
+                </div>
+            {{/if}}
+        </div>
+
+    </section>
+    <footer class="sheet-footer flexrow">
+        <button type="submit" name="submit">
+            <i class="fa fa-save"></i> Save and Close
+        </button>
+    </footer>
+</form>
