@@ -17,7 +17,7 @@ Hooks.once('ready', async function () {
   if (!game.user.isGM) return;
   Hooks.on(`renderItemSheet5e`, async (app, html, data) => {
     //console.log("ASE: Caught actor sheet render hook!", data);
-    let aseSpellList = ['Darkness',
+    let aseSpellList = [game.i18n.localize("advancedspelleffects.Darkness"),
       'Detect Magic',
       'Fog Cloud',
       'Steel Wind Strike',
@@ -30,6 +30,7 @@ Hooks.once('ready', async function () {
       'Magic Missile',
       'Scorching Ray',
       'Eldritch Blast'];
+    console.log('ASE Spell List: ', aseSpellList);
     let isSummon = data.item.name.includes("Summon");
     if (!aseSpellList.includes(data.item.name) && !isSummon) {
       return;

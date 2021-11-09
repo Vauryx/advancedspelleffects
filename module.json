@@ -8,15 +8,7 @@
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.8.9",
   "compatibleCoreVersion": "0.8.9",
-  "packs": [
-    {
-      "name": "aseMidiSpells",
-      "label": "Advanced Spell Effects - MIDI Spells",
-      "path": "packs/aseMidiSpells.db",
-      "entity": "Item",
-      "module": "advancedspelleffects"
-    }
-  ],
+  "packs": [],
   "authors": [
     {
       "name": "Vauryx",
