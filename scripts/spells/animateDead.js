@@ -78,6 +78,7 @@ export class animateDead {
     }
 
     static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
         const magicSignsRaw = `jb2a.magic_signs.circle.02`;
         const magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
 
@@ -103,11 +104,11 @@ export class animateDead {
         });
         currentSummonTypes = currFlags.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" } };
 
-        let mechOptions = [];
+        let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
 
-        mechOptions.push({
+        spellOptions.push({
             label: 'Associated Zombie Actor:',
             type: 'dropdown',
             options: summonOptions,
@@ -115,7 +116,7 @@ export class animateDead {
             flagName: 'summons.zombie.actor',
             flagValue: currFlags.summons?.zombie?.actor ?? '',
         });
-        mechOptions.push({
+        spellOptions.push({
             label: 'Associated Skeleton Actor:',
             type: 'dropdown',
             options: summonOptions,
@@ -245,7 +246,7 @@ export class animateDead {
 
         return {
             animOptions: animOptions,
-            spellOptions: mechOptions,
+            spellOptions: spellOptions,
             soundOptions: soundOptions,
         }
 

@@ -307,6 +307,7 @@ export class spiritualWeapon {
     }
 
     static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];

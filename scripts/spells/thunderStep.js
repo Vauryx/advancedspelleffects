@@ -15,6 +15,14 @@ export class thunderStep {
         const spellLevel = midiData.itemLevel ? Number(midiData.itemLevel) : 3;
         const spellSaveDC = actorD.data.data.attributes.spelldc;
 
+        const effectOptions = itemD.getFlag('advancedspelleffects', 'effectOptions') ?? {};
+        const teleportSound = effectOptions.teleportSound ?? "";
+        const teleportSoundDelay = Number(effectOptions.teleportSoundDelay) ?? 0;
+        const teleportVolume = effectOptions.teleportVolume ?? 1;
+        const reappearSound = effectOptions.reappearSound ?? "";
+        const reappearSoundDelay = Number(effectOptions.reappearSoundDelay) ?? 0;
+        const reappearVolume = effectOptions.reappearVolume ?? 1;
+
         const teleport_range = await MeasuredTemplate.create({
             t: "circle",
             user: game.userId,
@@ -110,7 +118,7 @@ export class thunderStep {
             interval: 2
         };
 
-        let position = await warpgate.crosshairs.show(crosshairsConfig, {show: displayCrosshairs});
+        let position = await warpgate.crosshairs.show(crosshairsConfig, { show: displayCrosshairs });
 
         teleport_range[0].delete();
 
@@ -121,6 +129,11 @@ export class thunderStep {
         });
 
         new Sequence("Advanced Spell Effects")
+            .sound()
+            .file(teleportSound)
+            .volume(teleportVolume)
+            .delay(teleportSoundDelay)
+            .playIf(teleportSound !== "")
             .effect()
             .file("jb2a.shatter.blue")
             .atLocation(tokenD, { cacheLocation: true })
@@ -183,6 +196,11 @@ export class thunderStep {
 
             }, true)
             .wait(250)
+            .sound()
+            .file(reappearSound)
+            .volume(reappearVolume)
+            .delay(reappearSoundDelay)
+            .playIf(reappearSound !== "")
             .effect()
             .baseFolder("modules/jb2a_patreon/Library/Generic/Impact")
             .file("Impact_01_Regular_Blue_400x400.webm")
@@ -204,19 +222,75 @@ export class thunderStep {
         function addTokenToText(token, roll, dc, damageRoll) {
             console.log(damageRoll);
             let saveResult = roll >= dc ? true : false;
-           
+
 
             return `<div class="midi-qol-flex-container">
       <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
       <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
       <div>
       <b>${saveResult ? "succeeds" : "fails"}</b> with 
-      <b>${roll}</b> and takes <b>${saveResult ? Math.floor(damageRoll.total/2) : damageRoll.total}</b> damage.
+      <b>${roll}</b> and takes <b>${saveResult ? Math.floor(damageRoll.total / 2) : damageRoll.total}</b> damage.
         
       </div>
       <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
     </div>`;
 
+        }
+
+    }
+    static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+        soundOptions.push({
+            label: "Teleport Sound:",
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.teleportSound',
+            flagName: 'teleportSound',
+            flagValue: currFlags?.teleportSound ?? '',
+        });
+        soundOptions.push({
+            label: "Teleport Sound Delay:",
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.teleportSoundDelay',
+            flagName: 'teleportSoundDelay',
+            flagValue: currFlags?.teleportSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: "Teleport Volume:",
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.teleportVolume',
+            flagName: 'teleportVolume',
+            flagValue: currFlags?.teleportVolume ?? 1,
+        });
+
+        soundOptions.push({
+            label: "Reappear Sound: ",
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.reappearSound',
+            flagName: 'reappearSound',
+            flagValue: currFlags?.reappearSound ?? '',
+        });
+        soundOptions.push({
+            label: "Reappear Sound Delay:",
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.reappearSoundDelay',
+            flagName: 'reappearSoundDelay',
+            flagValue: currFlags?.reappearSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: "Reappear Volume:",
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.reappearVolume',
+            flagName: 'reappearVolume',
+            flagValue: currFlags?.reappearVolume ?? 1,
+        });
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions
         }
 
     }

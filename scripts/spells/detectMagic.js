@@ -301,6 +301,7 @@ export class detectMagic {
     }
 
     static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
 
         const detectMagicWaves = `jb2a.detect_magic.circle`;
         const detectMagicWaveColorOptions = utilFunctions.getDBOptions(detectMagicWaves);

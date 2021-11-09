@@ -35,7 +35,6 @@ export class ASESettings extends FormApplication {
             "Spiritual Weapon": spiritualWeapon,
             "Steel Wind Strike": steelWindStrike,
             "Thunder Step": thunderStep,
-            "Thunder Step": summonCreature,
             "Witch Bolt": witchBolt,
             "Scorching Ray": scorchingRay,
             "Eldritch Blast": eldritchBlast,
@@ -126,6 +125,7 @@ export class ASESettings extends FormApplication {
         //console.log("Detected item name: ", itemName);
         await this.setItemDetails(item);
         let requiredSettings;
+        console.log("Item name: ", itemName);
         if (itemName.includes("Summon")) {
             requiredSettings = await summonCreature.getRequiredSettings(flags.advancedspelleffects.effectOptions);
             console.log(requiredSettings);

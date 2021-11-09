@@ -320,6 +320,7 @@ export class steelWindStrike {
     }
 
     static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
 
         const SwordColors = `jb2a.sword.melee.01`;
         const swordColorOptions = utilFunctions.getDBOptions(SwordColors);

@@ -397,6 +397,7 @@ export class callLightning {
     }
 
     static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];

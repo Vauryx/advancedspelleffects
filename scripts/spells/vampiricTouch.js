@@ -189,6 +189,7 @@ export class vampiricTouch {
     }
 
     static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
         //console.log(currFlags);
         const vampiricTouchCasterAnim = 'jb2a.energy_strands.overlay';
         const vampiricTouchStrandAnim = `jb2a.energy_strands.range.standard`;

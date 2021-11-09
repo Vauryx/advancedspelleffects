@@ -50,7 +50,7 @@ export class scorchingRay {
     }
 
     static async getRequiredSettings(currFlags) {
-
+        if (!currFlags) currFlags = {};
         const missileColorOptions = utilFunctions.getDBOptions('jb2a.scorching_ray.02');
         const targetMarkerColorOptions = utilFunctions.getDBOptions('jb2a.markers.01');
 

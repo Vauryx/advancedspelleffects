@@ -48,7 +48,7 @@ export class magicMissile {
     }
 
     static async getRequiredSettings(currFlags) {
-
+        if (!currFlags) currFlags = {};
         const missileColorOptions = utilFunctions.getDBOptions('jb2a.magic_missile');
         const targetMarkerColorOptions = utilFunctions.getDBOptions('jb2a.moonbeam.01.loop');
 

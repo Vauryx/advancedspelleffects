@@ -40,6 +40,7 @@ export class eldritchBlast {
     }
 
     static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
 
         const missileColorOptions = utilFunctions.getDBOptions('jb2a.eldritch_blast');
         const targetMarkerColorOptions = utilFunctions.getDBOptions('jb2a.markers.02');

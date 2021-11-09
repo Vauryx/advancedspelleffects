@@ -288,7 +288,7 @@ export class summonCreature {
     }
 
     static async getRequiredSettings(currFlags) {
-
+        if (!currFlags) currFlags = {};
         const magicSignsRaw = `jb2a.magic_signs.circle.02`;
         const magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
 
