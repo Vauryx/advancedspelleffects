@@ -60,10 +60,10 @@ export class steelWindStrike {
             currentAutoRotateState = caster.document.getFlag("autorotate", "enabled") ?? false;
         }
         if (currentAutoRotateState) {
-            await caster.setFlag("autorotate", "enabled", false);
+            await caster.document.setFlag("autorotate", "enabled", false);
         }
         //console.log ("Auto Rotate Flag status: ",caster.document.getFlag("autorotate", "enabled"));
-        await steelWindStrike(caster, targets);
+        await steelWindStrike(caster, targets, aseFlags);
 
         async function evaluateAttack(target) {
             //console.log("Evalute attack target: ", target);
@@ -180,7 +180,14 @@ export class steelWindStrike {
             return true;
         }
         //---------------------------------------------------------------------------
-        async function steelWindStrike(caster, targets) {
+        async function steelWindStrike(caster, targets, options) {
+            const dashSound = options.dashSound ?? "";
+            const dashSoundDelay = options.dashSoundDelay ?? 0;
+            const dashVolume = options.dashVolume ?? 1;
+            const strikeSound = options.strikeSound ?? "";
+            let strikeSoundDelay = options.strikeSoundDelay ?? 0;
+            const strikeVolume = options.strikeVolume ?? 1;
+
             let currentX;
             let targetX;
             let currentY;
@@ -193,6 +200,7 @@ export class steelWindStrike {
                 if (i == targets.length - 1) {
                     swingType = 5;
                     swingStartDelay = -250;
+                    strikeSoundDelay += 750;
                 }
                 else {
                     swingType = validSwingTypes[utilFunctions.getRandomInt(0, 2)];
@@ -211,6 +219,11 @@ export class steelWindStrike {
                 distance = Math.sqrt(Math.pow((targetX - currentX), 2) + Math.pow((targetY - currentY), 2));
                 //console.log(distance);
                 let steelWindSequence = new Sequence("Advanced Spell Effects")
+                    .sound()
+                    .file(dashSound)
+                    .volume(dashVolume)
+                    .delay(dashSoundDelay)
+                    .playIf(dashSound != "")
                     .effect()
                     .atLocation({ x: caster.x + (canvas.grid.size / 2), y: caster.y + (canvas.grid.size / 2) })
                     .JB2A()
@@ -228,6 +241,11 @@ export class steelWindStrike {
                     .moveSpeed(distance / 60)
                     .duration(800)
                     .waitUntilFinished(swingStartDelay)
+                    .sound()
+                    .file(strikeSound)
+                    .volume(strikeVolume)
+                    .delay(strikeSoundDelay)
+                    .playIf(strikeSound != "")
                     .effect()
                     .atLocation(caster, { cacheLocation: false })
                     .JB2A()
@@ -299,5 +317,74 @@ export class steelWindStrike {
             }
 
         }
+    }
+
+    static async getRequiredSettings(currFlags) {
+
+        const SwordColors = `jb2a.sword.melee.01`;
+        const swordColorOptions = utilFunctions.getDBOptions(SwordColors);
+
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+        animOptions.push({
+            label: 'Sword Color: ',
+            type: 'dropdown',
+            name: 'flags.advancedspelleffects.effectOptions.weaponColor',
+            options: swordColorOptions,
+            flagName: 'weaponColor',
+            flagValue: currFlags.weaponColor ?? 'blue',
+        });
+        soundOptions.push({
+            label: "Dash Sound:",
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.dashSound',
+            flagName: 'dashSound',
+            flagValue: currFlags.dashSound ?? '',
+        });
+        soundOptions.push({
+            label: "Dash Sound Delay:",
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dashSoundDelay',
+            flagName: 'dashSoundDelay',
+            flagValue: currFlags.dashSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: "Dash Sound Volume:",
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.dashVolume',
+            flagName: 'dashVolume',
+            flagValue: currFlags.dashVolume ?? 1,
+        });
+
+        soundOptions.push({
+            label: "Strike Sound:",
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.strikeSound',
+            flagName: 'strikeSound',
+            flagValue: currFlags.strikeSound ?? '',
+        });
+        soundOptions.push({
+            label: "Strike Sound Delay:",
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.strikeSoundDelay',
+            flagName: 'strikeSoundDelay',
+            flagValue: currFlags.strikeSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: "Strike Sound Volume:",
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.strikeVolume',
+            flagName: 'strikeVolume',
+            flagValue: currFlags.strikeVolume ?? 1,
+        });
+
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions
+        }
+
     }
 }

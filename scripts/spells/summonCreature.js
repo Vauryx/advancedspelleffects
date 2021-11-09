@@ -1,3 +1,4 @@
+import * as utilFunctions from "../utilityFunctions.js";
 export class summonCreature {
     static registerHooks() {
         return;
@@ -246,5 +247,101 @@ export class summonCreature {
         for (const summonedToken of summonedTokens) {
             await warpgate.dismiss(summonedToken.id);
         }
+    }
+
+    static async getRequiredSettings(currFlags) {
+
+        const magicSignsRaw = `jb2a.magic_signs.circle.02`;
+        const magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
+
+        const magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${currFlags.advancedspelleffects?.effectOptions?.magicSchool ?? 'abjuration'}.intro`;
+        const magicSchoolColorOptions = utilFunctions.getDBOptions(magicSchoolColorsRaw);
+
+        const effectAColorsRaw = `jb2a.eldritch_blast`;
+        const effectAColorOptions = utilFunctions.getDBOptions(effectAColorsRaw);
+
+        const effectBColorsRaw = `jb2a.energy_strands.complete`;
+        const effectBColorOptions = utilFunctions.getDBOptions(effectBColorsRaw);
+
+        const portalColorsRaw = `jb2a.portals.vertical.vortex`;
+        const portalColorOptions = utilFunctions.getDBOptions(portalColorsRaw);
+
+        const portalImpactColorsRaw = `jb2a.impact.010`;
+        const portalImpactColorOptions = utilFunctions.getDBOptions(portalImpactColorsRaw);
+
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+
+        animOptions.push({
+            label: 'Magic School: ',
+            type: 'dropdown',
+            name: 'flags.advancedspelleffects.effectOptions.magicSchool',
+            options: magicSchoolOptions,
+            flagName: 'magicSchool',
+            flagValue: currFlags.magicSchool ?? 'abjuration',
+        });
+
+        animOptions.push({
+            label: 'Magic School Color: ',
+            type: 'dropdown',
+            name: 'flags.advancedspelleffects.effectOptions.magicSchoolColor',
+            flagName: 'magicSchoolColor',
+            options: magicSchoolColorOptions,
+            flagValue: currFlags.magicSchoolColor ?? 'blue',
+        });
+
+        animOptions.push({
+            label: 'Effect A Color: ',
+            type: 'dropdown',
+            name: 'flags.advancedspelleffects.effectOptions.effectAColor',
+            flagName: 'effectAColor',
+            options: effectAColorOptions,
+            flagValue: currFlags.effectAColor ?? 'blue',
+        });
+
+        animOptions.push({
+            label: 'Effect B Color: ',
+            type: 'dropdown',
+            name: 'flags.advancedspelleffects.effectOptions.effectBColor',
+            flagName: 'effectBColor',
+            options: effectBColorOptions,
+            flagValue: currFlags.effectBColor ?? 'blue',
+        });
+
+        animOptions.push({
+            label: 'Portal Color: ',
+            type: 'dropdown',
+            name: 'flags.advancedspelleffects.effectOptions.portalColor',
+            flagName: 'portalColor',
+            options: portalColorOptions,
+            flagValue: currFlags.portalColor ?? 'blue',
+        });
+
+        animOptions.push({
+            label: 'Portal Impact Color: ',
+            type: 'dropdown',
+            name: 'flags.advancedspelleffects.effectOptions.portalImpactColor',
+            flagName: 'portalImpactColor',
+            options: portalImpactColorOptions,
+            flagValue: currFlags.portalImpactColor ?? 'blue',
+        });
+
+        spellOptions.push({
+            label: `Use Tasha's Scaling: `,
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.isTashas',
+            flagName: 'isTashas',
+            flagValue: currFlags.isTashas ?? false,
+        });
+
+
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions
+        }
+
     }
 }

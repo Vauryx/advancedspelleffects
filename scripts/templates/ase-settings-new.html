@@ -13,13 +13,75 @@
                     <p>ASE Settings: <b>{{itemName}}</b></p>
                 </div>
                 <div class="ase-settings-tabs">
-                    <button class="nav-tab ase-spell-settingsButton" type="button"><i>Spell Settings</i></button>
-                    <button class="nav-tab ase-anim-settingsButton selected" type="button"><i>Animation
-                            Settings</i></button>
-                    <button class="nav-tab ase-sound-settingsButton" type="button"><i>Sound Settings</i></button>
+                    <button class="nav-tab ase-spell-settingsButton selected" type="button" title="Spell Settings">
+                        <div style="text-align:center">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                    </button>
+                    <button class="nav-tab ase-anim-settingsButton " type="button" title="Animation Settings">
+                        <div style="text-align:center">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                    </button>
+                    <button class="nav-tab ase-sound-settingsButton" type="button" title="Sound Settings">
+                        <div style="text-align:center">
+                            <i class="fas fa-volume-up"></i>
+                        </div>
+                    </button>
                 </div>
                 <div id="ase-settings-body">
-                    <div id="ase-spell-settings" class="hide">
+                    <div id="ase-spell-settings" class="show">
+                        {{#ifCondASE itemName 'includes' 'Summon'}}
+                            <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
+                            <input type="hidden" id="hdnSummonerId" value="{{effectData.summonerId}}" />
+                            <table id="summonsTable" width="100%">
+                                <tbody>
+                                    {{#each effectData.summons}}
+                                        <tr>
+                                            <td>
+                                                <label><b>Summon Type Name:</b></label>
+                                            </td>
+                                            <td>
+                                                <input type="text"
+                                                    name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.name"
+                                                    value="{{this.name}}">
+                                            </td>
+                                            <td>
+                                                <label><b>Associated Actor:</b></label>
+                                            </td>
+                                            <td> <select
+                                                    name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.actor">
+                                                    {{#select this.actor}}
+                                                        {{#each ../effectData.summonOptions as |id name|}}
+                                                            <option value="{{id}}">{{name}}</option>
+                                                        {{/each}}
+                                                    {{/select}}
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <label><b>Summon Quantity:</b></label>
+                                            </td>
+                                            <td>
+                                                <input style='width: 3em;' type="text"
+                                                    name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.qty"
+                                                    value="{{this.qty}}">
+                                            </td>
+                                        </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                            <div style="text-align:center;">
+                                <div style="margin:auto;">
+                                    <button class='addType' type="button" style="width:50%;text-align:center;"> Add Type
+                                    </button>
+                                </div>
+                                <div style="margin:auto;">
+                                    <button class='removeType' type="button" style="width:50%;text-align:center;">
+                                        <i class="fas fa-times"></i> Remove Type
+                                    </button>
+                                </div>
+                            </div>
+                        {{/ifCondASE}}
                         <table>
                             <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
                                 {{#each effectData.requiredSettings.spellOptions}}
@@ -60,7 +122,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div id="ase-anim-settings" class="show">
+                    <div id="ase-anim-settings" class="hide">
                         <table>
                             <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
                                 {{#each effectData.requiredSettings.animOptions}}

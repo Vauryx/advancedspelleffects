@@ -125,80 +125,11 @@ export class ASESettings extends FormApplication {
         let returnOBJ = {};
         //console.log("Detected item name: ", itemName);
         await this.setItemDetails(item);
-        let requiredSettings = await this.spellList[itemName].getRequiredSettings(flags.advancedspelleffects.effectOptions);
-        console.log(requiredSettings);
-        returnOBJ = {
-            requiredSettings: requiredSettings
-        }
-        /*switch (itemName) {
-            case 'Detect Magic':
-                let detectMagicWaves = `jb2a.detect_magic.circle`;
-                let detectMagicWaveColorOptions = utilFunctions.getDBOptions(detectMagicWaves);
-
-                let detectMagicAuras = `jb2a.magic_signs.circle.02.divination.intro`;
-                let detectMagicAuraColorOptions = utilFunctions.getDBOptions(detectMagicAuras);
-
-                returnOBJ = {
-                    dmWaveColors: detectMagicWaveColorOptions,
-                    dmAuraColors: detectMagicAuraColorOptions
-                };
-                break;
-            case 'Steel Wind Strike':
-                let weaponsPathMap = {
-                    "sword": "melee.01"
-                };
-                let availWeapons = Object.keys(weaponsPathMap);
-                let weaponOptions = {};
-                availWeapons.forEach((weapon) => {
-                    weaponOptions[weapon] = capitalizeFirstLetter(weapon);
-                })
-                let weaponsColors = {};
-                let colorOptions = {};
-                availWeapons.forEach(async (weapon) => {
-                    let availColors = Sequencer.Database.getPathsUnder(`jb2a.${weapon}.${weaponsPathMap[weapon]}`);
-                    weaponsColors[weapon] = availColors;
-                });
-                let currentWeapon = flags.advancedspelleffects?.effectOptions?.weapon ?? `sword`;
-                weaponsColors[currentWeapon].forEach((color) => {
-                    console.log(color);
-                    colorOptions[color] = capitalizeFirstLetter(color);
-                });
-                returnOBJ = {
-                    swsWeapons: weaponOptions,
-                    weaponColors: colorOptions
-                }
-                break;
-            case 'Witch Bolt':
-                let initialBoltAnim = 'jb2a.chain_lightning.primary';
-                let initialBoltColorOptions = utilFunctions.getDBOptions(initialBoltAnim);
-
-                let streamAnim = 'jb2a.witch_bolt';
-                let streamColorOptions = utilFunctions.getDBOptions(streamAnim);
-
-                returnOBJ = {
-                    initialBoltColors: initialBoltColorOptions,
-                    streamColors: streamColorOptions
-                }
-                break;
-        }*/
+        let requiredSettings;
         if (itemName.includes("Summon")) {
-            let magicSignsRaw = `jb2a.magic_signs.circle.02`;
-            let magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
-
-            let magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${flags.advancedspelleffects?.effectOptions?.magicSchool ?? 'abjuration'}.intro`;
-            let magicSchoolColorOptions = utilFunctions.getDBOptions(magicSchoolColorsRaw);
-
-            let effectAColorsRaw = `jb2a.eldritch_blast`;
-            let effectAColorOptions = utilFunctions.getDBOptions(effectAColorsRaw);
-
-            let effectBColorsRaw = `jb2a.energy_strands.complete`;
-            let effectBColorOptions = utilFunctions.getDBOptions(effectBColorsRaw);
-
-            let portalColorsRaw = `jb2a.portals.vertical.vortex`;
-            let portalColorOptions = utilFunctions.getDBOptions(portalColorsRaw);
-
-            let portalImpactColorsRaw = `jb2a.impact.010`;
-            let portalImpactColorOptions = utilFunctions.getDBOptions(portalImpactColorsRaw);
+            requiredSettings = await summonCreature.getRequiredSettings(flags.advancedspelleffects.effectOptions);
+            console.log(requiredSettings);
+            returnOBJ.requiredSettings = requiredSettings;
 
             let summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
             let summonOptions = {};
@@ -208,33 +139,52 @@ export class ASESettings extends FormApplication {
                 summonOptions[actor.name] = actor.id;
             });
 
-            returnOBJ = {
-                summonOptions: summonOptions,
-                summons: currentSummonTypes,
-                magicSchoolOptions: magicSchoolOptions,
-                magicSchoolColorOptions: magicSchoolColorOptions,
-                effectAColorOptions: effectAColorOptions
-            };
-            if (itemName == "Animate Dead") {
-                //currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" } };
-                //returnOBJ["effectBColorOptions"] = effectBColorOptions;
+            currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? [{ name: "", actor: "", qty: 1 }];
+            returnOBJ["itemId"] = item.id;
+            if (item.parent) {
+                returnOBJ["summonerId"] = item.parent.id;
             }
             else {
-                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? [{ name: "", actor: "", qty: 1 }];
-                returnOBJ["itemId"] = item.id;
-                if (item.parent) {
-                    returnOBJ["summonerId"] = item.parent.id;
-                }
-                else {
-                    returnOBJ["summonerId"] = "";
-                }
-                returnOBJ["portalColorOptions"] = portalColorOptions;
-                returnOBJ["portalImpactColorOptions"] = portalImpactColorOptions;
+                returnOBJ["summonerId"] = "";
             }
+
             returnOBJ.summons = currentSummonTypes;
+            returnOBJ.summonOptions = summonOptions;
             //console.log(returnOBJ);
         }
+        else {
+            requiredSettings = await this.spellList[itemName].getRequiredSettings(flags.advancedspelleffects.effectOptions);
+            console.log(requiredSettings);
+            returnOBJ.requiredSettings = requiredSettings;
+        }
+        console.log(returnOBJ);
         return returnOBJ;
+        /*switch (itemName) {
+    case 'Detect Magic':
+        let detectMagicWaves = `jb2a.detect_magic.circle`;
+        let detectMagicWaveColorOptions = utilFunctions.getDBOptions(detectMagicWaves);
+
+        let detectMagicAuras = `jb2a.magic_signs.circle.02.divination.intro`;
+        let detectMagicAuraColorOptions = utilFunctions.getDBOptions(detectMagicAuras);
+
+        returnOBJ = {
+            dmWaveColors: detectMagicWaveColorOptions,
+            dmAuraColors: detectMagicAuraColorOptions
+        };
+        break;
+    case 'Witch Bolt':
+        let initialBoltAnim = 'jb2a.chain_lightning.primary';
+        let initialBoltColorOptions = utilFunctions.getDBOptions(initialBoltAnim);
+
+        let streamAnim = 'jb2a.witch_bolt';
+        let streamColorOptions = utilFunctions.getDBOptions(streamAnim);
+
+        returnOBJ = {
+            initialBoltColors: initialBoltColorOptions,
+            streamColors: streamColorOptions
+        }
+        break;
+}*/
     }
 
     async getData() {
@@ -263,8 +213,8 @@ export class ASESettings extends FormApplication {
         const spellSettings = $("#ase-spell-settings");
         const spellSettingsButton = $(".ase-spell-settingsButton");
 
-        let currentTab = animSettingsButton;
-        let currentBody = animSettings;
+        let currentTab = spellSettingsButton;
+        let currentBody = spellSettings;
 
 
         super.activateListeners(html);
