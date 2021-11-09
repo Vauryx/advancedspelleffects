@@ -35,15 +35,15 @@ export class eldritchBlast {
         if (invocations.agonizingBlast) {
             aseEffectOptions.dmgMod = casterActor?.data?.data?.abilities?.cha?.mod ?? 0;
         }
-        
-    new MissileDialog({
-      casterId: casterToken.id,
-      numMissiles: numMissiles,
-      itemCardId: itemCardId,
-      effectOptions: aseEffectOptions,
-      item: spellItem,
-      actionType: "rsak",
-    }).render(true);
+
+        new MissileDialog({
+            casterId: casterToken.id,
+            numMissiles: numMissiles,
+            itemCardId: itemCardId,
+            effectOptions: aseEffectOptions,
+            item: spellItem,
+            actionType: "rsak",
+        }).render(true);
     }
 
     static async getRequiredSettings(currFlags) {
@@ -61,7 +61,7 @@ export class eldritchBlast {
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.invocations.agonizingBlast',
             flagName: 'invocations.agonizingBlast',
-            flagValue: currFlags.invocations.agonizingBlast,
+            flagValue: currFlags.invocations?.agonizingBlast ?? false,
         });
 
         animOptions.push({
