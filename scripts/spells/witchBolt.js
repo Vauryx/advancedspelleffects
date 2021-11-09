@@ -17,7 +17,7 @@ export class witchBolt {
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
         }
-       
+
         new Sequence("Advanced Spell Effects")
             .effect()
             .file(boltFile)
@@ -57,9 +57,12 @@ export class witchBolt {
                                     "value": "Send lightning along the arc."
                                 }
                             },
-                            "flags": {"advancedspelleffects": {
-                                "enableASE": true,
-                                'effectOptions': effectOptions}}
+                            "flags": {
+                                "advancedspelleffects": {
+                                    "enableASE": true,
+                                    'effectOptions': effectOptions
+                                }
+                            }
                         }
                     }
                 }
@@ -89,7 +92,7 @@ export class witchBolt {
         let damageRoll = await new Roll(`1d12`).evaluate({ async: true });
         let itemData = midiData.item.data;
         itemData.data.components.concentration = false;
-        if(game.modules.get("midi-qol")?.active) {   
+        if (game.modules.get("midi-qol")?.active) {
             //console.log(damageRoll);
             new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, "lightning", target ? [target] : [], damageRoll, { flavor: `Witch Bolt - Damage Roll (1d12 Lightning)`, itemCardId: "new", itemData: itemData });
         }
@@ -256,13 +259,120 @@ export class witchBolt {
             if (!concOrigin || concOrigin?.length < 4) return false;
             let itemID = concOrigin[5] ?? concOrigin[3];
             let witchBoltItem = casterActor.items.get(itemID);
-            
+
             //console.log(witchBoltItem);
             let confirm = await warpgate.buttonDialog(confirmData, 'row');
             if (confirm) {
-               await witchBolt.activateBolt({actor: casterActor, item: witchBoltItem, tokenId: caster.id});
+                await witchBolt.activateBolt({ actor: casterActor, item: witchBoltItem, tokenId: caster.id });
             }
 
         }
     }
+
+    static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
+
+        const initialBoltAnim = 'jb2a.chain_lightning.primary';
+        const initialBoltColorOptions = utilFunctions.getDBOptions(initialBoltAnim);
+
+        const streamAnim = 'jb2a.witch_bolt';
+        const streamColorOptions = utilFunctions.getDBOptions(streamAnim);
+
+        let animOptions = [];
+        let soundOptions = [];
+        let spellOptions = [];
+
+        animOptions.push({
+            label: 'Initial Bolt Color:',
+            type: 'dropdown',
+            options: initialBoltColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.initialBoltColor',
+            flagName: 'initialBoltColor',
+            flagValue: currFlags.initialBoltColor ?? 'blue',
+        });
+        soundOptions.push({
+            label: 'Initial Bolt Sound:',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.initialBoltSound',
+            flagName: 'initialBoltSound',
+            flagValue: currFlags.initialBoltSound ?? '',
+        });
+        soundOptions.push({
+            label: 'Initial Bolt Sound Delay:',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.initialBoltSoundDelay',
+            flagName: 'initialBoltSoundDelay',
+            flagValue: currFlags.initialBoltSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: 'Initial Bolt Volume:',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.initialBoltVolume',
+            flagName: 'initialBoltVolume',
+            flagValue: currFlags.initialBoltVolume ?? 1,
+        });
+
+        animOptions.push({
+            label: 'Continuous Stream Color:',
+            type: 'dropdown',
+            options: streamColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.streamColor',
+            flagName: 'streamColor',
+            flagValue: currFlags.streamColor ?? 'blue',
+        });
+        soundOptions.push({
+            label: 'Continuous Stream Sound(Caster):',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.streamCasterSound',
+            flagName: 'streamCasterSound',
+            flagValue: currFlags.streamCasterSound ?? '',
+        });
+        soundOptions.push({
+            label: 'Continuous Stream Sound Delay(Caster):',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.streamCasterSoundDelay',
+            flagName: 'streamCasterSoundDelay',
+            flagValue: currFlags.streamCasterSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: 'Continuous Stream Volume(Caster):',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.streamCasterVolume',
+            flagName: 'streamCasterVolume',
+            flagValue: currFlags.streamCasterVolume ?? 1,
+        });
+
+        soundOptions.push({
+            label: 'Continuous Stream Sound(Target):',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.streamTargetSound',
+            flagName: 'streamTargetSound',
+            flagValue: currFlags.streamTargetSound ?? '',
+        });
+        soundOptions.push({
+            label: 'Continuous Stream Sound Delay(Target):',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.streamTargetSoundDelay',
+            flagName: 'streamTargetSoundDelay',
+            flagValue: currFlags.streamTargetSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: 'Continuous Stream Volume(Target):',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.streamTargetVolume',
+            flagName: 'streamTargetVolume',
+            flagValue: currFlags.streamTargetVolume ?? 1,
+        });
+        //TEMP WHILE WITCHBOLT SOUND IS UNDER DEV
+        soundOptions = [];
+
+        return {
+            animOptions: animOptions,
+            spellOptions: spellOptions,
+            soundOptions: soundOptions,
+        }
+
+    }
+
+
 }

@@ -1,4 +1,5 @@
-import {concentrationHandler} from "../concentrationHandler.js"
+import { concentrationHandler } from "../concentrationHandler.js";
+import * as utilFunctions from "../utilityFunctions.js";
 //Contributed by Wasp - The Sequencer Guy
 export class vampiricTouch {
     static async cast(midiData) {
@@ -18,11 +19,11 @@ export class vampiricTouch {
 
         const impactSound = effectOptions.vtImpactSound;
         const impactSoundDelay = Number(effectOptions.vtImpactSoundDelay) ?? 0;
-        const impactSoundVolume = effectOptions.vtImpactVolume ?? 1;
+        const impactVolume = effectOptions.vtImpactVolume ?? 1;
 
         const siphonSound = effectOptions.vtSiphonSound;
         const siphonSoundDelay = Number(effectOptions.vtSiphonSoundDelay) ?? 0;
-        const siphonSoundVolume = effectOptions.vtSiphonVolume ?? 1;
+        const siphonVolume = effectOptions.vtSiphonVolume ?? 1;
 
 
         const updates = {
@@ -45,12 +46,21 @@ export class vampiricTouch {
                                 "value": "The touch of your shadow-wreathed hand can siphon force from others to heal your wounds."
                             }
                         },
-                        "flags": {"advancedspelleffects": {
-                            "enableASE": true,
-                            'effectOptions': {
-                                'vtStrandColor': effectOptions.vtStrandColor,
-                                'vtImpactColor': effectOptions.vtImpactColor
-                            }}}
+                        "flags": {
+                            "advancedspelleffects": {
+                                "enableASE": true,
+                                'effectOptions': {
+                                    'vtStrandColor': effectOptions.vtStrandColor,
+                                    'vtImpactColor': effectOptions.vtImpactColor,
+                                    'vtSiphonSound': siphonSound,
+                                    'vtSiphonSoundDelay': siphonSoundDelay,
+                                    'vtSiphonVolume': siphonVolume,
+                                    'vtImpactSound': impactSound,
+                                    'vtImpactSoundDelay': impactSoundDelay,
+                                    'vtImpactVolume': impactVolume,
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -64,17 +74,17 @@ export class vampiricTouch {
                     "data.attributes.hp.value": Math.min(tactor.data.data.attributes.hp.max, updatedHP)
                 });
             }
-            else{
+            else {
                 await concentrationHandler.addConcentration(tactor, midiData.item);
             }
         }
-        
+
         new Sequence('Advanced Spell Effects')
             .sound()
             .file(impactSound)
             .delay(impactSoundDelay + 100)
-            .volume(impactSoundVolume)
-            .playIf(impactSound != "") 
+            .volume(impactVolume)
+            .playIf(impactSound != "")
             .effect()
             .file(impactAnim)
             .atLocation(target)
@@ -84,8 +94,8 @@ export class vampiricTouch {
             .sound()
             .file(siphonSound)
             .delay(siphonSoundDelay)
-            .volume(siphonSoundVolume)
-            .playIf(siphonSound != "")
+            .volume(siphonVolume)
+            .playIf(siphonSound != "" && !missed)
             .effect()
             .file(strandAnim)
             .atLocation(target)
@@ -106,7 +116,7 @@ export class vampiricTouch {
             .persist()
             .name(`${tokenD.id}-vampiric-touch`)
             .scaleIn(0, damageTotal * 200, { ease: "easeInOutBack" })
-            .scaleOut(0,1000, { ease: "easeInOutBack" })
+            .scaleOut(0, 1000, { ease: "easeInOutBack" })
             .fadeOut(1000)
             //.scale(0.4)
             .play()
@@ -135,6 +145,12 @@ export class vampiricTouch {
         let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
         let strandAnim = `jb2a.energy_strands.range.standard.${effectOptions.vtStrandColor}`;
         let impactAnim = `jb2a.impact.004.${effectOptions.vtImpactColor}`;
+        const siphonSound = effectOptions.vtSiphonSound;
+        const siphonSoundDelay = Number(effectOptions.vtSiphonSoundDelay) ?? 0;
+        const siphonVolume = effectOptions.vtSiphonVolume ?? 1;
+        const impactSound = effectOptions.vtImpactSound;
+        const impactSoundDelay = Number(effectOptions.vtImpactSoundDelay) ?? 0;
+        const impactVolume = effectOptions.vtImpactVolume ?? 1;
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
             damageTotal = midiData.damageRoll?.total ?? 12;
@@ -146,12 +162,22 @@ export class vampiricTouch {
             }
         }
         new Sequence('Advanced Spell Effects')
+            .sound()
+            .file(impactSound)
+            .delay(impactSoundDelay + 100)
+            .volume(impactVolume)
+            .playIf(impactSound != "")
             .effect()
             .file(impactAnim)
             .atLocation(target)
             .scaleToObject()
             .missed(missed)
             .delay(100)
+            .sound()
+            .file(siphonSound)
+            .delay(siphonSoundDelay)
+            .volume(siphonVolume)
+            .playIf(siphonSound != "" && !missed)
             .effect()
             .file(strandAnim)
             .atLocation(target)
@@ -160,5 +186,134 @@ export class vampiricTouch {
             .repeats(Math.max(1, Math.floor(damageTotal)), 100, 200)
             .randomizeMirrorY()
             .play()
+    }
+
+    static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
+        //console.log(currFlags);
+        const vampiricTouchCasterAnim = 'jb2a.energy_strands.overlay';
+        const vampiricTouchStrandAnim = `jb2a.energy_strands.range.standard`;
+        const vampiricTouchImpactAnim = `jb2a.impact.004`;
+
+        const vampiricTouchCasterColorOptions = utilFunctions.getDBOptions(vampiricTouchCasterAnim);
+        const vampiricTouchStrandColorOptions = utilFunctions.getDBOptions(vampiricTouchStrandAnim);
+        const vampiricTouchImpactColorOptions = utilFunctions.getDBOptions(vampiricTouchImpactAnim);
+
+        let animOptions = [];
+        let soundOptions = [];
+
+        animOptions.push({
+            label: 'Caster Effect:',
+            type: 'dropdown',
+            options: vampiricTouchCasterColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.vtCasterColor',
+            flagName: 'vtCasterColor',
+            flagValue: currFlags.vtCasterColor ?? '',
+        });
+
+        soundOptions.push({
+            label: 'Caster Sound:',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtCasterSound',
+            flagName: 'vtCasterSound',
+            flagValue: currFlags.vtCasterSound ?? '',
+        });
+
+        soundOptions.push({
+            label: 'Caster Sound Delay:',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtCasterSoundDelay',
+            flagName: 'vtCasterSoundDelay',
+            flagValue: currFlags.vtCasterSoundDelay ?? '',
+        });
+
+        soundOptions.push({
+            label: 'Caster Sound Volume:',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtCasterVolume',
+            flagName: 'vtCasterVolume',
+            flagValue: currFlags.vtCasterVolume ?? '',
+            min: 0,
+            max: 1,
+            step: 0.01
+        });
+
+        animOptions.push({
+            label: 'Siphon Effect:',
+            type: 'dropdown',
+            options: vampiricTouchStrandColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.vtStrandColor',
+            flagName: 'vtStrandColor',
+            flagValue: currFlags.vtStrandColor ?? '',
+        });
+
+        soundOptions.push({
+            label: 'Siphon Sound:',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtSiphonSound',
+            flagName: 'vtSiphonSound',
+            flagValue: currFlags.vtSiphonSound ?? '',
+        });
+
+        soundOptions.push({
+            label: 'Siphon Sound Delay:',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtSiphonSoundDelay',
+            flagName: 'vtSiphonSoundDelay',
+            flagValue: currFlags.vtSiphonSoundDelay ?? '',
+        });
+
+        soundOptions.push({
+            label: 'Siphon Sound Volume:',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtSiphonVolume',
+            flagName: 'vtSiphonVolume',
+            flagValue: currFlags.vtSiphonVolume ?? '',
+            min: 0,
+            max: 1,
+            step: 0.01
+        });
+
+        animOptions.push({
+            label: 'Impact Effect:',
+            type: 'dropdown',
+            options: vampiricTouchImpactColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.vtImpactColor',
+            flagName: 'vtImpactColor',
+            flagValue: currFlags.vtImpactColor ?? '',
+        });
+
+        soundOptions.push({
+            label: 'Impact Sound:',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtImpactSound',
+            flagName: 'vtImpactSound',
+            flagValue: currFlags.vtImpactSound ?? '',
+        });
+
+        soundOptions.push({
+            label: 'Impact Sound Delay:',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtImpactSoundDelay',
+            flagName: 'vtImpactSoundDelay',
+            flagValue: currFlags.vtImpactSoundDelay ?? '',
+        });
+
+        soundOptions.push({
+            label: 'Impact Sound Volume:',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtImpactVolume',
+            flagName: 'vtImpactVolume',
+            flagValue: currFlags.vtImpactVolume ?? '',
+            min: 0,
+            max: 1,
+            step: 0.01
+        });
+
+        return {
+            animOptions: animOptions,
+            soundOptions: soundOptions
+        }
+
     }
 }

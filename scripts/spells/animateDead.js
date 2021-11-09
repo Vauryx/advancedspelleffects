@@ -34,20 +34,20 @@ export class animateDead {
             animateDeadItems.forEach(async function (item) {
                 let aseSettings = item.getFlag("advancedspelleffects", "effectOptions");
                 //console.log(aseSettings);
-                
+
                 let portalAnimIntro = `jb2a.magic_signs.circle.02.${aseSettings.magicSchool}.intro.${aseSettings.magicSchoolColor}`;
                 let portalAnimLoop = `jb2a.magic_signs.circle.02.${aseSettings.magicSchool}.loop.${aseSettings.magicSchoolColor}`;
                 let portalAnimOutro = `jb2a.magic_signs.circle.02.${aseSettings.magicSchool}.outro.${aseSettings.magicSchoolColor}`;
                 let effectAAnim = `jb2a.eldritch_blast.${aseSettings.effectAColor}.05ft`;
                 let effectBAnim = `jb2a.energy_strands.complete.${aseSettings.effectBColor}.01`;
 
-                if(!assetDBPaths)
-                //Add animation to assetDBPaths if it is not already in the list
-                if (!assetDBPaths.includes(portalAnimIntro)) assetDBPaths.push(portalAnimIntro);
-                if(!assetDBPaths.includes(portalAnimLoop)) assetDBPaths.push(portalAnimLoop);
-                if(!assetDBPaths.includes(portalAnimOutro)) assetDBPaths.push(portalAnimOutro);
-                if(!assetDBPaths.includes(effectAAnim)) assetDBPaths.push(effectAAnim);
-                if(!assetDBPaths.includes(effectBAnim)) assetDBPaths.push(effectBAnim);
+                if (!assetDBPaths)
+                    //Add animation to assetDBPaths if it is not already in the list
+                    if (!assetDBPaths.includes(portalAnimIntro)) assetDBPaths.push(portalAnimIntro);
+                if (!assetDBPaths.includes(portalAnimLoop)) assetDBPaths.push(portalAnimLoop);
+                if (!assetDBPaths.includes(portalAnimOutro)) assetDBPaths.push(portalAnimOutro);
+                if (!assetDBPaths.includes(effectAAnim)) assetDBPaths.push(effectAAnim);
+                if (!assetDBPaths.includes(effectBAnim)) assetDBPaths.push(effectBAnim);
             });
         }
         //console.log('DB Paths about to be preloaded...', assetDBPaths);
@@ -76,4 +76,180 @@ export class animateDead {
         new animateDeadDialog(corpses, { raiseLimit: raiseLimit, effectSettings: aseSettings }).render(true);
 
     }
+
+    static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
+        const magicSignsRaw = `jb2a.magic_signs.circle.02`;
+        const magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
+
+        const magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${currFlags.advancedspelleffects?.effectOptions?.magicSchool ?? 'abjuration'}.intro`;
+        const magicSchoolColorOptions = utilFunctions.getDBOptions(magicSchoolColorsRaw);
+
+        const effectAColorsRaw = `jb2a.eldritch_blast`;
+        const effectAColorOptions = utilFunctions.getDBOptions(effectAColorsRaw);
+
+        const effectBColorsRaw = `jb2a.energy_strands.complete`;
+        const effectBColorOptions = utilFunctions.getDBOptions(effectBColorsRaw);
+
+        const portalColorsRaw = `jb2a.portals.vertical.vortex`;
+        const portalColorOptions = utilFunctions.getDBOptions(portalColorsRaw);
+
+        const portalImpactColorsRaw = `jb2a.impact.010`;
+        const portalImpactColorOptions = utilFunctions.getDBOptions(portalImpactColorsRaw);
+        const summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
+        let summonOptions = {};
+        let currentSummonTypes = {};
+        summonActorsList.forEach((actor) => {
+            summonOptions[actor.id] = actor.name;
+        });
+        currentSummonTypes = currFlags.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" } };
+
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+        spellOptions.push({
+            label: 'Associated Zombie Actor:',
+            type: 'dropdown',
+            options: summonOptions,
+            name: 'flags.advancedspelleffects.effectOptions.summons.zombie.actor',
+            flagName: 'summons.zombie.actor',
+            flagValue: currFlags.summons?.zombie?.actor ?? '',
+        });
+        spellOptions.push({
+            label: 'Associated Skeleton Actor:',
+            type: 'dropdown',
+            options: summonOptions,
+            name: 'flags.advancedspelleffects.effectOptions.summons.skeleton.actor',
+            flagName: 'summons.skeleton.actor',
+            flagValue: currFlags.summons?.skeleton?.actor ?? '',
+        });
+
+        animOptions.push({
+            label: 'Magic School:',
+            type: 'dropdown',
+            options: magicSchoolOptions,
+            name: 'flags.advancedspelleffects.effectOptions.magicSchool',
+            flagName: 'magicSchool',
+            flagValue: currFlags.magicSchool ?? 'abjuration',
+        });
+        animOptions.push({
+            label: 'Magic School Color:',
+            type: 'dropdown',
+            options: magicSchoolColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.magicSchoolColor',
+            flagName: 'magicSchoolColor',
+            flagValue: currFlags.magicSchoolColor ?? 'blue',
+        });
+        soundOptions.push({
+            label: 'Magic School Intro Sound:',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.magicSchoolSound',
+            flagName: 'magicSchoolSound',
+            flagValue: currFlags.magicSchoolSound ?? '',
+        });
+        soundOptions.push({
+            label: 'Magic School Intro Sound Delay:',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.magicSchoolSoundDelay',
+            flagName: 'magicSchoolSoundDelay',
+            flagValue: currFlags.magicSchoolSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: 'Magic School Intro Sound Volume:',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.magicSchoolVolume',
+            flagName: 'magicSchoolVolume',
+            flagValue: currFlags.magicSchoolVolume ?? 1,
+        });
+        soundOptions.push({
+            label: 'Magic School Outro Sound:',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.magicSchoolSoundOutro',
+            flagName: 'magicSchoolSoundOutro',
+            flagValue: currFlags.magicSchoolSoundOutro ?? '',
+        });
+        soundOptions.push({
+            label: 'Magic School Outro Sound Delay:',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.magicSchoolSoundDelayOutro',
+            flagName: 'magicSchoolSoundDelayOutro',
+            flagValue: currFlags.magicSchoolSoundDelayOutro ?? 0,
+        });
+        soundOptions.push({
+            label: 'Magic School Outro Sound Volume:',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.magicSchoolVolumeOutro',
+            flagName: 'magicSchoolVolumeOutro',
+            flagValue: currFlags.magicSchoolVolumeOutro ?? 1,
+        });
+
+        animOptions.push({
+            label: 'Effect A Color:',
+            type: 'dropdown',
+            options: effectAColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.effectAColor',
+            flagName: 'effectAColor',
+            flagValue: currFlags.effectAColor ?? 'blue',
+        });
+        soundOptions.push({
+            label: 'Effect A Sound:',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.effectASound',
+            flagName: 'effectASound',
+            flagValue: currFlags.effectASound ?? '',
+        });
+        soundOptions.push({
+            label: 'Effect A Sound Delay:',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.effectASoundDelay',
+            flagName: 'effectASoundDelay',
+            flagValue: currFlags.effectASoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: 'Effect A Sound Volume:',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.effectASoundVolume',
+            flagName: 'effectASoundVolume',
+            flagValue: currFlags.effectASoundVolume ?? 1,
+        });
+
+        animOptions.push({
+            label: 'Effect B Color:',
+            type: 'dropdown',
+            options: effectBColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.effectBColor',
+            flagName: 'effectBColor',
+            flagValue: currFlags.effectBColor ?? 'blue',
+        });
+        soundOptions.push({
+            label: 'Effect B Sound:',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.effectBSound',
+            flagName: 'effectBSound',
+            flagValue: currFlags.effectBSound ?? '',
+        });
+        soundOptions.push({
+            label: 'Effect B Sound Delay:',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.effectBSoundDelay',
+            flagName: 'effectBSoundDelay',
+            flagValue: currFlags.effectBSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: 'Effect B Sound Volume:',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.effectBSoundVolume',
+            flagName: 'effectBSoundVolume',
+            flagValue: currFlags.effectBSoundVolume ?? 1,
+        });
+
+        return {
+            animOptions: animOptions,
+            spellOptions: spellOptions,
+            soundOptions: soundOptions,
+        }
+
+    }
+
 }
