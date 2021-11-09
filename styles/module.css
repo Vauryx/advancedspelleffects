@@ -29,6 +29,7 @@
   border-radius: 0px;
   transition: all 0.35s ease;
   font-size: 16px;
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.3);
 }
 #ase-item-settings .window-content .ase-settings-tabs .tab-mini-text {
   font-family: "Trebuchet MS", "Helvetica Neue", "Arial";
@@ -39,10 +40,9 @@
   font-size: 25px;
 }
 #ase-item-settings .window-content .ase-settings-tabs button:hover {
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   -moz-box-shadow: 0 0 10px #000000;
   -webkit-box-shadow: 0 0 10px #000000;
-  box-shadow: 0 0 10px #000000;
+  box-shadow: 0 0 0px #000000;
 }
 
 #ase-item-settings .window-content .ase-settings-tabs .nav-tab {

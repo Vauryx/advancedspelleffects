@@ -128,7 +128,7 @@ export class ASESettings extends FormApplication {
         console.log("Item name: ", itemName);
         if (itemName.includes("Summon")) {
             requiredSettings = await summonCreature.getRequiredSettings(flags.advancedspelleffects.effectOptions);
-            console.log(requiredSettings);
+            //console.log(requiredSettings);
             returnOBJ.requiredSettings = requiredSettings;
 
             let summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
@@ -154,37 +154,11 @@ export class ASESettings extends FormApplication {
         }
         else {
             requiredSettings = await this.spellList[itemName].getRequiredSettings(flags.advancedspelleffects.effectOptions);
-            console.log(requiredSettings);
+            //console.log(requiredSettings);
             returnOBJ.requiredSettings = requiredSettings;
         }
-        console.log(returnOBJ);
+        //console.log(returnOBJ);
         return returnOBJ;
-        /*switch (itemName) {
-    case 'Detect Magic':
-        let detectMagicWaves = `jb2a.detect_magic.circle`;
-        let detectMagicWaveColorOptions = utilFunctions.getDBOptions(detectMagicWaves);
-
-        let detectMagicAuras = `jb2a.magic_signs.circle.02.divination.intro`;
-        let detectMagicAuraColorOptions = utilFunctions.getDBOptions(detectMagicAuras);
-
-        returnOBJ = {
-            dmWaveColors: detectMagicWaveColorOptions,
-            dmAuraColors: detectMagicAuraColorOptions
-        };
-        break;
-    case 'Witch Bolt':
-        let initialBoltAnim = 'jb2a.chain_lightning.primary';
-        let initialBoltColorOptions = utilFunctions.getDBOptions(initialBoltAnim);
-
-        let streamAnim = 'jb2a.witch_bolt';
-        let streamColorOptions = utilFunctions.getDBOptions(streamAnim);
-
-        returnOBJ = {
-            initialBoltColors: initialBoltColorOptions,
-            streamColors: streamColorOptions
-        }
-        break;
-}*/
     }
 
     async getData() {

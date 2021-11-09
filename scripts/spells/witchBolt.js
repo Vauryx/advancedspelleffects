@@ -363,7 +363,8 @@ export class witchBolt {
             flagName: 'streamTargetVolume',
             flagValue: currFlags.streamTargetVolume ?? 1,
         });
-
+        //TEMP WHILE WITCHBOLT SOUND IS UNDER DEV
+        soundOptions = [];
 
         return {
             animOptions: animOptions,
