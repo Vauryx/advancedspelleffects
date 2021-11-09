@@ -51,10 +51,19 @@ export class fogCloud {
             drawOutline: true,
             interval: 1
         }
+        const sound = aseFlags?.fogCloudSound ?? "";
+        const soundDelay = Number(aseFlags?.fogCloudSoundDelay) ?? 0;
+        const volume = aseFlags?.fogCloudVolume ?? 1;
+
+        const soundOptions = {
+            sound: sound,
+            volume: volume,
+            delay: soundDelay
+        };
         const displayCrosshairs = async (crosshairs) => {
             new Sequence("Advanced Spell Effects")
                 .effect()
-                .file("jb2a.darkness.black")
+                .file("jb2a.fog_cloud.1.white")
                 .attachTo(crosshairs)
                 .persist()
                 .scaleToObject()
@@ -64,9 +73,9 @@ export class fogCloud {
         }
         let fogCloudTemplate = await warpgate.crosshairs.show(crosshairsConfig);
 
-        await placeCloudAsTile(fogCloudTemplate, casterActor.id, itemLevel);
+        await placeCloudAsTile(fogCloudTemplate, casterActor.id, itemLevel, soundOptions);
 
-        async function placeCloudAsTile(template, casterId, spellLevel) {
+        async function placeCloudAsTile(template, casterId, spellLevel, soundOptions) {
             let templateData = template;
             let tileWidth;
             let tileHeight;
@@ -107,7 +116,13 @@ export class fogCloud {
             }]
             let createdTiles = await aseSocket.executeAsGM("placeTiles", data);
             let tileId = createdTiles[0].id ?? createdTiles[0]._id;
-
+            new Sequence("Advanced Spell Effects")
+                .sound()
+                .file(soundOptions.sound)
+                .delay(soundOptions.delay)
+                .volume(soundOptions.volume)
+                .playIf(soundOptions.sound !== "")
+                .play();
             for (let i = 0; i < wall_number; i++) {
                 let x = placedX + outerCircleRadius * Math.cos(i * wall_angles);
                 let y = placedY + outerCircleRadius * Math.sin(i * wall_angles);
@@ -132,6 +147,47 @@ export class fogCloud {
 
             await aseSocket.executeAsGM("placeWalls", walls);
         }
+    }
+    static async getRequiredSettings(currFlags) {
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+        animOptions.push({
+            label: 'Number of Walls(per level): ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.wallNumber',
+            flagName: 'wallNumber',
+            flagValue: currFlags.wallNumber ?? 12,
+        });
+        soundOptions.push({
+            label: "Fog Cloud Sound:",
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.fogCloudSound',
+            flagName: 'fogCloudSound',
+            flagValue: currFlags.fogCloudSound ?? '',
+        });
+        soundOptions.push({
+            label: "Fog Cloud Sound Delay:",
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.fogCloudSoundDelay',
+            flagName: 'fogCloudSoundDelay',
+            flagValue: currFlags.fogCloudSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: "Fog Cloud Sound Volume:",
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.fogCloudVolume',
+            flagName: 'fogCloudVolume',
+            flagValue: currFlags.fogCloudVolume ?? 1,
+        });
+
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions
+        }
+
     }
 }
 

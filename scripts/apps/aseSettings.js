@@ -1,4 +1,18 @@
 import * as utilFunctions from "../utilityFunctions.js";
+// Importing spells
+import { animateDead } from "../spells/animateDead.js";
+import { darkness } from "../spells/darkness.js";
+import { detectMagic } from "../spells/detectMagic.js";
+import { callLightning } from "../spells/callLightning.js";
+import { fogCloud } from "../spells/fogCloud.js";
+import { spiritualWeapon } from "../spells/spiritualWeapon.js";
+import { steelWindStrike } from "../spells/steelWindStrike.js";
+import { thunderStep } from "../spells/thunderStep.js";
+import { summonCreature } from "../spells/summonCreature.js";
+import { witchBolt } from "../spells/witchBolt.js";
+import { magicMissile } from "../spells/magicMissile.js";
+import { scorchingRay } from "../spells/scorchingRay.js";
+import { eldritchBlast } from "../spells/eldritchBlast.js";
 import { vampiricTouch } from "../spells/vampiricTouch.js";
 
 
@@ -10,6 +24,22 @@ export class ASESettings extends FormApplication {
             if (!this.flags.effectOptions) {
                 this.flags.effectOptions = {};
             }
+        }
+        this.spellList = {
+            "Animate Dead": animateDead,
+            "Call Lightning": callLightning,
+            "Detect Magic": detectMagic,
+            "Fog Cloud": fogCloud,
+            "Darkness": darkness,
+            "Magic Missile": magicMissile,
+            "Spiritual Weapon": spiritualWeapon,
+            "Steel Wind Strike": steelWindStrike,
+            "Thunder Step": thunderStep,
+            "Thunder Step": summonCreature,
+            "Witch Bolt": witchBolt,
+            "Scorching Ray": scorchingRay,
+            "Eldritch Blast": eldritchBlast,
+            "Vampiric Touch": vampiricTouch
         }
     }
 
@@ -90,16 +120,17 @@ export class ASESettings extends FormApplication {
 
     async setEffectData(item) {
         //console.log(item);
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
         let flags = this.object.data.flags;
         let itemName = item.name;
         let returnOBJ = {};
         //console.log("Detected item name: ", itemName);
         await this.setItemDetails(item);
-        switch (itemName) {
+        let requiredSettings = await this.spellList[itemName].getRequiredSettings(flags.advancedspelleffects.effectOptions);
+        console.log(requiredSettings);
+        returnOBJ = {
+            requiredSettings: requiredSettings
+        }
+        /*switch (itemName) {
             case 'Detect Magic':
                 let detectMagicWaves = `jb2a.detect_magic.circle`;
                 let detectMagicWaveColorOptions = utilFunctions.getDBOptions(detectMagicWaves);
@@ -115,12 +146,6 @@ export class ASESettings extends FormApplication {
             case 'Steel Wind Strike':
                 let weaponsPathMap = {
                     "sword": "melee.01"
-                    /*,
-                                        "mace": "melee",
-                                        "greataxe": "melee",
-                                        "greatsword": "melee",
-                                        "handaxe": "melee",
-                                        "spear": "melee.01"*/
                 };
                 let availWeapons = Object.keys(weaponsPathMap);
                 let weaponOptions = {};
@@ -155,49 +180,8 @@ export class ASESettings extends FormApplication {
                     streamColors: streamColorOptions
                 }
                 break;
-            case 'Vampiric Touch':
-                let requiredSettings = await vampiricTouch.getRequiredSettings();
-                let animSettings = requiredSettings.animOptions;
-                requiredSettings.currentOptions = flags.advancedspelleffects.effectOptions;
-                //iterate over requiredSettings.animOptions and replace every flagName with the current value at that flag
-                for (let i = 0; i < animSettings.length; i++) {
-                    let animOption = animSettings[i];
-                    let flagName = animOption.flagName;
-                    let flagValue = flags.advancedspelleffects.effectOptions[flagName];
-                    requiredSettings.animOptions[i].flagName = flagValue;
-                }
-
-                console.log(requiredSettings);
-                returnOBJ = {
-                    vtRequiredSettings: requiredSettings
-                }
-                break;
-        }
-        if (itemName == 'Scorching Ray' || itemName == 'Magic Missile' || itemName == 'Eldritch Blast') {
-            let baseAnim;
-            let targetMarkerAnim;
-            switch (itemName) {
-                case 'Scorching Ray':
-                    baseAnim = 'jb2a.scorching_ray.02';
-                    targetMarkerAnim = 'jb2a.markers.01';
-                    break;
-                case 'Magic Missile':
-                    baseAnim = 'jb2a.magic_missile';
-                    targetMarkerAnim = 'jb2a.moonbeam.01.loop';
-                    break;
-                case 'Eldritch Blast':
-                    baseAnim = 'jb2a.eldritch_blast';
-                    targetMarkerAnim = 'jb2a.markers.02';
-                    break;
-            }
-            let missileColorOptions = utilFunctions.getDBOptions(baseAnim);
-            let targetMarkerColorOptions = utilFunctions.getDBOptions(targetMarkerAnim);
-            returnOBJ = {
-                missileColors: missileColorOptions,
-                targetMarkerColors: targetMarkerColorOptions
-            }
-            console.log(returnOBJ);
-        } else if (itemName.includes("Summon") || itemName == "Animate Dead") {
+        }*/
+        if (itemName.includes("Summon")) {
             let magicSignsRaw = `jb2a.magic_signs.circle.02`;
             let magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
 
@@ -232,8 +216,8 @@ export class ASESettings extends FormApplication {
                 effectAColorOptions: effectAColorOptions
             };
             if (itemName == "Animate Dead") {
-                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" } };
-                returnOBJ["effectBColorOptions"] = effectBColorOptions;
+                //currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" } };
+                //returnOBJ["effectBColorOptions"] = effectBColorOptions;
             }
             else {
                 currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? [{ name: "", actor: "", qty: 1 }];
@@ -276,6 +260,8 @@ export class ASESettings extends FormApplication {
         const animSettingsButton = $(".ase-anim-settingsButton");
         const soundSettings = $("#ase-sound-settings");
         const soundSettingsButton = $(".ase-sound-settingsButton");
+        const spellSettings = $("#ase-spell-settings");
+        const spellSettingsButton = $(".ase-spell-settingsButton");
 
         let currentTab = animSettingsButton;
         let currentBody = animSettings;
@@ -295,16 +281,22 @@ export class ASESettings extends FormApplication {
                 soundSettings.toggleClass("hide");
                 currentBody = soundSettings;
                 currentTab = soundSettingsButton;
+            } else if ($(this).hasClass("ase-spell-settingsButton")) {
+                //console.log("spell");
+                spellSettings.toggleClass("hide");
+                currentBody = spellSettings;
+                currentTab = spellSettingsButton;
             }
             currentTab.toggleClass("selected");
             body.height("auto");
+            body.width("auto");
         });
 
         html.find('.ase-enable-checkbox input[type="checkbox"]').click(evt => {
             this.submit({ preventClose: true }).then(() => this.render());
         });
         html.find('.ase-enable-checkbox select').change(evt => {
-            this.submit({ preventClose: true }).then(() => this.render());
+            //this.submit({ preventClose: true }).then(() => this.render());
         });
         //console.log(this);
         html.find('.addType').click(this._addSummonType.bind(this));
@@ -372,9 +364,9 @@ export class ASESettings extends FormApplication {
     async _updateObject(event, formData) {
         //console.log(formData);
         formData = expandObject(formData);
-        console.log(formData);
+        //console.log(formData);
         if (!formData.changes) formData.changes = [];
-        console.log(formData.changes);
+        //console.log(formData.changes);
         formData.changes = Object.values(formData.changes);
         for (let c of formData.changes) {
             //@ts-ignore

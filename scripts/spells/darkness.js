@@ -116,7 +116,7 @@ export class darkness {
                 .delay(soundOptions.delay)
                 .volume(soundOptions.volume)
                 .playIf(soundOptions.sound !== "")
-            .play();
+                .play();
             //console.log("ASE DARKNESS: Darknes Tile Created: ",tileD);
             let wall_number = 12;
             let wall_angles = 2 * Math.PI / wall_number
@@ -145,6 +145,41 @@ export class darkness {
 
             await aseSocket.executeAsGM("placeWalls", walls);
         }
+    }
+
+    static async getRequiredSettings(currFlags) {
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+        soundOptions.push({
+            label: "Darkness Sound:",
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.darknessSound',
+            flagName: 'darknessSound',
+            flagValue: currFlags.darknessSound ?? '',
+        });
+        soundOptions.push({
+            label: "Darkness Sound Delay:",
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.darknessSoundDelay',
+            flagName: 'darknessSoundDelay',
+            flagValue: currFlags.darknessSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: "Darkness Sound Volume:",
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.darknessVolume',
+            flagName: 'darknessVolume',
+            flagValue: currFlags.darknessVolume ?? 1,
+        });
+
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions
+        }
+
     }
 
 }

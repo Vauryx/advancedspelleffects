@@ -6,20 +6,23 @@
                 <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
                     flags.advancedspelleffects.enableASE}}>
             </div>
+        </div>
+        <div class="ase-enabled-content">
             {{#if flags.advancedspelleffects.enableASE}}
                 <div class="form-group">
                     <p>ASE Settings: <b>{{itemName}}</b></p>
                 </div>
                 <div class="ase-settings-tabs">
-                    <button class="nav-tab ase-anim-settingsButton selected" type="button">Animation Settings</button>
-                    <button class="nav-tab ase-sound-settingsButton" type="button">Sound Settings</button>
+                    <button class="nav-tab ase-spell-settingsButton" type="button"><i>Spell Settings</i></button>
+                    <button class="nav-tab ase-anim-settingsButton selected" type="button"><i>Animation
+                            Settings</i></button>
+                    <button class="nav-tab ase-sound-settingsButton" type="button"><i>Sound Settings</i></button>
                 </div>
                 <div id="ase-settings-body">
-                    <div id="ase-anim-settings" class="show">
-                        <p>Animation settings tab...</p>
+                    <div id="ase-spell-settings" class="hide">
                         <table>
                             <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
-                                {{#each effectData.vtRequiredSettings.animOptions}}
+                                {{#each effectData.requiredSettings.spellOptions}}
                                     <tr>
                                         <td>
                                             <label><b>{{this.label}}</b></label>
@@ -27,7 +30,7 @@
                                         <td>
                                             {{#ifCondASE this.type '==' 'dropdown'}}
                                                 <select name="{{this.name}}">
-                                                    {{#select this.flagName}}
+                                                    {{#select this.flagValue}}
                                                         {{#each this.options as |name key|}}
                                                             <option value="{{key}}">
                                                                 {{name}}
@@ -36,6 +39,59 @@
                                                     {{/select}}
                                                 </select>
                                             {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'checkbox'}}
+                                                <input type="checkbox" name="{{this.name}}" {{checked this.flagValue}}>
+                                            {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'numberInput'}}
+                                        <td colspan="2">
+                                            <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
+                                                value={{this.flagValue}}>
+                                        </td>
+                                        {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'rangeInput'}}
+                                            <td colspan="2">
+                                                <input type="range" min="0" max="1" step="0.01" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
+                                        </td>
+                                    </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="ase-anim-settings" class="show">
+                        <table>
+                            <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                                {{#each effectData.requiredSettings.animOptions}}
+                                    <tr>
+                                        <td>
+                                            <label><b>{{this.label}}</b></label>
+                                        </td>
+                                        <td>
+                                            {{#ifCondASE this.type '==' 'dropdown'}}
+                                                <select name="{{this.name}}">
+                                                    {{#select this.flagValue}}
+                                                        {{#each this.options as |name key|}}
+                                                            <option value="{{key}}">
+                                                                {{name}}
+                                                            </option>
+                                                        {{/each}}
+                                                    {{/select}}
+                                                </select>
+                                            {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'numberInput'}}
+                                        <td colspan="2">
+                                            <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
+                                                value={{this.flagValue}}>
+                                        </td>
+                                        {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'rangeInput'}}
+                                            <td colspan="2">
+                                                <input type="range" min="0" max="1" step="0.01" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
                                         </td>
                                     </tr>
                                 {{/each}}
@@ -43,7 +99,41 @@
                         </table>
                     </div>
                     <div id="ase-sound-settings" class="hide">
-                        <p>Sound settings tab...</p>
+                        <table>
+                            <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                                {{#each effectData.requiredSettings.soundOptions}}
+                                    <tr>
+                                        <td>
+                                            <label><b>{{this.label}}</b></label>
+                                        </td>
+                                        {{#ifCondASE this.type '==' 'fileInput'}}
+                                            <td>
+                                                <input type="text" class="files" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="file-picker" data-type="audio"
+                                                    data-target="{{this.name}}" tabindex="-1" title="Browse Files">
+                                                    <i class="fas fa-music fa-sm"></i>
+                                                </button>
+                                            </td>
+                                        {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'numberInput'}}
+                                            <td colspan="2">
+                                                <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'rangeInput'}}
+                                            <td colspan="2">
+                                                <input type="range" min="0" max="1" step="0.01" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
+                                    </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             {{/if}}
@@ -56,3 +146,5 @@
         </button>
     </footer>
 </form>
+
+<!---->

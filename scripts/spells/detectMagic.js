@@ -205,11 +205,12 @@ export class detectMagic {
         //console.log("Registering Detect Magic Hook");
         if ((!updateData.x && !updateData.y)) return;
         const isGM = utilFunctions.isFirstGM();
-        console.log("Is first GM: ", isGM);
-        if(!isGM) return;
+
+        if (!isGM) return;
         if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length == 0) {
             return;
         }
+        console.log("Is first GM: ", isGM);
         let users = [];
         for (const user in tokenDocument.actor.data.permission) {
             if (user == "default") continue;
@@ -298,5 +299,65 @@ export class detectMagic {
             }
         }
     }
+
+    static async getRequiredSettings(currFlags) {
+
+        const detectMagicWaves = `jb2a.detect_magic.circle`;
+        const detectMagicWaveColorOptions = utilFunctions.getDBOptions(detectMagicWaves);
+
+        const detectMagicAuras = `jb2a.magic_signs.circle.02.divination.intro`;
+        const detectMagicAuraColorOptions = utilFunctions.getDBOptions(detectMagicAuras);
+
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+        animOptions.push({
+            label: 'Select Wave Color: ',
+            type: 'dropdown',
+            options: detectMagicWaveColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.waveColor',
+            flagName: 'waveColor',
+            flagValue: currFlags.waveColor ?? 'blue',
+        });
+        soundOptions.push({
+            label: 'Wave Sound: ',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.waveSound',
+            flagName: 'waveSound',
+            flagValue: currFlags.waveSound ?? '',
+        });
+        soundOptions.push({
+            label: "Wave Sound Delay: ",
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.waveSoundDelay',
+            flagName: 'wakeSoundDelay',
+            flagValue: currFlags.waveSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: "Wave Sound Volume:",
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.waveVolume',
+            flagName: 'waveVolume',
+            flagValue: currFlags.waveVolume ?? 1,
+        });
+
+        animOptions.push({
+            label: 'Select Aura Color: ',
+            type: 'dropdown',
+            options: detectMagicAuraColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.auraColor',
+            flagName: 'auraColor',
+            flagValue: currFlags.auraColor ?? 'blue',
+        });
+
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions
+        }
+
+    }
+
 }
 
