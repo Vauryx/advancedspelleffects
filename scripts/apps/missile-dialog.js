@@ -123,10 +123,13 @@ export class MissileDialog extends FormApplication {
         let attackType = parsedEventData.altKey ? 'kh' : (parsedEventData.ctrlKey ? 'kl' : '');
         //console.log('Mouse Click Data: ', parsedEventData);
         let token = canvas.tokens.placeables.filter(token => {
+            //console.log('Token Global Position: ', token.getGlobalPosition());
+            //console.log('Token Width & Height: ', token.w, token.h);
+            //console.log('Mouse Position: ', parsedEventData);
             return token.getGlobalPosition().x <= parsedEventData.x
-                && token.getGlobalPosition().x + token.width >= parsedEventData.x
+                && token.getGlobalPosition().x + token.w >= parsedEventData.x
                 && token.getGlobalPosition().y <= parsedEventData.y
-                && token.getGlobalPosition().y + token.height >= parsedEventData.y;
+                && token.getGlobalPosition().y + token.h >= parsedEventData.y;
         })[0];
         if (token) {
             //console.log('Target: ', token.name);
