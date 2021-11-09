@@ -9,6 +9,9 @@ export class spiritualWeapon {
     static async createSpiritualWeapon(midiData) {
         const casterActor = midiData.actor;
         const casterToken = canvas.tokens.get(midiData.tokenId);
+        const item = midiData.item;
+        const effectOptions = item.getFlag('advancedspelleffects', 'effectOptions') ?? {};
+        console.log(effectOptions);
         const level = midiData.spellLevel;
         let summonType = "Spiritual Weapon";
         const summonerDc = casterActor.data.data.attributes.spelldc;
@@ -16,8 +19,14 @@ export class spiritualWeapon {
         const summonerMod = getProperty(casterActor, `data.data.abilities.${getProperty(casterActor, 'data.data.attributes.spellcasting')}.mod`);
         let damageScale = '';
 
-        async function myEffectFunction(template, color, update) {
+        async function myEffectFunction(template, options, update) {
             let glowColor;
+            let color = options.color;
+            const sound = options.effectOptions?.summonSound ?? "";
+            const soundDelay = Number(options.effectOptions?.summonSoundDelay) ?? 0;
+            const volume = options.effectOptions?.summonVolume ?? 1;
+
+
             switch (color) {
                 case 'blue':
                     glowColor = utilFunctions.rgbToHex(173, 216, 230)
@@ -58,6 +67,11 @@ export class spiritualWeapon {
                 effect = `jb2a.bless.400px.intro.blue`;
             }
             new Sequence("Advanced Spell Effects")
+                .sound()
+                .file(sound)
+                .delay(soundDelay)
+                .volume(volume)
+                .playIf(sound !== "")
                 .effect()
                 .file(effectFile)
                 .atLocation(template)
@@ -125,7 +139,7 @@ export class spiritualWeapon {
         if (weaponChoice == "sword") {
             attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee.fire`);
         }
-        else if(weaponChoice == "mace") {
+        else if (weaponChoice == "mace") {
             attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee.01`);
         }
         else if (Sequencer.Database.entryExists(`jb2a.${weaponChoice}.melee`)) {
@@ -264,7 +278,7 @@ export class spiritualWeapon {
             interval: 2
         };
 
-        const options = { controllingActor: game.actors.get(midiData.actor._id), crosshairs: crosshairsConfig };
+        const options = { controllingActor: game.actors.get(casterActor.id), crosshairs: crosshairsConfig };
         const displayCrosshairs = async (crosshairs) => {
             new Sequence("Advanced Spell Effects")
                 .effect()
@@ -278,18 +292,55 @@ export class spiritualWeapon {
         };
         const callbacks = {
             pre: async (template, update) => {
-                myEffectFunction(template, spiritColorChoice, update);
+                myEffectFunction(template, { color: spiritColorChoice, effectOptions: effectOptions }, update);
                 await warpgate.wait(1750);
             },
             post: async (template, token) => {
                 postEffects(template, token);
                 await warpgate.wait(500);
-                await Sequencer.EffectManager.endEffects({name: 'ASE-spiritual-weapon-crosshairs'});
+                await Sequencer.EffectManager.endEffects({ name: 'ASE-spiritual-weapon-crosshairs' });
             },
             show: displayCrosshairs
         };
-        
+
         warpgate.spawn(summonType, updates, callbacks, options);
+    }
+
+    static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+
+        soundOptions.push({
+            label: "Summon Sound:",
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.summonSound',
+            flagName: 'summonSound',
+            flagValue: currFlags.summonSound ?? '',
+        });
+        soundOptions.push({
+            label: "Summon Sound Delay:",
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.summonSoundDelay',
+            flagName: 'summonSoundDelay',
+            flagValue: currFlags.summonSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: "Summon Sound Volume:",
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.summonVolume',
+            flagName: 'summonVolume',
+            flagValue: currFlags.summonVolume ?? 1,
+        });
+
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions
+        }
+
     }
 
 }

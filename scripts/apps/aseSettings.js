@@ -1,4 +1,21 @@
 import * as utilFunctions from "../utilityFunctions.js";
+// Importing spells
+import { animateDead } from "../spells/animateDead.js";
+import { darkness } from "../spells/darkness.js";
+import { detectMagic } from "../spells/detectMagic.js";
+import { callLightning } from "../spells/callLightning.js";
+import { fogCloud } from "../spells/fogCloud.js";
+import { spiritualWeapon } from "../spells/spiritualWeapon.js";
+import { steelWindStrike } from "../spells/steelWindStrike.js";
+import { thunderStep } from "../spells/thunderStep.js";
+import { summonCreature } from "../spells/summonCreature.js";
+import { witchBolt } from "../spells/witchBolt.js";
+import { magicMissile } from "../spells/magicMissile.js";
+import { scorchingRay } from "../spells/scorchingRay.js";
+import { eldritchBlast } from "../spells/eldritchBlast.js";
+import { vampiricTouch } from "../spells/vampiricTouch.js";
+
+
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
@@ -8,11 +25,26 @@ export class ASESettings extends FormApplication {
                 this.flags.effectOptions = {};
             }
         }
+        this.spellList = {
+            "Animate Dead": animateDead,
+            "Call Lightning": callLightning,
+            "Detect Magic": detectMagic,
+            "Fog Cloud": fogCloud,
+            "Darkness": darkness,
+            "Magic Missile": magicMissile,
+            "Spiritual Weapon": spiritualWeapon,
+            "Steel Wind Strike": steelWindStrike,
+            "Thunder Step": thunderStep,
+            "Witch Bolt": witchBolt,
+            "Scorching Ray": scorchingRay,
+            "Eldritch Blast": eldritchBlast,
+            "Vampiric Touch": vampiricTouch
+        }
     }
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            template: './modules/advancedspelleffects/scripts/templates/ase-settings.html',
+            template: './modules/advancedspelleffects/scripts/templates/ase-settings-new.html',
             id: 'ase-item-settings',
             title: "Advanced Spell Effects Settings",
             resizable: true,
@@ -87,129 +119,17 @@ export class ASESettings extends FormApplication {
 
     async setEffectData(item) {
         //console.log(item);
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
         let flags = this.object.data.flags;
         let itemName = item.name;
         let returnOBJ = {};
         //console.log("Detected item name: ", itemName);
         await this.setItemDetails(item);
-        switch (itemName) {
-            case 'Detect Magic':
-                let detectMagicWaves = `jb2a.detect_magic.circle`;
-                let detectMagicWaveColorOptions = utilFunctions.getDBOptions(detectMagicWaves);
-
-                let detectMagicAuras = `jb2a.magic_signs.circle.02.divination.intro`;
-                let detectMagicAuraColorOptions = utilFunctions.getDBOptions(detectMagicAuras);
-
-                returnOBJ = {
-                    dmWaveColors: detectMagicWaveColorOptions,
-                    dmAuraColors: detectMagicAuraColorOptions
-                };
-                break;
-            case 'Steel Wind Strike':
-                let weaponsPathMap = {
-                    "sword": "melee.01"/*,
-                    "mace": "melee",
-                    "greataxe": "melee",
-                    "greatsword": "melee",
-                    "handaxe": "melee",
-                    "spear": "melee.01"*/
-                };
-                let availWeapons = Object.keys(weaponsPathMap);
-                let weaponOptions = {};
-                availWeapons.forEach((weapon) => {
-                    weaponOptions[weapon] = capitalizeFirstLetter(weapon);
-                })
-                let weaponsColors = {};
-                let colorOptions = {};
-                availWeapons.forEach(async (weapon) => {
-                    let availColors = Sequencer.Database.getPathsUnder(`jb2a.${weapon}.${weaponsPathMap[weapon]}`);
-                    weaponsColors[weapon] = availColors;
-                });
-                let currentWeapon = flags.advancedspelleffects?.effectOptions?.weapon ?? `sword`;
-                weaponsColors[currentWeapon].forEach((color) => {
-                    console.log(color);
-                    colorOptions[color] = capitalizeFirstLetter(color);
-                });
-                returnOBJ = {
-                    swsWeapons: weaponOptions,
-                    weaponColors: colorOptions
-                }
-                break;
-            case 'Witch Bolt':
-                let initialBoltAnim = 'jb2a.chain_lightning.primary';
-                let initialBoltColorOptions = utilFunctions.getDBOptions(initialBoltAnim);
-
-                let streamAnim = 'jb2a.witch_bolt';
-                let streamColorOptions = utilFunctions.getDBOptions(streamAnim);
-
-                returnOBJ = {
-                    initialBoltColors: initialBoltColorOptions,
-                    streamColors: streamColorOptions
-                }
-                break;
-            case 'Vampiric Touch':
-                let vampiricTouchCasterAnim = 'jb2a.energy_strands.overlay';
-                let vampiricTouchStrandAnim = `jb2a.energy_strands.range.standard`;
-                let vampiricTouchImpactAnim = `jb2a.impact.004`;
-
-                let vampiricTouchCasterColorOptions = utilFunctions.getDBOptions(vampiricTouchCasterAnim);
-                let vampiricTouchStrandColorOptions = utilFunctions.getDBOptions(vampiricTouchStrandAnim);
-                let vampiricTouchImpactColorOptions = utilFunctions.getDBOptions(vampiricTouchImpactAnim);
-
-                returnOBJ = {
-                    vtCasterColors: vampiricTouchCasterColorOptions,
-                    vtStrandColors: vampiricTouchStrandColorOptions,
-                    vtImpactColors: vampiricTouchImpactColorOptions
-                }
-                break;
-        }
-        if (itemName == 'Scorching Ray' || itemName == 'Magic Missile' || itemName == 'Eldritch Blast') {
-            let baseAnim;
-            let targetMarkerAnim;
-            switch (itemName) {
-                case 'Scorching Ray':
-                    baseAnim = 'jb2a.scorching_ray.02';
-                    targetMarkerAnim = 'jb2a.markers.01';
-                    break;
-                case 'Magic Missile':
-                    baseAnim = 'jb2a.magic_missile';
-                    targetMarkerAnim = 'jb2a.moonbeam.01.loop';
-                    break;
-                case 'Eldritch Blast':
-                    baseAnim = 'jb2a.eldritch_blast';
-                    targetMarkerAnim = 'jb2a.markers.02';
-                    break;
-            }
-            let missileColorOptions = utilFunctions.getDBOptions(baseAnim);
-            let targetMarkerColorOptions = utilFunctions.getDBOptions(targetMarkerAnim);
-            returnOBJ = {
-                missileColors: missileColorOptions,
-                targetMarkerColors: targetMarkerColorOptions
-            }
-            console.log(returnOBJ);
-        }
-        else if (itemName.includes("Summon") || itemName == "Animate Dead") {
-            let magicSignsRaw = `jb2a.magic_signs.circle.02`;
-            let magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
-
-            let magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${flags.advancedspelleffects?.effectOptions?.magicSchool ?? 'abjuration'}.intro`;
-            let magicSchoolColorOptions = utilFunctions.getDBOptions(magicSchoolColorsRaw);
-
-            let effectAColorsRaw = `jb2a.eldritch_blast`;
-            let effectAColorOptions = utilFunctions.getDBOptions(effectAColorsRaw);
-
-            let effectBColorsRaw = `jb2a.energy_strands.complete`;
-            let effectBColorOptions = utilFunctions.getDBOptions(effectBColorsRaw);
-
-            let portalColorsRaw = `jb2a.portals.vertical.vortex`;
-            let portalColorOptions = utilFunctions.getDBOptions(portalColorsRaw);
-
-            let portalImpactColorsRaw = `jb2a.impact.010`;
-            let portalImpactColorOptions = utilFunctions.getDBOptions(portalImpactColorsRaw);
+        let requiredSettings;
+        console.log("Item name: ", itemName);
+        if (itemName.includes("Summon")) {
+            requiredSettings = await summonCreature.getRequiredSettings(flags.advancedspelleffects.effectOptions);
+            //console.log(requiredSettings);
+            returnOBJ.requiredSettings = requiredSettings;
 
             let summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
             let summonOptions = {};
@@ -219,32 +139,25 @@ export class ASESettings extends FormApplication {
                 summonOptions[actor.name] = actor.id;
             });
 
-            returnOBJ = {
-                summonOptions: summonOptions,
-                summons: currentSummonTypes,
-                magicSchoolOptions: magicSchoolOptions,
-                magicSchoolColorOptions: magicSchoolColorOptions,
-                effectAColorOptions: effectAColorOptions
-            };
-            if (itemName == "Animate Dead") {
-                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" } };
-                returnOBJ["effectBColorOptions"] = effectBColorOptions;
+            currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? [{ name: "", actor: "", qty: 1 }];
+            returnOBJ["itemId"] = item.id;
+            if (item.parent) {
+                returnOBJ["summonerId"] = item.parent.id;
             }
             else {
-                currentSummonTypes = flags.advancedspelleffects?.effectOptions?.summons ?? [{ name: "", actor: "", qty: 1 }];
-                returnOBJ["itemId"] = item.id;
-                if (item.parent) {
-                    returnOBJ["summonerId"] = item.parent.id;
-                }
-                else {
-                    returnOBJ["summonerId"] = "";
-                }
-                returnOBJ["portalColorOptions"] = portalColorOptions;
-                returnOBJ["portalImpactColorOptions"] = portalImpactColorOptions;
+                returnOBJ["summonerId"] = "";
             }
+
             returnOBJ.summons = currentSummonTypes;
+            returnOBJ.summonOptions = summonOptions;
             //console.log(returnOBJ);
         }
+        else {
+            requiredSettings = await this.spellList[itemName].getRequiredSettings(flags.advancedspelleffects.effectOptions);
+            //console.log(requiredSettings);
+            returnOBJ.requiredSettings = requiredSettings;
+        }
+        //console.log(returnOBJ);
         return returnOBJ;
     }
 
@@ -266,13 +179,48 @@ export class ASESettings extends FormApplication {
 
     }
     activateListeners(html) {
-        //console.log(html);
+        const body = $("#ase-item-settings");
+        const animSettings = $("#ase-anim-settings");
+        const animSettingsButton = $(".ase-anim-settingsButton");
+        const soundSettings = $("#ase-sound-settings");
+        const soundSettingsButton = $(".ase-sound-settingsButton");
+        const spellSettings = $("#ase-spell-settings");
+        const spellSettingsButton = $(".ase-spell-settingsButton");
+
+        let currentTab = spellSettingsButton;
+        let currentBody = spellSettings;
+
+
         super.activateListeners(html);
+        $(".nav-tab").click(function () {
+            currentBody.toggleClass("hide");
+            currentTab.toggleClass("selected");
+            if ($(this).hasClass("ase-anim-settingsButton")) {
+                //console.log("anim");
+                animSettings.toggleClass("hide");
+                currentBody = animSettings;
+                currentTab = animSettingsButton;
+            } else if ($(this).hasClass("ase-sound-settingsButton")) {
+                //console.log("sound");
+                soundSettings.toggleClass("hide");
+                currentBody = soundSettings;
+                currentTab = soundSettingsButton;
+            } else if ($(this).hasClass("ase-spell-settingsButton")) {
+                //console.log("spell");
+                spellSettings.toggleClass("hide");
+                currentBody = spellSettings;
+                currentTab = spellSettingsButton;
+            }
+            currentTab.toggleClass("selected");
+            body.height("auto");
+            body.width("auto");
+        });
+
         html.find('.ase-enable-checkbox input[type="checkbox"]').click(evt => {
             this.submit({ preventClose: true }).then(() => this.render());
         });
         html.find('.ase-enable-checkbox select').change(evt => {
-            this.submit({ preventClose: true }).then(() => this.render());
+            //this.submit({ preventClose: true }).then(() => this.render());
         });
         //console.log(this);
         html.find('.addType').click(this._addSummonType.bind(this));
@@ -294,8 +242,7 @@ export class ASESettings extends FormApplication {
             let summoner = game.actors.get(actorId);
             item = summoner.items.get(itemId);
             //console.log(summoner, item);
-        }
-        else {
+        } else {
             item = game.items.get(itemId);
             //console.log(item);
         }
@@ -341,8 +288,9 @@ export class ASESettings extends FormApplication {
     async _updateObject(event, formData) {
         //console.log(formData);
         formData = expandObject(formData);
-        if (!formData.changes)
-            formData.changes = [];
+        //console.log(formData);
+        if (!formData.changes) formData.changes = [];
+        //console.log(formData.changes);
         formData.changes = Object.values(formData.changes);
         for (let c of formData.changes) {
             //@ts-ignore

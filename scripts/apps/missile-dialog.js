@@ -176,6 +176,8 @@ export class MissileDialog extends FormApplication {
                 let token = canvas.tokens.get($(this).attr('id').split('-')[0]);
                 token._onHoverIn(e);
             });
+            $("#missile-dialog").height("auto");
+
         }
         else {
             document.getElementById(`${target.document.id}-missiles`).value++;
@@ -227,7 +229,7 @@ export class MissileDialog extends FormApplication {
         let missileAnim = `${this.data.effectOptions.missileAnim}.${this.data.effectOptions.missileColor}`;
 
         const missileIntroSound = this.data.effectOptions.missileIntroSound ?? "";
-        
+
         let missileIntroSoundDelay = Number(this.data.effectOptions.missileIntroSoundDelay) ?? 0;
         let missileIntroVolume = Number(this.data.effectOptions.missileIntroVolume) ?? 1;
         const impactDelay = Number(this.data.effectOptions.impactDelay) ?? -1000;
@@ -349,7 +351,7 @@ export class MissileDialog extends FormApplication {
                 for (let i = 0; i < missileNum; i++) {
                     if (this.data.effectOptions.missileType == 'dart') {
                         attackData['hit'] = true;
-                        missileDelay = utilFunctions.getRandomInt(75,150);
+                        missileDelay = utilFunctions.getRandomInt(75, 150);
                     }
                     else {
                         let attackMod = this.data.attackMods[targetToken.id][i].type;
@@ -397,7 +399,7 @@ export class MissileDialog extends FormApplication {
                         attackData['hit'] = true;
                         damageTotal += damageRoll.total;
                     }
-                    
+
                     await this._launchMissile(caster, targetToken, attackData);
                     await warpgate.wait(missileDelay);
                 }

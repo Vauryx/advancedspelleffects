@@ -91,11 +91,14 @@ export class callLightning {
                                 "value": "Call forth a bolt of lightning from the storm cloud above."
                             }
                         },
-                        "flags": {"advancedspelleffects": {
-                            "enableASE": true,
-                            'effectOptions': {
-                                'stormTileId': stormTileId
-                            }}}
+                        "flags": {
+                            "advancedspelleffects": {
+                                "enableASE": true,
+                                'effectOptions': {
+                                    'stormTileId': stormTileId
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -171,7 +174,7 @@ export class callLightning {
                 .volume(stormCloudVolume)
                 .delay(stormCloudSoundDelay)
                 .playIf(stormCloudSound !== "")
-            .play()
+                .play()
             return (tileId);
         }
     }
@@ -392,4 +395,51 @@ export class callLightning {
             await callLightning.callLightningBolt(stormCloudTiles[0].id);
         }
     }
+
+    static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+        const boltOptions = {
+            "chain": "Chain",
+            "strike": "Strike",
+        }
+        animOptions.push({
+            label: "Select Bolt Style: ",
+            type: "dropdown",
+            options: boltOptions,
+            name: "flags.advancedspelleffects.effectOptions.boltStyle",
+            flagName: "boltStyle",
+            flagValue: currFlags.boltStyle,
+        });
+        soundOptions.push({
+            label: 'Bolt Sound:',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.boltSound',
+            flagName: 'boltSound',
+            flagValue: currFlags.boltSound,
+        });
+        soundOptions.push({
+            label: 'Bolt Sound Delay:',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.boltSoundDelay',
+            flagName: 'boltSoundDelay',
+            flagValue: currFlags.boltSoundDelay,
+        });
+        soundOptions.push({
+            label: 'Bolt Volume:',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.boltVolume',
+            flagName: 'boltVolume',
+            flagValue: currFlags.boltVolume,
+        });
+
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions,
+        }
+    }
+
 }

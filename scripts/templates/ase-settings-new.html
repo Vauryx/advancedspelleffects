@@ -1,0 +1,212 @@
+<form class="flexcol" id="aseSettingsForm" autocomplete="off" novalidate>
+    <section class="content">
+        <div class="ase-enable-checkbox">
+            <div class="form-group">
+                <label>Convert to Advanced Spell Effect</label>
+                <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
+                    flags.advancedspelleffects.enableASE}}>
+            </div>
+        </div>
+        <div class="ase-enabled-content">
+            {{#if flags.advancedspelleffects.enableASE}}
+                <div class="form-group">
+                    <p>ASE Settings: <b>{{itemName}}</b></p>
+                </div>
+                <div class="ase-settings-tabs">
+                    <button class="nav-tab ase-spell-settingsButton selected" type="button" title="Spell Settings">
+                        <div style="text-align:center">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                    </button>
+                    <button class="nav-tab ase-anim-settingsButton " type="button" title="Animation Settings">
+                        <div style="text-align:center">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                    </button>
+                    <button class="nav-tab ase-sound-settingsButton" type="button" title="Sound Settings">
+                        <div style="text-align:center">
+                            <i class="fas fa-volume-up"></i>
+                        </div>
+                    </button>
+                </div>
+                <div id="ase-settings-body">
+                    <div id="ase-spell-settings" class="show">
+                        {{#ifCondASE itemName 'includes' 'Summon'}}
+                            <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
+                            <input type="hidden" id="hdnSummonerId" value="{{effectData.summonerId}}" />
+                            <table id="summonsTable" width="100%">
+                                <tbody>
+                                    {{#each effectData.summons}}
+                                        <tr>
+                                            <td>
+                                                <label><b>Summon Type Name:</b></label>
+                                            </td>
+                                            <td>
+                                                <input type="text"
+                                                    name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.name"
+                                                    value="{{this.name}}">
+                                            </td>
+                                            <td>
+                                                <label><b>Associated Actor:</b></label>
+                                            </td>
+                                            <td> <select
+                                                    name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.actor">
+                                                    {{#select this.actor}}
+                                                        {{#each ../effectData.summonOptions as |id name|}}
+                                                            <option value="{{id}}">{{name}}</option>
+                                                        {{/each}}
+                                                    {{/select}}
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <label><b>Quantity:</b></label>
+                                            </td>
+                                            <td>
+                                                <input style='width: 3em;' type="text"
+                                                    name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.qty"
+                                                    value="{{this.qty}}">
+                                            </td>
+                                        </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                            <div style="text-align:center;">
+                                <div style="margin:auto;">
+                                    <button class='addType' type="button" style="width:50%;text-align:center;"> Add Type
+                                    </button>
+                                </div>
+                                <div style="margin:auto;">
+                                    <button class='removeType' type="button" style="width:50%;text-align:center;">
+                                        <i class="fas fa-times"></i> Remove Type
+                                    </button>
+                                </div>
+                            </div>
+                        {{/ifCondASE}}
+                        <table>
+                            <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                                {{#each effectData.requiredSettings.spellOptions}}
+                                    <tr>
+                                        <td>
+                                            <label><b>{{this.label}}</b></label>
+                                        </td>
+                                        <td>
+                                            {{#ifCondASE this.type '==' 'dropdown'}}
+                                                <select name="{{this.name}}">
+                                                    {{#select this.flagValue}}
+                                                        {{#each this.options as |name key|}}
+                                                            <option value="{{key}}">
+                                                                {{name}}
+                                                            </option>
+                                                        {{/each}}
+                                                    {{/select}}
+                                                </select>
+                                            {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'checkbox'}}
+                                                <input type="checkbox" name="{{this.name}}" {{checked this.flagValue}}>
+                                            {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'numberInput'}}
+                                        <td colspan="2">
+                                            <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
+                                                value={{this.flagValue}}>
+                                        </td>
+                                        {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'rangeInput'}}
+                                            <td colspan="2">
+                                                <input type="range" min="0" max="1" step="0.01" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
+                                        </td>
+                                    </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="ase-anim-settings" class="hide">
+                        <table>
+                            <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                                {{#each effectData.requiredSettings.animOptions}}
+                                    <tr>
+                                        <td>
+                                            <label><b>{{this.label}}</b></label>
+                                        </td>
+                                        <td>
+                                            {{#ifCondASE this.type '==' 'dropdown'}}
+                                                <select name="{{this.name}}">
+                                                    {{#select this.flagValue}}
+                                                        {{#each this.options as |name key|}}
+                                                            <option value="{{key}}">
+                                                                {{name}}
+                                                            </option>
+                                                        {{/each}}
+                                                    {{/select}}
+                                                </select>
+                                            {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'numberInput'}}
+                                        <td colspan="2">
+                                            <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
+                                                value={{this.flagValue}}>
+                                        </td>
+                                        {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'rangeInput'}}
+                                            <td colspan="2">
+                                                <input type="range" min="0" max="1" step="0.01" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
+                                        </td>
+                                    </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="ase-sound-settings" class="hide">
+                        <table>
+                            <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
+                                {{#each effectData.requiredSettings.soundOptions}}
+                                    <tr>
+                                        <td>
+                                            <label><b>{{this.label}}</b></label>
+                                        </td>
+                                        {{#ifCondASE this.type '==' 'fileInput'}}
+                                            <td>
+                                                <input type="text" class="files" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="file-picker" data-type="audio"
+                                                    data-target="{{this.name}}" tabindex="-1" title="Browse Files">
+                                                    <i class="fas fa-music fa-sm"></i>
+                                                </button>
+                                            </td>
+                                        {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'numberInput'}}
+                                            <td colspan="2">
+                                                <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'rangeInput'}}
+                                            <td colspan="2">
+                                                <input type="range" min="0" max="1" step="0.01" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
+                                    </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {{/if}}
+        </div>
+
+    </section>
+    <footer class="sheet-footer flexrow">
+        <button type="submit" name="submit">
+            <i class="fa fa-save"></i> Save and Close
+        </button>
+    </footer>
+</form>
+
+<!---->
