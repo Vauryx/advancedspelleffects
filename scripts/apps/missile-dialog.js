@@ -14,6 +14,7 @@ export class MissileDialog extends FormApplication {
         this.data.caster = options.casterId;
         this.data.itemCardId = options.itemCardId;
         this.data.item = options.item;
+        this.data.actionType = options?.actionType || "other";
         this.data.effectOptions = options.effectOptions;
         this.data.allAttackRolls = [];
         this.data.allDamRolls = [];
@@ -282,10 +283,10 @@ export class MissileDialog extends FormApplication {
         };
 
     }
-    async _evaluateAttack(caster, target, mod) {
+    async _evaluateAttack(caster, target, mod, rollData) {
         //console.log("Evalute attack target: ", target);
-
-        let attackRoll = await new Roll(`${mod == '' ? 1 : 2}d20${mod} + @mod + @prof`, caster.actor.getRollData()).evaluate({ async: true });
+        let attackBonus = rollData.bonuses[actionType]?.attack || ''
+        let attackRoll = await new Roll(`${mod == '' ? 1 : 2}d20${mod} + @mod + @prof + ${attackBonus}`, rollData).evaluate({ async: true });
         //console.log("Attack roll: ", attackRoll);
         let crit = attackRoll.terms[0].total == 20;
         let hit;
@@ -321,6 +322,8 @@ export class MissileDialog extends FormApplication {
             //console.log(this);
             //console.log('Attack Mods Info: ', this.data.attackMods);
             let caster = canvas.tokens.get(this.data.caster);
+            let rollData = caster.actor.getRollData();
+            let damageBonus = rollData.bonuses[actionType]?.damage || "";
             const chatMessage = await game.messages.get(this.data.itemCardId);
             //console.log(`${caster.name} is firing Missiles at Selected Targets...`);
             //console.log("Missile Data: ", this.data);
@@ -355,12 +358,13 @@ export class MissileDialog extends FormApplication {
                         let attackMod = this.data.attackMods[targetToken.id][i].type;
                         missileDelay = utilFunctions.getRandomInt(50, 100);
                         //console.log(attackMod);
-                        attackData = await this._evaluateAttack(caster, targetToken, attackMod);
+                        attackData = await this._evaluateAttack(caster, targetToken, attackMod, rollData);
                         if (attackData.crit) {
                             attacksCrit += 1;
                         }
                     }
-                    damageFormula = `${attackData.crit ? this.data.effectOptions.dmgDieCount * 2 : this.data.effectOptions.dmgDieCount}${this.data.effectOptions.dmgDie} ${Number(this.data.effectOptions.dmgMod) ? '+' + this.data.effectOptions.dmgMod : ''}`;
+                    
+                    damageFormula = `${attackData.crit ? this.data.effectOptions.dmgDieCount * 2 : this.data.effectOptions.dmgDieCount}${this.data.effectOptions.dmgDie} ${Number(this.data.effectOptions.dmgMod) ? '+' + this.data.effectOptions.dmgMod : '' } + ${damageBonus}`;
                     //console.log(damageFormula);
                     damageRoll = await new Roll(damageFormula).evaluate({ async: true });
                     this.data.allDamRolls.push({ roll: damageRoll, target: targetToken.name });

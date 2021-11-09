@@ -36,6 +36,13 @@ export class eldritchBlast {
             aseEffectOptions.dmgMod = casterActor?.data?.data?.abilities?.cha?.mod ?? 0;
         }
         
-        new MissileDialog({casterId: casterToken.id, numMissiles: numMissiles, itemCardId: itemCardId, effectOptions: aseEffectOptions, item: spellItem}).render(true);
+    new MissileDialog({
+      casterId: casterToken.id,
+      numMissiles: numMissiles,
+      itemCardId: itemCardId,
+      effectOptions: aseEffectOptions,
+      item: spellItem,
+      actionType: "rsak",
+    }).render(true);
     }
 }
