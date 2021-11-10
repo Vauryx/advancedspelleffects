@@ -14,7 +14,7 @@ import { magicMissile } from "../spells/magicMissile.js";
 import { scorchingRay } from "../spells/scorchingRay.js";
 import { eldritchBlast } from "../spells/eldritchBlast.js";
 import { vampiricTouch } from "../spells/vampiricTouch.js";
-
+import { moonBeam } from "../spells/moonBeam.js";
 
 export class ASESettings extends FormApplication {
     constructor() {
@@ -38,7 +38,8 @@ export class ASESettings extends FormApplication {
             "Witch Bolt": witchBolt,
             "Scorching Ray": scorchingRay,
             "Eldritch Blast": eldritchBlast,
-            "Vampiric Touch": vampiricTouch
+            "Vampiric Touch": vampiricTouch,
+            "Moonbeam": moonBeam
         }
     }
 

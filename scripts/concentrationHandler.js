@@ -62,7 +62,7 @@ export class concentrationHandler {
             case game.i18n.localize('ASE.VampiricTouch'):
                 vampiricTouch.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
-            case "Moonbeam":
+            case game.i18n.localize('ASE.Moonbeam'):
                 moonBeam.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }

@@ -15,7 +15,7 @@ import { vampiricTouch } from "./spells/vampiricTouch.js";
 import { magicMissile } from "./spells/magicMissile.js";
 import { scorchingRay } from "./spells/scorchingRay.js";
 import { eldritchBlast } from "./spells/eldritchBlast.js";
-import {moonBeam} from "./spells/moonBeam.js";
+import { moonBeam } from "./spells/moonBeam.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -95,10 +95,10 @@ export class ASEHandler {
             case game.i18n.localize('ASE.EldritchBlast'):
                 await eldritchBlast.selectTargets(data);
                 return;
-            case 'Moonbeam':
+            case game.i18n.localize('ASE.Moonbeam'):
                 await moonBeam.callBeam(data);
                 return;
-            case 'Move Moonbeam':
+            case game.i18n.localize('ASE.MoveMoonbeam'):
                 await moonBeam.moveBeam(data);
                 return;
         }

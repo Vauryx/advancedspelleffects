@@ -15,5 +15,7 @@
   "ASE.MagicMissile": "Magic Missile",
   "ASE.ScorchingRay": "Scorching Ray",
   "ASE.EldritchBlast": "Eldritch Blast",
-  "ASE.Summon": "Summon"
+  "ASE.Summon": "Summon",
+  "ASE.Moonbeam": "Moonbeam",
+  "ASE.MoveMoonbeam": "Move Moonbeam"
 }

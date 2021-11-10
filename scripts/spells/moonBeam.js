@@ -11,11 +11,11 @@ export class moonBeam {
     static async _updateToken(tokenDocument, updateData) {
         if ((!updateData.x && !updateData.y)) return;
 
-        console.log('Update Token tokenDocument: ', tokenDocument);
-        console.log('Update Token updateData: ', updateData);
-
         const moonbeamTiles = await Tagger.getByTag(`-moonbeam`);
         if (moonbeamTiles.length == 0) return;
+
+        console.log('Update Token tokenDocument: ', tokenDocument);
+        console.log('Update Token updateData: ', updateData);
 
         const token = canvas.tokens.get(tokenDocument.id);
         let newTokenPosition = { x: 0, y: 0 };
@@ -40,6 +40,23 @@ export class moonBeam {
                     console.log(`${token.name} is entering the space of a moonbeam tile - ${moonbeamTile.id}`);
                     //add the tile to the inTiles array
                     inTiles.push(moonbeamTile.id);
+                    let effectOptions = moonbeamTile.document.getFlag("advancedspelleffects", "effectOptions") ?? {};
+                    new Sequence()
+                        .sound()
+                        .file(effectOptions.moonbeamDmgSound)
+                        .delay(Number(effectOptions.moonbeamDmgDelay) ?? 0)
+                        .volume(effectOptions.moonbeamDmgVolume ?? 1)
+                        .playIf(effectOptions.moonbeamDmgSound != "")
+                        .effect()
+                        .file(`jb2a.impact.004.${effectOptions.moonbeamDmgColor}`)
+                        .attachTo(tokenDocument)
+                        .JB2A()
+                        .randomRotation()
+                        .scaleIn(0.5, 200)
+                        .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
+                        .randomOffset(0.5)
+                        .repeats(4, 100, 250)
+                        .play()
                 }
             }
             // check if token was previously in the space of a moonbeam tile
@@ -48,10 +65,6 @@ export class moonBeam {
                 //remove the tile from the inTiles array
                 //inTiles.splice(inTiles.indexOf(moonbeamTile.id), 1);
             }
-        }
-        // iterate over every tile that token is in
-        for (let i = 0; i < inTiles.length; i++) {
-
         }
         await token.document.setFlag("advancedspelleffects", "moonbeam.inTiles", inTiles);
     }
@@ -72,12 +85,29 @@ export class moonBeam {
         for (let i = 0; i < moonbeamTiles.length; i++) {
             let moonbeamTile = moonbeamTiles[i];
             console.log('Moonbeam tile found: ', moonbeamTile);
+            let effectOptions = moonbeamTile.getFlag("advancedspelleffects", "effectOptions") ?? {};
             //check if token has entered the tile
             if (combatantPosition.x >= moonbeamTile.x && combatantPosition.x <= moonbeamTile.x + moonbeamTile.width && combatantPosition.y >= moonbeamTile.y && combatantPosition.y <= moonbeamTile.y + moonbeamTile.height) {
                 //check if tile exists in inTiles which is an array of tiles
                 console.log(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
                 //add the tile to the inTiles array
                 inTiles.push(moonbeamTile.id);
+                new Sequence()
+                    .sound()
+                    .file(effectOptions.moonbeamDmgSound)
+                    .delay(Number(effectOptions.moonbeamDmgDelay) ?? 0)
+                    .volume(effectOptions.moonbeamDmgVolume ?? 1)
+                    .playIf(effectOptions.moonbeamDmgSound && effectOptions.moonbeamDmgSound != "")
+                    .effect()
+                    .file(`jb2a.impact.004.${effectOptions.moonbeamDmgColor}`)
+                    .atLocation(combatantToken)
+                    .JB2A()
+                    .randomRotation()
+                    .scaleIn(0.5, 200)
+                    .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
+                    .randomOffset(0.5)
+                    .repeats(4, 100, 250)
+                    .play()
             }
         }
         await combatantToken.document.setFlag("advancedspelleffects", "moonbeam.inTiles", inTiles);
@@ -91,6 +121,14 @@ export class moonBeam {
         }
         await warpgate.revert(casterToken.document, `${casterActor.id}-moonbeam`);
         ui.notifications.info(`Move Moonbeam has been removed from your At-Will spells.`);
+
+        const tokens = canvas.tokens.placeables;
+        for await (let token of tokens) {
+            if (token.document.getFlag("advancedspelleffects", "moonbeam") != undefined) {
+                await token.document.unsetFlag("advancedspelleffects", "moonbeam");
+            }
+        }
+
     }
 
     static async callBeam(data) {
@@ -98,11 +136,27 @@ export class moonBeam {
         const casterToken = canvas.tokens.get(data.tokenId);
         const itemCardId = data.itemCardId;
         const spellItem = data.item;
+        const spellLevel = data.itemLevel;
         const aseEffectOptions = spellItem?.getFlag("advancedspelleffects", "effectOptions");
         console.log(aseEffectOptions);
         const beamIntro = `jb2a.moonbeam.01.intro.${aseEffectOptions.moonbeamColor}`;
         const beamOutro = `jb2a.moonbeam.01.outro.${aseEffectOptions.moonbeamColor}`;
         const beamLoop = `jb2a.moonbeam.01.no_pulse.${aseEffectOptions.moonbeamColor}`;
+        const damageColor = aseEffectOptions.moonbeamDmgColor;
+        const beamInitialSound = aseEffectOptions.moonbeamSound ?? "";
+        const beamLoopSound = aseEffectOptions.moonbeamLoopSound ?? "";
+        const beamInitialSoundDelay = Number(aseEffectOptions.moonbeamSoundDelay) ?? 0;
+        const beamLoopSoundDelay = Number(aseEffectOptions.moonbeamLoopSoundDelay) ?? 0;
+        const beamInitialSoundVolume = aseEffectOptions.moonbeamVolume ?? 1;
+        const beamLoopSoundVolume = aseEffectOptions.moonbeamLoopVolume ?? 1;
+
+        const levelScaling = aseEffectOptions.levelScaling ?? true;
+        const damageDie = aseEffectOptions.moonbeamDmgDie ?? 'd10';
+        const damageDieCount = levelScaling ? spellLevel : aseEffectOptions.moonbeamDmgDieCount ?? 2;
+        const damageDieBonus = aseEffectOptions.moonbeamDmgDieBonus ?? 0;
+        let damageFormula = `${damageDieCount}${damageDie}+${damageDieBonus}`;
+
+        aseEffectOptions["damageFormula"] = damageFormula;
         const updates = {
             embedded: {
                 Item: {
@@ -141,10 +195,20 @@ export class moonBeam {
         await warpgate.mutate(casterToken.document, updates, {}, { name: `${casterActor.id}-moonbeam` });
         ui.notifications.info(`Move Moonbeam has been added to your At-Will spells.`);
 
-        let moonbeamTile = await placeBeam(moonbeamLoc, casterToken.id, beamLoop);
+        const beamOptions = {
+            damageFormula: damageFormula,
+            options: aseEffectOptions
+        };
+
+        let moonbeamTile = await placeBeam(moonbeamLoc, casterToken.id, beamLoop, aseEffectOptions);
         console.log(moonbeamTile);
 
         let beamSeq = new Sequence("Advanced Spell Effects")
+            .sound()
+            .file(beamInitialSound)
+            .delay(beamInitialSoundDelay)
+            .volume(beamInitialSoundVolume)
+            .playIf(beamInitialSound != "")
             .effect()
             .file(beamIntro)
             .atLocation(moonbeamLoc)
@@ -155,7 +219,7 @@ export class moonBeam {
             .fadeIn(500)
         await beamSeq.play();
 
-        async function placeBeam(templateData, tokenId, beamAnim) {
+        async function placeBeam(templateData, tokenId, beamAnim, effectOptions) {
             let tileWidth;
             let tileHeight;
             let tileX;
@@ -187,7 +251,14 @@ export class moonBeam {
                 x: tileX,
                 y: tileY,
                 z: 100,
-                flags: { tagger: { tags: [`${tokenId}-moonbeam`] } }
+                flags: {
+                    tagger: {
+                        tags: [`${tokenId}-moonbeam`]
+                    },
+                    advancedspelleffects: {
+                        effectOptions: effectOptions
+                    }
+                }
             }]
             //console.log("Placing as tile: ", data);
             let createdTiles = await aseSocket.executeAsGM("placeTiles", data);
@@ -243,5 +314,145 @@ export class moonBeam {
         }
         let placedLoc = await warpgate.crosshairs.show(crosshairsConfig, { show: displayCrosshairs });
         return placedLoc;
+    }
+
+    static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
+        const beamColorOptions = utilFunctions.getDBOptions('jb2a.moonbeam.01.no_pulse');
+        const beamDamageOptions = utilFunctions.getDBOptions('jb2a.impact.004');
+
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+        const dieOptions = {
+            'd4': 'd4',
+            'd6': 'd6',
+            'd8': 'd8',
+            'd10': 'd10',
+            'd12': 'd12',
+            'd20': 'd20',
+        };
+
+        spellOptions.push({
+            label: 'Scale with spellLevel: ',
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.levelScaling',
+            flagName: 'levelScaling',
+            flagValue: currFlags.levelScaling ?? true,
+        });
+
+        spellOptions.push({
+            label: 'Damage Die Count: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
+            flagName: 'dmgDieCount',
+            flagValue: currFlags.dmgDieCount ?? 1,
+        });
+
+        spellOptions.push({
+            label: 'Damage Die: ',
+            type: 'dropdown',
+            options: dieOptions,
+            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
+            flagName: 'dmgDie',
+            flagValue: currFlags.dmgDie ?? 'd10',
+        });
+
+        spellOptions.push({
+            label: 'Damage Modifier: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
+            flagName: 'dmgMod',
+            flagValue: currFlags.dmgMod ?? 0,
+        });
+
+        animOptions.push({
+            label: 'Beam Color: ',
+            type: 'dropdown',
+            options: beamColorOptions,
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamColor',
+            flagName: 'moonbeamColor',
+            flagValue: currFlags.moonbeamColor,
+        });
+        soundOptions.push({
+            label: 'Moonbeam Initial Sound: ',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamSound',
+            flagName: 'moonbeamSound',
+            flagValue: currFlags.moonbeamSound ?? '',
+        });
+        soundOptions.push({
+            label: 'Moonbeam Initial Sound Delay: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamSoundDelay',
+            flagName: 'moonbeamSoundDelay',
+            flagValue: currFlags.moonbeamSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: 'Moonbeam Initial Volume: ',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamVolume',
+            flagName: 'moonbeamVolume',
+            flagValue: currFlags.moonbeamVolume ?? 1,
+        });
+
+        soundOptions.push({
+            label: 'Moonbeam Loop Sound: ',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopSound',
+            flagName: 'moonbeamLoopSound',
+            flagValue: currFlags.moonbeamLoopSound ?? '',
+        });
+        soundOptions.push({
+            label: 'Moonbeam Loop Sound Delay: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopSoundDelay',
+            flagName: 'moonbeamLoopSoundDelay',
+            flagValue: currFlags.moonbeamLoopSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: 'Moonbeam Loop Volume: ',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopVolume',
+            flagName: 'moonbeamLoopVolume',
+            flagValue: currFlags.moonbeamLoopVolume ?? 1,
+        });
+
+        animOptions.push({
+            label: 'Damage Effect Color: ',
+            type: 'dropdown',
+            options: beamDamageOptions,
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgColor',
+            flagName: 'moonbeamDmgColor',
+            flagValue: currFlags.moonbeamDmgColor,
+        });
+        soundOptions.push({
+            label: 'Damage Effect Sound: ',
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgSound',
+            flagName: 'moonbeamDmgSound',
+            flagValue: currFlags.moonbeamDmgSound ?? '',
+        });
+        soundOptions.push({
+            label: 'Damage Effect Sound Delay: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgSoundDelay',
+            flagName: 'moonbeamDmgSoundDelay',
+            flagValue: currFlags.moonbeamDmgSoundDelay ?? 0,
+        });
+        soundOptions.push({
+            label: 'Damage Effect Volume: ',
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgVolume',
+            flagName: 'moonbeamDmgVolume',
+            flagValue: currFlags.moonbeamDmgVolume ?? 1,
+        });
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions
+        }
+
     }
 }
