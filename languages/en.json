@@ -15,14 +15,5 @@
   "ASE.MagicMissile": "Magic Missile",
   "ASE.ScorchingRay": "Scorching Ray",
   "ASE.EldritchBlast": "Eldritch Blast",
-  "ASE.Summon": "Summon",
-
-  "ASE.Abjuration": "abjuration",
-  "ASE.Conjuration": "conjuration",
-  "ASE.Divination": "divination",
-  "ASE.Enchantment": "enchantment",
-  "ASE.Evocation": "evocation",
-  "ASE.Illusion": "illusion",
-  "ASE.Necromancy": "necromancy",
-  "ASE.Transmutation": "transmutation"
+  "ASE.Summon": "Summon"
 }
