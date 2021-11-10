@@ -1,3 +1,28 @@
 {
-  "advancedspelleffects.Darkness": "Darkness"
+  "ASE.Darkness": "Darkness",
+  "ASE.DetectMagic": "Detect Magic",
+  "ASE.FogCloud": "Fog Cloud",
+  "ASE.SteelWindStrike": "Steel Wind Strike",
+  "ASE.ThunderStep": "Thunder Step",
+  "ASE.SpiritualWeapon": "Spiritual Weapon",
+  "ASE.CallLightning": "Call Lightning",
+  "ASE.CallLightningBolt": "Call Lightning Bolt",
+  "ASE.AnimateDead": "Animate Dead",
+  "ASE.WitchBolt": "Witch Bolt",
+  "ASE.ActivateWitchBolt": "Activate Witch Bolt",
+  "ASE.VampiricTouch": "Vampiric Touch",
+  "ASE.VampiricTouchAttack": "Vampiric Touch (Attack)",
+  "ASE.MagicMissile": "Magic Missile",
+  "ASE.ScorchingRay": "Scorching Ray",
+  "ASE.EldritchBlast": "Eldritch Blast",
+  "ASE.Summon": "Summon",
+
+  "ASE.Abjuration": "abjuration",
+  "ASE.Conjuration": "conjuration",
+  "ASE.Divination": "divination",
+  "ASE.Enchantment": "enchantment",
+  "ASE.Evocation": "evocation",
+  "ASE.Illusion": "illusion",
+  "ASE.Necromancy": "necromancy",
+  "ASE.Transmutation": "transmutation"
 }

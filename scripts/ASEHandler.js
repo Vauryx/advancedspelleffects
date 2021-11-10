@@ -31,40 +31,40 @@ export class ASEHandler {
         }
         //Activate spell
         switch (item.name) {
-            case "Darkness":
+            case game.i18n.localize("ASE.Darkness"):
                 await darkness.createDarkness(data);
                 return;
-            case "Detect Magic":
+            case game.i18n.localize('ASE.DetectMagic'):
                 await detectMagic.activateDetectMagic(data);
                 return;
-            case "Call Lightning":
+            case game.i18n.localize('ASE.CallLightning'):
                 if (!data.flavor?.includes("Lightning Bolt")) {
                     await callLightning.createStormCloud(data);
                 }
                 return;
-            case "Call Lightning Bolt":
-                if(!data.flavor?.includes("Lightning Bolt")) {
+            case game.i18n.localize('ASE.CallLightningBolt'):
+                if (!data.flavor?.includes("Lightning Bolt")) {
                     await callLightning.callLightningBolt(aseFlags.effectOptions.stormTileId);
                 }
                 return;
-            case "Fog Cloud":
+            case game.i18n.localize('ASE.FogCloud'):
                 await fogCloud.createFogCloud(data);
                 return;
-            case "Spiritual Weapon":
+            case game.i18n.localize('ASE.SpiritualWeapon'):
                 await spiritualWeapon.createSpiritualWeapon(data);
                 return;
-            case "Steel Wind Strike":
+            case game.i18n.localize('ASE.SteelWindStrike'):
                 if (!data.flavor?.includes("Steel Wind Strike")) {
                     await steelWindStrike.doStrike(data);
                 }
                 return;
-            case "Thunder Step":
+            case game.i18n.localize('ASE.ThunderStep'):
                 await thunderStep.doTeleport(data);
                 return;
-            case "Animate Dead":
+            case game.i18n.localize('ASE.AnimateDead'):
                 await animateDead.rise(data);
                 return;
-            case 'Witch Bolt':
+            case game.i18n.localize('ASE.WitchBolt'):
                 if (data.flavor != "Witch Bolt - Damage Roll (1d12 Lightning)" || !data.flavor) {
                     console.log('Casting Witch Bolt!', data.flavor);
                     await witchBolt.cast(data);
@@ -74,28 +74,28 @@ export class ASEHandler {
                     //await witchBolt.activateBolt(data);
                 }
                 return;
-            case 'Activate Witch Bolt':
+            case game.i18n.localize('ASE.ActivateWitchBolt'):
                 if (data.flavor != "Witch Bolt - Damage Roll (1d12 Lightning)" || !data.flavor) {
                     await witchBolt.activateBolt(data);
                 }
                 return;
-            case 'Vampiric Touch':
+            case game.i18n.localize('ASE.VampiricTouch'):
                 await vampiricTouch.cast(data);
                 return;
-            case 'Vampiric Touch (Attack)':
+            case game.i18n.localize('ASE.VampiricTouchAttack'):
                 await vampiricTouch.activateTouch(data);
                 return;
-            case 'Magic Missile':
+            case game.i18n.localize('ASE.MagicMissile'):
                 await magicMissile.selectTargets(data);
                 return;
-            case 'Scorching Ray':
+            case game.i18n.localize('ASE.ScorchingRay'):
                 await scorchingRay.selectTargets(data);
                 return;
-            case 'Eldritch Blast':
+            case game.i18n.localize('ASE.EldritchBlast'):
                 await eldritchBlast.selectTargets(data);
                 return;
         }
-        if (item.name.includes("Summon")) {
+        if (item.name.includes(game.i18n.localize("ASE.Summon"))) {
             await summonCreature.doSummon(data);
             return;
         }
