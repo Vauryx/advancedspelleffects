@@ -420,7 +420,7 @@ export class MissileDialog extends FormApplication {
                     //let playerChatCardConetnt = `Launched </b>${missileNum}</b> ${this.data.effectOptions.missileType}(s) at <b>${targetToken.name}</b> dealing <b>${totalDamageFormula.formula} (${damageTotal}) ${this.data.effectOptions.dmgType}</b> damage!`
                     //await ChatMessage.create({content: playerChatCardConetnt, user: game.user.id});
                     await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
-                    await ui.chat.scrollBottom();
+
 
                 }
 
@@ -428,7 +428,8 @@ export class MissileDialog extends FormApplication {
                 await targetToken.document.unsetFlag("advancedspelleffects", 'missileSpell');
             }
             let content = this._buildChatData(this.data.allAttackRolls, this.data.allDamRolls, caster);
-            await ChatMessage.create({ content: content, user: game.user.id })
+            await ChatMessage.create({ content: content, user: game.user.id });
+            await ui.chat.scrollBottom();
         }
         $(document.body).off("mouseup", MissileDialog._handleClick);
         await aseSocket.executeAsGM("updateFlag", game.user.id, "missileDialogPos", { left: this.position.left, top: this.position.top });

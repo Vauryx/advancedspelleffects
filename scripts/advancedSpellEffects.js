@@ -19,6 +19,7 @@ import { witchBolt } from "./spells/witchBolt.js";
 import {magicMissile} from "./spells/magicMissile.js";
 import {scorchingRay} from "./spells/scorchingRay.js";
 import {eldritchBlast} from "./spells/eldritchBlast.js";
+import {moonBeam} from "./spells/moonBeam.js";
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
     setupASESocket();
@@ -42,8 +43,21 @@ const aseModules = {
     noMidiHandler,
     MissileDialog,
     scorchingRay,
-    eldritchBlast
+    eldritchBlast,
+    moonBeam
+
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());
+    Hooks.on('sequencerReady', ()=> {
+        function easeOutElasticCustom(x) {
+            const c4 = (2 * Math.PI) / 10;
+            return x === 0
+                ? 0
+                : x === 1
+                    ? 1
+                    : Math.pow(2, -12 * x) * Math.sin((x * 12 - 0.75) * c4) + 1;
+        }
+        Sequencer.registerEase("easeOutElasticCustom", easeOutElasticCustom);
+    });
 });

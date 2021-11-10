@@ -259,12 +259,12 @@ export class callLightning {
                 itemData.data.components.concentration = false;
                 // console.log("ItemData: ", itemData);
                 // console.log("Item: ", item);
-                let fullDamageRoll = new Roll(`${spellLevel}d10`).evaluate({ async: false });
+                let fullDamageRoll = await new Roll(`${spellLevel}d10`).evaluate({ async: true });
                 if (game.modules.get("dice-so-nice")?.active) {
                     game.dice3d?.showForRoll(fullDamageRoll);
                 }
                 //console.log("Lightning Bolt Full Damage roll: ", fullDamageRoll);
-                let halfdamageroll = new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: false });
+                let halfdamageroll = await new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: true });
 
                 if (failedSaves.length > 0) {
                     new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, fullDamageRoll.total, "lightning", failedSaves, fullDamageRoll, { flavor: `Lightning Bolt Full Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });

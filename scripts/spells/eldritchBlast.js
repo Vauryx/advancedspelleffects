@@ -53,12 +53,12 @@ export class eldritchBlast {
         const targetMarkerColorOptions = utilFunctions.getDBOptions('jb2a.markers.02');
 
         const dieOptions = {
-            'd4': 'D4',
-            'd6': 'D6',
-            'd8': 'D8',
-            'd10': 'D10',
-            'd12': 'D12',
-            'd20': 'D20',
+            'd4': 'd4',
+            'd6': 'd6',
+            'd8': 'd8',
+            'd10': 'd10',
+            'd12': 'd12',
+            'd20': 'd20',
         };
 
         let spellOptions = [];

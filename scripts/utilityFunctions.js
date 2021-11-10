@@ -26,6 +26,10 @@ export function checkModules() {
     return error;
 }
 
+export function getDistanceClassic(pointA, pointB) {
+    return Math.sqrt(Math.pow((pointA.x - pointB.x), 2) + Math.pow((pointA.y - pointB.y), 2));
+}
+
 export function measureDistance(pointA, pointB) {
     const ray = new Ray({ x: pointA.x, y: pointA.y }, { x: pointB.x, y: pointB.y });
     const segments = [{ ray }];

@@ -1,3 +1,5 @@
+import * as utilFunctions from "./utilityFunctions.js";
+
 export var aseSocket = undefined;
 
 export function setupASESocket() {
@@ -9,17 +11,19 @@ export function setupASESocket() {
         aseSocket.register("deleteTiles", deleteTiles);
         aseSocket.register("updateFlag", updateFlag);
         aseSocket.register("moveWalls", moveWalls);
+        aseSocket.register("moveTile", moveTile);
+        aseSocket.register("fadeTile", fadeTile);
     }
 };
 
 async function updateFlag(objectId, flag, value) {
-    let object = canvas.scene.tiles.get(objectId) 
-                || canvas.scene.tokens.get(objectId) 
-                || canvas.scene.drawings.get(objectId) 
-                || canvas.scene.walls.get(objectId) 
-                || canvas.scene.lights.get(objectId) 
-                || game.scenes.get(objectId) 
-                || game.users.get(objectId);
+    let object = canvas.scene.tiles.get(objectId)
+        || canvas.scene.tokens.get(objectId)
+        || canvas.scene.drawings.get(objectId)
+        || canvas.scene.walls.get(objectId)
+        || canvas.scene.lights.get(objectId)
+        || game.scenes.get(objectId)
+        || game.users.get(objectId);
     await object.setFlag("advancedspelleffects", flag, value);
 }
 
@@ -78,3 +82,42 @@ async function moveWalls(tileId, wallType, numWalls) {
     await canvas.scene.createEmbeddedDocuments("Wall", walls);
 }
 
+async function moveTile(newLocation, tileId) {
+    let tile = canvas.scene.tiles.get(tileId);
+
+    const distance = utilFunctions.getDistanceClassic({ x: tile.data.x + canvas.grid.size, y: tile.data.y + canvas.grid.size }, { x: newLocation.x, y: newLocation.y });
+    console.log('Distance: ', distance);
+
+    const moveSpeed = Math.floor(distance / 50);
+    console.log('Move Speed: ', moveSpeed);
+
+    let moveTileSeq = new Sequence("Advanced Spell Effects")
+        .animation()
+        .on(tile)
+        .moveTowards(newLocation, { ease: "easeInOutQuint" })
+        .offset({ x: -canvas.grid.size, y: -canvas.grid.size })
+        .moveSpeed(moveSpeed)
+    await moveTileSeq.play();
+
+}
+
+async function fadeTile(fade, tileId) {
+    //console.log("Fading in Moonbeam Tile...");
+    let tile = canvas.scene.tiles.get(tileId);
+    if (!tile) {
+        ui.notifications.error("Moonbeam Tile not found");
+        return;
+    }
+    let fadeTileSeq = new Sequence("Advanced Spell Effects")
+        .animation()
+        .on(tile);
+    if (fade.type == "fadeIn") {
+        fadeTileSeq.fadeIn(fade.duration);
+    }
+    else if (fade.type == "fadeOut") {
+        fadeTileSeq.fadeOut(fade.duration);
+    }
+
+    await fadeTileSeq.play();
+
+}

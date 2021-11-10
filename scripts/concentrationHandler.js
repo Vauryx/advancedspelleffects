@@ -8,6 +8,7 @@ import { fogCloud } from "./spells/fogCloud.js";
 import { summonCreature } from "./spells/summonCreature.js";
 import { witchBolt } from "./spells/witchBolt.js";
 import { vampiricTouch } from "./spells/vampiricTouch.js";
+import { moonBeam } from "./spells/moonBeam.js";
 
 export class concentrationHandler {
 
@@ -18,7 +19,7 @@ export class concentrationHandler {
     static async _handleConcentration(activeEffect) {
         console.log("Handling removal of Concentration: ", activeEffect);
         const isGM = utilFunctions.isFirstGM();
-        console.log("Is first GM: ", isGM);
+        //console.log("Is first GM: ", isGM);
         if (!isGM) return;
         if (activeEffect.data.label != "Concentrating") return;
         let origin = activeEffect.data.origin?.split(".");
@@ -60,6 +61,9 @@ export class concentrationHandler {
                 return;
             case game.i18n.localize('ASE.VampiricTouch'):
                 vampiricTouch.handleConcentration(casterActor, casterToken, effectOptions);
+                return;
+            case game.i18n.localize('ASE.Moonbeam'):
+                moonBeam.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }
         if (effectSource.includes(game.i18n.localize("ASE.Summon"))) {
