@@ -96,7 +96,9 @@ export class ASEHandler {
                 await eldritchBlast.selectTargets(data);
                 return;
             case game.i18n.localize('ASE.Moonbeam'):
-                await moonBeam.callBeam(data);
+                if (!data.flavor?.includes("- Damage Roll")) {
+                    await moonBeam.callBeam(data);
+                }
                 return;
             case game.i18n.localize('ASE.MoveMoonbeam'):
                 await moonBeam.moveBeam(data);

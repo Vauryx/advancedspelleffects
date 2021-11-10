@@ -194,7 +194,8 @@ export class spiritualWeapon {
                 'alpha': 0,
                 'name': `${summonType} of ${casterActor.name}`,
                 'img': spiritualWeapon,
-                'scale': 1.5
+                'scale': 1.5,
+                'actorLink': false
             },
             actor: {
                 'name': `${summonType} of ${casterActor.name}`,

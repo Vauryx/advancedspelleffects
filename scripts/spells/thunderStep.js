@@ -23,7 +23,7 @@ export class thunderStep {
         const reappearSoundDelay = Number(effectOptions.reappearSoundDelay) ?? 0;
         const reappearVolume = effectOptions.reappearVolume ?? 1;
 
-        const teleport_range = await MeasuredTemplate.create({
+        const teleport_range = await canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [{
             t: "circle",
             user: game.userId,
             x: tokenD.x + canvas.grid.size / 2,
@@ -31,9 +31,9 @@ export class thunderStep {
             direction: 0,
             distance: 92.5,
             fillColor: game.user.color
-        });
+        }]);
 
-        const damage_range = await MeasuredTemplate.create({
+        const damage_range = await canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [{
             t: "circle",
             user: game.userId,
             x: tokenD.x + canvas.grid.size / 2,
@@ -41,7 +41,7 @@ export class thunderStep {
             direction: 0,
             distance: 12.5,
             fillColor: "#FF0000"
-        });
+        }]);
 
         const passengers = [];
         if (midiData.targets.length) {
@@ -156,10 +156,10 @@ export class thunderStep {
                         let newChatmessageContent = $(chatMessageContent);
 
                         newChatmessageContent.find(".midi-qol-saves-display").empty();
-                        let damage = new Roll(`${spellLevel}d10`).roll();
+                        let damage = await new Roll(`${spellLevel}d10`).evaluate({ async: true });
                         for (let targetToken of targets) {
 
-                            let save = new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.con.save }).roll().total;
+                            let save = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.con.save }).evaluate({ async: true }).total;
 
                             targetTokens.add(targetToken)
                             if (save >= spellSaveDC) {

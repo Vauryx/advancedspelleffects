@@ -12,6 +12,7 @@ export function setupASESocket() {
         aseSocket.register("updateFlag", updateFlag);
         aseSocket.register("moveWalls", moveWalls);
         aseSocket.register("moveTile", moveTile);
+        aseSocket.register("fadeTile", fadeTile);
     }
 };
 
@@ -93,10 +94,30 @@ async function moveTile(newLocation, tileId) {
     let moveTileSeq = new Sequence("Advanced Spell Effects")
         .animation()
         .on(tile)
-        .moveTowards(newLocation,{ ease: "easeInOutQuint" })
+        .moveTowards(newLocation, { ease: "easeInOutQuint" })
         .offset({ x: -canvas.grid.size, y: -canvas.grid.size })
         .moveSpeed(moveSpeed)
     await moveTileSeq.play();
 
 }
 
+async function fadeTile(fade, tileId) {
+    //console.log("Fading in Moonbeam Tile...");
+    let tile = canvas.scene.tiles.get(tileId);
+    if (!tile) {
+        ui.notifications.error("Moonbeam Tile not found");
+        return;
+    }
+    let fadeTileSeq = new Sequence("Advanced Spell Effects")
+        .animation()
+        .on(tile);
+    if (fade.type == "fadeIn") {
+        fadeTileSeq.fadeIn(fade.duration);
+    }
+    else if (fade.type == "fadeOut") {
+        fadeTileSeq.fadeOut(fade.duration);
+    }
+
+    await fadeTileSeq.play();
+
+}

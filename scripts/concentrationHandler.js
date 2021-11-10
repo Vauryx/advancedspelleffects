@@ -19,7 +19,7 @@ export class concentrationHandler {
     static async _handleConcentration(activeEffect) {
         console.log("Handling removal of Concentration: ", activeEffect);
         const isGM = utilFunctions.isFirstGM();
-        console.log("Is first GM: ", isGM);
+        //console.log("Is first GM: ", isGM);
         if (!isGM) return;
         if (activeEffect.data.label != "Concentrating") return;
         let origin = activeEffect.data.origin?.split(".");
