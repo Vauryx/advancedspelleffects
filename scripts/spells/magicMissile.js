@@ -39,10 +39,10 @@ export class magicMissile {
         aseEffectOptions['missileType'] = 'dart';
         aseEffectOptions['missileAnim'] = 'jb2a.magic_missile';
         aseEffectOptions['baseScale'] = 0.05;
-        aseEffectOptions['dmgDie'] = 'd4';
-        aseEffectOptions['dmgDieCount'] = 1;
+        aseEffectOptions['dmgDie'] = aseEffectOptions.dmgDie ?? 'd4';
+        aseEffectOptions['dmgDieCount'] = aseEffectOptions.dmgDieCount ?? 1;
         aseEffectOptions['dmgType'] = 'force';
-        aseEffectOptions['dmgMod'] = 1;
+        aseEffectOptions['dmgMod'] = aseEffectOptions.dmgMod ?? 1;
         aseEffectOptions['impactDelay'] = -1000;
         new MissileDialog({ casterId: casterToken.id, numMissiles: numMissiles, itemCardId: itemCardId, effectOptions: aseEffectOptions, item: spellItem }).render(true);
     }
@@ -55,6 +55,41 @@ export class magicMissile {
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
+
+        const dieOptions = {
+            'd4': 'D4',
+            'd6': 'D6',
+            'd8': 'D8',
+            'd10': 'D10',
+            'd12': 'D12',
+            'd20': 'D20',
+        };
+
+
+        spellOptions.push({
+            label: 'Damage Die Count: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
+            flagName: 'dmgDieCount',
+            flagValue: currFlags.dmgDieCount ?? 1,
+        });
+
+        spellOptions.push({
+            label: 'Damage Die: ',
+            type: 'dropdown',
+            options: dieOptions,
+            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
+            flagName: 'dmgDie',
+            flagValue: currFlags.dmgDie ?? 'd10',
+        });
+
+        spellOptions.push({
+            label: 'Damage Modifier: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
+            flagName: 'dmgMod',
+            flagValue: currFlags.dmgMod ?? 0,
+        });
 
         animOptions.push({
             label: 'Target Marker Color: ',

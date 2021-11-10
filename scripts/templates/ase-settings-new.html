@@ -105,17 +105,13 @@
                                                 <input type="checkbox" name="{{this.name}}" {{checked this.flagValue}}>
                                             {{/ifCondASE}}
                                             {{#ifCondASE this.type '==' 'numberInput'}}
-                                        <td colspan="2">
-                                            <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
-                                                value={{this.flagValue}}>
-                                        </td>
-                                        {{/ifCondASE}}
-                                        {{#ifCondASE this.type '==' 'rangeInput'}}
-                                            <td colspan="2">
+                                                <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'rangeInput'}}
                                                 <input type="range" min="0" max="1" step="0.01" name="{{this.name}}"
                                                     value={{this.flagValue}}>
-                                            </td>
-                                        {{/ifCondASE}}
+                                            {{/ifCondASE}}
                                         </td>
                                     </tr>
                                 {{/each}}
