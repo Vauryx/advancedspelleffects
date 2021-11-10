@@ -111,25 +111,21 @@ export class MissileDialog extends FormApplication {
     }
 
     async _handleClick(event) {
-
+        //console.log('Clicked: ', event);
         let parsedEventData = {
             altKey: event.originalEvent.altKey,
             ctrlKey: event.originalEvent.ctrlKey,
-            button: event.originalEvent.button,
-            x: event.originalEvent.x,
-            y: event.originalEvent.y
+            button: event.originalEvent.button
         }
         //set attacktype to 1 if altkey and -1 if ctrlkey, 0 by default
         let attackType = parsedEventData.altKey ? 'kh' : (parsedEventData.ctrlKey ? 'kl' : '');
         //console.log('Mouse Click Data: ', parsedEventData);
         let token = canvas.tokens.placeables.filter(token => {
-            //console.log('Token Global Position: ', token.getGlobalPosition());
-            //console.log('Token Width & Height: ', token.w, token.h);
-            //console.log('Mouse Position: ', parsedEventData);
-            return token.getGlobalPosition().x <= parsedEventData.x
-                && token.getGlobalPosition().x + token.hitArea.width >= parsedEventData.x
-                && token.getGlobalPosition().y <= parsedEventData.y
-                && token.getGlobalPosition().y + token.hitArea.height >= parsedEventData.y;
+            const mouse = canvas.app.renderer.plugins.interaction.mouse;
+            const mouseLocal = mouse.getLocalPosition(token);
+            //console.log('Mouse Local: ', mouseLocal);
+            return mouseLocal.x >= 0 && mouseLocal.x <= token.hitArea.width
+                && mouseLocal.y >= 0 && mouseLocal.y <= token.hitArea.height;
         })[0];
         if (token) {
             //console.log('Target: ', token.name);
