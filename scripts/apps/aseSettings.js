@@ -126,7 +126,7 @@ export class ASESettings extends FormApplication {
         await this.setItemDetails(item);
         let requiredSettings;
         console.log("Item name: ", itemName);
-        if (itemName.includes("Summon")) {
+        if (itemName.includes(game.i18n.localize("ASE.Summon"))) {
             requiredSettings = await summonCreature.getRequiredSettings(flags.advancedspelleffects.effectOptions);
             //console.log(requiredSettings);
             returnOBJ.requiredSettings = requiredSettings;
@@ -153,7 +153,7 @@ export class ASESettings extends FormApplication {
             //console.log(returnOBJ);
         }
         else {
-            requiredSettings = await this.spellList[itemName].getRequiredSettings(flags.advancedspelleffects.effectOptions);
+            requiredSettings = await this.spellList[game.i18n.localize(itemName)].getRequiredSettings(flags.advancedspelleffects.effectOptions);
             //console.log(requiredSettings);
             returnOBJ.requiredSettings = requiredSettings;
         }

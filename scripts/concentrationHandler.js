@@ -20,7 +20,7 @@ export class concentrationHandler {
         console.log("Handling removal of Concentration: ", activeEffect);
         const isGM = utilFunctions.isFirstGM();
         console.log("Is first GM: ", isGM);
-        if(!isGM) return;
+        if (!isGM) return;
         if (activeEffect.data.label != "Concentrating") return;
         let origin = activeEffect.data.origin?.split(".");
         if (!origin || origin?.length < 4) return false;
@@ -28,11 +28,11 @@ export class concentrationHandler {
         let casterActor;
         let casterToken;
         let effectSource;
-        if(origin[0] == "Actor"){
+        if (origin[0] == "Actor") {
             casterActor = game.actors.get(origin[1]);
             casterToken = await casterActor.getActiveTokens()[0];
         }
-        else{
+        else {
             casterToken = canvas.tokens.get(origin[3]);
             casterActor = casterToken.actor;
         }
@@ -44,29 +44,29 @@ export class concentrationHandler {
         if (!aseEnabled) return;
         //console.log(effectSource);
         switch (effectSource) {
-            case "Darkness":
+            case game.i18n.localize("ASE.Darkness"):
                 darkness.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
-            case "Detect Magic":
+            case game.i18n.localize('ASE.DetectMagic'):
                 detectMagic.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
-            case "Call Lightning":
+            case game.i18n.localize('ASE.CallLightning'):
                 callLightning.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
-            case "Fog Cloud":
+            case game.i18n.localize('ASE.FogCloud'):
                 fogCloud.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
-            case "Witch Bolt":
+            case game.i18n.localize('ASE.WitchBolt'):
                 witchBolt.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
-            case "Vampiric Touch":
+            case game.i18n.localize('ASE.VampiricTouch'):
                 vampiricTouch.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
             case "Moonbeam":
                 moonBeam.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }
-        if (effectSource.includes("Summon")) {
+        if (effectSource.includes(game.i18n.localize("ASE.Summon"))) {
             summonCreature.handleConcentration(casterActor, casterToken, effectOptions);
             return;
         }

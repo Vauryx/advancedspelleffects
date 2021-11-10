@@ -41,18 +41,18 @@ export class scorchingRay {
         aseEffectOptions['missileType'] = 'ray';
         aseEffectOptions['missileAnim'] = 'jb2a.scorching_ray';
         aseEffectOptions['baseScale'] = 0.1;
-        aseEffectOptions['dmgDie'] = 'd6';
-        aseEffectOptions['dmgDieCount'] = 2;
+        aseEffectOptions['dmgDie'] = aseEffectOptions.dmgDie ?? 'd6';
+        aseEffectOptions['dmgDieCount'] = aseEffectOptions.dmgDieCount ?? 2;
         aseEffectOptions['dmgType'] = 'fire';
-        aseEffectOptions['dmgMod'] = 0;
+        aseEffectOptions['dmgMod'] = aseEffectOptions.dmgMod ?? 0;
         aseEffectOptions['impactDelay'] = -1000;
         new MissileDialog({
-          casterId: casterToken.id,
-          numMissiles: numMissiles,
-          itemCardId: itemCardId,
-          effectOptions: aseEffectOptions,
-          item: spellItem,
-          actionType: "rsak",
+            casterId: casterToken.id,
+            numMissiles: numMissiles,
+            itemCardId: itemCardId,
+            effectOptions: aseEffectOptions,
+            item: spellItem,
+            actionType: "rsak",
         }).render(true);
     }
 
@@ -64,6 +64,41 @@ export class scorchingRay {
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
+
+        const dieOptions = {
+            'd4': 'D4',
+            'd6': 'D6',
+            'd8': 'D8',
+            'd10': 'D10',
+            'd12': 'D12',
+            'd20': 'D20',
+        };
+
+        spellOptions.push({
+            label: 'Damage Die Count: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
+            flagName: 'dmgDieCount',
+            flagValue: currFlags.dmgDieCount ?? 1,
+        });
+
+        spellOptions.push({
+            label: 'Damage Die: ',
+            type: 'dropdown',
+            options: dieOptions,
+            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
+            flagName: 'dmgDie',
+            flagValue: currFlags.dmgDie ?? 'd10',
+        });
+
+        spellOptions.push({
+            label: 'Damage Modifier: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
+            flagName: 'dmgMod',
+            flagValue: currFlags.dmgMod ?? 0,
+        });
+
 
         animOptions.push({
             label: 'Target Marker Color: ',

@@ -6,17 +6,9 @@
   "version": "This is auto replaced",
   "library": "false",
   "manifestPlusVersion": "1.0.0",
-  "minimumCoreVersion": "0.8.8",
-  "compatibleCoreVersion": "0.8.8",
-  "packs": [
-    {
-      "name": "aseMidiSpells",
-      "label": "Advanced Spell Effects - MIDI Spells",
-      "path": "packs/aseMidiSpells.db",
-      "entity": "Item",
-      "module": "advancedspelleffects"
-    }
-  ],
+  "minimumCoreVersion": "0.8.9",
+  "compatibleCoreVersion": "0.8.9",
+  "packs": [],
   "authors": [
     {
       "name": "Vauryx",
@@ -36,14 +28,9 @@
     }
   ],
   "conflicts": [],
-  "esmodules": [
-    "/scripts/setup.js",
-    "/scripts/advancedSpellEffects.js"
-  ],
+  "esmodules": ["/scripts/setup.js", "/scripts/advancedSpellEffects.js"],
   "scripts": [],
-  "styles": [
-    "/styles/module.css"
-  ],
+  "styles": ["/styles/module.css"],
   "languages": [
     {
       "lang": "en",

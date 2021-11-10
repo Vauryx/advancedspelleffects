@@ -26,24 +26,24 @@ export class eldritchBlast {
         aseEffectOptions['missileType'] = 'beam';
         aseEffectOptions['missileAnim'] = 'jb2a.eldritch_blast';
         aseEffectOptions['baseScale'] = 0.1;
-        aseEffectOptions['dmgDie'] = 'd10';
-        aseEffectOptions['dmgDieCount'] = 1;
+        aseEffectOptions['dmgDie'] = aseEffectOptions.dmgDie ?? 'd10';
+        aseEffectOptions['dmgDieCount'] = aseEffectOptions.dmgDieCount ?? 1;
         aseEffectOptions['dmgType'] = 'force';
-        aseEffectOptions['dmgMod'] = 0;
+        aseEffectOptions['dmgMod'] = aseEffectOptions.dmgMod ?? 0;
         aseEffectOptions['impactDelay'] = -3000;
         let invocations = aseEffectOptions.invocations;
         if (invocations.agonizingBlast) {
-            aseEffectOptions.dmgMod = casterActor?.data?.data?.abilities?.cha?.mod ?? 0;
+            aseEffectOptions.dmgMod += casterActor?.data?.data?.abilities?.cha?.mod ?? 0;
         }
-        
-    new MissileDialog({
-      casterId: casterToken.id,
-      numMissiles: numMissiles,
-      itemCardId: itemCardId,
-      effectOptions: aseEffectOptions,
-      item: spellItem,
-      actionType: "rsak",
-    }).render(true);
+
+        new MissileDialog({
+            casterId: casterToken.id,
+            numMissiles: numMissiles,
+            itemCardId: itemCardId,
+            effectOptions: aseEffectOptions,
+            item: spellItem,
+            actionType: "rsak",
+        }).render(true);
     }
 
     static async getRequiredSettings(currFlags) {
@@ -51,6 +51,15 @@ export class eldritchBlast {
 
         const missileColorOptions = utilFunctions.getDBOptions('jb2a.eldritch_blast');
         const targetMarkerColorOptions = utilFunctions.getDBOptions('jb2a.markers.02');
+
+        const dieOptions = {
+            'd4': 'D4',
+            'd6': 'D6',
+            'd8': 'D8',
+            'd10': 'D10',
+            'd12': 'D12',
+            'd20': 'D20',
+        };
 
         let spellOptions = [];
         let animOptions = [];
@@ -61,7 +70,32 @@ export class eldritchBlast {
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.invocations.agonizingBlast',
             flagName: 'invocations.agonizingBlast',
-            flagValue: currFlags.invocations.agonizingBlast,
+            flagValue: currFlags.invocations?.agonizingBlast ?? false,
+        });
+
+        spellOptions.push({
+            label: 'Damage Die Count: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
+            flagName: 'dmgDieCount',
+            flagValue: currFlags.dmgDieCount ?? 1,
+        });
+
+        spellOptions.push({
+            label: 'Damage Die: ',
+            type: 'dropdown',
+            options: dieOptions,
+            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
+            flagName: 'dmgDie',
+            flagValue: currFlags.dmgDie ?? 'd10',
+        });
+
+        spellOptions.push({
+            label: 'Damage Modifier: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
+            flagName: 'dmgMod',
+            flagValue: currFlags.dmgMod ?? 0,
         });
 
         animOptions.push({
