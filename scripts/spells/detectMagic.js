@@ -25,8 +25,17 @@ export class detectMagic {
                 if (!assetDBPaths.includes(waveAnim)) assetDBPaths.push(waveAnim);
                 if (!assetDBPaths.includes(auraLoopAnim)) assetDBPaths.push(auraLoopAnim);
                 if (!assetDBPaths.includes(auraIntroAnim)) assetDBPaths.push(auraIntroAnim);
-
-                let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+                const magicalSchoolsEng = [
+                    "abjuration",
+                    "conjuration",
+                    "divination",
+                    "enchantment",
+                    "evocation",
+                    "illusion",
+                    "necromancy",
+                    "transmutation"
+                ];
+                let magicalSchools = magicalSchoolsEng;
                 let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
 
                 let objects = await Tagger.getByTag("magical");
@@ -68,23 +77,23 @@ export class detectMagic {
         const waveSoundDelay = Number(aseFlags.waveSoundDelay) ?? 0;
         const waveVolume = Number(aseFlags.waveVolume) ?? 1;
 
-        const magicalSchoolsEng = {
-            "abjuration": "Abjuration",
-            "conjuration": "Conjuration",
-            "divination": "Divination",
-            "enchantment": "Enchantment",
-            "evocation": "Evocation",
-            "illusion": "Illusion",
-            "necromancy": "Necromancy",
-            "transmutation": "Transmutation"
-        };
+        const magicalSchoolsEng = [
+            "abjuration",
+            "conjuration",
+            "divination",
+            "enchantment",
+            "evocation",
+            "illusion",
+            "necromancy",
+            "transmutation"
+        ];
 
         for (const user in actor.data.permission) {
             if (user == "default") continue;
             users.push(user);
         }
 
-        let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+        let magicalSchools = magicalSchoolsEng;
         let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
 
         let objects = await Tagger.getByTag("magical", { ignore: [caster] });
@@ -170,8 +179,18 @@ export class detectMagic {
             if (user == "default") continue;
             users.push(user);
         }
+        const magicalSchoolsEng = [
+            "abjuration",
+            "conjuration",
+            "divination",
+            "enchantment",
+            "evocation",
+            "illusion",
+            "necromancy",
+            "transmutation"
+        ];
         let objects = await Tagger.getByTag("magical", { ignore: [casterToken] });
-        let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+        let magicalSchools = magicalSchoolsEng;
         let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
         let magicalObjects = [];
 
@@ -233,7 +252,17 @@ export class detectMagic {
         newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
         let magicalObjectsOutOfRange = [];
         let magicalObjectsInRange = [];
-        let magicalSchools = Object.values(CONFIG.DND5E.spellSchools).map(school => school.toLowerCase());
+        const magicalSchoolsEng = [
+            "abjuration",
+            "conjuration",
+            "divination",
+            "enchantment",
+            "evocation",
+            "illusion",
+            "necromancy",
+            "transmutation"
+        ];
+        let magicalSchools = magicalSchoolsEng;
         let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
 
         let objects = await Tagger.getByTag("magical", { ignore: [tokenDocument] });
