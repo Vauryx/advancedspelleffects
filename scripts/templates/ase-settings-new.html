@@ -188,6 +188,11 @@
                                                     value={{this.flagValue}}>
                                             </td>
                                         {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'checkbox'}}
+                                            <td colspan="2">
+                                                <input type="checkbox" name="{{this.name}}" {{checked this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
                                     </tr>
                                 {{/each}}
                             </tbody>
