@@ -60,7 +60,7 @@ async function fadeTile(fade, tileId) {
     //console.log("Fading in Moonbeam Tile...");
     let tile = canvas.scene.tiles.get(tileId);
     if (!tile) {
-        ui.notifications.error("Moonbeam Tile not found");
+        ui.notifications.error(game.i18n.localize("ASE.TileNotFound"));
         return;
     }
     let fadeTileSeq = new Sequence("Advanced Spell Effects")
@@ -133,7 +133,7 @@ async function moveSound(sourceId, newLoc) {
     let source = canvas.scene.tiles.get(sourceId)
         || canvas.scene.tokens.get(sourceId);
     if (!source) {
-        ui.notifications.error("ASE: Sound Source not found");
+        ui.notifications.error(game.i18n.localize("ASE.SoundSourceNotFound"));
         return;
     }
     if (source.getFlag("advancedspelleffects", "moving")) {
@@ -141,7 +141,7 @@ async function moveSound(sourceId, newLoc) {
     }
     const attachedSounds = (await Tagger.getByTag([`ase-source-${sourceId}`]));
     if (!attachedSounds.length > 0) {
-        ui.notifications.error("ASE: Sound not found");
+        ui.notifications.error(game.i18n.localize("ASE.SoundNotFound"));
         return;
     }
     const oldSoundData = attachedSounds[0].document.data;

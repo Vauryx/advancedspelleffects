@@ -67,7 +67,7 @@ export class magicMissile {
 
 
         spellOptions.push({
-            label: 'Damage Die Count: ',
+            label: game.i18n.localize('ASE.DamageDieCountLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
             flagName: 'dmgDieCount',
@@ -75,7 +75,7 @@ export class magicMissile {
         });
 
         spellOptions.push({
-            label: 'Damage Die: ',
+            label: game.i18n.localize('ASE.DamageDieLabel'),
             type: 'dropdown',
             options: dieOptions,
             name: 'flags.advancedspelleffects.effectOptions.dmgDie',
@@ -84,7 +84,7 @@ export class magicMissile {
         });
 
         spellOptions.push({
-            label: 'Damage Modifier: ',
+            label: game.i18n.localize('ASE.DamageBonusLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.dmgMod',
             flagName: 'dmgMod',
@@ -92,7 +92,7 @@ export class magicMissile {
         });
 
         animOptions.push({
-            label: 'Target Marker Color: ',
+            label: game.i18n.localize('ASE.TargetmarkerColorLabel'),
             type: 'dropdown',
             options: targetMarkerColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.targetMarkerColor',
@@ -100,21 +100,21 @@ export class magicMissile {
             flagValue: currFlags.targetMarkerColor,
         });
         soundOptions.push({
-            label: 'Target Marker Sound: ',
+            label: game.i18n.localize('ASE.TargetMarkerSoundLabel'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.markerSound',
             flagName: 'markerSound',
             flagValue: currFlags.markerSound ?? '',
         });
         soundOptions.push({
-            label: 'Target Marker Sound Delay: ',
+            label: game.i18n.localize('ASE.TargetMarkerSoundDelayLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.markerSoundDelay',
             flagName: 'markerSoundDelay',
             flagValue: currFlags.markerSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Target Marker Sound Volume: ',
+            label: game.i18n.localize('ASE.TargetMarkerVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.markerVolume',
             flagName: 'markerVolume',
@@ -122,7 +122,7 @@ export class magicMissile {
         });
 
         animOptions.push({
-            label: 'Dart Color: ',
+            label: game.i18n.localize('ASE.DartColorLabel'),
             type: 'dropdown',
             options: missileColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.missileColor',
@@ -130,21 +130,21 @@ export class magicMissile {
             flagValue: currFlags.missileColor,
         });
         soundOptions.push({
-            label: 'Dart Intro Sound: ',
+            label: game.i18n.localize('ASE.DartIntroSoundLabel'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.missileIntroSound',
             flagName: 'missileIntroSound',
             flagValue: currFlags.missileIntroSound ?? '',
         });
         soundOptions.push({
-            label: 'Dart Intro Sound Delay',
+            label: game.i18n.localize('ASE.DartIntroSoundDelayLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.missileIntroSoundDelay',
             flagName: 'missileIntroSoundDelay',
             flagValue: currFlags.missileIntroSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Dart Intro Volume',
+            label: game.i18n.localize('ASE.DartIntroVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.missileIntroVolume',
             flagName: 'missileIntroVolume',
@@ -152,21 +152,21 @@ export class magicMissile {
         });
 
         soundOptions.push({
-            label: 'Dart Impact Sound: ',
+            label: game.i18n.localize('ASE.DartImpactSoundLabel'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactSound',
             flagName: 'missileImpactSound',
             flagValue: currFlags.missileImpactSound ?? '',
         });
         soundOptions.push({
-            label: 'Dart Impact Sound Delay',
+            label: game.i18n.localize('ASE.DartImpactSoundDelayLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactSoundDelay',
             flagName: 'missileImpactSoundDelay',
             flagValue: currFlags.missileImpactSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Dart Impact Volume',
+            label: game.i18n.localize('ASE.DartImpactVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactVolume',
             flagname: 'missileImpactVolume',

@@ -48,7 +48,7 @@ export class MissileDialog extends FormApplication {
         return mergeObject(super.defaultOptions, {
             template: './modules/advancedspelleffects/scripts/templates/missile-dialog.html',
             id: 'missile-dialog',
-            title: `Select Targets`,
+            title: game.i18n.localize("ASE.SelectTargetsDialogTitle"),
             resizable: true,
             width: "auto",
             height: "auto",
@@ -444,7 +444,7 @@ export class MissileDialog extends FormApplication {
     // for crtical hits, replace the attack roll with the word "crit"
     // add the breakdown of the attack and damage rolls as a tooltip on the roll results
     _buildChatData(attackRolls, damageRolls, caster) {
-        let content = `<table id="missileDialogChatTable"><tr><th>Target</th><th>Attack Roll</th><th>Damage</th>`
+        let content = `<table id="missileDialogChatTable"><tr><th>${game.i18n.localize("ASE.Target")}</th><th>${game.i18n.localize("ASE.AttackRoll")}</th><th>${game.i18n.localize("ASE.DamageCapital")}</th>`
 
         console.log('Building chat data...');
         console.log('Attack Rolls: ', attackRolls);

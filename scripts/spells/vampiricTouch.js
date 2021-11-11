@@ -43,7 +43,7 @@ export class vampiricTouch {
                             "school": "nec",
                             "target": { "value": 1, "type": 'creature' },
                             "description": {
-                                "value": "The touch of your shadow-wreathed hand can siphon force from others to heal your wounds."
+                                "value": game.i18n.localize("ASE.VampiricTouchDescription")
                             }
                         },
                         "flags": {
@@ -73,9 +73,6 @@ export class vampiricTouch {
                 await tactor.update({
                     "data.attributes.hp.value": Math.min(tactor.data.data.attributes.hp.max, updatedHP)
                 });
-            }
-            else {
-                await concentrationHandler.addConcentration(tactor, midiData.item);
             }
         }
 

@@ -47,7 +47,7 @@ export class ASESettings extends FormApplication {
         return mergeObject(super.defaultOptions, {
             template: './modules/advancedspelleffects/scripts/templates/ase-settings-new.html',
             id: 'ase-item-settings',
-            title: "Advanced Spell Effects Settings",
+            title: game.i18n.localize("ASE.SettingsWindowTitle"),
             resizable: true,
             width: "auto",
             height: "auto",
@@ -74,31 +74,31 @@ export class ASESettings extends FormApplication {
             "scaling": { "mode": "none", "formula": "" }
         };
         switch (item.name) {
-            case "Detect Magic":
+            case game.i18n.localize("ASE.DetectMagic"):
                 data.duration = { "value": 10, "units": "minute" };
                 break;
-            case "Darkness":
+            case game.i18n.localize("ASE.Darkness"):
                 data.level = 2;
                 data.duration = { "value": 10, "units": "minute" };
                 break;
-            case "Fog Cloud":
+            case game.i18n.localize("ASE.FogCloud"):
                 data.level = 1;
                 data.duration = { "value": 10, "units": "minute" };
                 break;
-            case 'Steel Wind Strike':
+            case game.i18n.localize("ASE.SteelWindStrike"):
                 data.level = 5;
                 break;
-            case 'Thunder Step':
+            case game.i18n.localize("ASE.ThunderStep"):
                 data.level = 3;
                 break;
-            case 'Spiritual Weapon':
+            case game.i18n.localize("ASE.SpiritualWeapon"):
                 data.level = 2;
                 break;
-            case 'Call Lightning':
+            case game.i18n.localize("ASE.CallLightning"):
                 data.level = 3;
                 data.duration = { "value": 10, "units": "minute" };
                 break;
-            case 'Witch Bolt':
+            case game.i18n.localize("ASE.WitchBolt"):
                 data.level = 1;
                 data.actionType = "rsak"
                 data.damage.parts.push(["1d12", "lightning"])
@@ -106,7 +106,7 @@ export class ASESettings extends FormApplication {
                 data.scaling.formula = "1d12";
                 data.scaling.mode = "level";
                 break;
-            case 'Vampiric Touch':
+            case game.i18n.localize("ASE.VampiricTouch"):
                 data.level = 3;
                 data.actionType = "msak"
                 data.damage.parts.push(["3d6", "necrotic"])
@@ -269,17 +269,17 @@ export class ASESettings extends FormApplication {
         let newSelect = newSummonRow.insertCell(3);
         let newLabel3 = newSummonRow.insertCell(4);
         let newQtyInput = newSummonRow.insertCell(5);
-        newLabel1.innerHTML = `<label><b>Summon Type Name:</b></label>`;
+        newLabel1.innerHTML = `<label><b>${game.i18n.localize("ASE.SummonTypeNameLabel")}</b></label>`;
         newTextInput.innerHTML = `<input type="text"
         name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.name"
         value="">`;
-        newLabel2.innerHTML = `<label><b>Associated Actor:</b></label>`;
+        newLabel2.innerHTML = `<label><b>${game.i18n.localize("ASE.AssociatedActorLabel")}</b></label>`;
         newSelect.innerHTML = ` <select name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.actor">
         {{#each ../effectData.summonOptions as |id name|}}
         <option value="">{{name}}</option>
         {{/each}}
     </select>`;
-        newLabel3.innerHTML = `<label><b>Summon Quantity:</b></label>`;
+        newLabel3.innerHTML = `<label><b>game.i18n.localize("ASE.SummonQuantityLabel")</b></label>`;
         newQtyInput.innerHTML = `<input style='width: 3em;' type="text"
     name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.qty"
     value=1>`;

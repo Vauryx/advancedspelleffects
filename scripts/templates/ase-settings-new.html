@@ -2,7 +2,7 @@
     <section class="content">
         <div class="ase-enable-checkbox">
             <div class="form-group">
-                <label>Convert to Advanced Spell Effect</label>
+                <label>{{localize "ASE.ConvertToASELabel"}}</label>
                 <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
                     flags.advancedspelleffects.enableASE}}>
             </div>
@@ -10,20 +10,23 @@
         <div class="ase-enabled-content">
             {{#if flags.advancedspelleffects.enableASE}}
                 <div class="form-group">
-                    <p>ASE Settings: <b>{{itemName}}</b></p>
+                    <p>{{localize "ASE.ASESettingsLabel"}}<b>{{itemName}}</b></p>
                 </div>
                 <div class="ase-settings-tabs">
-                    <button class="nav-tab ase-spell-settingsButton selected" type="button" title="Spell Settings">
+                    <button class="nav-tab ase-spell-settingsButton selected" type="button"
+                        title="{{localize 'ASE.SpellSettingsButtonTitle'}}">
                         <div style="text-align:center">
                             <i class="fas fa-cog"></i>
                         </div>
                     </button>
-                    <button class="nav-tab ase-anim-settingsButton " type="button" title="Animation Settings">
+                    <button class="nav-tab ase-anim-settingsButton " type="button"
+                        title="{{localize 'ASE.AnimationSettingsButtonTitle'}}">
                         <div style="text-align:center">
                             <i class="fas fa-magic"></i>
                         </div>
                     </button>
-                    <button class="nav-tab ase-sound-settingsButton" type="button" title="Sound Settings">
+                    <button class="nav-tab ase-sound-settingsButton" type="button"
+                        title="{{localize 'ASE.SoundSettingsButtonTitle'}}">
                         <div style="text-align:center">
                             <i class="fas fa-volume-up"></i>
                         </div>
@@ -39,7 +42,7 @@
                                     {{#each effectData.summons}}
                                         <tr>
                                             <td>
-                                                <label><b>Summon Type Name:</b></label>
+                                                <label><b>{{localize "ASE.SummonTypeNameLabel"}}</b></label>
                                             </td>
                                             <td>
                                                 <input type="text"
@@ -47,7 +50,7 @@
                                                     value="{{this.name}}">
                                             </td>
                                             <td>
-                                                <label><b>Associated Actor:</b></label>
+                                                <label><b>{{localize "ASE.AssociatedActorLabel"}}</b></label>
                                             </td>
                                             <td> <select
                                                     name="flags.advancedspelleffects.effectOptions.summons.{{@index}}.actor">
@@ -59,7 +62,7 @@
                                                 </select>
                                             </td>
                                             <td>
-                                                <label><b>Quantity:</b></label>
+                                                <label><b>{{localize "ASE.SummonQuantityLabel"}}</b></label>
                                             </td>
                                             <td>
                                                 <input style='width: 3em;' type="text"
@@ -72,12 +75,13 @@
                             </table>
                             <div style="text-align:center;">
                                 <div style="margin:auto;">
-                                    <button class='addType' type="button" style="width:50%;text-align:center;"> Add Type
+                                    <button class='addType' type="button" style="width:50%;text-align:center;">
+                                        {{localize "ASE.AddTypeButtonLabel"}}
                                     </button>
                                 </div>
                                 <div style="margin:auto;">
                                     <button class='removeType' type="button" style="width:50%;text-align:center;">
-                                        <i class="fas fa-times"></i> Remove Type
+                                        <i class="fas fa-times"></i> {{localize "ASE.RemoveTypeButtonLabel"}}
                                     </button>
                                 </div>
                             </div>
@@ -205,7 +209,7 @@
     </section>
     <footer class="sheet-footer flexrow">
         <button type="submit" name="submit">
-            <i class="fa fa-save"></i> Save and Close
+            <i class="fa fa-save"></i> {{localize "ASE.SaveCloseButtonLabel"}}
         </button>
     </footer>
 </form>

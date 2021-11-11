@@ -47,7 +47,7 @@ export class darkness {
         let crosshairsConfig = {
             size: 6,
             icon: item.img,
-            label: 'Darkness',
+            label: game.i18n.localize("ASE.Darkness"),
             tag: 'darkness-crosshairs',
             drawIcon: true,
             drawOutline: false,
@@ -154,21 +154,21 @@ export class darkness {
         let soundOptions = [];
 
         soundOptions.push({
-            label: "Darkness Sound:",
+            label: game.i18n.localize("ASE.DarknessSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.darknessSound',
             flagName: 'darknessSound',
             flagValue: currFlags.darknessSound ?? '',
         });
         soundOptions.push({
-            label: "Darkness Sound Delay:",
+            label: game.i18n.localize("ASE.DarknessSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.darknessSoundDelay',
             flagName: 'darknessSoundDelay',
             flagValue: currFlags.darknessSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Darkness Sound Volume:",
+            label: game.i18n.localize("ASE.DarknessVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.darknessVolume',
             flagName: 'darknessVolume',

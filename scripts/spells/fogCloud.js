@@ -45,7 +45,7 @@ export class fogCloud {
         let crosshairsConfig = {
             size: 8 * itemLevel,
             icon: item.img,
-            label: 'Fog Cloud',
+            label: game.i18n.localize("ASE.FogCloud"),
             tag: 'fog-cloud-crosshairs',
             drawIcon: true,
             drawOutline: true,
@@ -155,28 +155,28 @@ export class fogCloud {
         let soundOptions = [];
 
         animOptions.push({
-            label: 'Number of Walls(per level): ',
+            label: game.i18n.localize("ASE.WallsLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.wallNumber',
             flagName: 'wallNumber',
             flagValue: currFlags.wallNumber ?? 12,
         });
         soundOptions.push({
-            label: "Fog Cloud Sound:",
+            label: game.i18n.localize("ASE.FogCloudSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.fogCloudSound',
             flagName: 'fogCloudSound',
             flagValue: currFlags.fogCloudSound ?? '',
         });
         soundOptions.push({
-            label: "Fog Cloud Sound Delay:",
+            label: game.i18n.localize("ASE.FogCloudSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.fogCloudSoundDelay',
             flagName: 'fogCloudSoundDelay',
             flagValue: currFlags.fogCloudSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Fog Cloud Sound Volume:",
+            label: game.i18n.localize("ASE.FogCloudVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.fogCloudVolume',
             flagName: 'fogCloudVolume',

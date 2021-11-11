@@ -76,7 +76,7 @@ export class steelWindStrike {
             //console.log("Current damage dice roll total: ", currentRoll.total);
             //game.dice3d?.showForRoll(currentRoll);
             if (game.modules.get("midi-qol")?.active) {
-                let damageData = new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: 'Steel Wind Strike - Damage Roll (6d10 force)', itemCardId: "new", itemData: midiData.item.data });
+                let damageData = new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item.data });
             }
             //console.log("damage data: ", damageData);
             rollDataForDisplay.push({
@@ -259,13 +259,13 @@ export class steelWindStrike {
                                         <li class="flexrow">
                                             <h4>${name}</h4>
                                             <div>
-                                                <span>Attack Total: ${attackTotal}</span>
+                                                <span>${game.i18n.localize("ASE.SWSAttackTotalMessage")}${attackTotal}</span>
                                             </div>
                                             <div>
-                                                <span>${hitStatus ? 'Hit!' : 'Missed!'}</span>
+                                                <span>${hitStatus ? game.i18n.localize("ASE.SWSHitMessage") : game.i18n.localize("ASE.SWSMissMessage")}</span>
                                             </div>
                                             <div> 
-                                                <span>Damage Total: ${damageTotal}</span>
+                                                <span>${game.i18n.localize("ASE.SWSDamageTotalMessage")} ${damageTotal}</span>
                                             </div>
                                         </li>
                                     </section> 
@@ -276,7 +276,7 @@ export class steelWindStrike {
                 let crosshairsConfig = {
                     size: 1,
                     icon: caster.data.img,
-                    label: 'End At',
+                    label: game.i18n.localize("ASE.SWSFinalLocationCrosshairsLabel"),
                     tag: 'end-at-crosshairs',
                     drawIcon: true,
                     drawOutline: false,
@@ -288,12 +288,12 @@ export class steelWindStrike {
             }
             let done = await (new Promise((resolve) => {
                 new Dialog({
-                    title: "Steel Wind Strike breakdown",
+                    title: game.i18n.localize("ASE.SWSBreakDownWindowTitle"),
                     content: contentHTML,
                     buttons:
                     {
                         one: {
-                            label: 'Okay',
+                            label: game.i18n.localize("ASE.OK"),
                             callback: (html) => {
                                 resolve(true);
                             }
@@ -322,7 +322,7 @@ export class steelWindStrike {
         let soundOptions = [];
 
         animOptions.push({
-            label: 'Sword Color: ',
+            label: game.i18n.localize("ASE.SwordColorLabel"),
             type: 'dropdown',
             name: 'flags.advancedspelleffects.effectOptions.weaponColor',
             options: swordColorOptions,
@@ -330,21 +330,21 @@ export class steelWindStrike {
             flagValue: currFlags.weaponColor ?? 'blue',
         });
         soundOptions.push({
-            label: "Dash Sound:",
+            label: game.i18n.localize("ASE.DashSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.dashSound',
             flagName: 'dashSound',
             flagValue: currFlags.dashSound ?? '',
         });
         soundOptions.push({
-            label: "Dash Sound Delay:",
+            label: game.i18n.localize("ASE.DashSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.dashSoundDelay',
             flagName: 'dashSoundDelay',
             flagValue: currFlags.dashSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Dash Sound Volume:",
+            label: game.i18n.localize("ASE.DashVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.dashVolume',
             flagName: 'dashVolume',
@@ -352,21 +352,21 @@ export class steelWindStrike {
         });
 
         soundOptions.push({
-            label: "Strike Sound:",
+            label: game.i18n.localize("ASE.StrikeSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.strikeSound',
             flagName: 'strikeSound',
             flagValue: currFlags.strikeSound ?? '',
         });
         soundOptions.push({
-            label: "Strike Sound Delay:",
+            label: game.i18n.localize("ASE.StrikeSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.strikeSoundDelay',
             flagName: 'strikeSoundDelay',
             flagValue: currFlags.strikeSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Strike Sound Volume:",
+            label: game.i18n.localize("ASE.StrikeVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.strikeVolume',
             flagName: 'strikeVolume',

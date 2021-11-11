@@ -210,34 +210,34 @@ export class summonCreature {
             let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
             //console.log(damageItems);
             switch (item.name) {
-                case "Summon Aberrant Spirit":
+                case game.i18n.localize("ASE.SummonAberrantSpirit"):
                     hpBonus = 10 * (spellLevel - 4);
                     break;
-                case "Summon Beast":
+                case game.i18n.localize("ASE.SummonBeast"):
                     hpBonus = 5 * (spellLevel - 2);
                     break;
-                case "Summon Celestial":
-                    if (chosenSummon[0].includes("Defender")) {
+                case game.i18n.localize("ASE.SummonCelestial"):
+                    if (chosenSummon[0].includes(game.i18n.localize("ASE.Defender"))) {
                         acBonus += 2;
                     }
                     hpBonus = 10 * (spellLevel - 5);
                     break;
-                case "Summon Construct":
+                case game.i18n.localize("ASE.SummonConstruct"):
                     hpBonus = 15 * (spellLevel - 3);
                     break;
-                case "Summon Elemental":
+                case game.i18n.localize("ASE.SummonElemental"):
                     hpBonus = 10 * (spellLevel - 4);
                     break;
-                case "Summon Fey":
+                case game.i18n.localize("ASE.SummonFey"):
                     hpBonus = 10 * (spellLevel - 3);
                     break;
-                case "Summon Fiend":
+                case game.i18n.localize("ASE.SummonFiend"):
                     hpBonus = 15 * (spellLevel - 6);
                     break;
-                case "Summon Shadowspawn":
+                case game.i18n.localize("ASE.SummonShadowspawn"):
                     hpBonus = 15 * (spellLevel - 3);
                     break;
-                case "Summon Undead":
+                case game.i18n.localize("ASE.SummonUndead"):
                     hpBonus = 10 * (spellLevel - 3);
                     break;
             }
@@ -256,7 +256,7 @@ export class summonCreature {
                 ActiveEffect: {
                     "Spell Level Bonus - AC": {
                         icon: 'icons/magic/defensive/shield-barrier-blue.webp',
-                        label: 'Spell Level Bonus - AC',
+                        label: game.i18n.localize("ASE.SpellLevelBonusACEffectLabel"),
                         changes: [{
                             "key": "data.attributes.ac.bonus",
                             "mode": 2,
@@ -266,15 +266,6 @@ export class summonCreature {
                     }
                 }
             };
-
-            /*damageItems.forEach((item)=> {
-                let currDamage = item.data.data.damage.parts[0][0];
-                console.log(currDamage);
-                updates.item[item.name] = {
-                    'data.attackBonus': `- @mod - @prof + ${attackBonus}`,
-                    'data.damage.parts': [[`${currDamage}+${damageBonus}`, `${item.data.data.damage.parts[0][1]}`]]
-                } 
-            });*/
         }
         const warpgateOptions = { controllingActor: game.actors.get(midiData.actor.id), duplicates: chosenSummon[1], crosshairs: crosshairsConfig };
         await warpgate.spawn(chosenSummon[0], updates, summonEffectCallbacks, warpgateOptions);
@@ -310,7 +301,7 @@ export class summonCreature {
 
 
         animOptions.push({
-            label: 'Magic School: ',
+            label: game.i18n.localize("ASE.MagicSchoolLabel"),
             type: 'dropdown',
             name: 'flags.advancedspelleffects.effectOptions.magicSchool',
             options: magicSchoolOptions,
@@ -319,7 +310,7 @@ export class summonCreature {
         });
 
         animOptions.push({
-            label: 'Magic School Color: ',
+            label: game.i18n.localize("ASE.MagicSchoolColorLabel"),
             type: 'dropdown',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolColor',
             flagName: 'magicSchoolColor',
@@ -327,21 +318,21 @@ export class summonCreature {
             flagValue: currFlags.magicSchoolColor ?? 'blue',
         });
         soundOptions.push({
-            label: "Magic Circle Sound: ",
+            label: game.i18n.localize("ASE.MagicCircleSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.circleSound',
             flagName: 'circleSound',
             flagValue: currFlags.circleSound ?? '',
         });
         soundOptions.push({
-            label: "Magic Circle Sound Delay:",
+            label: game.i18n.localize("ASE.MagicCircleSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.circleSoundDelay',
             flagName: 'circleSoundDelay',
             flagValue: currFlags.circleSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Magic Circle Volume:",
+            label: game.i18n.localize("ASE.MagicCircleVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.circleVolume',
             flagName: 'circleVolume',
@@ -349,7 +340,7 @@ export class summonCreature {
         });
 
         animOptions.push({
-            label: 'Effect A Color: ',
+            label: game.i18n.localize("ASE.EffectAColorLabel"),
             type: 'dropdown',
             name: 'flags.advancedspelleffects.effectOptions.effectAColor',
             flagName: 'effectAColor',
@@ -357,21 +348,21 @@ export class summonCreature {
             flagValue: currFlags.effectAColor ?? 'blue',
         });
         soundOptions.push({
-            label: "Effect A Sound: ",
+            label: game.i18n.localize("ASE.EffectASoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.effectASound',
             flagName: 'effectASound',
             flagValue: currFlags.effectASound ?? '',
         });
         soundOptions.push({
-            label: "Effect A Sound Delay:",
+            label: game.i18n.localize("ASE.EffectASoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.effectASoundDelay',
             flagName: 'effectASoundDelay',
             flagValue: currFlags.effectASoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Effect A Volume:",
+            label: game.i18n.localize("ASE.EffectASoundVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.effectAVolume',
             flagName: 'effectAVolume',
@@ -379,7 +370,7 @@ export class summonCreature {
         });
 
         animOptions.push({
-            label: 'Portal Color: ',
+            label: game.i18n.localize("ASE.PortalColorLabel"),
             type: 'dropdown',
             name: 'flags.advancedspelleffects.effectOptions.portalColor',
             flagName: 'portalColor',
@@ -387,21 +378,21 @@ export class summonCreature {
             flagValue: currFlags.portalColor ?? 'blue',
         });
         soundOptions.push({
-            label: "Portal Sound: ",
+            label: game.i18n.localize("ASE.PortalSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.portalSound',
             flagName: 'portalSound',
             flagValue: currFlags.portalSound ?? '',
         });
         soundOptions.push({
-            label: "Portal Sound Delay:",
+            label: game.i18n.localize("ASE.PortalSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.portalSoundDelay',
             flagName: 'portalSoundDelay',
             flagValue: currFlags.portalSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Portal Volume:",
+            label: game.i18n.localize("ASE.PortalVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.portalVolume',
             flagName: 'portalVolume',
@@ -409,7 +400,7 @@ export class summonCreature {
         });
 
         animOptions.push({
-            label: 'Portal Impact Color: ',
+            label: game.i18n.localize("ASE.PortalCloseColorLabel"),
             type: 'dropdown',
             name: 'flags.advancedspelleffects.effectOptions.portalImpactColor',
             flagName: 'portalImpactColor',
@@ -417,21 +408,21 @@ export class summonCreature {
             flagValue: currFlags.portalImpactColor ?? 'blue',
         });
         soundOptions.push({
-            label: "Portal Close Sound: ",
+            label: game.i18n.localize("ASE.PortalCloseSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.portalCloseSound',
             flagName: 'portalCloseSound',
             flagValue: currFlags.portalImpactSound ?? '',
         });
         soundOptions.push({
-            label: "Portal Close Sound Delay:",
+            label: game.i18n.localize("ASE.PortalCloseSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.portalCloseSoundDelay',
             flagName: 'portalCloseSoundDelay',
             flagValue: currFlags.portalCloseSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Portal Close Volume:",
+            label: game.i18n.localize("ASE.PortalCloseVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.portalCloseVolume',
             flagName: 'portalCloseVolume',
@@ -439,7 +430,7 @@ export class summonCreature {
         });
 
         spellOptions.push({
-            label: `Use Tasha's Scaling: `,
+            label: game.i18n.localize("ASE.UseTashasScalingLabel"),
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.isTashas',
             flagName: 'isTashas',

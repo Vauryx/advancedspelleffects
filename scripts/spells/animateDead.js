@@ -109,7 +109,7 @@ export class animateDead {
         let soundOptions = [];
 
         spellOptions.push({
-            label: 'Associated Zombie Actor:',
+            label: game.i18n.localize('ASE.ZombieActorLabel'),
             type: 'dropdown',
             options: summonOptions,
             name: 'flags.advancedspelleffects.effectOptions.summons.zombie.actor',
@@ -117,7 +117,7 @@ export class animateDead {
             flagValue: currFlags.summons?.zombie?.actor ?? '',
         });
         spellOptions.push({
-            label: 'Associated Skeleton Actor:',
+            label: game.i18n.localize('ASE.SkeletonActorLabel'),
             type: 'dropdown',
             options: summonOptions,
             name: 'flags.advancedspelleffects.effectOptions.summons.skeleton.actor',
@@ -126,7 +126,7 @@ export class animateDead {
         });
 
         animOptions.push({
-            label: 'Magic School:',
+            label: game.i18n.localize('ASE.MagicSchoolLabel'),
             type: 'dropdown',
             options: magicSchoolOptions,
             name: 'flags.advancedspelleffects.effectOptions.magicSchool',
@@ -134,7 +134,7 @@ export class animateDead {
             flagValue: currFlags.magicSchool ?? 'abjuration',
         });
         animOptions.push({
-            label: 'Magic School Color:',
+            label: game.i18n.localize('ASE.MagicSchoolColorLabel'),
             type: 'dropdown',
             options: magicSchoolColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolColor',
@@ -142,42 +142,42 @@ export class animateDead {
             flagValue: currFlags.magicSchoolColor ?? 'blue',
         });
         soundOptions.push({
-            label: 'Magic School Intro Sound:',
+            label: game.i18n.localize('ASE.MagicSchoolColorLabel'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolSound',
             flagName: 'magicSchoolSound',
             flagValue: currFlags.magicSchoolSound ?? '',
         });
         soundOptions.push({
-            label: 'Magic School Intro Sound Delay:',
+            label: game.i18n.localize('ASE.MagicSchoolIntroSoundDelayLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolSoundDelay',
             flagName: 'magicSchoolSoundDelay',
             flagValue: currFlags.magicSchoolSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Magic School Intro Sound Volume:',
+            label: game.i18n.localize('ASE.MagicSchoolIntroSoundVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolVolume',
             flagName: 'magicSchoolVolume',
             flagValue: currFlags.magicSchoolVolume ?? 1,
         });
         soundOptions.push({
-            label: 'Magic School Outro Sound:',
+            label: game.i18n.localize('ASE.MagicSchoolOutroSoundLabel'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolSoundOutro',
             flagName: 'magicSchoolSoundOutro',
             flagValue: currFlags.magicSchoolSoundOutro ?? '',
         });
         soundOptions.push({
-            label: 'Magic School Outro Sound Delay:',
+            label: game.i18n.localize('ASE.MagicSchoolOutroSoundDelayLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolSoundDelayOutro',
             flagName: 'magicSchoolSoundDelayOutro',
             flagValue: currFlags.magicSchoolSoundDelayOutro ?? 0,
         });
         soundOptions.push({
-            label: 'Magic School Outro Sound Volume:',
+            label: game.i18n.localize('ASE.MagicSchoolOutroSoundVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolVolumeOutro',
             flagName: 'magicSchoolVolumeOutro',
@@ -185,7 +185,7 @@ export class animateDead {
         });
 
         animOptions.push({
-            label: 'Effect A Color:',
+            label: game.i18n.localize('ASE.EffectAColorLabel'),
             type: 'dropdown',
             options: effectAColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.effectAColor',
@@ -193,21 +193,21 @@ export class animateDead {
             flagValue: currFlags.effectAColor ?? 'blue',
         });
         soundOptions.push({
-            label: 'Effect A Sound:',
+            label: game.i18n.localize('ASE.EffectASoundLabel'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.effectASound',
             flagName: 'effectASound',
             flagValue: currFlags.effectASound ?? '',
         });
         soundOptions.push({
-            label: 'Effect A Sound Delay:',
+            label: game.i18n.localize('ASE.EffectASoundDelayLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.effectASoundDelay',
             flagName: 'effectASoundDelay',
             flagValue: currFlags.effectASoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Effect A Sound Volume:',
+            label: game.i18n.localize('ASE.EffectASoundVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.effectASoundVolume',
             flagName: 'effectASoundVolume',
@@ -215,7 +215,7 @@ export class animateDead {
         });
 
         animOptions.push({
-            label: 'Effect B Color:',
+            label: game.i18n.localize('ASE.EffectBColorLabel'),
             type: 'dropdown',
             options: effectBColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.effectBColor',
@@ -223,21 +223,21 @@ export class animateDead {
             flagValue: currFlags.effectBColor ?? 'blue',
         });
         soundOptions.push({
-            label: 'Effect B Sound:',
+            label: game.i18n.localize('ASE.EffectBSoundLabel'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.effectBSound',
             flagName: 'effectBSound',
             flagValue: currFlags.effectBSound ?? '',
         });
         soundOptions.push({
-            label: 'Effect B Sound Delay:',
+            label: game.i18n.localize('ASE.EffectBSoundDelayLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.effectBSoundDelay',
             flagName: 'effectBSoundDelay',
             flagValue: currFlags.effectBSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Effect B Sound Volume:',
+            label: game.i18n.localize('ASE.EffectBSoundVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.effectBSoundVolume',
             flagName: 'effectBSoundVolume',

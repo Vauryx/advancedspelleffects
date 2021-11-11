@@ -68,6 +68,17 @@ export class detectMagic {
         const waveSoundDelay = Number(aseFlags.waveSoundDelay) ?? 0;
         const waveVolume = Number(aseFlags.waveVolume) ?? 1;
 
+        const magicalSchoolsEng = {
+            "abjuration": "Abjuration",
+            "conjuration": "Conjuration",
+            "divination": "Divination",
+            "enchantment": "Enchantment",
+            "evocation": "Evocation",
+            "illusion": "Illusion",
+            "necromancy": "Necromancy",
+            "transmutation": "Transmutation"
+        };
+
         for (const user in actor.data.permission) {
             if (user == "default") continue;
             users.push(user);
@@ -81,6 +92,7 @@ export class detectMagic {
             let pointA = { x: caster.data.x + (canvas.grid.size / 2), y: caster.data.y + (canvas.grid.size / 2) };
             let pointB = { x: o.x + (canvas.grid.size / 2), y: o.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
+
             return {
                 delay: distance * 55,
                 distance: distance,

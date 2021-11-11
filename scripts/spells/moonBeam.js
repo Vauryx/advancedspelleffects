@@ -50,12 +50,12 @@ export class moonBeam {
                 if (inTiles.includes(moonbeamTile.id)) {
 
                     console.log(`${token.name} has already entered this tile this turn - ${moonbeamTile.id}`);
-                    ui.notifications.info(`${token.name} has already entered this tile this turn - ${moonbeamTile.id}`);
+                    ui.notifications.info(token.name + game.i18n.localize("ASE.MoonbeamAlreadyEnteredTile"));
                     //do nothing
                 }
                 else {
                     console.log(`${token.name} is entering the space of a moonbeam tile - ${moonbeamTile.id}`);
-                    ui.notifications.info(`${token.name} is entering the space of a moonbeam tile - ${moonbeamTile.id}`);
+                    ui.notifications.info(token.name + game.i18n.localize("ASE.MoonbeamEnteringTile"));
                     //add the tile to the inTiles array
                     inTiles.push(moonbeamTile.id);
                     let effectOptions = moonbeamTile.document.getFlag("advancedspelleffects", "effectOptions") ?? {};
@@ -95,7 +95,7 @@ export class moonBeam {
             if (combatantPosition.x >= moonbeamTile.x && combatantPosition.x <= moonbeamTile.x + moonbeamTile.width && combatantPosition.y >= moonbeamTile.y && combatantPosition.y <= moonbeamTile.y + moonbeamTile.height) {
                 //check if tile exists in inTiles which is an array of tiles
                 console.log(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
-                ui.notifications.info(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
+                ui.notifications.info(combatantToken.name + game.i18n.localize("ASE.StartingTurnInMoonbeam"));
                 //add the tile to the inTiles array
                 await moonBeam.activateBeam(combatantToken, effectOptions);
                 inTiles.push(moonbeamTile.id);
@@ -111,7 +111,7 @@ export class moonBeam {
             aseSocket.executeAsGM("deleteTiles", [moonbeamTiles[0].id]);
         }
         await warpgate.revert(casterToken.document, `${casterActor.id}-moonbeam`);
-        ui.notifications.info(`Move Moonbeam has been removed from your At-Will spells.`);
+        ui.notifications.info(game.i18n.localize("ASE.MoveMoonbeam") + game.i18n.localize("ASE.RemovedAtWill"));
 
         const tokens = canvas.tokens.placeables;
         for await (let token of tokens) {
@@ -174,7 +174,7 @@ export class moonBeam {
                             "school": "evo",
                             "target": { "value": null, "width": null, "units": "", "type": "" },
                             "description": {
-                                "value": "Command your Moonbeam to move up to 60 feet in any direction."
+                                "value": game.i18n.localize("ASE.MoveMoonbeamDescription")
                             }
                         },
                         "flags": {
@@ -191,7 +191,7 @@ export class moonBeam {
         let moonbeamLoc = await moonBeam.chooseBeamLocation(beamLoop);
 
         await warpgate.mutate(casterToken.document, updates, {}, { name: `${casterActor.id}-moonbeam` });
-        ui.notifications.info(`Move Moonbeam has been added to your At-Will spells.`);
+        ui.notifications.info(game.i18n.localize("ASE.MoveMoonbeam") + game.i18n.localize("ASE.AddedAtWill"));
 
         const moonbeamTile = await placeBeam(moonbeamLoc, casterToken.id, beamLoop, aseEffectOptions);
         //console.log(moonbeamTile);
@@ -303,8 +303,8 @@ export class moonBeam {
       <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
       <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
       <div>
-      <b>${saveResult}</b> with 
-      <b>${saveTotal}</b> and takes <b>${damageTotal}</b> damage.
+      <b>${saveResult}</b> ${game.i18n.localize("ASE.With")} 
+      <b>${saveTotal}</b> ${game.i18n.localize('ASE.AndTakes')}<b>${damageTotal}</b> ${game.i18n.localize("ASE.Damage")}
         
       </div>
       <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
@@ -375,7 +375,7 @@ export class moonBeam {
             let damageTotal;
             let midiData;
             if (passedSave) {
-                saveResult = "succeeds";
+                saveResult = game.i18n.localize("ASE.Succeeds");
                 damageTotal = halfdamageroll.total;
                 midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, halfdamageroll.total, "radiant", [token],
                     halfdamageroll, {
@@ -385,7 +385,7 @@ export class moonBeam {
                 });
             }
             else {
-                saveResult = "fails";
+                saveResult = game.i18n.localize("ASE.Fails");
                 damageTotal = fullDamageRoll.total;
                 midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, fullDamageRoll.total, "radiant", [token],
                     fullDamageRoll, {
@@ -477,7 +477,7 @@ export class moonBeam {
         }
         let crosshairsConfig = {
             size: 2,
-            label: 'Moonbeam',
+            label: game.i18n.localize("ASE.Moonbeam"),
             tag: 'moonbeam-crosshairs',
             drawIcon: false,
             drawOutline: false,
@@ -506,7 +506,7 @@ export class moonBeam {
         };
 
         spellOptions.push({
-            label: 'Scale with spellLevel: ',
+            label: game.i18n.localize("ASE.ScaleWithLevelLabel"),
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.levelScaling',
             flagName: 'levelScaling',
@@ -514,7 +514,7 @@ export class moonBeam {
         });
 
         spellOptions.push({
-            label: 'Damage Die Count: ',
+            label: game.i18n.localize("ASE.DamageDieCountLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
             flagName: 'dmgDieCount',
@@ -522,7 +522,7 @@ export class moonBeam {
         });
 
         spellOptions.push({
-            label: 'Damage Die: ',
+            label: game.i18n.localize("ASE.DamageDieLabel"),
             type: 'dropdown',
             options: dieOptions,
             name: 'flags.advancedspelleffects.effectOptions.dmgDie',
@@ -531,7 +531,7 @@ export class moonBeam {
         });
 
         spellOptions.push({
-            label: 'Damage Modifier: ',
+            label: game.i18n.localize("ASE.DamageBonusLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.dmgMod',
             flagName: 'dmgMod',
@@ -539,7 +539,7 @@ export class moonBeam {
         });
 
         animOptions.push({
-            label: 'Beam Color: ',
+            label: game.i18n.localize("ASE.BeamColorLabel"),
             type: 'dropdown',
             options: beamColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.moonbeamColor',
@@ -547,21 +547,21 @@ export class moonBeam {
             flagValue: currFlags.moonbeamColor,
         });
         soundOptions.push({
-            label: 'Moonbeam Initial Sound: ',
+            label: game.i18n.localize("ASE.MoonbeamInitialSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamSound',
             flagName: 'moonbeamSound',
             flagValue: currFlags.moonbeamSound ?? '',
         });
         soundOptions.push({
-            label: 'Moonbeam Initial Sound Delay: ',
+            label: game.i18n.localize("ASE.MoonbeamInitialSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamSoundDelay',
             flagName: 'moonbeamSoundDelay',
             flagValue: currFlags.moonbeamSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Moonbeam Initial Volume: ',
+            label: game.i18n.localize("ASE.MoonbeamInitialVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamVolume',
             flagName: 'moonbeamVolume',
@@ -569,42 +569,42 @@ export class moonBeam {
         });
 
         soundOptions.push({
-            label: 'Moonbeam Loop Sound: ',
+            label: game.i18n.localize("ASE.MoonbeamLoopSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopSound',
             flagName: 'moonbeamLoopSound',
             flagValue: currFlags.moonbeamLoopSound ?? '',
         });
         soundOptions.push({
-            label: 'Moonbeam Loop Sound Delay: ',
+            label: game.i18n.localize("ASE.MoonbeamLoopSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopSoundDelay',
             flagName: 'moonbeamLoopSoundDelay',
             flagValue: currFlags.moonbeamLoopSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Moonbeam Loop Volume: ',
+            label: game.i18n.localize("ASE.MoonbeamLoopVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopVolume',
             flagName: 'moonbeamLoopVolume',
             flagValue: currFlags.moonbeamLoopVolume ?? 1,
         });
         soundOptions.push({
-            label: 'Moonbeam Loop Volume Easing: ',
+            label: game.i18n.localize("ASE.MoonbeamLoopVolumeEasingLabel"),
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopEasing',
             flagName: 'moonbeamLoopEasing',
             flagValue: currFlags.moonbeamLoopEasing ?? true,
         });
         soundOptions.push({
-            label: 'Moonbeam Loop Volume Radius: ',
+            label: game.i18n.localize("ASE.MoonbeamLoopSoundRadiusLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopRadius',
             flagName: 'moonbeamLoopRadius',
             flagValue: currFlags.moonbeamLoopRadius ?? 20,
         });
         animOptions.push({
-            label: 'Damage Effect Color: ',
+            label: game.i18n.localize("ASE.DamageEffectColorLabel"),
             type: 'dropdown',
             options: beamDamageOptions,
             name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgColor',
@@ -612,21 +612,21 @@ export class moonBeam {
             flagValue: currFlags.moonbeamDmgColor,
         });
         soundOptions.push({
-            label: 'Damage Effect Sound: ',
+            label: game.i18n.localize("ASE.DamageEffectSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgSound',
             flagName: 'moonbeamDmgSound',
             flagValue: currFlags.moonbeamDmgSound ?? '',
         });
         soundOptions.push({
-            label: 'Damage Effect Sound Delay: ',
+            label: game.i18n.localize("ASE.DamageEffectSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgSoundDelay',
             flagName: 'moonbeamDmgSoundDelay',
             flagValue: currFlags.moonbeamDmgSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Damage Effect Volume: ',
+            label: game.i18n.localize("ASE.DamageEffectVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgVolume',
             flagName: 'moonbeamDmgVolume',

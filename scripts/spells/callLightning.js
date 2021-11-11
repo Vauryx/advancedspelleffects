@@ -26,8 +26,8 @@ export class callLightning {
 
 
         let weatherDialogData = {
-            buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
-            title: "Is there a storm?"
+            buttons: [{ label: game.i18n.localize('ASE.Yes'), value: true }, { label: game.i18n.localize('ASE.No'), value: false }],
+            title: game.i18n.localize('ASE.AskStorm')
         };
 
         let stormyWeather = await warpgate.buttonDialog(weatherDialogData, 'row');
@@ -45,7 +45,7 @@ export class callLightning {
         let crosshairsConfig = {
             size: 25,
             icon: item.img,
-            label: "Call Lightning",
+            label: game.i18n.localize('ASE.CallLightning'),
             tag: 'call-lightning-crosshairs',
             drawIcon: true,
             drawOutline: false,
@@ -88,7 +88,7 @@ export class callLightning {
                             "range": { "value": null, "long": null, "units": "" },
                             "school": "con",
                             "description": {
-                                "value": "Call forth a bolt of lightning from the storm cloud above."
+                                "value": game.i18n.localize('ASE.CallLightningBoltCastDescription')
                             }
                         },
                         "flags": {
@@ -104,8 +104,8 @@ export class callLightning {
             }
         }
         await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-call-lightning` });
-        ui.notifications.info(`Call Lightning Bolt has been added to your At-Will spells.`);
-        ChatMessage.create({ content: `${caster.actor.name} darkens the sky with a storm cloud...` });
+        ui.notifications.info(`${game.i18n.localize('ASE.CallLightningBolt') + game.i18n.localize('ASE.AddedAtWill')}`);
+        ChatMessage.create({ content: `${caster.actor.name + game.i18n.localize('ASE.CallLightningChatMessage')}` });
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         await callLightning.callLightningBolt(stormTileId);
 
@@ -183,14 +183,14 @@ export class callLightning {
         let stormCloudTile = canvas.scene.tiles.get(stormTileId);
         let confirmData = {
             buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
-            title: `Call forth Level ${stormCloudTile.getFlag("advancedspelleffects", "spellLevel")} Lightning Bolt?`
+            title: `${game.i18n.localize('ASE.CallLightningBoltDialogA') + stormCloudTile.getFlag("advancedspelleffects", "spellLevel") + game.i18n.localize('ASE.CallLightningBoltDialogB')}`
         };
         let confirm = await warpgate.buttonDialog(confirmData, 'row');
         if (confirm) {
             let crosshairsConfig = {
                 size: 3,
                 icon: "icons/magic/lightning/bolt-strike-blue.webp",
-                label: "Lightning Bolt",
+                label: game.i18n.localize('ASE.LightningBolt'),
                 tag: 'lightning-bolt-crosshairs',
                 drawIcon: true,
                 drawOutline: true,
@@ -207,7 +207,7 @@ export class callLightning {
             if (dist > 60) {
                 await warpgate.buttonDialog({
                     buttons: [{ label: "Ok", value: true }],
-                    title: "Spell Failed - Out of Range!"
+                    title: `${game.i18n.localize('ASE.SpellFailed')} - ${game.i18n.localize('ASE.OutOfRange')}`
                 }, 'row')
                 return;
             }
@@ -239,7 +239,7 @@ export class callLightning {
 
                 for (const currentTarget of tokens) {
                     let currentTargetActor = currentTarget.token.actor;
-                    let saveResult = await currentTargetActor.rollAbilitySave("dex", { fastForward: true, flavor: "Call Lightning Saving Throw" });
+                    let saveResult = await currentTargetActor.rollAbilitySave("dex", { fastForward: true, flavor: game.i18n.localize('ASE.CallLightningSavingThrowFlavor') });
 
                     if (saveResult.total < saveDC) {
                         failedSaves.push(currentTarget.token);
@@ -267,10 +267,10 @@ export class callLightning {
                 let halfdamageroll = await new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: true });
 
                 if (failedSaves.length > 0) {
-                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, fullDamageRoll.total, "lightning", failedSaves, fullDamageRoll, { flavor: `Lightning Bolt Full Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
+                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, fullDamageRoll.total, game.i18n.localize('ASE.Lightning').toLowerCase(), failedSaves, fullDamageRoll, { flavor: `${game.i18n.localize('ASE.CallLightningFullDamageFlavor') + `(${spellLevel}` + game.i18n.localize('ASE.CallLightningDamageFlavorEnd') + ')'}`, itemCardId: "new", itemData: itemData });
                 }
                 if (passedSaves.length > 0) {
-                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, halfdamageroll.total, "lightning", passedSaves, halfdamageroll, { flavor: `Lightning Bolt Half Damage - Damage Roll (${spellLevel}d10 Lightning)`, itemCardId: "new", itemData: itemData });
+                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, halfdamageroll.total, game.i18n.localize('ASE.Lightning').toLowerCase(), passedSaves, halfdamageroll, { flavor: `${game.i18n.localize('ASE.CallLightningHalfDamageFlavor') + `(${spellLevel}` + game.i18n.localize('ASE.CallLightningDamageFlavorEnd') + ')'}`, itemCardId: "new", itemData: itemData });
                 }
             }
 
@@ -378,8 +378,8 @@ export class callLightning {
             //console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
             await aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
             await warpgate.revert(casterToken.document, `${casterActor.id}-call-lightning`);
-            ui.notifications.info(`Call Lightning Bolt has been removed from your At-Will spells.`);
-            ChatMessage.create({ content: `The storm cloud dissipates...` });
+            ui.notifications.info(game.i18n.localize('ASE.CallLightningBolt') + game.i18n.localize('ASE.RemovedAtWill'));
+            ChatMessage.create({ content: game.i18n.localize('ASE.CallLightningBoltDissipate') });
         }
 
     }
@@ -402,11 +402,11 @@ export class callLightning {
         let animOptions = [];
         let soundOptions = [];
         const boltOptions = {
-            "chain": "Chain",
-            "strike": "Strike",
+            "chain": game.i18n.localize('ASE.Chain'),
+            "strike": game.i18n.localize('ASE.Strike')
         }
         animOptions.push({
-            label: "Select Bolt Style: ",
+            label: game.i18n.localize('ASE.SelectBoltStyleLabel'),
             type: "dropdown",
             options: boltOptions,
             name: "flags.advancedspelleffects.effectOptions.boltStyle",
@@ -414,21 +414,21 @@ export class callLightning {
             flagValue: currFlags.boltStyle,
         });
         soundOptions.push({
-            label: 'Bolt Sound:',
+            label: game.i18n.localize('ASE.BoltSoundLabel'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.boltSound',
             flagName: 'boltSound',
             flagValue: currFlags.boltSound,
         });
         soundOptions.push({
-            label: 'Bolt Sound Delay:',
+            label: game.i18n.localize('ASE.BoltSoundDelayLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.boltSoundDelay',
             flagName: 'boltSoundDelay',
             flagValue: currFlags.boltSoundDelay,
         });
         soundOptions.push({
-            label: 'Bolt Volume:',
+            label: game.i18n.localize('ASE.BoltVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.boltVolume',
             flagName: 'boltVolume',

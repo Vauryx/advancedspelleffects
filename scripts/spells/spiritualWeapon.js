@@ -103,7 +103,7 @@ export class spiritualWeapon {
         }
         let weaponData = [{
             type: "select",
-            label: "Weapon",
+            label: game.i18n.localize("ASE.WeaponDialogLabel"),
             options: ["Mace", "Maul", "Scythe", "Sword"]
         }]
         let weaponChoice = await warpgate.dialog(weaponData);
@@ -120,7 +120,7 @@ export class spiritualWeapon {
 
         let typeData = [{
             type: "select",
-            label: "Spirit Type",
+            label: game.i18n.localize("ASE.SpiritTypeDialogLabel"),
             options: typeOptions
         }];
         let typeChoice = await warpgate.dialog(typeData);
@@ -156,11 +156,11 @@ export class spiritualWeapon {
 
         let colorData = [{
             type: "select",
-            label: "Spirit Color",
+            label: game.i18n.localize("ASE.SpiritColorDialogLabel"),
             options: colorOptions
         }, {
             type: "select",
-            label: "Spirit Attack Color",
+            label: game.i18n.localize("ASE.SpiritAttackColorDialogLabel"),
             options: attackColorOptions
         }];
 
@@ -315,21 +315,21 @@ export class spiritualWeapon {
 
 
         soundOptions.push({
-            label: "Summon Sound:",
+            label: game.i18n.localize("ASE.SummonSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.summonSound',
             flagName: 'summonSound',
             flagValue: currFlags.summonSound ?? '',
         });
         soundOptions.push({
-            label: "Summon Sound Delay:",
+            label: game.i18n.localize("ASE.SummonSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.summonSoundDelay',
             flagName: 'summonSoundDelay',
             flagValue: currFlags.summonSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Summon Sound Volume:",
+            label: game.i18n.localize("ASE.SummonVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.summonVolume',
             flagName: 'summonVolume',

@@ -1,19 +1,24 @@
 <form id="animateDeadForm" class="flexcol" autocomplete="off" novalidate>
     <section class="content">
-        <p>You can raise <b><input type="number" id="raiseLimit" style='width: 2em;' readonly
-                    value="{{data.raiseLimit}}"></input></b> corpses.</p>
+        <p>{{localize "ASE.AnimateDeadDialogRaiseMessage"}}<b><input type="number" id="raiseLimit" style='width: 2em;'
+                    readonly value="{{data.raiseLimit}}"></input></b>
+            {{localize "ASE.AnimateDeadDialogCorpsesMessage"}}
+        </p>
         <table width="100%">
             <tbody>
                 <tr>
-                    <th>Corpse</th>
-                    <th>Raise</th>
+                    <th>{{localize "ASE.AnimateDeadDialogHeaderCorpse"}}</th>
+                    <th>{{localize "ASE.AnimateDeadDialogHeaderRaise"}}</th>
                 </tr>
                 {{#each data.corpses as |corpse|}}
-                <tr class='corpseToken' id={{corpse.id}}>
-                    <td><img src="{{corpse.data.img}}" width="30" height="30" style="border:0px"> - {{corpse.name}}</td>
-                    <td><button class='raiseCorpse' type="button" id="{{corpse.id}}">Zombie</td>
-                    <td><button class='raiseCorpse' type="button" id="{{corpse.id}}">Skeleton</td>
-                </tr>
+                    <tr class='corpseToken' id={{corpse.id}}>
+                        <td><img src="{{corpse.data.img}}" width="30" height="30" style="border:0px"> - {{corpse.name}}
+                        </td>
+                        <td><button class='raiseCorpse' type="button" id="{{corpse.id}}">{{localize "ASE.ZombieLabel"}}
+                        </td>
+                        <td><button class='raiseCorpse' type="button"
+                                id="{{corpse.id}}">{{localize "ASE.SkeletonLabel"}}</td>
+                    </tr>
                 {{/each}}
             </tbody>
         </table>
@@ -35,7 +40,8 @@
         <input type="hidden" id="hdnMagicSchoolVolume" value="{{data.effectSettings.magicSchoolVolume}}" />
 
         <input type="hidden" id="hdnMagicSchoolSoundOutro" value="{{data.effectSettings.magicSchoolSoundOutro}}" />
-        <input type="hidden" id="hdnMagicSchoolSoundDelayOutro" value="{{data.effectSettings.magicSchoolSoundDelayOutro}}" />
+        <input type="hidden" id="hdnMagicSchoolSoundDelayOutro"
+            value="{{data.effectSettings.magicSchoolSoundDelayOutro}}" />
         <input type="hidden" id="hdnMagicSchoolVolumeOutro" value="{{data.effectSettings.magicSchoolVolumeOutro}}" />
 
         <input type="hidden" id="hdnMagicSchoolColor" value="{{data.effectSettings.magicSchoolColor}}" />
@@ -45,7 +51,7 @@
     </section>
     <footer class="sheet-footer flexrow">
         <button type="submit" name="submit">
-            <i class="fa fa-check-square"></i> Done
+            <i class="fa fa-check-square"></i> {{localize "ASE.Done"}}
         </button>
     </footer>
 </form>

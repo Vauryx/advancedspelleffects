@@ -21,7 +21,7 @@ export class concentrationHandler {
         const isGM = utilFunctions.isFirstGM();
         //console.log("Is first GM: ", isGM);
         if (!isGM) return;
-        if (activeEffect.data.label != "Concentrating") return;
+        if (activeEffect.data.label != game.i18n.localize("ASE.ConcentratingLabel")) return;
         let origin = activeEffect.data.origin?.split(".");
         if (!origin || origin?.length < 4) return false;
         let itemId = origin[5] ?? origin[3];
@@ -79,7 +79,7 @@ export class concentrationHandler {
         if (!selfTarget)
             return;
 
-        let concentrationName = "Concentrating";
+        let concentrationName = game.i18n.localize("ASE.ConcentratingLabel");
         const inCombat = (game.combat?.turns.some(combatant => combatant.token?.id === selfTarget.id));
         const effectData = {
             changes: [],

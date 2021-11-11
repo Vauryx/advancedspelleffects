@@ -15,7 +15,7 @@ export class animateDeadDialog extends FormApplication {
         return mergeObject(super.defaultOptions, {
             template: './modules/advancedspelleffects/scripts/templates/animate-dead-dialog.html',
             id: 'animate-dead-dialog',
-            title: "Animate Dead",
+            title: game.i18n.localize("ASE.AnimateDead"),
             resizable: true,
             width: "auto",
             height: "auto",
@@ -105,7 +105,7 @@ export class animateDeadDialog extends FormApplication {
             skeletonTokenData = mergeObject(corpseToken.data.toObject(), skeletonTokenData, { inplace: false });
         }
         else {
-            ui.notifications.error("Associated actor for summon not found!");
+            ui.notifications.error(game.i18n.localize("ASE.AssociatedActorNotFoundNotification"));
             return;
         }
         switch (corpseType) {
@@ -122,7 +122,7 @@ export class animateDeadDialog extends FormApplication {
         document.getElementById("raiseLimit").value--;
         document.getElementById(corpseToken.id).remove();
         if (document.getElementById("raiseLimit").value == 0) {
-            ui.notifications.info("Raised all corpses!");
+            ui.notifications.info(game.i18n.localize("ASE.RaisedAllCorpsesNotification"));
             document.querySelector('button[type="submit"]').click();
         }
         async function playEffect(effectSettings) {
@@ -131,22 +131,22 @@ export class animateDeadDialog extends FormApplication {
             const colorA = effectSettings.colorA;
             const soundA = effectSettings.soundA ?? "";
             const soundADelay = Number(effectSettings.soundADelay) ?? 0;
-            const soundAVolume = effectSettings.soundAVolume=="" ? 1 : Number(effectSettings.soundAVolume);
+            const soundAVolume = effectSettings.soundAVolume == "" ? 1 : Number(effectSettings.soundAVolume);
 
             const colorB = effectSettings.colorB;
             const soundB = effectSettings.soundB ?? "";
             const soundBDelay = Number(effectSettings.soundBDelay) ?? 0;
-            const soundBVolume = effectSettings.soundBVolume=="" ? 1 : Number(effectSettings.soundBVolume);
+            const soundBVolume = effectSettings.soundBVolume == "" ? 1 : Number(effectSettings.soundBVolume);
 
             const schoolName = effectSettings.magicSchool;
             const schoolColor = effectSettings.magicSchoolColor;
             const schoolSound = effectSettings.magicSchoolSound ?? "";
             const SchoolSoundDelay = Number(effectSettings.magicSchoolSoundDelay) ?? 0;
-            const schoolVolume = effectSettings.magicSchoolVolume=="" ? 1 : Number(effectSettings.magicSchoolVolume);
+            const schoolVolume = effectSettings.magicSchoolVolume == "" ? 1 : Number(effectSettings.magicSchoolVolume);
 
             const schoolSoundOutro = effectSettings.magicSchoolSoundOutro ?? "";
             const schoolSoundDelayOutro = Number(effectSettings.magicSchoolSoundDelayOutro) ?? 0;
-            const schoolVolumeOutro = effectSettings.magicSchoolVolumeOutro=="" ? 1 : Number(effectSettings.magicSchoolVolumeOutro);
+            const schoolVolumeOutro = effectSettings.magicSchoolVolumeOutro == "" ? 1 : Number(effectSettings.magicSchoolVolumeOutro);
 
             const token = effectSettings.token;
             const summonTokenData = effectSettings.summonTokenData;

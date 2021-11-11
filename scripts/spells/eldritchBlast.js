@@ -66,7 +66,7 @@ export class eldritchBlast {
         let soundOptions = [];
 
         spellOptions.push({
-            label: 'Agonizing Blast: ',
+            label: game.i18n.localize("ASE.AgonizingBlastLabel"),
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.invocations.agonizingBlast',
             flagName: 'invocations.agonizingBlast',
@@ -74,7 +74,7 @@ export class eldritchBlast {
         });
 
         spellOptions.push({
-            label: 'Damage Die Count: ',
+            label: game.i18n.localize("ASE.DamageDieCountLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
             flagName: 'dmgDieCount',
@@ -82,7 +82,7 @@ export class eldritchBlast {
         });
 
         spellOptions.push({
-            label: 'Damage Die: ',
+            label: game.i18n.localize("ASE.DamageDieLabel"),
             type: 'dropdown',
             options: dieOptions,
             name: 'flags.advancedspelleffects.effectOptions.dmgDie',
@@ -91,7 +91,7 @@ export class eldritchBlast {
         });
 
         spellOptions.push({
-            label: 'Damage Modifier: ',
+            label: game.i18n.localize("ASE.DamageBonusLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.dmgMod',
             flagName: 'dmgMod',
@@ -99,7 +99,7 @@ export class eldritchBlast {
         });
 
         animOptions.push({
-            label: 'Target Marker Color: ',
+            label: game.i18n.localize("ASE.TargetmarkerColorLabel"),
             type: 'dropdown',
             options: targetMarkerColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.targetMarkerColor',
@@ -107,21 +107,21 @@ export class eldritchBlast {
             flagValue: currFlags.targetMarkerColor,
         });
         soundOptions.push({
-            label: 'Target Marker Sound: ',
+            label: game.i18n.localize("ASE.TargetMarkerSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.markerSound',
             flagName: 'markerSound',
             flagValue: currFlags.markerSound ?? '',
         });
         soundOptions.push({
-            label: 'Target Marker Sound Delay: ',
+            label: game.i18n.localize("ASE.TargetMarkerSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.markerSoundDelay',
             flagName: 'markerSoundDelay',
             flagValue: currFlags.markerSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Target Marker Sound Volume: ',
+            label: game.i18n.localize("ASE.TargetMarkerVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.markerVolume',
             flagName: 'markerVolume',
@@ -129,7 +129,7 @@ export class eldritchBlast {
         });
 
         animOptions.push({
-            label: 'Beam Color: ',
+            label: game.i18n.localize("ASE.BeamColorLabel"),
             type: 'dropdown',
             options: missileColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.missileColor',
@@ -137,21 +137,21 @@ export class eldritchBlast {
             flagValue: currFlags.missileColor,
         });
         soundOptions.push({
-            label: 'Beam Intro Sound: ',
+            label: game.i18n.localize("ASE.BeamIntroSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.missileIntroSound',
             flagName: 'missileIntroSound',
             flagValue: currFlags.missileIntroSound ?? '',
         });
         soundOptions.push({
-            label: 'Beam Intro Sound Delay',
+            label: game.i18n.localize("ASE.BeamIntroSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.missileIntroSoundDelay',
             flagName: 'missileIntroSoundDelay',
             flagValue: currFlags.missileIntroSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Beam Intro Volume',
+            label: game.i18n.localize("ASE.BeamIntroVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.missileIntroVolume',
             flagName: 'missileIntroVolume',
@@ -159,21 +159,21 @@ export class eldritchBlast {
         });
 
         soundOptions.push({
-            label: 'Beam Impact Sound: ',
+            label: game.i18n.localize("ASE.BeamImpactSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactSound',
             flagName: 'missileImpactSound',
             flagValue: currFlags.missileImpactSound ?? '',
         });
         soundOptions.push({
-            label: 'Beam Impact Sound Delay',
+            label: game.i18n.localize("ASE.BeamImpactSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactSoundDelay',
             flagName: 'missileImpactSoundDelay',
             flagValue: currFlags.missileImpactSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Beam Impact Volume',
+            label: game.i18n.localize("ASE.BeamImpactVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactVolume',
             flagname: 'missileImpactVolume',

@@ -54,8 +54,8 @@ export class thunderStep {
 
             let passenger = potentialPassengers.length ? await new Promise((resolve) => {
 
-                const content = ["Select a friend to bring with you! Warning, you <strong>will</strong> damage everyone in the red circle!<br><br><select style='width:100%'>"];
-                content.push(`<option passenger_id="noone">No one</option>`)
+                const content = [`${game.i18n.localize("ASE.ThunderStepPassengerPrompt")}<br><br><select style='width:100%'>`];
+                content.push(`<option passenger_id="noone">${game.i18n.localize("ASE.NoOne")}</option>`)
                 potentialPassengers.forEach(passenger => {
                     content.push(`<option passenger_id="${passenger.id}">${passenger.name}</option>`)
                 })
@@ -63,12 +63,12 @@ export class thunderStep {
 
                 let dismissed = true;
                 new Dialog({
-                    title: "Thunder Step",
+                    title: game.i18n.localize("ASE.ThunderStep"),
                     content: content,
                     buttons: {
                         one: {
                             icon: `<i class="fas fa-check"></i>`,
-                            label: "Done",
+                            label: game.i18n.localize("ASE.Done"),
                             callback: (html) => {
                                 const tokenId = html.find("select").find(':selected').attr('passenger_id');
                                 dismissed = false;
@@ -76,7 +76,7 @@ export class thunderStep {
                             }
                         }
                     },
-                    default: "Cancel",
+                    default: game.i18n.localize("ASE.Cancel"),
                     close: () => {
                         if (dismissed) {
                             resolve("cancel");
@@ -111,7 +111,7 @@ export class thunderStep {
         };
         let crosshairsConfig = {
             size: 1,
-            label: 'Thunder Step',
+            label: game.i18n.localize("ASE.ThunderStep"),
             tag: 'thunder-step-crosshairs',
             drawIcon: false,
             drawOutline: false,
@@ -228,8 +228,8 @@ export class thunderStep {
       <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
       <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
       <div>
-      <b>${saveResult ? "succeeds" : "fails"}</b> with 
-      <b>${roll}</b> and takes <b>${saveResult ? Math.floor(damageRoll.total / 2) : damageRoll.total}</b> damage.
+      <b>${saveResult ? game.i18n.localize("ASE.Succeeds") : game.i18n.localize("ASE.Fails")}</b> with
+      <b>${roll}</b> ${game.i18n.localize("ASE.AndTakes")}<b>${saveResult ? Math.floor(damageRoll.total / 2) : damageRoll.total}</b> ${game.i18n.localize("ASE.Damage")}
         
       </div>
       <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
@@ -245,21 +245,21 @@ export class thunderStep {
         let soundOptions = [];
 
         soundOptions.push({
-            label: "Teleport Sound:",
+            label: game.i18n.localize("ASE.TeleportSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.teleportSound',
             flagName: 'teleportSound',
             flagValue: currFlags?.teleportSound ?? '',
         });
         soundOptions.push({
-            label: "Teleport Sound Delay:",
+            label: game.i18n.localize("ASE.TeleportSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.teleportSoundDelay',
             flagName: 'teleportSoundDelay',
             flagValue: currFlags?.teleportSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Teleport Volume:",
+            label: game.i18n.localize("ASE.TeleportVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.teleportVolume',
             flagName: 'teleportVolume',
@@ -267,21 +267,21 @@ export class thunderStep {
         });
 
         soundOptions.push({
-            label: "Reappear Sound: ",
+            label: game.i18n.localize("ASE.ReappearSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.reappearSound',
             flagName: 'reappearSound',
             flagValue: currFlags?.reappearSound ?? '',
         });
         soundOptions.push({
-            label: "Reappear Sound Delay:",
+            label: game.i18n.localize("ASE.ReappearSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.reappearSoundDelay',
             flagName: 'reappearSoundDelay',
             flagValue: currFlags?.reappearSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: "Reappear Volume:",
+            label: game.i18n.localize("ASE.ReappearVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.reappearVolume',
             flagName: 'reappearVolume',

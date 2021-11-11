@@ -74,7 +74,7 @@ export class witchBolt {
                                 "range": { "value": null, "long": null, "units": "" },
                                 "school": "con",
                                 "description": {
-                                    "value": "Send lightning along the arc."
+                                    "value": game.i18n.localize("ASE.ActivateWitchBoltDescription"),
                                 }
                             },
                             "flags": {
@@ -122,7 +122,7 @@ export class witchBolt {
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-witchBolt` });
         await casterToken.document.unsetFlag("advancedspelleffects", "witchBolt");
         //console.log(`${casterActor.id}-witch-bolt`);
-        ui.notifications.info(`Activate Witch Bolt has been removed from your At-Will spells.`);
+        ui.notifications.info(game.i18n.localize("ASE.ActivateWitchBolt") + game.i18n.localize("ASE.RemovedAtWill"));
         await warpgate.revert(casterToken.document, `${casterActor.id}-witch-bolt`);
         const attachedSounds = (await Tagger.getByTag([`ase-source-${casterToken.id}`]));
         if (!attachedSounds.length > 0) {
@@ -146,7 +146,7 @@ export class witchBolt {
         itemData.data.components.concentration = false;
         if (game.modules.get("midi-qol")?.active) {
             //console.log(damageRoll);
-            new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, "lightning", target ? [target] : [], damageRoll, { flavor: `Witch Bolt - Damage Roll (1d12 Lightning)`, itemCardId: "new", itemData: itemData });
+            new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, "lightning", target ? [target] : [], damageRoll, { flavor: game.i18n.localize("ASE.WitchBoltDamageFlavor"), itemCardId: "new", itemData: itemData });
         }
         new Sequence("Advanced Spell Effects")
             .sound()
@@ -311,8 +311,8 @@ export class witchBolt {
         //console.log(witchBoltConcentration);
         if (witchBoltConcentration) {
             let confirmData = {
-                buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
-                title: "Activate Witch Bolt?"
+                buttons: [{ label: game.i18n.localize("ASE.Yes"), value: true }, { label: game.i18n.localize("ASE.No"), value: false }],
+                title: game.i18n.localize("ASE.WitchBoltPromptTitle"),
             };
             let target = canvas.tokens.get(caster.document.getFlag("advancedspelleffects", "witchBolt.targetId"));
             let concOrigin = witchBoltConcentration.data.origin.split(".");
@@ -343,7 +343,7 @@ export class witchBolt {
         let spellOptions = [];
 
         animOptions.push({
-            label: 'Initial Bolt Color:',
+            label: game.i18n.localize("ASE.InitialBoltColorLabel"),
             type: 'dropdown',
             options: initialBoltColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.initialBoltColor',
@@ -351,21 +351,21 @@ export class witchBolt {
             flagValue: currFlags.initialBoltColor ?? 'blue',
         });
         soundOptions.push({
-            label: 'Initial Bolt Sound:',
+            label: game.i18n.localize("ASE.InitialBoltSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.initialBoltSound',
             flagName: 'initialBoltSound',
             flagValue: currFlags.initialBoltSound ?? '',
         });
         soundOptions.push({
-            label: 'Initial Bolt Sound Delay:',
+            label: game.i18n.localize("ASE.InitialBoltSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.initialBoltSoundDelay',
             flagName: 'initialBoltSoundDelay',
             flagValue: currFlags.initialBoltSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Initial Bolt Volume:',
+            label: game.i18n.localize("ASE.InitialBoltVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.initialBoltVolume',
             flagName: 'initialBoltVolume',
@@ -373,7 +373,7 @@ export class witchBolt {
         });
 
         animOptions.push({
-            label: 'Continuous Stream Color:',
+            label: game.i18n.localize("ASE.ContinuousStreamColorLabel"),
             type: 'dropdown',
             options: streamColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.streamColor',
@@ -381,35 +381,35 @@ export class witchBolt {
             flagValue: currFlags.streamColor ?? 'blue',
         });
         soundOptions.push({
-            label: 'Continuous Stream Sound:',
+            label: game.i18n.localize("ASE.ContinuousStreamSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.streamCasterSound',
             flagName: 'streamCasterSound',
             flagValue: currFlags.streamCasterSound ?? '',
         });
         soundOptions.push({
-            label: 'Continuous Stream Sound Delay:',
+            label: game.i18n.localize("ASE.ContinuousStreamSoundDelayLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.streamCasterSoundDelay',
             flagName: 'streamCasterSoundDelay',
             flagValue: currFlags.streamCasterSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Continuous Stream Volume:',
+            label: game.i18n.localize("ASE.ContinuousStreamVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.streamCasterVolume',
             flagName: 'streamCasterVolume',
             flagValue: currFlags.streamCasterVolume ?? 1,
         });
         soundOptions.push({
-            label: 'Continuous Stream Volume Easing: ',
+            label: game.i18n.localize("ASE.ContinuousStreamSoundEasingLabel"),
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.streamCasterEasing',
             flagName: 'streamCasterEasing',
             flagValue: currFlags.streamCasterEasing ?? true,
         });
         soundOptions.push({
-            label: 'Continuous Stream Volume Radius: ',
+            label: game.i18n.localize("ASE.ContinuousStreamSoundRadiusLabel"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.streamCasterRadius',
             flagName: 'streamCasterRadius',
