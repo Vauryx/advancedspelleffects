@@ -13,12 +13,32 @@ export class witchBolt {
         let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
         let boltFile = `jb2a.chain_lightning.primary.${effectOptions.initialBoltColor}`;
         let animFile = `jb2a.witch_bolt.${effectOptions.streamColor}`;
+        const initialBoltSound = effectOptions.initialBoltSound ?? "";
+        const initialBoltSoundDelay = Number(effectOptions.initialBoltSoundDelay) ?? 0;
+        const initialBoltSoundVolume = effectOptions.initialBoltSoundVolume ?? 1;
+        const streamSound = effectOptions.streamCasterSound ?? "";
+        const streamSoundDelay = Number(effectOptions.streamCasterSoundDelay) ?? 0;
+        const streamVolume = effectOptions.streamCasterVolume ?? 1;
+        const streamEasing = effectOptions.streamCasterEasing ?? true;
+        const streamRadius = effectOptions.streamCasterRadius ?? 20;
+        const soundOptions = {
+            easing: streamEasing,
+            sound: streamSound,
+            radius: streamRadius,
+            volume: streamVolume,
+            delay: streamSoundDelay
+        };
         let missed = false;
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
         }
 
         new Sequence("Advanced Spell Effects")
+            .sound()
+            .file(initialBoltSound)
+            .delay(initialBoltSoundDelay)
+            .volume(initialBoltSoundVolume)
+            .playIf(initialBoltSound != "")
             .effect()
             .file(boltFile)
             .JB2A()
@@ -70,6 +90,30 @@ export class witchBolt {
             //console.log(`${caster.actor.id}-witch-bolt`);
             ui.notifications.info(`Activate Witch Bolt has been added to your At-Will spells.`);
             await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-witch-bolt` });
+            if (effectOptions.streamCasterSound && effectOptions.streamCasterSound != "") {
+                await placeSound(utilFunctions.getCenter(caster.document.data), soundOptions, caster.document.id);
+            }
+        }
+
+        async function placeSound(location, options, sourceId) {
+            const soundData = [{
+                easing: options.easing,
+                path: options.sound,
+                radius: options.radius,
+                type: "1",
+                volume: options.volume,
+                x: location.x,
+                y: location.y,
+                flags: {
+                    tagger: {
+                        tags: [`ase-source-${sourceId}`]
+                    },
+                    advancedspelleffects: {
+                        sourceId: sourceId
+                    }
+                }
+            }];
+            return (await aseSocket.executeAsGM("placeSounds", soundData, options.delay));
         }
     }
 
@@ -80,6 +124,11 @@ export class witchBolt {
         //console.log(`${casterActor.id}-witch-bolt`);
         ui.notifications.info(`Activate Witch Bolt has been removed from your At-Will spells.`);
         await warpgate.revert(casterToken.document, `${casterActor.id}-witch-bolt`);
+        const attachedSounds = (await Tagger.getByTag([`ase-source-${casterToken.id}`]));
+        if (!attachedSounds.length > 0) {
+            return;
+        }
+        await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.document.id));
         return;
     }
 
@@ -89,6 +138,9 @@ export class witchBolt {
         let target = canvas.tokens.get(caster.document.getFlag("advancedspelleffects", "witchBolt.targetId"));
         let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
         let boltFile = `jb2a.chain_lightning.primary.${effectOptions.initialBoltColor}`;
+        const initialBoltSound = effectOptions.initialBoltSound ?? "";
+        const initialBoltSoundDelay = Number(effectOptions.initialBoltSoundDelay) ?? 0;
+        const initialBoltSoundVolume = effectOptions.initialBoltSoundVolume ?? 1;
         let damageRoll = await new Roll(`1d12`).evaluate({ async: true });
         let itemData = midiData.item.data;
         itemData.data.components.concentration = false;
@@ -97,6 +149,11 @@ export class witchBolt {
             new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, "lightning", target ? [target] : [], damageRoll, { flavor: `Witch Bolt - Damage Roll (1d12 Lightning)`, itemCardId: "new", itemData: itemData });
         }
         new Sequence("Advanced Spell Effects")
+            .sound()
+            .file(initialBoltSound)
+            .delay(initialBoltSoundDelay)
+            .volume(initialBoltSoundVolume)
+            .playIf(initialBoltSound != "")
             .effect()
             .file(boltFile)
             .JB2A()
@@ -229,8 +286,9 @@ export class witchBolt {
                     .persist()
                     .name(`${tokenDocument.id}-witchBolt`)
                     .play()
-
-
+                if (effectOptions.streamCasterSound && effectOptions.streamCasterSound != "") {
+                    await aseSocket.executeAsGM("moveSound", tokenDocument.id, newPos);
+                }
             }
         }
 
@@ -323,51 +381,40 @@ export class witchBolt {
             flagValue: currFlags.streamColor ?? 'blue',
         });
         soundOptions.push({
-            label: 'Continuous Stream Sound(Caster):',
+            label: 'Continuous Stream Sound:',
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.streamCasterSound',
             flagName: 'streamCasterSound',
             flagValue: currFlags.streamCasterSound ?? '',
         });
         soundOptions.push({
-            label: 'Continuous Stream Sound Delay(Caster):',
+            label: 'Continuous Stream Sound Delay:',
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.streamCasterSoundDelay',
             flagName: 'streamCasterSoundDelay',
             flagValue: currFlags.streamCasterSoundDelay ?? 0,
         });
         soundOptions.push({
-            label: 'Continuous Stream Volume(Caster):',
+            label: 'Continuous Stream Volume:',
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.streamCasterVolume',
             flagName: 'streamCasterVolume',
             flagValue: currFlags.streamCasterVolume ?? 1,
         });
-
         soundOptions.push({
-            label: 'Continuous Stream Sound(Target):',
-            type: 'fileInput',
-            name: 'flags.advancedspelleffects.effectOptions.streamTargetSound',
-            flagName: 'streamTargetSound',
-            flagValue: currFlags.streamTargetSound ?? '',
+            label: 'Continuous Stream Volume Easing: ',
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.streamCasterEasing',
+            flagName: 'streamCasterEasing',
+            flagValue: currFlags.streamCasterEasing ?? true,
         });
         soundOptions.push({
-            label: 'Continuous Stream Sound Delay(Target):',
+            label: 'Continuous Stream Volume Radius: ',
             type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.streamTargetSoundDelay',
-            flagName: 'streamTargetSoundDelay',
-            flagValue: currFlags.streamTargetSoundDelay ?? 0,
+            name: 'flags.advancedspelleffects.effectOptions.streamCasterRadius',
+            flagName: 'streamCasterRadius',
+            flagValue: currFlags.streamCasterRadius ?? 20,
         });
-        soundOptions.push({
-            label: 'Continuous Stream Volume(Target):',
-            type: 'rangeInput',
-            name: 'flags.advancedspelleffects.effectOptions.streamTargetVolume',
-            flagName: 'streamTargetVolume',
-            flagValue: currFlags.streamTargetVolume ?? 1,
-        });
-        //TEMP WHILE WITCHBOLT SOUND IS UNDER DEV
-        soundOptions = [];
-
         return {
             animOptions: animOptions,
             spellOptions: spellOptions,
