@@ -107,7 +107,9 @@ export class witchBolt {
 
     static async _updateToken(tokenDocument, updateData) {
         //console.log("Registering Detect Magic Hook");
-        if (!game.user.isGM) return;
+        const isGM = utilFunctions.isFirstGM();
+        //console.log("Is first GM: ", isGM);
+        if (!isGM) return;
         if ((!updateData.x && !updateData.y)) return;
         let casterActor = tokenDocument.actor;
         let animFile = '';

@@ -13,6 +13,8 @@ export function setupASESocket() {
         aseSocket.register("moveWalls", moveWalls);
         aseSocket.register("moveTile", moveTile);
         aseSocket.register("fadeTile", fadeTile);
+        aseSocket.register("placeSounds", placeSounds);
+        aseSocket.register("moveSound", moveSound);
     }
 };
 
@@ -27,12 +29,52 @@ async function updateFlag(objectId, flag, value) {
     await object.setFlag("advancedspelleffects", flag, value);
 }
 
+async function placeTiles(tileData) {
+    return (await canvas.scene.createEmbeddedDocuments("Tile", tileData));
+}
+
 async function deleteTiles(tileIds) {
     await canvas.scene.deleteEmbeddedDocuments("Tile", tileIds);
 }
 
-async function placeTiles(tileData) {
-    return (await canvas.scene.createEmbeddedDocuments("Tile", tileData));
+async function moveTile(newLocation, tileId) {
+    let tile = canvas.scene.tiles.get(tileId);
+    const distance = utilFunctions.getDistanceClassic({ x: tile.data.x + canvas.grid.size, y: tile.data.y + canvas.grid.size }, { x: newLocation.x, y: newLocation.y });
+    //console.log('Distance: ', distance);
+
+    const moveSpeed = Math.floor(distance / 50);
+    //console.log('Move Speed: ', moveSpeed);
+
+    let moveTileSeq = new Sequence("Advanced Spell Effects")
+        .animation()
+        .on(tile)
+        .moveTowards(newLocation, { ease: "easeInOutQuint" })
+        .offset({ x: -canvas.grid.size, y: -canvas.grid.size })
+        .moveSpeed(moveSpeed)
+    await moveTileSeq.play();
+
+
+}
+
+async function fadeTile(fade, tileId) {
+    //console.log("Fading in Moonbeam Tile...");
+    let tile = canvas.scene.tiles.get(tileId);
+    if (!tile) {
+        ui.notifications.error("Moonbeam Tile not found");
+        return;
+    }
+    let fadeTileSeq = new Sequence("Advanced Spell Effects")
+        .animation()
+        .on(tile);
+    if (fade.type == "fadeIn") {
+        fadeTileSeq.fadeIn(fade.duration);
+    }
+    else if (fade.type == "fadeOut") {
+        fadeTileSeq.fadeOut(fade.duration);
+    }
+
+    await fadeTileSeq.play();
+
 }
 
 async function placeWalls(wallData) {
@@ -82,42 +124,46 @@ async function moveWalls(tileId, wallType, numWalls) {
     await canvas.scene.createEmbeddedDocuments("Wall", walls);
 }
 
-async function moveTile(newLocation, tileId) {
-    let tile = canvas.scene.tiles.get(tileId);
-
-    const distance = utilFunctions.getDistanceClassic({ x: tile.data.x + canvas.grid.size, y: tile.data.y + canvas.grid.size }, { x: newLocation.x, y: newLocation.y });
-    console.log('Distance: ', distance);
-
-    const moveSpeed = Math.floor(distance / 50);
-    console.log('Move Speed: ', moveSpeed);
-
-    let moveTileSeq = new Sequence("Advanced Spell Effects")
-        .animation()
-        .on(tile)
-        .moveTowards(newLocation, { ease: "easeInOutQuint" })
-        .offset({ x: -canvas.grid.size, y: -canvas.grid.size })
-        .moveSpeed(moveSpeed)
-    await moveTileSeq.play();
-
+async function placeSounds(soundData, delay) {
+    await warpgate.wait(delay);
+    return (await canvas.scene.createEmbeddedDocuments("AmbientSound", soundData));
 }
 
-async function fadeTile(fade, tileId) {
-    //console.log("Fading in Moonbeam Tile...");
-    let tile = canvas.scene.tiles.get(tileId);
-    if (!tile) {
-        ui.notifications.error("Moonbeam Tile not found");
+async function moveSound(sourceId, newLoc) {
+    let source = canvas.scene.tiles.get(sourceId)
+        || canvas.scene.tokens.get(sourceId);
+    if (!source) {
+        ui.notifications.error("ASE: Sound Source not found");
         return;
     }
-    let fadeTileSeq = new Sequence("Advanced Spell Effects")
-        .animation()
-        .on(tile);
-    if (fade.type == "fadeIn") {
-        fadeTileSeq.fadeIn(fade.duration);
+    if (source.getFlag("advancedspelleffects", "moving")) {
+        return;
     }
-    else if (fade.type == "fadeOut") {
-        fadeTileSeq.fadeOut(fade.duration);
+    const attachedSounds = (await Tagger.getByTag([`ase-source-${sourceId}`]));
+    if (!attachedSounds.length > 0) {
+        ui.notifications.error("ASE: Sound not found");
+        return;
     }
-
-    await fadeTileSeq.play();
+    const oldSoundData = attachedSounds[0].document.data;
+    //console.log('Old Sound Data: ', oldSoundData);
+    const sourceWidth = source.data.hitArea?.width || source.data.width;
+    const sourceHeight = source.data.hitArea?.height || source.data.height;
+    const newSoundData = [{
+        easing: oldSoundData.easing,
+        path: oldSoundData.path,
+        radius: oldSoundData.radius,
+        type: oldSoundData.type,
+        volume: oldSoundData.volume,
+        x: newLoc.x,
+        y: newLoc.y,
+        flags: oldSoundData.flags
+    }];
+    //console.log('New Sound Data: ', newSoundData);
+    if (oldSoundData.x != newSoundData[0].x || oldSoundData.y != newSoundData[0].y) {
+        await canvas.scene.createEmbeddedDocuments("AmbientSound", newSoundData);
+        if (canvas.scene.getEmbeddedDocument("AmbientSound", attachedSounds[0].document.id)) {
+            await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.document.id));
+        }
+    }
 
 }

@@ -6,7 +6,19 @@ export class moonBeam {
     static registerHooks() {
         Hooks.on("updateToken", moonBeam._updateToken);
         Hooks.on("updateCombat", moonBeam._updateCombat);
+        Hooks.on("deleteTile", moonBeam._deleteTile);
         return;
+    }
+
+    static async _deleteTile(tileD) {
+        const isGM = utilFunctions.isFirstGM();
+        //console.log("Is first GM: ", isGM);
+        if (!isGM) return;
+        const attachedSounds = (await Tagger.getByTag([`ase-source-${tileD.id}`]));
+        if (!attachedSounds.length > 0) {
+            return;
+        }
+        await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.document.id));
     }
 
     static async _updateToken(tokenDocument, updateData) {
@@ -38,10 +50,12 @@ export class moonBeam {
                 if (inTiles.includes(moonbeamTile.id)) {
 
                     console.log(`${token.name} has already entered this tile this turn - ${moonbeamTile.id}`);
+                    ui.notifications.info(`${token.name} has already entered this tile this turn - ${moonbeamTile.id}`);
                     //do nothing
                 }
                 else {
                     console.log(`${token.name} is entering the space of a moonbeam tile - ${moonbeamTile.id}`);
+                    ui.notifications.info(`${token.name} is entering the space of a moonbeam tile - ${moonbeamTile.id}`);
                     //add the tile to the inTiles array
                     inTiles.push(moonbeamTile.id);
                     let effectOptions = moonbeamTile.document.getFlag("advancedspelleffects", "effectOptions") ?? {};
@@ -81,6 +95,7 @@ export class moonBeam {
             if (combatantPosition.x >= moonbeamTile.x && combatantPosition.x <= moonbeamTile.x + moonbeamTile.width && combatantPosition.y >= moonbeamTile.y && combatantPosition.y <= moonbeamTile.y + moonbeamTile.height) {
                 //check if tile exists in inTiles which is an array of tiles
                 console.log(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
+                ui.notifications.info(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
                 //add the tile to the inTiles array
                 await moonBeam.activateBeam(combatantToken, effectOptions);
                 inTiles.push(moonbeamTile.id);
@@ -125,6 +140,8 @@ export class moonBeam {
         const beamLoopSoundDelay = Number(aseEffectOptions.moonbeamLoopSoundDelay) ?? 0;
         const beamInitialSoundVolume = aseEffectOptions.moonbeamVolume ?? 1;
         const beamLoopSoundVolume = aseEffectOptions.moonbeamLoopVolume ?? 1;
+        const beamLoopSoundEasing = aseEffectOptions.moonbeamLoopEasing ?? true;
+        const beamLoopSoundRadius = aseEffectOptions.moonbeamLoopRadius ?? 20;
 
         const levelScaling = aseEffectOptions.levelScaling ?? true;
         const damageDie = aseEffectOptions.dmgDie ?? 'd10';
@@ -163,9 +180,7 @@ export class moonBeam {
                         "flags": {
                             "advancedspelleffects": {
                                 "enableASE": true,
-                                'effectOptions': {
-                                    'moonbeamColor': aseEffectOptions.moonbeamColor
-                                }
+                                'effectOptions': aseEffectOptions
                             }
                         }
                     }
@@ -190,12 +205,24 @@ export class moonBeam {
             .effect()
             .file(beamIntro)
             .atLocation(moonbeamLoc)
+            .endTimePerc(0.50)
             .scale(0.5)
             .waitUntilFinished(-500)
             .thenDo(async () => {
                 await aseSocket.executeAsGM("fadeTile", { type: "fadeIn", duration: 500 }, moonbeamTileId);
             })
         await beamSeq.play();
+        const soundOptions = {
+            volume: beamLoopSoundVolume,
+            delay: beamLoopSoundDelay,
+            sound: beamLoopSound,
+            easing: beamLoopSoundEasing,
+            radius: beamLoopSoundRadius,
+        };
+        if (beamLoopSound != "") {
+            const sourceSound = await placeSound(moonbeamLoc, soundOptions, moonbeamTileId);
+            console.log('Sound Created...', sourceSound);
+        }
 
         async function placeBeam(templateData, tokenId, beamAnim, effectOptions) {
             let tileWidth;
@@ -244,6 +271,28 @@ export class moonBeam {
             return createdTiles[0];
 
         }
+
+        async function placeSound(location, options, sourceId) {
+            const soundData = [{
+                easing: options.easing,
+                path: options.sound,
+                radius: options.radius,
+                type: "1",
+                volume: options.volume,
+                x: location.x,
+                y: location.y,
+                flags: {
+                    tagger: {
+                        tags: [`ase-source-${sourceId}`]
+                    },
+                    advancedspelleffects: {
+                        sourceId: sourceId
+                    }
+                }
+            }];
+            return (await aseSocket.executeAsGM("placeSounds", soundData, options.delay));
+        }
+
     }
 
     static async activateBeam(token, effectOptions) {
@@ -299,7 +348,7 @@ export class moonBeam {
         }
 
         const rollInfo = effectOptions.rollInfo;
-        console.log('ROLL INFO: ', rollInfo);
+        //console.log('ROLL INFO: ', rollInfo);
         const spellItem = await fromUuid(rollInfo.itemUUID);
         const casterToken = canvas.tokens.get(rollInfo.casterTokenId);
         const casterActor = casterToken.actor;
@@ -314,7 +363,7 @@ export class moonBeam {
             const saveRoll = await new Roll(`1d20+@mod`, { mod: token.actor.data.data.abilities.con.save }).evaluate({ async: true });
             console.log('Rolls: ');
             console.log(fullDamageRoll);
-            console.log(halfdamageroll);
+            //console.log(halfdamageroll);
             console.log(saveRoll);
             if (game.modules.get("dice-so-nice")?.active) {
                 game.dice3d?.showForRoll(damageRoll);
@@ -406,8 +455,11 @@ export class moonBeam {
         let moonbeamLoc = await moonBeam.chooseBeamLocation(beamLoop);
         //console.log(moonbeamLoc);
         //console.log(moonbeamTile);
-
+        //console.log("ASE EFFECT OPTIONS: ", aseEffectOptions);
         await aseSocket.executeAsGM("moveTile", moonbeamLoc, moonbeamTile.id);
+        if (aseEffectOptions.moonbeamLoopSound && aseEffectOptions.moonbeamLoopSound != "") {
+            await aseSocket.executeAsGM("moveSound", moonbeamTile.id, moonbeamLoc);
+        }
 
     }
 
@@ -537,7 +589,20 @@ export class moonBeam {
             flagName: 'moonbeamLoopVolume',
             flagValue: currFlags.moonbeamLoopVolume ?? 1,
         });
-
+        soundOptions.push({
+            label: 'Moonbeam Loop Volume Easing: ',
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopEasing',
+            flagName: 'moonbeamLoopEasing',
+            flagValue: currFlags.moonbeamLoopEasing ?? true,
+        });
+        soundOptions.push({
+            label: 'Moonbeam Loop Volume Radius: ',
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopRadius',
+            flagName: 'moonbeamLoopRadius',
+            flagValue: currFlags.moonbeamLoopRadius ?? 20,
+        });
         animOptions.push({
             label: 'Damage Effect Color: ',
             type: 'dropdown',
