@@ -1,5 +1,4 @@
 import ASESettings from "./apps/aseSettings.js";
-import { PatrolMenu } from "./apps/ase-settings-new.js";
 
 Hooks.once('init', async function () {
   console.log("Registering ASE game settings...");
