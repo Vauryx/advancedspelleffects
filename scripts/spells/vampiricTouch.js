@@ -25,46 +25,47 @@ export class vampiricTouch {
         const siphonSoundDelay = Number(effectOptions.vtSiphonSoundDelay) ?? 0;
         const siphonVolume = effectOptions.vtSiphonVolume ?? 1;
 
-
         const updates = {
             embedded: {
-                Item: {
-                    "Vampiric Touch (Attack)": {
-                        "type": "spell",
-                        "img": midiData.item.img,
-                        "data": {
-                            "ability": "",
-                            "actionType": "msak",
-                            "activation": { "type": 'action', "cost": 1 },
-                            "damage": { "parts": [[`${midiData.itemLevel}d6`, "necrotic"]] },
-                            "level": midiData.itemLevel,
-                            "preparation": { "mode": 'atwill', "prepared": true },
-                            "range": { "value": 5, "units": 'ft' },
-                            "school": "nec",
-                            "target": { "value": 1, "type": 'creature' },
-                            "description": {
-                                "value": game.i18n.localize("ASE.VampiricTouchDescription")
-                            }
-                        },
-                        "flags": {
-                            "advancedspelleffects": {
-                                "enableASE": true,
-                                'effectOptions': {
-                                    'vtStrandColor': effectOptions.vtStrandColor,
-                                    'vtImpactColor': effectOptions.vtImpactColor,
-                                    'vtSiphonSound': siphonSound,
-                                    'vtSiphonSoundDelay': siphonSoundDelay,
-                                    'vtSiphonVolume': siphonVolume,
-                                    'vtImpactSound': impactSound,
-                                    'vtImpactSoundDelay': impactSoundDelay,
-                                    'vtImpactVolume': impactVolume,
-                                }
-                            }
-                        }
+                Item: {}
+            }
+        };
+        const activationItemName = game.i18n.localize('ASE.VampiricTouchAttack');
+
+        updates.embedded.Item[activationItemName] = {
+            "type": "spell",
+            "img": midiData.item.img,
+            "data": {
+                "ability": "",
+                "actionType": "msak",
+                "activation": { "type": 'action', "cost": 1 },
+                "damage": { "parts": [[`${midiData.itemLevel}d6`, "necrotic"]] },
+                "level": midiData.itemLevel,
+                "preparation": { "mode": 'atwill', "prepared": true },
+                "range": { "value": 5, "units": 'ft' },
+                "school": "nec",
+                "target": { "value": 1, "type": 'creature' },
+                "description": {
+                    "value": game.i18n.localize("ASE.VampiricTouchDescription")
+                }
+            },
+            "flags": {
+                "advancedspelleffects": {
+                    "enableASE": true,
+                    'effectOptions': {
+                        'vtStrandColor': effectOptions.vtStrandColor,
+                        'vtImpactColor': effectOptions.vtImpactColor,
+                        'vtSiphonSound': siphonSound,
+                        'vtSiphonSoundDelay': siphonSoundDelay,
+                        'vtSiphonVolume': siphonVolume,
+                        'vtImpactSound': impactSound,
+                        'vtImpactSoundDelay': impactSoundDelay,
+                        'vtImpactVolume': impactVolume,
                     }
                 }
             }
         }
+
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
             damageTotal = midiData.damageRoll?.total ?? 12;
@@ -118,7 +119,7 @@ export class vampiricTouch {
             //.scale(0.4)
             .play()
         await warpgate.mutate(tokenD.document, updates, {}, { name: `${tactor.id}-vampiric-touch` });
-        ui.notifications.info(`Vampiric Touch (Attack) has been added to your At-Will spells.`);
+        ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.VampiricTouchAttack") }));
         ChatMessage.create({ content: `${tactor.name}'s hands are wrapped in darkness...` });
 
     }
@@ -126,7 +127,7 @@ export class vampiricTouch {
         //handle concentration removal for vampiric touch
         await warpgate.revert(casterToken.document, `${casterActor.id}-vampiric-touch`);
 
-        ui.notifications.info(`Vampiric Touch (Attack) has been removed from your At-Will spells.`);
+        ui.notifications.info(game.i18n.format("ASE.RemovedAtWill", { spellName: game.i18n.localize("ASE.VampiricTouchAttack") }));
 
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-vampiric-touch` });
 

@@ -349,6 +349,9 @@ export class steelWindStrike {
             name: 'flags.advancedspelleffects.effectOptions.dashVolume',
             flagName: 'dashVolume',
             flagValue: currFlags.dashVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         soundOptions.push({
@@ -371,6 +374,9 @@ export class steelWindStrike {
             name: 'flags.advancedspelleffects.effectOptions.strikeVolume',
             flagName: 'strikeVolume',
             flagValue: currFlags.strikeVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         return {

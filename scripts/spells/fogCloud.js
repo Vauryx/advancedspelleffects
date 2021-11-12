@@ -181,6 +181,9 @@ export class fogCloud {
             name: 'flags.advancedspelleffects.effectOptions.fogCloudVolume',
             flagName: 'fogCloudVolume',
             flagValue: currFlags.fogCloudVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         return {

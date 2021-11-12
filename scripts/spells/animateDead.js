@@ -161,6 +161,9 @@ export class animateDead {
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolVolume',
             flagName: 'magicSchoolVolume',
             flagValue: currFlags.magicSchoolVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
         soundOptions.push({
             label: game.i18n.localize('ASE.MagicSchoolOutroSoundLabel'),
@@ -182,6 +185,9 @@ export class animateDead {
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolVolumeOutro',
             flagName: 'magicSchoolVolumeOutro',
             flagValue: currFlags.magicSchoolVolumeOutro ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         animOptions.push({
@@ -212,6 +218,9 @@ export class animateDead {
             name: 'flags.advancedspelleffects.effectOptions.effectASoundVolume',
             flagName: 'effectASoundVolume',
             flagValue: currFlags.effectASoundVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         animOptions.push({
@@ -242,6 +251,9 @@ export class animateDead {
             name: 'flags.advancedspelleffects.effectOptions.effectBSoundVolume',
             flagName: 'effectBSoundVolume',
             flagValue: currFlags.effectBSoundVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         return {

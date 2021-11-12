@@ -159,8 +159,8 @@ export class thunderStep {
                         let damage = await new Roll(`${spellLevel}d10`).evaluate({ async: true });
                         for (let targetToken of targets) {
 
-                            let save = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.con.save }).evaluate({ async: true }).total;
-
+                            let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.con.save }).evaluate({ async: true });
+                            let save = saveRoll.total;
                             targetTokens.add(targetToken)
                             if (save >= spellSaveDC) {
                                 saves.add(targetToken)
@@ -223,14 +223,11 @@ export class thunderStep {
             console.log(damageRoll);
             let saveResult = roll >= dc ? true : false;
 
-
             return `<div class="midi-qol-flex-container">
       <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
       <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
       <div>
-      <b>${saveResult ? game.i18n.localize("ASE.Succeeds") : game.i18n.localize("ASE.Fails")}</b> with
-      <b>${roll}</b> ${game.i18n.localize("ASE.AndTakes")}<b>${saveResult ? Math.floor(damageRoll.total / 2) : damageRoll.total}</b> ${game.i18n.localize("ASE.Damage")}
-        
+      ${saveResult ? game.i18n.format("ASE.SavePassMessage", { saveTotal: roll, damageTotal: Math.floor(damageRoll.total / 2) }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: roll, damageTotal: damageRoll.total })}
       </div>
       <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
     </div>`;
@@ -264,6 +261,9 @@ export class thunderStep {
             name: 'flags.advancedspelleffects.effectOptions.teleportVolume',
             flagName: 'teleportVolume',
             flagValue: currFlags?.teleportVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         soundOptions.push({
@@ -286,6 +286,9 @@ export class thunderStep {
             name: 'flags.advancedspelleffects.effectOptions.reappearVolume',
             flagName: 'reappearVolume',
             flagValue: currFlags?.reappearVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
         return {
             spellOptions: spellOptions,

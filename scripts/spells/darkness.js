@@ -173,6 +173,9 @@ export class darkness {
             name: 'flags.advancedspelleffects.effectOptions.darknessVolume',
             flagName: 'darknessVolume',
             flagValue: currFlags.darknessVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         return {

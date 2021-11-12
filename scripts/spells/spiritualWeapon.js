@@ -334,6 +334,9 @@ export class spiritualWeapon {
             name: 'flags.advancedspelleffects.effectOptions.summonVolume',
             flagName: 'summonVolume',
             flagValue: currFlags.summonVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         return {

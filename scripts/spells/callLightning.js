@@ -74,38 +74,39 @@ export class callLightning {
         //console.log("StomeTileID: ", stormTileId);
         const updates = {
             embedded: {
-                Item: {
-                    "Call Lightning Bolt": {
-                        "type": "spell",
-                        "img": item.img,
-                        "data": {
-                            "ability": "",
-                            "actionType": "other",
-                            "activation": { "type": "action", "cost": 1, "condition": "" },
-                            "damage": { "parts": [], "versatile": "" },
-                            "level": spellLevel,
-                            "preparation": { "mode": 'atwill', "prepared": true },
-                            "range": { "value": null, "long": null, "units": "" },
-                            "school": "con",
-                            "description": {
-                                "value": game.i18n.localize('ASE.CallLightningBoltCastDescription')
-                            }
-                        },
-                        "flags": {
-                            "advancedspelleffects": {
-                                "enableASE": true,
-                                'effectOptions': {
-                                    'stormTileId': stormTileId
-                                }
-                            }
-                        }
+                Item: {}
+            }
+        };
+        const activationItemName = game.i18n.localize('ASE.ActivateCallLightning');
+        updates.embedded.Item[activationItemName] = {
+            "type": "spell",
+            "img": item.img,
+            "data": {
+                "ability": "",
+                "actionType": "other",
+                "activation": { "type": "action", "cost": 1, "condition": "" },
+                "damage": { "parts": [], "versatile": "" },
+                "level": spellLevel,
+                "preparation": { "mode": 'atwill', "prepared": true },
+                "range": { "value": null, "long": null, "units": "" },
+                "school": "con",
+                "description": {
+                    "value": game.i18n.localize('ASE.ActivateCallLightningCastDescription')
+                }
+            },
+            "flags": {
+                "advancedspelleffects": {
+                    "enableASE": true,
+                    'effectOptions': {
+                        'stormTileId': stormTileId
                     }
                 }
             }
         }
+
         await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-call-lightning` });
-        ui.notifications.info(`${game.i18n.localize('ASE.CallLightningBolt') + game.i18n.localize('ASE.AddedAtWill')}`);
-        ChatMessage.create({ content: `${caster.actor.name + game.i18n.localize('ASE.CallLightningChatMessage')}` });
+        ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
+        ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage'), { name: caster.actor.name }}` });
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         await callLightning.callLightningBolt(stormTileId);
 
@@ -183,7 +184,7 @@ export class callLightning {
         let stormCloudTile = canvas.scene.tiles.get(stormTileId);
         let confirmData = {
             buttons: [{ label: "Yes", value: true }, { label: "No", value: false }],
-            title: `${game.i18n.localize('ASE.CallLightningBoltDialogA') + stormCloudTile.getFlag("advancedspelleffects", "spellLevel") + game.i18n.localize('ASE.CallLightningBoltDialogB')}`
+            title: game.i18n.format('ASE.ActivateCallLightningDialog', { spellLevel: stormCloudTile.getFlag("advancedspelleffects", "spellLevel") })
         };
         let confirm = await warpgate.buttonDialog(confirmData, 'row');
         if (confirm) {
@@ -267,10 +268,10 @@ export class callLightning {
                 let halfdamageroll = await new Roll(`${fullDamageRoll.total}/2`).evaluate({ async: true });
 
                 if (failedSaves.length > 0) {
-                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, fullDamageRoll.total, game.i18n.localize('ASE.Lightning').toLowerCase(), failedSaves, fullDamageRoll, { flavor: `${game.i18n.localize('ASE.CallLightningFullDamageFlavor') + `(${spellLevel}` + game.i18n.localize('ASE.CallLightningDamageFlavorEnd') + ')'}`, itemCardId: "new", itemData: itemData });
+                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, fullDamageRoll.total, game.i18n.localize('ASE.Lightning').toLowerCase(), failedSaves, fullDamageRoll, { flavor: game.i18n.format('ASE.CallLightningFullDamageFlavor', { damageRoll: `${spellLevel}d10` }), itemCardId: "new", itemData: itemData });
                 }
                 if (passedSaves.length > 0) {
-                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, halfdamageroll.total, game.i18n.localize('ASE.Lightning').toLowerCase(), passedSaves, halfdamageroll, { flavor: `${game.i18n.localize('ASE.CallLightningHalfDamageFlavor') + `(${spellLevel}` + game.i18n.localize('ASE.CallLightningDamageFlavorEnd') + ')'}`, itemCardId: "new", itemData: itemData });
+                    new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, halfdamageroll.total, game.i18n.localize('ASE.Lightning').toLowerCase(), passedSaves, halfdamageroll, { flavor: game.i18n.format('ASE.CallLightningHalfDamageFlavor', { damageRoll: `${spellLevel}d10` }), itemCardId: "new", itemData: itemData });
                 }
             }
 
@@ -378,8 +379,8 @@ export class callLightning {
             //console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
             await aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
             await warpgate.revert(casterToken.document, `${casterActor.id}-call-lightning`);
-            ui.notifications.info(game.i18n.localize('ASE.CallLightningBolt') + game.i18n.localize('ASE.RemovedAtWill'));
-            ChatMessage.create({ content: game.i18n.localize('ASE.CallLightningBoltDissipate') });
+            ui.notifications.info(game.i18n.format("ASE.RemovedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
+            ChatMessage.create({ content: game.i18n.localize('ASE.ActivateCallLightningDissipate') });
         }
 
     }
@@ -433,6 +434,9 @@ export class callLightning {
             name: 'flags.advancedspelleffects.effectOptions.boltVolume',
             flagName: 'boltVolume',
             flagValue: currFlags.boltVolume,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         return {

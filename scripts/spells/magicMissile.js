@@ -99,6 +99,17 @@ export class magicMissile {
             flagName: 'targetMarkerColor',
             flagValue: currFlags.targetMarkerColor,
         });
+        animOptions.push({
+            label: game.i18n.localize('ASE.TargetMarkerHueLabel'),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.targetMarkerHue',
+            flagName: 'targetMarkerHue',
+            flagValue: currFlags.targetMarkerHue ?? 0,
+        });
+        animOptions.push({
+            label: game.i18n.localize('ASE.TargetMarkerSaturationLabel'),
+            type: 'ranngeIn'
+        });
         soundOptions.push({
             label: game.i18n.localize('ASE.TargetMarkerSoundLabel'),
             type: 'fileInput',
@@ -119,6 +130,9 @@ export class magicMissile {
             name: 'flags.advancedspelleffects.effectOptions.markerVolume',
             flagName: 'markerVolume',
             flagValue: currFlags.markerVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         animOptions.push({
@@ -149,6 +163,9 @@ export class magicMissile {
             name: 'flags.advancedspelleffects.effectOptions.missileIntroVolume',
             flagName: 'missileIntroVolume',
             flagValue: currFlags.missileIntroVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         soundOptions.push({
@@ -171,6 +188,9 @@ export class magicMissile {
             name: 'flags.advancedspelleffects.effectOptions.missileImpactVolume',
             flagname: 'missileImpactVolume',
             flagValue: currFlags.missileImpactVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         return {

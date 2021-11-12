@@ -382,6 +382,9 @@ export class detectMagic {
             name: 'flags.advancedspelleffects.effectOptions.waveVolume',
             flagName: 'waveVolume',
             flagValue: currFlags.waveVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         animOptions.push({

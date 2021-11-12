@@ -126,6 +126,9 @@ export class eldritchBlast {
             name: 'flags.advancedspelleffects.effectOptions.markerVolume',
             flagName: 'markerVolume',
             flagValue: currFlags.markerVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         animOptions.push({
@@ -156,6 +159,9 @@ export class eldritchBlast {
             name: 'flags.advancedspelleffects.effectOptions.missileIntroVolume',
             flagName: 'missileIntroVolume',
             flagValue: currFlags.missileIntroVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         soundOptions.push({
@@ -178,6 +184,9 @@ export class eldritchBlast {
             name: 'flags.advancedspelleffects.effectOptions.missileImpactVolume',
             flagname: 'missileImpactVolume',
             flagValue: currFlags.missileImpactVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         return {

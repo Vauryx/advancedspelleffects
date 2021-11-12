@@ -60,35 +60,36 @@ export class witchBolt {
             await caster.document.setFlag("advancedspelleffects", "witchBolt.targetId", target.id);
             const updates = {
                 embedded: {
-                    Item: {
-                        "Activate Witch Bolt": {
-                            "type": "spell",
-                            "img": midiData.item.img,
-                            "data": {
-                                "ability": "",
-                                "actionType": "other",
-                                "activation": { "type": "action", "cost": 1, "condition": "" },
-                                "damage": { "parts": [], "versatile": "" },
-                                "level": midiData.itemLevel,
-                                "preparation": { "mode": 'atwill', "prepared": true },
-                                "range": { "value": null, "long": null, "units": "" },
-                                "school": "con",
-                                "description": {
-                                    "value": game.i18n.localize("ASE.ActivateWitchBoltDescription"),
-                                }
-                            },
-                            "flags": {
-                                "advancedspelleffects": {
-                                    "enableASE": true,
-                                    'effectOptions': effectOptions
-                                }
-                            }
-                        }
+                    Item: {}
+                }
+            };
+            const activationItemName = game.i18n.localize('ASE.ActivateWitchBolt');
+            updates.embedded.Item[activationItemName] = {
+                "type": "spell",
+                "img": midiData.item.img,
+                "data": {
+                    "ability": "",
+                    "actionType": "other",
+                    "activation": { "type": "action", "cost": 1, "condition": "" },
+                    "damage": { "parts": [], "versatile": "" },
+                    "level": midiData.itemLevel,
+                    "preparation": { "mode": 'atwill', "prepared": true },
+                    "range": { "value": null, "long": null, "units": "" },
+                    "school": "con",
+                    "description": {
+                        "value": game.i18n.localize("ASE.ActivateWitchBoltDescription"),
+                    }
+                },
+                "flags": {
+                    "advancedspelleffects": {
+                        "enableASE": true,
+                        'effectOptions': effectOptions
                     }
                 }
             }
+
             //console.log(`${caster.actor.id}-witch-bolt`);
-            ui.notifications.info(`Activate Witch Bolt has been added to your At-Will spells.`);
+            ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.ActivateWitchBolt") }));
             await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-witch-bolt` });
             if (effectOptions.streamCasterSound && effectOptions.streamCasterSound != "") {
                 await placeSound(utilFunctions.getCenter(caster.document.data), soundOptions, caster.document.id);
@@ -122,7 +123,7 @@ export class witchBolt {
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-witchBolt` });
         await casterToken.document.unsetFlag("advancedspelleffects", "witchBolt");
         //console.log(`${casterActor.id}-witch-bolt`);
-        ui.notifications.info(game.i18n.localize("ASE.ActivateWitchBolt") + game.i18n.localize("ASE.RemovedAtWill"));
+        ui.notifications.info(game.i18n.format("ASE.RemovedAtWill", { spellName: game.i18n.localize("ASE.ActivateWitchBolt") }));
         await warpgate.revert(casterToken.document, `${casterActor.id}-witch-bolt`);
         const attachedSounds = (await Tagger.getByTag([`ase-source-${casterToken.id}`]));
         if (!attachedSounds.length > 0) {
@@ -370,6 +371,9 @@ export class witchBolt {
             name: 'flags.advancedspelleffects.effectOptions.initialBoltVolume',
             flagName: 'initialBoltVolume',
             flagValue: currFlags.initialBoltVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         animOptions.push({
@@ -400,6 +404,9 @@ export class witchBolt {
             name: 'flags.advancedspelleffects.effectOptions.streamCasterVolume',
             flagName: 'streamCasterVolume',
             flagValue: currFlags.streamCasterVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
         soundOptions.push({
             label: game.i18n.localize("ASE.ContinuousStreamSoundEasingLabel"),

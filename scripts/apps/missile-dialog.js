@@ -444,7 +444,7 @@ export class MissileDialog extends FormApplication {
     // for crtical hits, replace the attack roll with the word "crit"
     // add the breakdown of the attack and damage rolls as a tooltip on the roll results
     _buildChatData(attackRolls, damageRolls, caster) {
-        let content = `<table id="missileDialogChatTable"><tr><th>${game.i18n.localize("ASE.Target")}</th><th>${game.i18n.localize("ASE.AttackRoll")}</th><th>${game.i18n.localize("ASE.DamageCapital")}</th>`
+        let content = `<table id="missileDialogChatTable"><tr><th>${game.i18n.localize("ASE.Target")}</th><th>${game.i18n.localize("ASE.AttackRoll")}</th><th>${game.i18n.localize("ASE.Damage")}</th>`
 
         console.log('Building chat data...');
         console.log('Attack Rolls: ', attackRolls);

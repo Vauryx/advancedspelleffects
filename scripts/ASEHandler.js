@@ -39,14 +39,12 @@ export class ASEHandler {
                 await detectMagic.activateDetectMagic(data);
                 return;
             case game.i18n.localize('ASE.CallLightning'):
-                if (!data.flavor?.includes("Lightning Bolt")) {
+                if (!data.flavor) {
                     await callLightning.createStormCloud(data);
                 }
                 return;
-            case game.i18n.localize('ASE.CallLightningBolt'):
-                if (!data.flavor?.includes("Lightning Bolt")) {
-                    await callLightning.callLightningBolt(aseFlags.effectOptions.stormTileId);
-                }
+            case game.i18n.localize('ASE.ActivateCallLightning'):
+                await callLightning.callLightningBolt(aseFlags.effectOptions.stormTileId);
                 return;
             case game.i18n.localize('ASE.FogCloud'):
                 await fogCloud.createFogCloud(data);

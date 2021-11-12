@@ -67,8 +67,13 @@ export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export function getCenter(pos) {
-    return ({ x: pos.x + (canvas.grid.size / 2), y: pos.y + (canvas.grid.size / 2) })
+export function getCenter(pos, width = 1) {
+    return ({ x: pos.x + ((canvas.grid.size / 2) * width), y: pos.y + ((canvas.grid.size / 2) * width) });
+}
+
+export function getTileCenter(tile) {
+    //return position offset by tile width/2 and height/2
+    return ({ x: tile.x + (tile.width / 2), y: tile.y + (tile.height / 2) })
 }
 
 export async function wait(ms) {

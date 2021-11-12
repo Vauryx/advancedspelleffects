@@ -337,6 +337,9 @@ export class summonCreature {
             name: 'flags.advancedspelleffects.effectOptions.circleVolume',
             flagName: 'circleVolume',
             flagValue: currFlags.circleVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         animOptions.push({
@@ -367,6 +370,9 @@ export class summonCreature {
             name: 'flags.advancedspelleffects.effectOptions.effectAVolume',
             flagName: 'effectAVolume',
             flagValue: currFlags.effectAVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         animOptions.push({
@@ -397,6 +403,9 @@ export class summonCreature {
             name: 'flags.advancedspelleffects.effectOptions.portalVolume',
             flagName: 'portalVolume',
             flagValue: currFlags.portalVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         animOptions.push({
@@ -427,6 +436,9 @@ export class summonCreature {
             name: 'flags.advancedspelleffects.effectOptions.portalCloseVolume',
             flagName: 'portalCloseVolume',
             flagValue: currFlags.portalCloseVolume ?? 1,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
 
         spellOptions.push({
