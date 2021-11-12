@@ -108,6 +108,23 @@ export class scorchingRay {
             flagName: 'targetMarkerColor',
             flagValue: currFlags.targetMarkerColor,
         });
+        animOptions.push({
+            label: game.i18n.localize('ASE.TargetMarkerHueLabel'),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.targetMarkerHue',
+            flagName: 'targetMarkerHue',
+            flagValue: currFlags.targetMarkerHue ?? 0,
+        });
+        animOptions.push({
+            label: game.i18n.localize('ASE.TargetMarkerSaturationLabel'),
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.targetMarkerSaturation',
+            flagName: 'targetMarkerSaturation',
+            flagValue: currFlags.targetMarkerSaturation ?? 0,
+            min: -1,
+            max: 1,
+            step: 0.1,
+        });
         soundOptions.push({
             label: game.i18n.localize("ASE.TargetMarkerSoundLabel"),
             type: 'fileInput',

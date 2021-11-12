@@ -108,7 +108,13 @@ export class magicMissile {
         });
         animOptions.push({
             label: game.i18n.localize('ASE.TargetMarkerSaturationLabel'),
-            type: 'ranngeIn'
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.targetMarkerSaturation',
+            flagName: 'targetMarkerSaturation',
+            flagValue: currFlags.targetMarkerSaturation ?? 0,
+            min: -1,
+            max: 1,
+            step: 0.1,
         });
         soundOptions.push({
             label: game.i18n.localize('ASE.TargetMarkerSoundLabel'),

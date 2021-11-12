@@ -65,6 +65,8 @@ export class MissileDialog extends FormApplication {
         const markerSound = this.data.effectOptions.markerSound ?? "";
         const markerSoundDelay = Number(this.data.effectOptions.markerSoundDelay) ?? 0;
         const markerSoundVolume = Number(this.data.effectOptions.markerVolume) ?? 1;
+        const markerAnimHue = this.data.effectOptions.targetMarkerHue ?? 0;
+        const markerAnimSaturation = this.data.effectOptions.targetMarkerSaturation ?? 0;
 
         let baseScale = this.data.effectOptions.baseScale;
         let currMissile = target.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 0;
@@ -81,6 +83,7 @@ export class MissileDialog extends FormApplication {
             .playIf(markerSound != "")
             .effect()
             .attachTo(target)
+            .filter("ColorMatrix", { hue: markerAnimHue, saturate: markerAnimSaturation })
             .persist()
             .file(markerAnim)
             .scale(0.01)

@@ -143,17 +143,13 @@
                                                 </select>
                                             {{/ifCondASE}}
                                             {{#ifCondASE this.type '==' 'numberInput'}}
-                                        <td colspan="2">
-                                            <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
-                                                value={{this.flagValue}}>
-                                        </td>
-                                        {{/ifCondASE}}
-                                        {{#ifCondASE this.type '==' 'rangeInput'}}
-                                            <td colspan="2">
+                                                <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
+                                                    value={{this.flagValue}}>
+                                            {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'rangeInput'}}
                                                 <input type="range" min="{{this.min}}" max="{{this.max}}"
                                                     step="{{this.step}}" name="{{this.name}}" value={{this.flagValue}}>
-                                            </td>
-                                        {{/ifCondASE}}
+                                            {{/ifCondASE}}
                                         </td>
                                     </tr>
                                 {{/each}}
