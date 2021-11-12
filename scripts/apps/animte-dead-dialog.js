@@ -150,23 +150,6 @@ export class animateDeadDialog extends FormApplication {
 
             const token = effectSettings.token;
             const summonTokenData = effectSettings.summonTokenData;
-            /*
-            console.log('Sound A: ',soundA);
-            console.log('Sound A Delay: ', soundADelay);
-            console.log('Sound A Volume: ', soundAVolume);
-
-            console.log('Sound B: ',soundB);
-            console.log('Sound B Delay: ', soundBDelay);
-            console.log('Sound B Volume: ', soundBVolume);
-
-            console.log('School Sound: ',schoolSound);
-            console.log('School Sound Delay: ', SchoolSoundDelay);
-            console.log('School Sound Volume: ', schoolVolume);
-
-            console.log('School Sound Outro: ',schoolSoundOutro);
-            console.log('School Sound Delay Outro: ', schoolSoundDelayOutro);
-            console.log('School Sound Volume Outro: ', schoolVolumeOutro);
-            */
 
             // console.log("Corpse to Mutate: ", corpseDoc);
             let animLoc = utilFunctions.getCenter(token);
