@@ -19,6 +19,7 @@
   "ASE.Moonbeam": "Moonbeam",
   "ASE.MoveMoonbeam": "Move Moonbeam",
   "ASE.LightningBolt": "Lightning Bolt",
+  "ASE.ChainLightning": "Chain Lightning",
 
   "ASE.SummonAberrantSpirit": "Summon Aberrant Spirit",
   "ASE.SummonBeast": "Summon Beast",
@@ -144,7 +145,7 @@
   "ASE.MoonbeamEnteringTile": "{name} is entering the space of a Moonbeam tile",
   "ASE.StartingTurnInMoonbeam": "{name} is starting their turn in the space of a moonbeam tile",
   "ASE.MoveMoonbeamDescription": "Command your Moonbeam to move up to 60 feet in any direction.",
-  "ASE.ScaleWithLevelLabel": "Scale with spellLevel: ",
+  "ASE.ScaleWithLevelLabel": "Scale with spell level: ",
   "ASE.MoonbeamInitialSoundLabel": "Moonbeam Initial Sound: ",
   "ASE.MoonbeamInitialSoundDelayLabel": "Moonbeam Initial Sound Delay: ",
   "ASE.MoonbeamInitialVolumeLabel": "Moonbeam Initial Volume: ",
@@ -263,5 +264,18 @@
   "ASE.ConcentratingLabel": "Concentrating",
 
   "ASE.SavePassMessage": "<b>succeeds</b> with <b>{saveTotal}</b> and takes <b>{damageTotal}</b> damage",
-  "ASE.SaveFailMessage": "<b>fails</b> with <b>{saveTotal}</b> and takes <b>{damageTotal}</b> damage"
+  "ASE.SaveFailMessage": "<b>fails</b> with <b>{saveTotal}</b> and takes <b>{damageTotal}</b> damage",
+
+  "ASE.ChainLightningNumJumpsLabel": "Number of targets to jump to: ",
+  "ASE.ChainLightningSecondaryDelayLowerLabel": "Secondary bolt delay min: ",
+  "ASE.ChainLightningSecondaryDelayUpperLabel": "Secondary bolt delay max: ",
+  "ASE.ChainLightningPrimaryColorLabel": "Primary Bolt Color: ",
+  "ASE.ChainLightningSecondaryColorLabel": "Secondary Bolt Color: ",
+  "ASE.ChainLightningPrimarySoundLabel": "Primary Bolt Sound: ",
+  "ASE.ChainLightningPrimarySoundDelayLabel": "Primary Bolt Sound Delay: ",
+  "ASE.ChainLightningPrimaryVolumeLabel": "Primary Bolt Volume: ",
+  "ASE.ChainLightningSecondarySoundLabel": "Secondary Bolt Sound: ",
+  "ASE.ChainLightningSecondarySoundDelayLabel": "Secondary Bolt Sound Delay: ",
+  "ASE.ChainLightningSecondaryVolumeLabel": "Secondary Bolt Volume: ",
+  "ASE.ChainLightningSaveFailEffectLabel": "Save Fail Effect Color: "
 }

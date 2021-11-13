@@ -15,6 +15,7 @@ import { scorchingRay } from "../spells/scorchingRay.js";
 import { eldritchBlast } from "../spells/eldritchBlast.js";
 import { vampiricTouch } from "../spells/vampiricTouch.js";
 import { moonBeam } from "../spells/moonBeam.js";
+import { chainLightning } from "../spells/chainLightning.js";
 
 export class ASESettings extends FormApplication {
     constructor() {
@@ -39,7 +40,8 @@ export class ASESettings extends FormApplication {
             "Scorching Ray": scorchingRay,
             "Eldritch Blast": eldritchBlast,
             "Vampiric Touch": vampiricTouch,
-            "Moonbeam": moonBeam
+            "Moonbeam": moonBeam,
+            "Chain Lightning": chainLightning
         }
     }
 
@@ -73,6 +75,11 @@ export class ASESettings extends FormApplication {
             "materials": { "value": "", "consumed": false, "cost": 0, "supply": 0 },
             "scaling": { "mode": "none", "formula": "" }
         };
+        let damageFormula;
+        let damageDieCount;
+        let damageDie;
+        let damageMod;
+        let effectOptions = this.object.data.flags?.advancedspelleffects?.effectOptions ?? {};
         switch (item.name) {
             case game.i18n.localize("ASE.DetectMagic"):
                 data.duration = { "value": 10, "units": "minute" };
@@ -113,6 +120,18 @@ export class ASESettings extends FormApplication {
                 data.duration = { "value": 1, "units": "minute" };
                 data.scaling.formula = "1d6";
                 data.scaling.mode = "level";
+                break;
+            case game.i18n.localize("ASE.ChainLightning"):
+                data.level = 6;
+                data.actionType = "save";
+                damageDieCount = effectOptions.dmgDieCount ?? 10;
+                damageDie = effectOptions.dmgDie ?? "d8";
+                damageMod = effectOptions.dmgMod ?? 0;
+                damageFormula = `${damageDieCount}${damageDie}${(damageMod != 0) ? ((damageMod > 0 ? ' + ' : '') + damageMod) : ''}`;
+                data.damage.parts.push([damageFormula, "lightning"]);
+                data.save = { ability: "dex", dc: null, scaling: "spell" };
+                data.target = { value: 1, width: null, units: "", type: "creature" };
+                break;
         }
         let updates = { data };
         await item.update(updates);
@@ -124,7 +143,7 @@ export class ASESettings extends FormApplication {
         let itemName = item.name;
         let returnOBJ = {};
         //console.log("Detected item name: ", itemName);
-        await this.setItemDetails(item);
+
         let requiredSettings;
         console.log("Item name: ", itemName);
         if (itemName.includes(game.i18n.localize("ASE.Summon"))) {
@@ -170,6 +189,7 @@ export class ASESettings extends FormApplication {
         let effectData;
         if (flags.advancedspelleffects?.enableASE) {
             effectData = await this.setEffectData(item);
+            await this.setItemDetails(this.object);
         }
         return {
             flags: this.object.data.flags,
@@ -220,9 +240,13 @@ export class ASESettings extends FormApplication {
         html.find('.ase-enable-checkbox input[type="checkbox"]').click(evt => {
             this.submit({ preventClose: true }).then(() => this.render());
         });
-        html.find('.ase-enable-checkbox select').change(evt => {
-            //this.submit({ preventClose: true }).then(() => this.render());
+        html.find('.ase-spell-settings-select').change(evt => {
+            this.submit({ preventClose: true }).then(() => this.render());
         });
+        html.find('.ase-spell-settings-numInput').change(evt => {
+            this.submit({ preventClose: true }).then(() => this.render());
+        });
+
         //console.log(this);
         html.find('.addType').click(this._addSummonType.bind(this));
         html.find('.removeType').click(this._removeSummonType.bind(this));
@@ -288,6 +312,8 @@ export class ASESettings extends FormApplication {
 
     async _updateObject(event, formData) {
         //console.log(formData);
+        console.log("Updating item...");
+        await this.setItemDetails(this.object);
         formData = expandObject(formData);
         //console.log(formData);
         if (!formData.changes) formData.changes = [];

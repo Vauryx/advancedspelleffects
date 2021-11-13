@@ -150,37 +150,38 @@ export class moonBeam {
             spellSaveDc: casterActor.data.data.attributes.spelldc,
             damageFormula: damageFormula,
         };
-
         const updates = {
             embedded: {
-                Item: {
-                    "Move Moonbeam": {
-                        "type": "spell",
-                        "img": spellItem.img,
-                        "data": {
-                            "ability": "",
-                            "actionType": "other",
-                            "activation": { "type": 'action', "cost": 1 },
-                            "damage": { "parts": [], "versatile": "" },
-                            "level": data.itemLevel,
-                            "preparation": { "mode": 'atwill', "prepared": true },
-                            "range": { "value": null, "long": null, "units": "" },
-                            "school": "evo",
-                            "target": { "value": null, "width": null, "units": "", "type": "" },
-                            "description": {
-                                "value": game.i18n.localize("ASE.MoveMoonbeamDescription")
-                            }
-                        },
-                        "flags": {
-                            "advancedspelleffects": {
-                                "enableASE": true,
-                                'effectOptions': aseEffectOptions
-                            }
-                        }
-                    }
+                Item: {}
+            }
+        };
+        const activationItemName = game.i18n.localize('ASE.VampiricTouchAttack');
+
+        updates.embedded.Item[activationItemName] = {
+            "type": "spell",
+            "img": spellItem.img,
+            "data": {
+                "ability": "",
+                "actionType": "other",
+                "activation": { "type": 'action', "cost": 1 },
+                "damage": { "parts": [], "versatile": "" },
+                "level": data.itemLevel,
+                "preparation": { "mode": 'atwill', "prepared": true },
+                "range": { "value": null, "long": null, "units": "" },
+                "school": "evo",
+                "target": { "value": null, "width": null, "units": "", "type": "" },
+                "description": {
+                    "value": game.i18n.localize("ASE.MoveMoonbeamDescription")
+                }
+            },
+            "flags": {
+                "advancedspelleffects": {
+                    "enableASE": true,
+                    'effectOptions': aseEffectOptions
                 }
             }
         }
+
 
         let moonbeamLoc = await moonBeam.chooseBeamLocation(beamLoop);
 
