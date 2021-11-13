@@ -1,4 +1,4 @@
-<form class="flexcol" id="aseSettingsForm" autocomplete="off" novalidate>
+<form class="ase-settings-form" id="aseSettingsForm" autocomplete="off" novalidate>
     <section class="content">
         <div class="ase-enable-checkbox">
             <div class="form-group">
@@ -86,7 +86,7 @@
                                 </div>
                             </div>
                         {{/ifCondASE}}
-                        <table>
+                        <table class="ase-spell-settings-table">
                             <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
                                 {{#each effectData.requiredSettings.spellOptions}}
                                     <tr>
@@ -95,7 +95,7 @@
                                         </td>
                                         <td>
                                             {{#ifCondASE this.type '==' 'dropdown'}}
-                                                <select name="{{this.name}}">
+                                                <select class="ase-spell-settings-select" name="{{this.name}}">
                                                     {{#select this.flagValue}}
                                                         {{#each this.options as |name key|}}
                                                             <option value="{{key}}">
@@ -109,7 +109,8 @@
                                                 <input type="checkbox" name="{{this.name}}" {{checked this.flagValue}}>
                                             {{/ifCondASE}}
                                             {{#ifCondASE this.type '==' 'numberInput'}}
-                                                <input type="Number" style="width: 4em;" min="0" name="{{this.name}}"
+                                                <input class="ase-spell-settings-numInput" type="Number"
+                                                    style="width: 4em;" min="0" name="{{this.name}}"
                                                     value={{this.flagValue}}>
                                             {{/ifCondASE}}
                                             {{#ifCondASE this.type '==' 'rangeInput'}}

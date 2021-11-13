@@ -16,6 +16,7 @@ import { magicMissile } from "./spells/magicMissile.js";
 import { scorchingRay } from "./spells/scorchingRay.js";
 import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
+import { chainLightning } from "./spells/chainLightning.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -100,6 +101,10 @@ export class ASEHandler {
                 return;
             case game.i18n.localize('ASE.MoveMoonbeam'):
                 await moonBeam.moveBeam(data);
+                return;
+            case game.i18n.localize('ASE.ChainLightning'):
+                const chainLightningSpell = new chainLightning(data);
+                chainLightningSpell.cast();
                 return;
         }
         if (item.name.includes(game.i18n.localize("ASE.Summon"))) {
