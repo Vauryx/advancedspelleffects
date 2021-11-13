@@ -155,7 +155,7 @@ export class moonBeam {
                 Item: {}
             }
         };
-        const activationItemName = game.i18n.localize('ASE.VampiricTouchAttack');
+        const activationItemName = game.i18n.localize('ASE.MoveMoonbeam');
 
         updates.embedded.Item[activationItemName] = {
             "type": "spell",

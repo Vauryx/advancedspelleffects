@@ -1,5 +1,5 @@
 import * as utilFunctions from "../utilityFunctions.js";
-
+//Courtesy of Wasp - The Sequencer Guy
 export class chainLightning {
 
     constructor(data) {
