@@ -228,12 +228,13 @@ export class callLightning {
 
             if (game.modules.get("midi-qol")?.active) {
                 let tokens = canvas.tokens.placeables.map(t => {
-                    let distance = canvas.grid.measureDistance({ x: boltTemplate.x, y: boltTemplate.y }, { x: t.data.x + (canvas.grid.size / 2), y: t.data.y + (canvas.grid.size / 2) });
+                    let distance = utilFunctions.measureDistance({ x: boltTemplate.x, y: boltTemplate.y }, { x: t.data.x + (canvas.grid.size / 2), y: t.data.y + (canvas.grid.size / 2) });
+                    //console.log("Distance: ", distance);
                     // console.log("bolt Loc", { x: template.x, y: template.y });
                     let returnObj = { token: t, distance: distance };
                     //console.log("Returning object: ", returnObj);
                     return (returnObj);
-                }).filter(t => t.distance <= 7.5);
+                }).filter(t => t.distance <= 5);
                 //console.log("Tokens in range: ", tokens);
                 let failedSaves = [];
                 let passedSaves = [];
