@@ -6,7 +6,7 @@ export class chainLightning {
         this.params = data;
         this.actor = game.actors.get(this.params.actor.id);
         this.token = canvas.tokens.get(this.params.tokenId);
-        this.item = this.actor.items.get(this.params.item.id);
+        this.item = this.params.item;
         this.firstTarget = this.params.targets[0] ?? Array.from(this.params.targets)[0];
         if (game.modules.get("midi-qol")?.active) {
             this.targetFailedSave = this.params.failedSaves.length > 0;
@@ -17,6 +17,7 @@ export class chainLightning {
         this.itemCardId = this.params.itemCardId;
 
         this.originalDamage = this.params.damageTotal;
+
         this.effectOptions = this.item.getFlag("advancedspelleffects", "effectOptions");
         this.spellLevel = this.params.itemLevel ? Number(this.params.itemLevel) : 6;
         if (this.effectOptions.levelScaling || this.effectOptions.levelScaling === undefined) {
@@ -30,6 +31,7 @@ export class chainLightning {
         this.spellSaveDC = this.actor.data.data.attributes.spelldc;
 
         this.targetData = [];
+
     }
 
 
@@ -75,8 +77,8 @@ export class chainLightning {
 
         let firstTarget = this.firstTarget;
         let tokenD = this.token;
-        console.log("firstTarget", firstTarget);
-        console.log("tokenD", tokenD);
+        //console.log("firstTarget", firstTarget);
+        //console.log("tokenD", tokenD);
         const potentialTargets = canvas.tokens.placeables.filter(function (target) {
             return target.actor.data.data.attributes.hp.value > 0
                 && canvas.grid.measureDistance(firstTarget, target) <= 32.5
