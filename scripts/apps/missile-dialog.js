@@ -383,7 +383,8 @@ export class MissileDialog extends FormApplication {
                     if (game.modules.get("midi-qol")?.active) {
                         //console.log(attackData);
                         if (attackData.hit) {
-                            new MidiQOL.DamageOnlyWorkflow(caster.actor, caster.document, damageRoll.total, this.data.effectOptions.dmgType, [targetToken], damageRoll, { itemCardId: this.data.item });
+                            //console.log(this.data.item);
+                            new MidiQOL.DamageOnlyWorkflow(caster.actor, caster, damageRoll.total, this.data.effectOptions.dmgType, [targetToken], damageRoll, { itemCardId: this.data.itemCardId, itemData: this.data.item.data });
                             damageTotal += damageRoll.total;
                             for (let i = 0; i < damageRoll.terms.length; i++) {
                                 //console.log("Term: ", damageRoll.terms[i]);
@@ -426,8 +427,11 @@ export class MissileDialog extends FormApplication {
 
 
                 }
+                const targetMarkers = await Sequencer.EffectManager.getEffects({ object: targetToken }).filter(effect => effect.data.name?.startsWith(`missile-target`));
+                for (let targetMarker of targetMarkers) {
+                    await Sequencer.EffectManager.endEffects({ name: targetMarker.data.name, object: targetToken });
+                }
 
-                await Sequencer.EffectManager.endEffects({ object: targetToken });
                 await targetToken.document.unsetFlag("advancedspelleffects", 'missileSpell');
             }
             let content = this._buildChatData(this.data.allAttackRolls, this.data.allDamRolls, caster);
