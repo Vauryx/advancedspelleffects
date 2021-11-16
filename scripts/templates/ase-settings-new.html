@@ -91,7 +91,7 @@
                                 {{#each effectData.requiredSettings.spellOptions}}
                                     <tr>
                                         <td>
-                                            <label><b>{{this.label}}</b></label>
+                                            <label title="{{this.tooltip}}"><b>{{this.label}}</b></label>
                                         </td>
                                         <td>
                                             {{#ifCondASE this.type '==' 'dropdown'}}
@@ -129,7 +129,7 @@
                                 {{#each effectData.requiredSettings.animOptions}}
                                     <tr>
                                         <td>
-                                            <label><b>{{this.label}}</b></label>
+                                            <label title="{{this.tooltip}}"><b>{{this.label}}</b></label>
                                         </td>
                                         <td>
                                             {{#ifCondASE this.type '==' 'dropdown'}}
@@ -163,7 +163,7 @@
                                 {{#each effectData.requiredSettings.soundOptions}}
                                     <tr>
                                         <td>
-                                            <label><b>{{this.label}}</b></label>
+                                            <label title="{{this.tooltip}}"><b>{{this.label}}</b></label>
                                         </td>
                                         {{#ifCondASE this.type '==' 'fileInput'}}
                                             <td>
