@@ -20,6 +20,7 @@
   "ASE.MoveMoonbeam": "Move Moonbeam",
   "ASE.LightningBolt": "Lightning Bolt",
   "ASE.ChainLightning": "Chain Lightning",
+  "ASE.MirrorImage": "Mirror Image",
 
   "ASE.SummonAberrantSpirit": "Summon Aberrant Spirit",
   "ASE.SummonBeast": "Summon Beast",
@@ -277,5 +278,7 @@
   "ASE.ChainLightningSecondarySoundLabel": "Secondary Bolt Sound: ",
   "ASE.ChainLightningSecondarySoundDelayLabel": "Secondary Bolt Sound Delay: ",
   "ASE.ChainLightningSecondaryVolumeLabel": "Secondary Bolt Volume: ",
-  "ASE.ChainLightningSaveFailEffectLabel": "Save Fail Effect Color: "
+  "ASE.ChainLightningSaveFailEffectLabel": "Save Fail Effect Color: ",
+
+  "ASE.MirrorImageRollConfirm": "Roll for Mirror Image?"
 }

@@ -30,7 +30,8 @@ Hooks.once('ready', async function () {
     game.i18n.localize('ASE.ScorchingRay'),
     game.i18n.localize('ASE.EldritchBlast'),
     game.i18n.localize('ASE.Moonbeam'),
-    game.i18n.localize('ASE.ChainLightning'),];
+    game.i18n.localize('ASE.ChainLightning'),
+    game.i18n.localize('ASE.MirrorImage'),];
 
     let isSummon = data.item.name.includes(game.i18n.localize("ASE.Summon"));
     //console.log('ASE Spell List: ', aseSpellList);

@@ -17,6 +17,7 @@ import { scorchingRay } from "./spells/scorchingRay.js";
 import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { chainLightning } from "./spells/chainLightning.js";
+import { mirrorImage } from "./spells/mirrorImage.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -105,6 +106,10 @@ export class ASEHandler {
             case game.i18n.localize('ASE.ChainLightning'):
                 const chainLightningSpell = new chainLightning(data);
                 chainLightningSpell.cast();
+                return;
+            case game.i18n.localize('ASE.MirrorImage'):
+                const mirrorImageSpell = new mirrorImage(data);
+                mirrorImageSpell.cast();
                 return;
         }
         if (item.name.includes(game.i18n.localize("ASE.Summon"))) {

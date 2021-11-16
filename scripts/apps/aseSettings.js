@@ -16,7 +16,7 @@ import { eldritchBlast } from "../spells/eldritchBlast.js";
 import { vampiricTouch } from "../spells/vampiricTouch.js";
 import { moonBeam } from "../spells/moonBeam.js";
 import { chainLightning } from "../spells/chainLightning.js";
-
+import { mirrorImage } from "../spells/mirrorImage.js";
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
@@ -41,7 +41,8 @@ export class ASESettings extends FormApplication {
             "Eldritch Blast": eldritchBlast,
             "Vampiric Touch": vampiricTouch,
             "Moonbeam": moonBeam,
-            "Chain Lightning": chainLightning
+            "Chain Lightning": chainLightning,
+            "Mirror Image": mirrorImage
         }
     }
 
