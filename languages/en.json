@@ -292,7 +292,7 @@
   "ASE.MirrorImageRuneColorLabel": "Rune Effect Color: ",
   "ASE.MirrorImageRuneColorTooltip": "Color of the Initial 'Rune' effect",
   "ASE.MirrorImageOrbitRadiusLabel": "Orbit Radius: ",
-  "ASE.MirrorImageOrbitRadiusTooltip": "Radius of the Mirror Image's orbit (40-100 is recommended)",
+  "ASE.MirrorImageOrbitRadiusTooltip": "Radius of the Mirror Image's orbit (10-150 is recommended)",
   "ASE.MirrorImageOrbitDurationLabel": "Orbit Duration: ",
   "ASE.MirrorImageOrbitDurationTooltip": "Duration of the Mirror Image's orbit, aka the speed of the orbit (12-48 is recommended)",
   "ASE.MirrorImageOpacityLabel": "Mirror Image Opacity: ",
