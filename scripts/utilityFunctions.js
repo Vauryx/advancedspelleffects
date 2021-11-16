@@ -236,3 +236,10 @@ export function getDBOptions(rawSet) {
     }
     return options;
 }
+
+export function isMidiActive() {
+    if (game.modules.get("midi-qol")?.active) {
+        return true;
+    }
+    return false;
+}
