@@ -6,7 +6,7 @@ export class animateDead {
     static registerHooks() {
         if (game.settings.get("advancedspelleffects", "preloadFiles")) {
             //console.log("Starting Preload of ASE Animate Dead...");
-            Hooks.on("sequencer.ready", animateDead._preloadAssets);
+            //Hooks.on("sequencer.ready", animateDead._preloadAssets);
         }
         return;
     }

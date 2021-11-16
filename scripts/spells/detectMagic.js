@@ -7,7 +7,7 @@ export class detectMagic {
         Hooks.on("updateToken", detectMagic._updateToken);
         if (game.settings.get("advancedspelleffects", "preloadFiles")) {
             //console.log("Starting Preload of ASE Animate Dead...");
-            Hooks.on("sequencer.ready", detectMagic._preloadAssets);
+            //Hooks.on("sequencer.ready", detectMagic._preloadAssets);
         }
     }
     static async _preloadAssets() {
