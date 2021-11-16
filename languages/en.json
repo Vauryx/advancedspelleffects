@@ -298,7 +298,7 @@
   "ASE.MirrorImageOpacityLabel": "Mirror Image Opacity: ",
   "ASE.MirrorImageOpacityTooltip": "Opacity of the Mirror Image (0-1)",
   "ASE.MirrorImageDestroyDelay": "Image Destruction Delay: ",
-  "ASE.MirrorImageDestroyDelayTooltip": "Delay before the Mirror Image is destroyed",
+  "ASE.MirrorImageDestroyDelayTooltip": "Delay before the Mirror Image is destroyed when hit",
   "ASE.MirrorImageDestroySoundLabel": "Image Destruction Sound: ",
   "ASE.MirrorImageDestroySoundTooltip": "Sound played when the Mirror Image is destroyed",
   "ASE.MirrorImageDestroySoundDelayLabel": "Image Destruction Sound Delay: ",
