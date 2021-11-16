@@ -4,7 +4,7 @@ import * as utilFunctions from "../utilityFunctions.js";
 export class magicMissile {
     static async registerHooks() {
         if (game.settings.get("advancedspelleffects", "preloadFiles")) {
-            Hooks.on("sequencer.ready", magicMissile._preloadAssets);
+            //Hooks.on("sequencer.ready", magicMissile._preloadAssets);
         }
         return;
     }
