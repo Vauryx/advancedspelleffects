@@ -69,9 +69,11 @@ export class mirrorImage {
         let target = Array.from(data.targets)[0];
 
         const mirrorImages = await Sequencer.EffectManager.getEffects().filter(effect => effect.data.name.startsWith(`MirrorImage-${target.id}`));
-        // console.log("Mirror Images: ", mirrorImages);
+        console.log("Mirror Images: ", mirrorImages);
+        // assign every mirror image effect name to a variable
 
         if (mirrorImages.length == 0) return;
+        const mirrorImageEffectNames = mirrorImages.map(effect => effect.data.name);
         const effectOptions = target.getFlag("advancedspelleffects", "mirrorImage");
         if (!effectOptions) return;
         const attackRoll = data.attackRoll;
@@ -114,7 +116,7 @@ export class mirrorImage {
             if (attackRoll.total >= imageAC) {
                 // console.log("Mirror Image hit.");
                 await warpgate.wait(effectOptions.imageDestroyDelay);
-                await Sequencer.EffectManager.endEffects({ name: `MirrorImage-${target.id}-${mirrorImages.length - 1}` });
+                await Sequencer.EffectManager.endEffects({ name: mirrorImageEffectNames[0] });
                 await mirrorImage.updateChatCard(data.itemCardId, target, roll.total, true);
                 return;
             }
