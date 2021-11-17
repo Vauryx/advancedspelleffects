@@ -210,17 +210,19 @@ export class detectMagic {
             if (!magical.school) {
                 continue;
             }
-            await aseSocket.executeAsGM("updateFlag", magical.obj.id, "magicDetected", false);
-            await Sequencer.EffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-            new Sequence("Advanced Spell Effects")
-                .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
-                .forUsers(users)
-                .atLocation(magical.obj)
-                .playIf(magical.distance <= 30)
-                .scale(0.25)
-                .setMustache(magical)
-                .zIndex(0)
-                .play()
+            if (magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) {
+                await aseSocket.executeAsGM("updateFlag", magical.obj.id, "magicDetected", false);
+                await Sequencer.EffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+                new Sequence("Advanced Spell Effects")
+                    .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
+                    .forUsers(users)
+                    .atLocation(magical.obj)
+                    .playIf(magical.distance <= 30)
+                    .scale(0.25)
+                    .setMustache(magical)
+                    .zIndex(0)
+                    .play();
+            }
         }
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-detectMagicAura`, object: casterToken });
         new Sequence("Advanced Spell Effects")
@@ -241,7 +243,7 @@ export class detectMagic {
         if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length == 0) {
             return;
         }
-        console.log("Is first GM: ", isGM);
+        //console.log("Is first GM: ", isGM);
         let users = [];
         for (const user in tokenDocument.actor.data.permission) {
             if (user == "default") continue;
@@ -291,9 +293,11 @@ export class detectMagic {
                 .setMustache(magical)
                 .zIndex(0)
                 .playIf((magical.obj.document.getFlag("advancedspelleffects", "magicDetected")))
-                .play()
-            await magical.obj.document.setFlag("advancedspelleffects", "magicDetected", false);
-            await SequencerEffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+                .play();
+            if (magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) {
+                await magical.obj.document.setFlag("advancedspelleffects", "magicDetected", false);
+                await Sequencer.EffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+            }
         }
         magicalObjectsInRange = objects.map(o => {
             let pointA = { x: newPos.x + (canvas.grid.size / 2), y: newPos.y + (canvas.grid.size / 2) };
