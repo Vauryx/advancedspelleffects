@@ -104,7 +104,8 @@ export class mirrorImage {
 
         if (roll.total < dc) {
             console.log("Mirror Image failed.");
-            await mirrorImage.updateChatCardMissed(data.itemCardId, target, roll.total);
+            await warpgate.wait(500);
+            await mirrorImage.updateChatCardFailed(data.itemCardId, target, roll.total);
             return;
         }
         else {
@@ -121,13 +122,15 @@ export class mirrorImage {
                 return;
             }
             else {
+                await warpgate.wait(500);
                 await mirrorImage.updateChatCard(data.itemCardId, target, roll.total, false);
+                return;
             }
         }
 
     }
 
-    static async updateChatCardMissed(itemCardId, target, attackRoll) {
+    static async updateChatCardFailed(itemCardId, target, attackRoll) {
         const chatMessage = await game.messages.get(itemCardId, target);
         // console.log(chatMessage);
         let chatMessageContent = $(await duplicate(chatMessage.data.content));
@@ -135,12 +138,7 @@ export class mirrorImage {
         //chatMessageContent.find(".midi-qol-hits-display").empty();
         chatMessageContent.find(".midi-qol-hits-display").append(`<div class="midi-qol-flex-container">
                     <div>
-                        Mirror Image Roll: <b>${attackRoll}</b>  - Attack hits
-                    </div>
-                    <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${target.id}"> ${target.name}!</div>
-                    <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${target.id}"> ${target.name}!
-                    </div>
-                    <div><img src="${target.data.img}" width="30" height="30" style="border:0px">
+                        Mirror Image Roll: <b>${attackRoll}</b>
                     </div>
                 </div>`);
         await chatMessage.update({ content: chatMessageContent.prop('outerHTML') });
