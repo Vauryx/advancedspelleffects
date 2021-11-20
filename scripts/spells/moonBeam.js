@@ -77,7 +77,7 @@ export class moonBeam {
         //console.log(combat);
         const combatantToken = canvas.tokens.get(combat.current.tokenId);
         const combatantActor = combatantToken.actor;
-        const combatantPosition = utilFunctions.getCenter(combatantToken.data);
+        const combatantPosition = utilFunctions.getCenter(combatantToken.data, combatantToken.data.width);
 
         let inTiles = [];
         //iterate over every moonbeam tile
@@ -86,7 +86,10 @@ export class moonBeam {
             //console.log('Moonbeam tile found: ', moonbeamTile);
             let effectOptions = moonbeamTile.document.getFlag("advancedspelleffects", "effectOptions") ?? {};
             //check if token has entered the tile
-            if (combatantPosition.x >= moonbeamTile.x && combatantPosition.x <= moonbeamTile.x + moonbeamTile.width && combatantPosition.y >= moonbeamTile.y && combatantPosition.y <= moonbeamTile.y + moonbeamTile.height) {
+            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile);
+            let targetToBeamDist = utilFunctions.getDistanceClassic(combatantPosition, moonbeamTileCenter);
+            //console.log('target to beam dist: ', targetToBeamDist);
+            if (targetToBeamDist < (((combatantToken.data.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
                 //check if tile exists in inTiles which is an array of tiles
                 console.log(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
                 ui.notifications.info(game.i18n.format("ASE.StartingTurnInMoonbeam", { name: combatantToken.name }));
@@ -177,6 +180,7 @@ export class moonBeam {
             "flags": {
                 "advancedspelleffects": {
                     "enableASE": true,
+                    "spellEffect": game.i18n.localize('ASE.MoveMoonbeam'),
                     'effectOptions': aseEffectOptions
                 }
             }

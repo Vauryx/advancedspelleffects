@@ -97,6 +97,7 @@ export class callLightning {
             "flags": {
                 "advancedspelleffects": {
                     "enableASE": true,
+                    "spellEffect": game.i18n.localize('ASE.ActivateCallLightning'),
                     'effectOptions': {
                         'stormTileId': stormTileId
                     }

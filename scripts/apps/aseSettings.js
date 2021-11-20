@@ -137,10 +137,10 @@ export class ASESettings extends FormApplication {
         await item.update(updates);
     }
 
-    async setEffectData(item) {
+    async setEffectData(item, itemName) {
         //console.log(item);
         let flags = this.object.data.flags;
-        let itemName = item.name;
+        //let itemName = item.name;
         let returnOBJ = {};
         //console.log("Detected item name: ", itemName);
 
@@ -173,7 +173,12 @@ export class ASESettings extends FormApplication {
             //console.log(returnOBJ);
         }
         else {
-            requiredSettings = await this.spellList[game.i18n.localize(itemName)].getRequiredSettings(flags.advancedspelleffects.effectOptions);
+            if (this.spellList[game.i18n.localize(itemName)] != undefined) {
+                requiredSettings = await this.spellList[game.i18n.localize(itemName)].getRequiredSettings(flags.advancedspelleffects.effectOptions);
+            }
+            else {
+                requiredSettings = await this.spellList[game.i18n.localize("ASE.AnimateDead")].getRequiredSettings(flags.advancedspelleffects.effectOptions);
+            }
             //console.log(requiredSettings);
             returnOBJ.requiredSettings = requiredSettings;
         }
@@ -181,20 +186,47 @@ export class ASESettings extends FormApplication {
         return returnOBJ;
     }
 
+    async getSpellOptions() {
+        let spellOptions = {};
+        let spellList = this.spellList;
+        let spellNames = Object.keys(spellList);
+        console.log(spellNames);
+        spellNames.forEach((spellName) => {
+            spellOptions[spellName] = spellName;
+        });
+        console.log(spellOptions);
+        return spellOptions;
+    }
+
     async getData() {
         let flags = this.object.data.flags;
         let item = this.object;
-        let itemName = item.name;
+        let itemName = flags.advancedspelleffects?.spellEffect ?? item.name;
+        if (itemName == "") {
+            itemName = item.name;
+            let spellListKeys = Object.keys(this.spellList);
+            if (spellListKeys.includes(itemName)) {
+                itemName = itemName;
+            }
+            else {
+                itemName = game.i18n.localize("ASE.AnimateDead");
+            }
+        }
+        console.log(itemName);
         let content = "";
         let effectData;
+        let spellOptions;
         if (flags.advancedspelleffects?.enableASE) {
-            effectData = await this.setEffectData(item);
+            spellOptions = await this.getSpellOptions();
+            console.log(spellOptions);
+            effectData = await this.setEffectData(item, itemName);
             await this.setItemDetails(this.object);
         }
         return {
             flags: this.object.data.flags,
             itemName: itemName,
             effectData: effectData,
+            spellOptions: spellOptions,
             content: content
         };
 
@@ -239,12 +271,18 @@ export class ASESettings extends FormApplication {
 
         html.find('.ase-enable-checkbox input[type="checkbox"]').click(evt => {
             this.submit({ preventClose: true }).then(() => this.render());
+            $("#ase-item-settings").height("auto");
+            $("#ase-item-settings").width("auto");
         });
         html.find('.ase-spell-settings-select').change(evt => {
             this.submit({ preventClose: true }).then(() => this.render());
+            $("#ase-item-settings").height("auto");
+            $("#ase-item-settings").width("auto");
         });
         html.find('.ase-spell-settings-numInput').change(evt => {
             this.submit({ preventClose: true }).then(() => this.render());
+            $("#ase-item-settings").height("auto");
+            $("#ase-item-settings").width("auto");
         });
 
         //console.log(this);
@@ -313,6 +351,7 @@ export class ASESettings extends FormApplication {
     async _updateObject(event, formData) {
         //console.log(formData);
         console.log("Updating item...");
+        await this.object.unsetFlag("advancedspelleffects", "effectOptions");
         await this.setItemDetails(this.object);
         formData = expandObject(formData);
         //console.log(formData);

@@ -52,6 +52,7 @@ export class vampiricTouch {
             "flags": {
                 "advancedspelleffects": {
                     "enableASE": true,
+                    "spellEffect": game.i18n.localize('ASE.VampiricTouchAttack'),
                     'effectOptions': {
                         'vtStrandColor': effectOptions.vtStrandColor,
                         'vtImpactColor': effectOptions.vtImpactColor,

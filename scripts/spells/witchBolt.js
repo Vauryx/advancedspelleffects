@@ -83,6 +83,7 @@ export class witchBolt {
                 "flags": {
                     "advancedspelleffects": {
                         "enableASE": true,
+                        "spellEffect": game.i18n.localize('ASE.ActivateWitchBolt'),
                         'effectOptions': effectOptions
                     }
                 }
@@ -184,9 +185,13 @@ export class witchBolt {
                 if (!origin || origin?.length < 4) return false;
                 let itemId = origin[5] ?? origin[3];
                 //console.log("scanning item id: ", itemId);
-                let effectSource = token.actor.items.get(itemId)?.name;
+
+                let item = token.actor.items.get(itemId);
+                if (!item) return false;
+                const spellEffect = item.getFlag("advancedspelleffects", 'spellEffect') ?? undefined;
+                if (!spellEffect) return false;
                 //console.log("Effect Source Detecetd: ", effectSource);
-                return effectSource == "Witch Bolt"
+                return spellEffect == game.i18n.localize('ASE.WitchBolt');
             }).length > 0)
         });
         //console.log('Witch Bolt Casters: ', witchBoltCasters);
@@ -218,8 +223,12 @@ export class witchBolt {
                     let origin = effect.data.origin?.split(".");
                     if (!origin || origin?.length < 4) return false;
                     let itemId = origin[5] ?? origin[3];
-                    let effectSource = casterOnTarget.actor.items.get(itemId)?.name;
-                    return effectSource == "Witch Bolt"
+                    let item = casterOnTarget.actor.items.get(itemId);
+                    if (!item) return false;
+                    const spellEffect = item.getFlag("advancedspelleffects", 'spellEffect') ?? undefined;
+                    if (!spellEffect) return false;
+                    //console.log("Effect Source Detecetd: ", effectSource);
+                    return spellEffect == game.i18n.localize('ASE.WitchBolt');
                 })[0];
                 if (distanceToTarget > 30) {
                     //console.log(witchBoltConcentration);
@@ -250,8 +259,12 @@ export class witchBolt {
             let origin = effect.data.origin?.split(".");
             if (!origin || origin?.length < 4) return false;
             let itemId = origin[5] ?? origin[3];
-            let effectSource = casterActor.items.get(itemId)?.name;
-            return effectSource == "Witch Bolt"
+            let item = casterActor.items.get(itemId);
+            if (!item) return false;
+            const spellEffect = item.getFlag("advancedspelleffects", 'spellEffect') ?? undefined;
+            if (!spellEffect) return false;
+            //console.log("Effect Source Detecetd: ", effectSource);
+            return spellEffect == game.i18n.localize('ASE.WitchBolt');
         })[0];
         //console.log(witchBoltConcentration);
         //console.log(casterActor);
