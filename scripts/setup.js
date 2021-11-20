@@ -34,11 +34,11 @@ Hooks.once('ready', async function () {
     game.i18n.localize('ASE.MirrorImage'),];
 
     let isSummon = data.item.name.includes(game.i18n.localize("ASE.Summon"));
-    //console.log('ASE Spell List: ', aseSpellList);
+    console.log('ASE Spell List: ', aseSpellList);
     if (!aseSpellList.includes(data.item.name) && !isSummon) {
       return;
     }
-    const aseBtn = $(`<a class="ase-item-settings" title="ASE"><i class="fas fa-biohazard"></i>ASE</a>`);
+    const aseBtn = $(`<a class="ase-item-settings" title="Advanced Spell Effects"><i class="fas fa-magic"></i>ASE</a>`);
     aseBtn.click(ev => {
       new ASESettings(app.document, {}).render(true);
     });

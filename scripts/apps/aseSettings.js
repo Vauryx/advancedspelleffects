@@ -26,24 +26,23 @@ export class ASESettings extends FormApplication {
                 this.flags.effectOptions = {};
             }
         }
-        this.spellList = {
-            "Animate Dead": animateDead,
-            "Call Lightning": callLightning,
-            "Detect Magic": detectMagic,
-            "Fog Cloud": fogCloud,
-            "Darkness": darkness,
-            "Magic Missile": magicMissile,
-            "Spiritual Weapon": spiritualWeapon,
-            "Steel Wind Strike": steelWindStrike,
-            "Thunder Step": thunderStep,
-            "Witch Bolt": witchBolt,
-            "Scorching Ray": scorchingRay,
-            "Eldritch Blast": eldritchBlast,
-            "Vampiric Touch": vampiricTouch,
-            "Moonbeam": moonBeam,
-            "Chain Lightning": chainLightning,
-            "Mirror Image": mirrorImage
-        }
+        this.spellList = {};
+        this.spellList[game.i18n.localize("ASE.AnimateDead")] = animateDead;
+        this.spellList[game.i18n.localize("ASE.CallLightning")] = callLightning;
+        this.spellList[game.i18n.localize("ASE.DetectMagic")] = detectMagic;
+        this.spellList[game.i18n.localize("ASE.FogCloud")] = fogCloud;
+        this.spellList[game.i18n.localize("ASE.Darkness")] = darkness;
+        this.spellList[game.i18n.localize("ASE.MagicMissile")] = magicMissile;
+        this.spellList[game.i18n.localize("ASE.SpiritualWeapon")] = spiritualWeapon;
+        this.spellList[game.i18n.localize("ASE.SteelWindStrike")] = steelWindStrike;
+        this.spellList[game.i18n.localize("ASE.ThunderStep")] = thunderStep;
+        this.spellList[game.i18n.localize("ASE.WitchBolt")] = witchBolt;
+        this.spellList[game.i18n.localize("ASE.ScorchingRay")] = scorchingRay;
+        this.spellList[game.i18n.localize("ASE.EldritchBlast")] = eldritchBlast;
+        this.spellList[game.i18n.localize("ASE.VampiricTouch")] = vampiricTouch;
+        this.spellList[game.i18n.localize("ASE.Moonbeam")] = moonBeam;
+        this.spellList[game.i18n.localize("ASE.ChainLightning")] = chainLightning;
+        this.spellList[game.i18n.localize("ASE.MirrorImage")] = mirrorImage;
     }
 
     static get defaultOptions() {

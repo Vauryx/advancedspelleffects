@@ -34,7 +34,7 @@
                 </div>
                 <div id="ase-settings-body">
                     <div id="ase-spell-settings" class="show">
-                        {{#ifCondASE itemName 'includes' 'Summon'}}
+                        {{#ifCondASE itemName 'includes' (localize 'ASE.Summon')}}
                             <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
                             <input type="hidden" id="hdnSummonerId" value="{{effectData.summonerId}}" />
                             <table id="summonsTable" width="100%">
