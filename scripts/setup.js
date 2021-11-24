@@ -35,7 +35,7 @@ Hooks.once('ready', async function () {
     game.i18n.localize('ASE.MirrorImage'),];
 
     let isSummon = data.item.name.includes(game.i18n.localize("ASE.Summon"));
-    console.log('ASE Spell List: ', aseSpellList);
+    //console.log('ASE Spell List: ', aseSpellList);
     /*if (!aseSpellList.includes(data.item.name) && !isSummon) {
       return;
     }*/
@@ -48,8 +48,5 @@ Hooks.once('ready', async function () {
     let titleElement = html.closest('.app').find('.window-title');
     aseBtn.insertAfter(titleElement);
   });
-  //Migrating pre 0.8 item flags to new system
-
-
 });
 

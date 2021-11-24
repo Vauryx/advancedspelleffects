@@ -145,7 +145,7 @@ export class ASESettings extends FormApplication {
         //console.log("Detected item name: ", itemName);
 
         let requiredSettings;
-        console.log("Item name: ", itemName);
+        console.log("ASE (setEffectData) Item name: ", itemName);
         if (itemName.includes(game.i18n.localize("ASE.Summon"))) {
             requiredSettings = await summonCreature.getRequiredSettings(flags.advancedspelleffects.effectOptions);
             //console.log(requiredSettings);
@@ -190,21 +190,21 @@ export class ASESettings extends FormApplication {
         let spellOptions = {};
         let spellList = this.spellList;
         let spellNames = Object.keys(spellList);
-        console.log(spellNames);
+        //console.log(spellNames);
         spellNames.forEach((spellName) => {
             spellOptions[spellName] = spellName;
         });
-        console.log(spellOptions);
+        //console.log(spellOptions);
         return spellOptions;
     }
 
     async getData() {
         let flags = this.object.data.flags;
-        console.log("flag: ", flags.advancedspelleffects.spellEffect);
+        //console.log("flag: ", flags.advancedspelleffects.spellEffect);
         let item = this.object;
-        console.log("item: ", item);
+        //console.log("item: ", item);
         let itemName = flags.advancedspelleffects?.spellEffect ?? item.name;
-        console.log("Pre change item name: ", itemName);
+        //console.log("Pre change item name: ", itemName);
         if (itemName == "") {
             itemName = item.name;
             let spellListKeys = Object.keys(this.spellList);
@@ -215,13 +215,13 @@ export class ASESettings extends FormApplication {
                 itemName = game.i18n.localize("ASE.AnimateDead");
             }
         }
-        console.log("post change item name: ", itemName);
+        //console.log("post change item name: ", itemName);
         let content = "";
         let effectData;
         let spellOptions;
         if (flags.advancedspelleffects?.enableASE) {
             spellOptions = await this.getSpellOptions();
-            console.log(spellOptions);
+            //console.log(spellOptions);
             effectData = await this.setEffectData(item, itemName);
             await this.setItemDetails(this.object);
         }
@@ -353,7 +353,7 @@ export class ASESettings extends FormApplication {
 
     async _updateObject(event, formData) {
         //console.log(formData);
-        console.log("Updating item...");
+        console.log("Saving ASE item...");
         await this.object.unsetFlag("advancedspelleffects", "effectOptions");
         await this.setItemDetails(this.object);
         formData = expandObject(formData);
