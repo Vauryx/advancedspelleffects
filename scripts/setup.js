@@ -1,4 +1,5 @@
 import ASESettings from "./apps/aseSettings.js";
+import { versionMigration } from "./versionMigration.js"
 
 Hooks.once('init', async function () {
   console.log("Registering ASE game settings...");
@@ -39,12 +40,16 @@ Hooks.once('ready', async function () {
       return;
     }*/
     const aseBtn = $(`<a class="ase-item-settings" title="Advanced Spell Effects"><i class="fas fa-magic"></i>ASE</a>`);
-    aseBtn.click(ev => {
+    aseBtn.click(async (ev) => {
+      await versionMigration.handle(app.document);
       new ASESettings(app.document, {}).render(true);
     });
     html.closest('.app').find('.ase-item-settings').remove();
     let titleElement = html.closest('.app').find('.window-title');
     aseBtn.insertAfter(titleElement);
   });
+  //Migrating pre 0.8 item flags to new system
+
+
 });
 

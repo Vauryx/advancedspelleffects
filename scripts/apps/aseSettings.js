@@ -43,6 +43,7 @@ export class ASESettings extends FormApplication {
         this.spellList[game.i18n.localize("ASE.Moonbeam")] = moonBeam;
         this.spellList[game.i18n.localize("ASE.ChainLightning")] = chainLightning;
         this.spellList[game.i18n.localize("ASE.MirrorImage")] = mirrorImage;
+        this.spellList[game.i18n.localize("ASE.Summon")] = summonCreature;
     }
 
     static get defaultOptions() {
@@ -62,7 +63,6 @@ export class ASESettings extends FormApplication {
             "activation": { "type": "action", "cost": 1, "condition": "" },
             "duration": { "value": null, "units": "" },
             "target": { "value": null, "width": null, "units": "", "type": "" },
-            "range": { "value": null, "long": null, "units": "" },
             "uses": { "value": 0, "max": 0, "per": null },
             "consume": { "type": "", "target": null, "amount": null },
             "ability": null,
@@ -200,8 +200,11 @@ export class ASESettings extends FormApplication {
 
     async getData() {
         let flags = this.object.data.flags;
+        console.log("flag: ", flags.advancedspelleffects.spellEffect);
         let item = this.object;
+        console.log("item: ", item);
         let itemName = flags.advancedspelleffects?.spellEffect ?? item.name;
+        console.log("Pre change item name: ", itemName);
         if (itemName == "") {
             itemName = item.name;
             let spellListKeys = Object.keys(this.spellList);
@@ -212,7 +215,7 @@ export class ASESettings extends FormApplication {
                 itemName = game.i18n.localize("ASE.AnimateDead");
             }
         }
-        console.log(itemName);
+        console.log("post change item name: ", itemName);
         let content = "";
         let effectData;
         let spellOptions;
