@@ -17,12 +17,13 @@ export class concentrationHandler {
     }
 
     static async _handleConcentration(activeEffect) {
-        console.log("Handling removal of Concentration: ", activeEffect);
+        //console.log("Handling removal of Concentration: ", activeEffect);
         const isGM = utilFunctions.isFirstGM();
         //console.log("Is first GM: ", isGM);
         if (!isGM) return;
-        if (activeEffect.data.label != game.i18n.localize("ASE.ConcentratingLabel")) return;
+        if (activeEffect.data.label != 'Concentration' && activeEffect.data.label != game.i18n.localize("ASE.ConcentratingLabel")) return;
         let origin = activeEffect.data.origin?.split(".");
+        //console.log("Origin: ", origin);
         if (!origin || origin?.length < 4) return false;
         let itemId = origin[5] ?? origin[3];
         let casterActor;
@@ -37,13 +38,15 @@ export class concentrationHandler {
             casterActor = casterToken.actor;
         }
         effectSource = casterActor.items.get(itemId).name;
+        //console.log("ASE Concentration removed - Effect Source: ", effectSource);
         let item = casterActor.items.filter((item) => item.name == effectSource)[0] ?? undefined;
         if (!item) return;
         let aseEnabled = item.getFlag("advancedspelleffects", 'enableASE') ?? false;
         let effectOptions = item.getFlag("advancedspelleffects", 'effectOptions') ?? {};
         if (!aseEnabled) return;
-        //console.log(effectSource);
-        switch (effectSource) {
+        const spellEffect = item.getFlag("advancedspelleffects", 'spellEffect') ?? undefined;
+
+        switch (spellEffect) {
             case game.i18n.localize("ASE.Darkness"):
                 darkness.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
