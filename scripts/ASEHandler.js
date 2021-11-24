@@ -1,5 +1,5 @@
 import * as utilFunctions from "./utilityFunctions.js";
-
+import { versionMigration } from "./versionMigration.js"
 // Importing spells
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
@@ -23,6 +23,7 @@ export class ASEHandler {
     static async handleASE(data) {
         // check if the spell being rolled is marked as an ASE spell
         let item = data.item;
+        await versionMigration.handle(item);
         let aseFlags = item?.data?.flags?.advancedspelleffects ?? false;
         if (!aseFlags.enableASE) return;
 
@@ -32,8 +33,10 @@ export class ASEHandler {
             ui.notifications.error(missingModule);
             return;
         }
+        //handle any required flag migration
+
         //Activate spell
-        switch (item.name) {
+        switch (aseFlags.spellEffect) {
             case game.i18n.localize("ASE.Darkness"):
                 await darkness.createDarkness(data);
                 return;
@@ -66,7 +69,7 @@ export class ASEHandler {
                 await animateDead.rise(data);
                 return;
             case game.i18n.localize('ASE.WitchBolt'):
-                if (data.flavor != "Witch Bolt - Damage Roll (1d12 Lightning)" || !data.flavor) {
+                if (data.flavor != game.i18n.localize("ASE.WitchBoltDamageFlavor") || !data.flavor) {
                     console.log('Casting Witch Bolt!', data.flavor);
                     await witchBolt.cast(data);
                 }
@@ -76,7 +79,7 @@ export class ASEHandler {
                 }
                 return;
             case game.i18n.localize('ASE.ActivateWitchBolt'):
-                if (data.flavor != "Witch Bolt - Damage Roll (1d12 Lightning)" || !data.flavor) {
+                if (data.flavor != game.i18n.localize("ASE.WitchBoltDamageFlavor") || !data.flavor) {
                     await witchBolt.activateBolt(data);
                 }
                 return;

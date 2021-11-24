@@ -1,11 +1,31 @@
 <form class="ase-settings-form" id="aseSettingsForm" autocomplete="off" novalidate>
     <section class="content">
         <div class="ase-enable-checkbox">
-            <div class="form-group">
-                <label>{{localize "ASE.ConvertToASELabel"}}</label>
-                <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
-                    flags.advancedspelleffects.enableASE}}>
-            </div>
+            <table>
+                <tr>
+                    <td>
+                        <label>{{localize "ASE.ConvertToASELabel"}}</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" name="flags.advancedspelleffects.enableASE" {{checked
+                            flags.advancedspelleffects.enableASE}}>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Use Effect: </label>
+                    </td>
+                    <td>
+                        <select class="ase-spell-settings-select" name="flags.advancedspelleffects.spellEffect">
+                            {{#select itemName}}
+                                {{#each spellOptions as |name key|}}
+                                    <option value="{{key}}">{{name}}</option>
+                                {{/each}}
+                            {{/select}}
+                        </select>
+                    </td>
+                </tr>
+            </table>
         </div>
         <div class="ase-enabled-content">
             {{#if flags.advancedspelleffects.enableASE}}
@@ -34,7 +54,7 @@
                 </div>
                 <div id="ase-settings-body">
                     <div id="ase-spell-settings" class="show">
-                        {{#ifCondASE itemName 'includes' 'Summon'}}
+                        {{#ifCondASE itemName 'includes' (localize 'ASE.Summon')}}
                             <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
                             <input type="hidden" id="hdnSummonerId" value="{{effectData.summonerId}}" />
                             <table id="summonsTable" width="100%">

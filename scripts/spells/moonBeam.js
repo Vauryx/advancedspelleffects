@@ -180,6 +180,7 @@ export class moonBeam {
             "flags": {
                 "advancedspelleffects": {
                     "enableASE": true,
+                    "spellEffect": game.i18n.localize('ASE.MoveMoonbeam'),
                     'effectOptions': aseEffectOptions
                 }
             }

@@ -1,4 +1,5 @@
 import ASESettings from "./apps/aseSettings.js";
+import { versionMigration } from "./versionMigration.js"
 
 Hooks.once('init', async function () {
   console.log("Registering ASE game settings...");
@@ -35,11 +36,12 @@ Hooks.once('ready', async function () {
 
     let isSummon = data.item.name.includes(game.i18n.localize("ASE.Summon"));
     //console.log('ASE Spell List: ', aseSpellList);
-    if (!aseSpellList.includes(data.item.name) && !isSummon) {
+    /*if (!aseSpellList.includes(data.item.name) && !isSummon) {
       return;
-    }
-    const aseBtn = $(`<a class="ase-item-settings" title="ASE"><i class="fas fa-biohazard"></i>ASE</a>`);
-    aseBtn.click(ev => {
+    }*/
+    const aseBtn = $(`<a class="ase-item-settings" title="Advanced Spell Effects"><i class="fas fa-magic"></i>ASE</a>`);
+    aseBtn.click(async (ev) => {
+      await versionMigration.handle(app.document);
       new ASESettings(app.document, {}).render(true);
     });
     html.closest('.app').find('.ase-item-settings').remove();
