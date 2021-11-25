@@ -319,7 +319,7 @@ export class witchBolt {
             let origin = effect.data.origin?.split(".");
             if (!origin || origin?.length < 4) return false;
             let itemId = origin[5] ?? origin[3];
-            let effectSource = casterActor.items.get(itemId).name;
+            let effectSource = casterActor.items.get(itemId)?.name;
             return effectSource == "Witch Bolt"
         })[0];
         //console.log(witchBoltConcentration);
