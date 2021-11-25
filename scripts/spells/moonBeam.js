@@ -23,17 +23,14 @@ export class moonBeam {
 
     static async _updateToken(tokenDocument, updateData) {
         const isGM = utilFunctions.isFirstGM();
-        console.log("Is first GM: ", isGM);
-        console.log('Update Token tokenDocument: ', tokenDocument);
-        console.log('Update Token updateData: ', updateData);
+        //console.log("Is first GM: ", isGM);
+        //console.log('Update Token tokenDocument: ', tokenDocument);
+        //console.log('Update Token updateData: ', updateData);
         if (!isGM) return;
         if ((!updateData.x && !updateData.y)) return;
 
         const moonbeamTiles = await Tagger.getByTag(`*-moonbeam`);
         if (moonbeamTiles.length == 0) return;
-
-
-
 
         const token = canvas.tokens.get(tokenDocument.id);
         let newTokenPosition = { x: 0, y: 0 };
@@ -42,10 +39,10 @@ export class moonBeam {
         newTokenPosition = utilFunctions.getCenter(newTokenPosition, tokenDocument.data.width);
 
         let inTiles = token.document.getFlag("advancedspelleffects", "moonbeam.inTiles") ?? [];
-        console.log('inTiles: ', inTiles);
-        console.log('moonbeamTiles: ', moonbeamTiles);
-        console.log('token: ', token);
-        console.log('New Token Position: ', newTokenPosition);
+        //console.log('inTiles: ', inTiles);
+        //console.log('moonbeamTiles: ', moonbeamTiles);
+        //console.log('token: ', token);
+        //console.log('New Token Position: ', newTokenPosition);
         //iterate over every moonbeam tile
         for (let i = 0; i < moonbeamTiles.length; i++) {
             let moonbeamTile = moonbeamTiles[i];
