@@ -130,7 +130,7 @@ export class witchBolt {
         if (!attachedSounds.length > 0) {
             return;
         }
-        await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.document.id));
+        await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.id));
         return;
     }
 

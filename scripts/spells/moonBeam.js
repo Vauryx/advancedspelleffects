@@ -18,7 +18,7 @@ export class moonBeam {
         if (!attachedSounds.length > 0) {
             return;
         }
-        await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.document.id));
+        await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.id));
     }
 
     static async _updateToken(tokenDocument, updateData) {
@@ -46,9 +46,12 @@ export class moonBeam {
         //iterate over every moonbeam tile
         for (let i = 0; i < moonbeamTiles.length; i++) {
             let moonbeamTile = moonbeamTiles[i];
-            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile);
+            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile.data);
+            //console.log('Moonbeam tile center: ', moonbeamTileCenter);
             let targetToBeamDist = utilFunctions.getDistanceClassic(newTokenPosition, moonbeamTileCenter);
-            if (targetToBeamDist < (((tokenDocument.data.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
+            //console.log('target to beam dist: ', targetToBeamDist);
+            //console.log('Required Distance: ', (((tokenDocument.data.width * canvas.grid.size) / 2) + (moonbeamTile.data.width / 2)));
+            if (targetToBeamDist < (((tokenDocument.data.width * canvas.grid.size) / 2) + (moonbeamTile.data.width / 2))) {
                 //check if tile exists in inTiles which is an array of tiles
                 if (inTiles.includes(moonbeamTile.id)) {
 
@@ -61,7 +64,7 @@ export class moonBeam {
                     ui.notifications.info(game.i18n.format("ASE.MoonbeamEnteringTile", { name: token.name }));
                     //add the tile to the inTiles array
                     inTiles.push(moonbeamTile.id);
-                    let effectOptions = moonbeamTile.document.getFlag("advancedspelleffects", "effectOptions") ?? {};
+                    let effectOptions = moonbeamTile.getFlag("advancedspelleffects", "effectOptions") ?? {};
                     await moonBeam.activateBeam(token, effectOptions);
                 }
             }
@@ -87,12 +90,12 @@ export class moonBeam {
         for (let i = 0; i < moonbeamTiles.length; i++) {
             let moonbeamTile = moonbeamTiles[i];
             //console.log('Moonbeam tile found: ', moonbeamTile);
-            let effectOptions = moonbeamTile.document.getFlag("advancedspelleffects", "effectOptions") ?? {};
+            let effectOptions = moonbeamTile.getFlag("advancedspelleffects", "effectOptions") ?? {};
             //check if token has entered the tile
-            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile);
+            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile.data);
             let targetToBeamDist = utilFunctions.getDistanceClassic(combatantPosition, moonbeamTileCenter);
             //console.log('target to beam dist: ', targetToBeamDist);
-            if (targetToBeamDist < (((combatantToken.data.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
+            if (targetToBeamDist < (((combatantToken.data.width * canvas.grid.size) / 2) + (moonbeamTile.data.width / 2))) {
                 //check if tile exists in inTiles which is an array of tiles
                 console.log(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
                 ui.notifications.info(game.i18n.format("ASE.StartingTurnInMoonbeam", { name: combatantToken.name }));

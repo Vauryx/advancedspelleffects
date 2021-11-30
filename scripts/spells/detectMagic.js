@@ -99,7 +99,7 @@ export class detectMagic {
         let objects = await Tagger.getByTag("magical", { ignore: [caster] });
         magicalObjects = objects.map(o => {
             let pointA = { x: caster.data.x + (canvas.grid.size / 2), y: caster.data.y + (canvas.grid.size / 2) };
-            let pointB = { x: o.x + (canvas.grid.size / 2), y: o.y + (canvas.grid.size / 2) }
+            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
 
             return {
@@ -138,8 +138,8 @@ export class detectMagic {
             .scale(0.2)
             .loopProperty("sprite", "rotation", { duration: 20000, from: 0, to: 360 })
             .name(`${caster.id}-detectMagicAura`)
-            .belowTokens()
-
+            .belowTokens();
+        console.log('Magical Objects', magicalObjects);
         for (let magical of magicalObjects) {
             if (!magical.school) {
                 continue;
@@ -156,7 +156,7 @@ export class detectMagic {
                 .waitUntilFinished(-1200)
                 .zIndex(0)
                 .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
-                .name(`${magical.obj.document.id}-magicRune`)
+                .name(`${magical.obj.id}-magicRune`)
                 .delay(magical.delay)
                 .forUsers(users)
                 .scale(0.25)
@@ -196,7 +196,7 @@ export class detectMagic {
 
         magicalObjects = objects.map(o => {
             let pointA = { x: casterToken.data.x + (canvas.grid.size / 2), y: casterToken.data.y + (canvas.grid.size / 2) };
-            let pointB = { x: o.x + (canvas.grid.size / 2), y: o.y + (canvas.grid.size / 2) }
+            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
             return {
                 delay: 0,
@@ -210,9 +210,9 @@ export class detectMagic {
             if (!magical.school) {
                 continue;
             }
-            if (magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) {
+            if (magical.obj.getFlag("advancedspelleffects", "magicDetected")) {
                 await aseSocket.executeAsGM("updateFlag", magical.obj.id, "magicDetected", false);
-                await Sequencer.EffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+                await Sequencer.EffectManager.endEffects({ name: `${magical.obj.id}-magicRune`, object: magical.obj._object });
                 new Sequence("Advanced Spell Effects")
                     .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                     .forUsers(users)
@@ -271,7 +271,7 @@ export class detectMagic {
 
         magicalObjectsOutOfRange = objects.map(o => {
             let pointA = { x: newPos.x + (canvas.grid.size / 2), y: newPos.y + (canvas.grid.size / 2) };
-            let pointB = { x: o.x + (canvas.grid.size / 2), y: o.y + (canvas.grid.size / 2) }
+            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
             return {
                 delay: 0,
@@ -292,16 +292,16 @@ export class detectMagic {
                 .scale(0.25)
                 .setMustache(magical)
                 .zIndex(0)
-                .playIf((magical.obj.document.getFlag("advancedspelleffects", "magicDetected")))
+                .playIf((magical.obj.getFlag("advancedspelleffects", "magicDetected")))
                 .play();
-            if (magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) {
-                await magical.obj.document.setFlag("advancedspelleffects", "magicDetected", false);
-                await Sequencer.EffectManager.endEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
+            if (magical.obj.getFlag("advancedspelleffects", "magicDetected")) {
+                await magical.obj.setFlag("advancedspelleffects", "magicDetected", false);
+                await Sequencer.EffectManager.endEffects({ name: `${magical.obj.id}-magicRune`, object: magical.obj._object });
             }
         }
         magicalObjectsInRange = objects.map(o => {
             let pointA = { x: newPos.x + (canvas.grid.size / 2), y: newPos.y + (canvas.grid.size / 2) };
-            let pointB = { x: o.x + (canvas.grid.size / 2), y: o.y + (canvas.grid.size / 2) }
+            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
             return {
                 delay: 0,
@@ -316,9 +316,9 @@ export class detectMagic {
             if (!magical.school) {
                 continue;
             }
-            //let runeDisplayed = Sequencer.EffectManager.getEffects({ name: `${magical.obj.document.id}-magicRune`, object: magical.obj });
-            if (!magical.obj.document.getFlag("advancedspelleffects", "magicDetected")) {
-                await magical.obj.document.setFlag("advancedspelleffects", "magicDetected", true);
+            //let runeDisplayed = Sequencer.EffectManager.getEffects({ name: `${magical.obj.id}-magicRune`, object: magical.obj });
+            if (!magical.obj.getFlag("advancedspelleffects", "magicDetected")) {
+                await magical.obj.setFlag("advancedspelleffects", "magicDetected", true);
                 new Sequence("Advanced Spell Effects")
                     .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
                     .forUsers(users)
@@ -330,7 +330,7 @@ export class detectMagic {
                     .waitUntilFinished(-800)
                     .zIndex(0)
                     .effect("jb2a.magic_signs.rune.{{school}}.loop.{{color}}")
-                    .name(`${magical.obj.document.id}-magicRune`)
+                    .name(`${magical.obj.id}-magicRune`)
                     .delay(magical.delay)
                     .forUsers(users)
                     .scale(0.25)

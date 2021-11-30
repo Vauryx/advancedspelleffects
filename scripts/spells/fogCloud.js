@@ -21,7 +21,8 @@ export class fogCloud {
         let wallDocuments = [];
         walls = await Tagger.getByTag([`FogCloudWall-${tileD.id}`]);
         walls.forEach((wall) => {
-            wallDocuments.push(wall.document.id);
+            console.log(wall);
+            wallDocuments.push(wall.id);
         });
         if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
             await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);

@@ -93,7 +93,7 @@ async function moveWalls(tileId, wallType, numWalls) {
 
     walls = await Tagger.getByTag([`${wallType}Wall-${tileD.id}`]);
     walls.forEach((wall) => {
-        wallDocuments.push(wall.document.id);
+        wallDocuments.push(wall.id);
     });
     walls = [];
     if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
@@ -144,7 +144,7 @@ async function moveSound(sourceId, newLoc) {
         ui.notifications.error(game.i18n.localize("ASE.SoundNotFound"));
         return;
     }
-    const oldSoundData = attachedSounds[0].document.data;
+    const oldSoundData = attachedSounds[0].data;
     //console.log('Old Sound Data: ', oldSoundData);
     const sourceWidth = source.data.hitArea?.width || source.data.width;
     const sourceHeight = source.data.hitArea?.height || source.data.height;
@@ -161,8 +161,8 @@ async function moveSound(sourceId, newLoc) {
     //console.log('New Sound Data: ', newSoundData);
     if (oldSoundData.x != newSoundData[0].x || oldSoundData.y != newSoundData[0].y) {
         await canvas.scene.createEmbeddedDocuments("AmbientSound", newSoundData);
-        if (canvas.scene.getEmbeddedDocument("AmbientSound", attachedSounds[0].document.id)) {
-            await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.document.id));
+        if (canvas.scene.getEmbeddedDocument("AmbientSound", attachedSounds[0].id)) {
+            await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.id));
         }
     }
 

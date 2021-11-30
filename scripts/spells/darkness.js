@@ -17,7 +17,7 @@ export class darkness {
         let wallDocuments = [];
         walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
         walls.forEach((wall) => {
-            wallDocuments.push(wall.document.id);
+            wallDocuments.push(wall.id);
         });
         if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
             await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
