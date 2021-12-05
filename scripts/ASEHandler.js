@@ -49,7 +49,9 @@ export class ASEHandler {
                 }
                 return;
             case game.i18n.localize('ASE.ActivateCallLightning'):
-                await callLightning.callLightningBolt(aseFlags.effectOptions.stormTileId);
+
+                await callLightning.callLightningBolt(aseFlags.effectOptions.stormTileId, data.itemCardId, data.item.id);
+
                 return;
             case game.i18n.localize('ASE.FogCloud'):
                 await fogCloud.createFogCloud(data);

@@ -359,6 +359,7 @@ export class MissileDialog extends FormApplication {
                         missileDelay = utilFunctions.getRandomInt(75, 150);
                     }
                     else {
+                        //console.log(this.data.attackMods[targetToken.id][i]);
                         let attackMod = this.data.attackMods[targetToken.id][i].type;
                         missileDelay = utilFunctions.getRandomInt(50, 100);
                         //console.log(attackMod);
@@ -367,8 +368,33 @@ export class MissileDialog extends FormApplication {
                             attacksCrit += 1;
                         }
                     }
+                    const maxMods = game.settings.get('dnd5e', 'criticalDamageModifiers');
+                    const maxBaseDice = game.settings.get('dnd5e', 'criticalDamageMaxDice');
 
-                    damageFormula = `${attackData.crit ? this.data.effectOptions.dmgDieCount * 2 : this.data.effectOptions.dmgDieCount}${this.data.effectOptions.dmgDie} ${Number(this.data.effectOptions.dmgMod) ? '+' + this.data.effectOptions.dmgMod : ''} + ${damageBonus}`;
+                    let damageDieCount = this.data.effectOptions.dmgDieCount;
+                    let baseDamageDie = this.data.effectOptions.dmgDie;
+                    let baseDamageDieModified;
+                    let damageMod = Number(this.data.effectOptions.dmgMod) ? this.data.effectOptions.dmgMod : 0;
+
+                    console.log(`Damage Die Count: ${damageDieCount}, Base Damage Die: ${baseDamageDie}, Damage Mod: ${damageMod}`);
+
+                    if (attackData.crit) {
+                        if (maxMods) {
+                            damageMod *= 2;
+                            damageBonus *= 2;
+                        }
+                        if (maxBaseDice) {
+                            baseDamageDieModified = (Number(baseDamageDie.split('d')[1])) * damageDieCount;
+                            baseDamageDie = baseDamageDie + '+ ' + baseDamageDieModified;
+                        }
+                        else {
+                            damageDieCount *= 2;
+                            // baseDamageDie = `${damageDieCount}${baseDamageDie}`;
+                            // console.log(`Damage Die Count: ${damageDieCount}, Base Damage Die: ${baseDamageDie}, Damage Mod: ${damageMod}`);
+                        }
+                    }
+
+                    damageFormula = `${damageDieCount > 0 ? damageDieCount : ''}${baseDamageDie} ${damageMod ? '+' + damageMod : ''} ${damageBonus ? '+' + damageBonus : ''}`;
                     //console.log(damageFormula);
                     damageRoll = await new Roll(damageFormula).evaluate({ async: true });
                     this.data.allDamRolls.push({ roll: damageRoll, target: targetToken.name });
@@ -483,14 +509,41 @@ export class MissileDialog extends FormApplication {
                 let currTarget = currAttackData.target;
                 let currAttackRoll = currAttackData.roll;
                 let currDamageRoll = currDamageData.roll;
-                let currDamageBreakdown = currDamageRoll.terms[0].formula + ': ';
-                let currDamageValues = currDamageRoll.terms[0].values;
-                for (let j = 0; j < currDamageValues.length; j++) {
+                let currDamageRollDieTerms = currDamageRoll.terms.filter(term => {
+                    return term.values?.length > 0;
+                });
+                let currDamageRollNumericTerms = currDamageRoll.terms.filter(term => {
+                    return (term.number != undefined) && !(term.values?.length > 0);
+                });
+                //console.log('Damage Roll Die Terms: ', currDamageRollDieTerms);
+                //console.log('Damage Roll Numeric Terms: ', currDamageRollNumericTerms);
+                let currDamageDieValues = [];
+                // concatenate the die terms and numeric terms into a single string
+                let currDamageFormula = '';
+                let currDamageBreakdown = '';
+                for (let j = 0; j < currDamageRollDieTerms.length; j++) {
+                    currDamageFormula += currDamageRollDieTerms[j].formula + (j < currDamageRollDieTerms.length - 1 ? ' + ' : '');
+                    for (let k = 0; k < currDamageRollDieTerms[j].values.length; k++) {
+                        currDamageBreakdown += '[' + (currDamageRollDieTerms[j].values[k]) + ']' + (k < currDamageRollDieTerms[j].values.length - 1 ? ' + ' : '');
+                    }
+                }
+                currDamageFormula += ': ';
+
+                for (let j = 0; j < currDamageRollNumericTerms.length; j++) {
+                    currDamageBreakdown += ((j == 0) && currDamageRollDieTerms.length > 0 ? ' + ' : '') + currDamageRollNumericTerms[j].number + (j < currDamageRollNumericTerms.length - 1 ? ' + ' : '');
+                }
+                currDamageBreakdown = currDamageFormula + currDamageBreakdown;
+                //console.log("Damage Breakdown: ", currDamageBreakdown);
+                //let currDamageBreakdown = currDamageRollDieTerms[0].formula + ': ';
+                //console.log("Damage Breakdown: ", currDamageBreakdown);
+                //let currDamageValues = currDamageRoll.terms[0].values ?? currDamageRoll.terms[0].number;
+                /*for (let j = 0; j < currDamageValues.length; j++) {
                     //console.log("Damage Value: ", currDamageValues[j]);
                     currDamageBreakdown += `[${currDamageValues[j]}]`;
-                }
-                let currExtraDamage = currDamageRoll.formula.split('+')[1];
-                currDamageBreakdown += ` ${currExtraDamage ? '+ ' : ''}${currExtraDamage ? currExtraDamage : ''}`;
+                }*/
+                //let currExtraDamage = currDamageRoll.formula.split('+')[1];
+                //console.log("Extra Damage: ", currExtraDamage);
+                //currDamageBreakdown += ` ${currExtraDamage ? '+ ' : ''}${currExtraDamage ? currExtraDamage : ''}`;
 
                 let currAttackRollResult = currAttackRoll.result.split("+");
                 if (currAttackData.crit) {
@@ -508,7 +561,7 @@ export class MissileDialog extends FormApplication {
                 }
                 currAttackRollResult = `[ ${currAttackRollResult[0]}] + ${currAttackRollResult[1]} + ${currAttackRollResult[2]}`;
                 //console.log("Attack Roll Result: ", currAttackRollResult);
-                //console.log("Damage Breakdown: ", currDamageBreakdown);
+
                 //console.log("Damage Roll: ", damageRoll);
                 content += `<tr><td>${currTarget}</td><td title = '${currAttackRollResult}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${currDamageRoll.total}</td></tr>`;
             }

@@ -84,6 +84,7 @@
   "ASE.AttackRoll": "Attack Roll",
   "ASE.Damage": "Damage",
   "ASE.NoOne": "No one",
+  "ASE.NoSpellItem": "No spell named {spellName} found.",
 
   "ASE.AskStorm": "Is there a storm?",
   "ASE.ActivateCallLightningCastDescription": "Call forth a bolt of lightning from the storm cloud above.",

@@ -90,7 +90,9 @@ export class detectMagic {
 
         for (const user in actor.data.permission) {
             if (user == "default") continue;
-            users.push(user);
+            if (game.users.get(user)) {
+                users.push(user);
+            }
         }
 
         let magicalSchools = magicalSchoolsEng;
@@ -177,7 +179,9 @@ export class detectMagic {
         let users = [];
         for (const user in casterActor.data.permission) {
             if (user == "default") continue;
-            users.push(user);
+            if (game.users.get(user)) {
+                users.push(user);
+            }
         }
         const magicalSchoolsEng = [
             "abjuration",
@@ -247,7 +251,9 @@ export class detectMagic {
         let users = [];
         for (const user in tokenDocument.actor.data.permission) {
             if (user == "default") continue;
-            users.push(user);
+            if (game.users.get(user)) {
+                users.push(user);
+            }
         }
         let newPos = { x: 0, y: 0 };
         newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;

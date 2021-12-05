@@ -243,3 +243,55 @@ export function isMidiActive() {
     }
     return false;
 }
+
+export function getContainedCustom(tokenD, crosshairs) {
+    let tokenCenter = getCenter(tokenD.data, tokenD.data.width);
+    let tokenCrosshairsDist = canvas.grid.measureDistance(tokenCenter, crosshairs);
+    let crosshairsDistance = crosshairs.data?.distance ?? crosshairs.distance;
+    //console.log(`Crosshairs distance: ${crosshairsDistance}`);
+    let distanceRequired = (crosshairsDistance - 2.5) + (2.5 * tokenD.data.width);
+    if ((tokenCrosshairsDist) < distanceRequired) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+export async function checkCrosshairs(crosshairs) {
+    //console.log(crosshairs);
+    let collected;
+    while (crosshairs.inFlight) {
+        //wait for initial render
+        await warpgate.wait(100);
+        /* set default tint */
+        collected = warpgate.crosshairs.collect(crosshairs, ['Token'], getContainedCustom)['Token'];
+        let tokensOutOfRange = canvas.tokens.placeables.filter(token => {
+            return !collected.find(t => t.id === token.id);
+        });
+        crosshairs.label = `${collected.length} targets`;
+        for await (let tokenD of collected) {
+            let token = canvas.tokens.get(tokenD.id);
+            //console.log(token);
+            let markerEffect = 'jb2a.ui.indicator.red';
+            let markerApplied = Sequencer.EffectManager.getEffects({ name: `ase-crosshairs-marker-${token.id}` });
+            if (markerApplied.length == 0) {
+                new Sequence()
+                    .effect()
+                    .file(markerEffect)
+                    .atLocation(token)
+                    .scale(0.5)
+                    .offset({ y: 100 })
+                    .mirrorY()
+                    .persist()
+                    .name(`ase-crosshairs-marker-${token.id}`)
+                    .play();
+            }
+        }
+        for await (let token of tokensOutOfRange) {
+            let markerApplied = Sequencer.EffectManager.getEffects({ name: `ase-crosshairs-marker-${token.id}` });
+            if (markerApplied.length > 0) {
+                Sequencer.EffectManager.endEffects({ name: `ase-crosshairs-marker-${token.id}` });
+            }
+        }
+    }
+}

@@ -21,7 +21,7 @@ export class eldritchBlast {
         }
         const itemCardId = midiData.itemCardId;
         const spellItem = midiData.item;
-        const aseEffectOptions = spellItem?.getFlag("advancedspelleffects", "effectOptions");
+        const aseEffectOptions = JSON.parse(JSON.stringify(spellItem?.getFlag("advancedspelleffects", "effectOptions") ?? {}));
         aseEffectOptions['targetMarkerType'] = 'jb2a.markers.02';
         aseEffectOptions['missileType'] = 'beam';
         aseEffectOptions['missileAnim'] = 'jb2a.eldritch_blast';
@@ -32,10 +32,11 @@ export class eldritchBlast {
         aseEffectOptions['dmgMod'] = aseEffectOptions.dmgMod ?? 0;
         aseEffectOptions['impactDelay'] = -3000;
         let invocations = aseEffectOptions.invocations;
+        console.log('ASEEffectOptions.dmgMod: ', aseEffectOptions.dmgMod);
         if (invocations.agonizingBlast) {
             aseEffectOptions.dmgMod += casterActor?.data?.data?.abilities?.cha?.mod ?? 0;
         }
-
+        console.log('ASEEffectOptions: ', aseEffectOptions);
         new MissileDialog({
             casterId: casterToken.id,
             numMissiles: numMissiles,
