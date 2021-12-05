@@ -139,7 +139,10 @@ export class MissileDialog extends FormApplication {
                     ui.notifications.info("Missile Limit Reached!");
                 }
                 if (numMissiles > 0) {
-                    document.getElementById("txtNumMissilesId").value--;
+                    const missileTextBox = document.getElementById("txtNumMissilesId");
+                    if (missileTextBox) {
+                        missileTextBox.value--;
+                    }
                     await this._applyMarker(token, attackType);
                     this._addTargetToList(token);
                     this.data.numMissiles--;
@@ -360,7 +363,7 @@ export class MissileDialog extends FormApplication {
                     }
                     else {
                         //console.log(this.data.attackMods[targetToken.id][i]);
-                        let attackMod = this.data.attackMods[targetToken.id][i].type;
+                        let attackMod = this.data.attackMods[targetToken.id][i]?.type;
                         missileDelay = utilFunctions.getRandomInt(50, 100);
                         //console.log(attackMod);
                         attackData = await this._evaluateAttack(caster, targetToken, attackMod, rollData);
