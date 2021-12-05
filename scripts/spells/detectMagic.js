@@ -15,7 +15,7 @@ export class detectMagic {
         let assetDBPaths = [];
         let animateDeadItems = utilFunctions.getAllItemsNamed("Detect Magic");
         if (animateDeadItems.length > 0) {
-            for (let item of animateDeadItems) {
+            for await (let item of animateDeadItems) {
                 let aseSettings = item.getFlag("advancedspelleffects", "effectOptions");
                 //console.log(aseSettings);
                 let waveAnim = `jb2a.detect_magic.circle.${aseSettings.waveColor ?? 'blue'}`;
@@ -46,7 +46,7 @@ export class detectMagic {
                         color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
                     }
                 });
-                for (let magical of magicalObjects) {
+                for await (let magical of magicalObjects) {
                     if (!magical.school) {
                         continue;
                     }
@@ -142,7 +142,7 @@ export class detectMagic {
             .name(`${caster.id}-detectMagicAura`)
             .belowTokens();
         console.log('Magical Objects', magicalObjects);
-        for (let magical of magicalObjects) {
+        for await (let magical of magicalObjects) {
             if (!magical.school) {
                 continue;
             }

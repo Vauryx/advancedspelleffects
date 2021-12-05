@@ -183,7 +183,7 @@ export class chainLightning {
 
     async rollSaves() {
 
-        for (let target of this.targetData) {
+        for await (let target of this.targetData) {
 
             const roll = await new Roll("1d20+@mod", { mod: target.token.actor.data.data.abilities.dex.save }).evaluate({ async: true });
             target.rollTotal = roll.total;

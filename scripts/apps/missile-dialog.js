@@ -24,7 +24,7 @@ export class MissileDialog extends FormApplication {
     static async _clearTargets() {
         let tokens = Array.from(canvas.tokens.placeables);
         //console.log("ASE Magic Missile Targets Detected...", tokens);
-        for (let target of tokens) {
+        for await (let target of tokens) {
             //console.log('Target: ',target);
             let effectsOnTarget = await Sequencer.EffectManager.getEffects({ object: target }).filter((e) => {
                 //console.log('e data name',e.data.name);
@@ -273,7 +273,7 @@ export class MissileDialog extends FormApplication {
         game.user.updateTokenTargets([]);
         Hooks.once('closeMissileDialog', async () => {
             let tokens = Array.from(canvas.tokens.placeables).filter(t => t.data.flags.advancedspelleffects && t.data.flags.advancedspelleffects.missileSpell);
-            for (let target of tokens) {
+            for await (let target of tokens) {
                 await Sequencer.EffectManager.getEffects({ object: target }).filter(async (e) => {
                     e.data.name.startsWith("missile-target-")
                 }).forEach(async (e) => {
@@ -334,7 +334,7 @@ export class MissileDialog extends FormApplication {
             const chatMessage = await game.messages.get(this.data.itemCardId);
             //console.log(`${caster.name} is firing Missiles at Selected Targets...`);
             //console.log("Missile Data: ", this.data);
-            for (let target of this.data.targets) {
+            for await (let target of this.data.targets) {
                 let targetToken = canvas.tokens.get(target.id);
                 //console.log("Target: ", targetToken);
                 let missileNum = targetToken.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 0;
@@ -457,7 +457,7 @@ export class MissileDialog extends FormApplication {
 
                 }
                 const targetMarkers = await Sequencer.EffectManager.getEffects({ object: targetToken }).filter(effect => effect.data.name?.startsWith(`missile-target`));
-                for (let targetMarker of targetMarkers) {
+                for await (let targetMarker of targetMarkers) {
                     await Sequencer.EffectManager.endEffects({ name: targetMarker.data.name, object: targetToken });
                 }
 

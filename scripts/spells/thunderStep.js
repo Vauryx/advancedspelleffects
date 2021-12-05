@@ -157,7 +157,7 @@ export class thunderStep {
 
                         newChatmessageContent.find(".midi-qol-saves-display").empty();
                         let damage = await new Roll(`${spellLevel}d10`).evaluate({ async: true });
-                        for (let targetToken of targets) {
+                        for await (let targetToken of targets) {
 
                             let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.con.save }).evaluate({ async: true });
                             let save = saveRoll.total;
@@ -210,7 +210,7 @@ export class thunderStep {
             .wait(50)
             .thenDo(async () => {
                 damage_range[0].delete();
-                for (let passenger of passengers) {
+                for await (let passenger of passengers) {
                     await passenger.document.update({
                         hidden: false
                     }, { animate: false });

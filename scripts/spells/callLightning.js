@@ -256,7 +256,7 @@ export class callLightning {
             let newChatmessageContent = $(chatMessageContent);
 
             newChatmessageContent.find(".midi-qol-saves-display").empty();
-            for (let targetToken of targetsInCrosshairs) {
+            for await (let targetToken of targetsInCrosshairs) {
 
                 let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.dex.save }).evaluate({ async: true });
 
