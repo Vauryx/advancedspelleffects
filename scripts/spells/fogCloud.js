@@ -39,6 +39,7 @@ export class fogCloud {
 
     static async createFogCloud(midiData) {
         let item = midiData.item;
+
         let itemLevel = midiData.itemLevel;
         let aseFlags = item.getFlag("advancedspelleffects", 'effectOptions');
         let caster = await canvas.tokens.get(midiData.tokenId);
@@ -51,15 +52,7 @@ export class fogCloud {
             cloudSize = Number(aseFlags.fogCloudRadius ?? 20) / 2.5;
         }
         if (cloudSize < 2.5) cloudSize = 2.5;
-        let crosshairsConfig = {
-            size: cloudSize,
-            icon: item.img,
-            label: game.i18n.localize("ASE.FogCloud"),
-            tag: 'fog-cloud-crosshairs',
-            drawIcon: true,
-            drawOutline: true,
-            interval: 1
-        }
+
         const sound = aseFlags?.fogCloudSound ?? "";
         const soundDelay = Number(aseFlags?.fogCloudSoundDelay) ?? 0;
         const volume = aseFlags?.fogCloudVolume ?? 1;
@@ -78,9 +71,17 @@ export class fogCloud {
                 .scaleToObject()
                 .opacity(0.5)
                 .play()
-
         }
-        let fogCloudTemplate = await warpgate.crosshairs.show(crosshairsConfig);
+        let crosshairsConfig = {
+            size: cloudSize,
+            icon: item.img,
+            label: game.i18n.localize("ASE.FogCloud"),
+            tag: 'fog-cloud-crosshairs',
+            drawIcon: false,
+            drawOutline: false,
+            interval: 1
+        }
+        let fogCloudTemplate = await warpgate.crosshairs.show(crosshairsConfig, { show: displayCrosshairs });
 
         await placeCloudAsTile(fogCloudTemplate, casterActor.id, itemLevel, soundOptions);
 
