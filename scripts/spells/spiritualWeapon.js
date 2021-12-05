@@ -8,15 +8,18 @@ export class spiritualWeapon {
 
     static async createSpiritualWeapon(midiData) {
         const casterActor = midiData.actor;
+        const casterActorRollData = casterActor.getRollData();
         const casterToken = canvas.tokens.get(midiData.tokenId);
         const item = midiData.item;
         const effectOptions = item.getFlag('advancedspelleffects', 'effectOptions') ?? {};
-        console.log(effectOptions);
+        //console.log(effectOptions);
         const level = midiData.spellLevel;
         let summonType = "Spiritual Weapon";
         const summonerDc = casterActor.data.data.attributes.spelldc;
-        const summonerAttack = summonerDc - 8;
-        const summonerMod = getProperty(casterActor, `data.data.abilities.${getProperty(casterActor, 'data.data.attributes.spellcasting')}.mod`);
+        const summonerAttack = (casterActorRollData.attributes.prof + casterActorRollData.mod) + Number(casterActorRollData.bonuses?.msak?.attack ?? 0);
+
+        //console.log("Caster Actor Roll Data: ", casterActorRollData);
+        const summonerMod = casterActorRollData.mod + Number(casterActorRollData.bonuses?.msak?.damage ?? 0);
         let damageScale = '';
 
         async function myEffectFunction(template, options, update) {
@@ -25,7 +28,6 @@ export class spiritualWeapon {
             const sound = options.effectOptions?.summonSound ?? "";
             const soundDelay = Number(options.effectOptions?.summonSoundDelay) ?? 0;
             const volume = options.effectOptions?.summonVolume ?? 1;
-
 
             switch (color) {
                 case 'blue':
@@ -52,6 +54,7 @@ export class spiritualWeapon {
                 default:
                     glowColor = utilFunctions.rgbToHex(153, 204, 255)
             }
+
             let effectFile;
             if (Sequencer.Database.entryExists(`jb2a.eldritch_blast.${color}`)) {
                 effectFile = `jb2a.eldritch_blast.${color}.05ft`
@@ -104,7 +107,7 @@ export class spiritualWeapon {
         let weaponData = [{
             type: "select",
             label: game.i18n.localize("ASE.WeaponDialogLabel"),
-            options: ["Mace", "Maul", "Scythe", "Sword"]
+            options: ["Mace", "Sword"]
         }]
         let weaponChoice = await warpgate.dialog(weaponData);
         weaponChoice = weaponChoice[0].toLowerCase();
@@ -136,17 +139,14 @@ export class spiritualWeapon {
         });
         let attackColors;
 
-        if (weaponChoice == "sword") {
-            attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee.fire`);
-        }
-        else if (weaponChoice == "mace") {
+        if (weaponChoice == "sword" || weaponChoice == "mace") {
             attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee.01`);
         }
         else if (Sequencer.Database.entryExists(`jb2a.${weaponChoice}.melee`)) {
             attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee`);
         }
         else {
-            attackColors = Sequencer.Database.getPathsUnder(`jb2a.sword.melee`);
+            attackColors = Sequencer.Database.getPathsUnder(`jb2a.sword.melee.fire`);
         }
         let attackColorOptions = [];
 
@@ -169,9 +169,10 @@ export class spiritualWeapon {
         let attackColorChoice = colorChoices[1].toLowerCase();
 
         spiritWeapon = spiritWeapon + `.${spiritColorChoice}`;
-        let spiritAttackAnim
+        //console.log("Spirit Weapon: " + spiritWeapon);
+        let spiritAttackAnim;
         if (weaponChoice == "sword") {
-            spiritAttackAnim = `jb2a.sword.melee.fire.${attackColorChoice}`;
+            spiritAttackAnim = `jb2a.sword.melee.01.${attackColorChoice}`;
         }
         else if (weaponChoice == "mace") {
             spiritAttackAnim = `jb2a.mace.melee.01.${attackColorChoice}`;
@@ -180,15 +181,22 @@ export class spiritualWeapon {
             spiritAttackAnim = `jb2a.${weaponChoice}.melee.${attackColorChoice}`;
         }
         else {
-            spiritAttackAnim = `jb2a.sword.melee.${attackColorChoice}`;
+            spiritAttackAnim = `jb2a.sword.melee.fire.${attackColorChoice}`;
         }
+        //console.log("Spirit Attack Anim: " + spiritAttackAnim);
         let spiritualWeapon = Sequencer.Database.getEntry(spiritWeapon).file;
-
-        console.log("Spiritual Weapon path: ", spiritualWeapon);
+        //console.log("Spiritual Weapon path: ", spiritualWeapon);
+        let spiritualWeaponAttackImg = Sequencer.Database.getEntry(spiritAttackAnim + '.0').file;
+        spiritualWeaponAttackImg = spiritualWeaponAttackImg.replace("800x600.webm", "Thumb.webp");
+        if (spiritualWeaponAttackImg.includes("Sword01") && spiritualWeaponAttackImg.includes("Dark_OrangePurple")) {
+            spiritualWeaponAttackImg = spiritualWeaponAttackImg.replace("Dark_OrangePurple", "Dark_PurpleOrange");
+        }
+        //console.log("Spiritual Weapon Attack path: ", spiritualWeaponAttackImg);
+        const spiritualWeaponActorImg = spiritualWeapon.replace("200x200.webm", "Thumb.webp");
         if ((level - 3) > 0) {
             damageScale = `+ ${Math.floor((level - 2) / 2)}d8[upcast]`;
         }
-
+        const attackItemName = game.i18n.localize('ASE.SpiritAttackItemName');
         let updates = {
             token: {
                 'alpha': 0,
@@ -199,73 +207,33 @@ export class spiritualWeapon {
             },
             actor: {
                 'name': `${summonType} of ${casterActor.name}`,
+                'img': spiritualWeaponActorImg,
             },
             embedded: {
-                Item: {
-                    "Attack": {
-                        'data.attackBonus': `- @mod - @prof + ${summonerAttack}`,
-                        'data.damage.parts': [[`1d8 ${damageScale} + ${summonerMod}`, 'force']],
-                        'data.attackBonus': `- @mod - @prof + ${summonerAttack}`,
-                        'data.damage.parts': [[`1d8 ${damageScale} + ${summonerMod}`, 'force']],
-                        'flags.midi-qol.onUseMacroName': 'ItemMacro',
-                        'flags.itemacro.macro.data.name': "Attack",
-                        'flags.itemacro.macro.data.type': "script",
-                        'flags.itemacro.macro.data.scope': "global",
-                        'flags.itemacro.macro.data.command': `let caster = canvas.tokens.get(args[0].tokenId);
-            let attackTarget = args[0].targets[0];
-            let hitTarget = args[0].hitTargets[0];
-            if (caster) {
-                let animFile = "${spiritAttackAnim}";
-                let missDirection = Math.floor(Math.random() * 10);
-                let missRotation = 60;
-                if (missDirection > 4) {
-                    missRotation *= -1;
+                Item: {}
+            }
+        };
+        updates.embedded.Item[attackItemName] = {
+            'type': 'weapon',
+            img: spiritualWeaponAttackImg,
+            "data": {
+                "ability": "",
+                "actionType": "mwak",
+                "activation": { "type": "action", "cost": 1, "condition": "" },
+                "attackBonus": `- @mod - @prof + ${summonerAttack}`,
+                "damage": { "parts": [[`1d8 ${damageScale} + ${summonerMod}`, 'force']], "versatile": "" },
+                "range": { "value": null, "long": null, "units": "" },
+                "description": {
+                    "value": game.i18n.localize('ASE.SpiritAttackItemDescription'),
                 }
-    
-                if (attackTarget) {
-                    if (!hitTarget) {
-                        let onMissSequence = new Sequence("Advanced Spell Effects")
-                            .animation()
-                                .on(caster)
-                                .opacity(1)
-                                .fadeOut(250)
-                            .effect()
-                                .file(animFile)
-                                .fadeIn(750)
-                                .atLocation(caster)
-                                .JB2A()
-                                .rotate(missRotation)
-                                .reachTowards(attackTarget)
-                                .fadeOut(500)
-                                .waitUntilFinished(-500)
-                            .animation()
-                                .on(caster)
-                                .opacity(1)
-                                .fadeIn(750)
-                        onMissSequence.play();
-                    }
-                    else {
-                        let onHitSequence = new Sequence("Advanced Spell Effects")
-                            .animation()
-                                .on(caster)
-                                .opacity(1)
-                                .fadeOut(250)
-                            .effect()
-                                .fadeIn(750)
-                                .file(animFile)
-                                .atLocation(caster)
-                                .JB2A()
-                                .fadeOut(500)
-                                .reachTowards(hitTarget)
-                                .waitUntilFinished(-500)
-                            .animation()
-                                .on(caster)
-                                .opacity(1)
-                                .fadeIn(750)
-                        onHitSequence.play();
-                    }
-                }
-            }`
+            },
+            "flags": {
+                "advancedspelleffects": {
+                    "enableASE": true,
+                    "disableSettings": true,
+                    "spellEffect": game.i18n.localize('ASE.SpiritAttackItemName'),
+                    'effectOptions': {
+                        'attackAnimFile': spiritAttackAnim
                     }
                 }
             }
@@ -307,11 +275,50 @@ export class spiritualWeapon {
         warpgate.spawn(summonType, updates, callbacks, options);
     }
 
+    static async spiritualWeaponAttack(data) {
+        //console.log("ASE Spiritual Weapon Attacking...", data);
+        const casterActor = data.actor;
+        const casterToken = canvas.tokens.get(data.tokenId);
+        const spellItem = data.item;
+        const aseEffectOptions = spellItem?.getFlag("advancedspelleffects", "effectOptions");
+        const attackAnimFile = aseEffectOptions?.attackAnimFile;
+
+        const target = Array.from(data.targets)[0];
+
+        //console.log("Caster: ", casterActor);
+        //console.log("Target: ", target);
+        //console.log("Anim File: ", attackAnimFile);
+        //console.log("ASE Effect Options: ", aseEffectOptions);
+
+        new Sequence("Advanced Spell Effects")
+            .animation()
+            .on(casterToken)
+            .opacity(1)
+            .fadeOut(250)
+            .effect()
+            .fadeIn(750)
+            .startTime(500)
+            .endTime(1250)
+            .file(attackAnimFile)
+            .missed(game.modules.get("midi-qol")?.active && Array.from(data.hitTargets ?? []).length == 0)
+            .atLocation(casterToken)
+            .fadeOut(500)
+            .reachTowards(target)
+            .waitUntilFinished(-250)
+            .animation()
+            .on(casterToken)
+            .opacity(1)
+            .fadeIn(750)
+            .play();
+
+    }
+
     static async getRequiredSettings(currFlags) {
         if (!currFlags) currFlags = {};
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
+
 
 
         soundOptions.push({
@@ -321,6 +328,25 @@ export class spiritualWeapon {
             flagName: 'summonSound',
             flagValue: currFlags.summonSound ?? '',
         });
+
+        /*animOptions.push({
+            label: game.i18n.localize("ASE.UseSpiritGlowLabel"),
+            tooltip: game.i18n.localize("ASE.UseSpiritGlowTooltip"),
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.useGlow',
+            flagName: 'useGlow',
+            flagValue: currFlags.useGlow ?? false,
+        });
+
+        animOptions.push({
+            label: game.i18n.localize("ASE.SpiritGlowColorLabel"),
+            tooltip: game.i18n.localize("ASE.SpiritGlowColorTooltip"),
+            type: 'colorPicker',
+            name: 'flags.advancedspelleffects.effectOptions.glowColor',
+            flagName: 'glowColor',
+            flagValue: currFlags.glowColor ?? '#0000FF',
+        });
+        */
         soundOptions.push({
             label: game.i18n.localize("ASE.SummonSoundDelayLabel"),
             type: 'numberInput',

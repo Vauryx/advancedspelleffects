@@ -36,9 +36,9 @@ Hooks.once('ready', async function () {
 
     let isSummon = data.item.name.includes(game.i18n.localize("ASE.Summon"));
     //console.log('ASE Spell List: ', aseSpellList);
-    /*if (!aseSpellList.includes(data.item.name) && !isSummon) {
+    if (app.document.getFlag("advancedspelleffects", "disableSettings")) {
       return;
-    }*/
+    }
     const aseBtn = $(`<a class="ase-item-settings" title="Advanced Spell Effects"><i class="fas fa-magic"></i>ASE</a>`);
     aseBtn.click(async (ev) => {
       await versionMigration.handle(app.document);

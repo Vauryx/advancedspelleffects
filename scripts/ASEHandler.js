@@ -59,6 +59,9 @@ export class ASEHandler {
             case game.i18n.localize('ASE.SpiritualWeapon'):
                 await spiritualWeapon.createSpiritualWeapon(data);
                 return;
+            case game.i18n.localize('ASE.SpiritAttackItemName'):
+                await spiritualWeapon.spiritualWeaponAttack(data);
+                return;
             case game.i18n.localize('ASE.SteelWindStrike'):
                 if (!data.flavor?.includes("Steel Wind Strike")) {
                     await steelWindStrike.doStrike(data);
