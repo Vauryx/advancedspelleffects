@@ -18,7 +18,7 @@ export const versionMigration = {
         spellList[game.i18n.localize("ASE.Moonbeam")] = game.i18n.localize("ASE.Moonbeam");
         spellList[game.i18n.localize("ASE.ChainLightning")] = game.i18n.localize("ASE.ChainLightning");
         spellList[game.i18n.localize("ASE.MirrorImage")] = game.i18n.localize("ASE.MirrorImage");
-        let flags = item.data?.flags?.advancedspelleffects ?? false;
+        let flags = item?.data?.flags?.advancedspelleffects ?? false;
         if (!flags) return;
         if (!flags.enableASE || (flags.spellEffect && flags.spellEffect != "")) return;
         console.log(`Migrating ${item.name} for ASE...`);
