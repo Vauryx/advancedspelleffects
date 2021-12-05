@@ -209,7 +209,7 @@ export class callLightning {
         let casterActor = caster.document.actor;
         const itemD = casterActor.items.get(itemId);
         //console.log(caster);
-        let dist = utilFunctions.measureDistance({ x: caster.data.x + (canvas.grid.size / 2), y: caster.data.y + (canvas.grid.size / 2) }, boltTemplate);
+        let dist = utilFunctions.measureDistance({ x: stormCloudTile.data.x + (stormCloudTile.data.width / 2), y: stormCloudTile.data.y + (stormCloudTile.data.width / 2) }, boltTemplate);
         //console.log("Distance to bolt: ", dist);
         if (dist > 60) {
             await warpgate.buttonDialog({
