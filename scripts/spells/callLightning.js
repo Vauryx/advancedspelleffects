@@ -183,7 +183,7 @@ export class callLightning {
 
     static async callLightningBolt(stormTileId, itemCardId, itemId) {
         let stormCloudTile = canvas.scene.tiles.get(stormTileId);
-
+        let getGM = game.users.find(i => i.isGM);
         let crosshairsConfig = {
             size: 3,
             icon: "icons/magic/lightning/bolt-strike-blue.webp",
@@ -235,9 +235,6 @@ export class callLightning {
         if (game.modules.get("midi-qol")?.active) {
 
             //console.log("Tokens in range: ", tokens);
-            let failedSaves = [];
-            let passedSaves = [];
-
 
             let spellLevel = stormCloudTile.getFlag("advancedspelleffects", "spellLevel");
             if (stormCloudTile.getFlag("advancedspelleffects", "stormDamage")) {
@@ -254,16 +251,23 @@ export class callLightning {
             let chatMessageContent = await duplicate(chatMessage.data.content);
             let targetTokens = new Set();
             let saves = new Set();
+            let saveRolls = [];
+            let damageRolls = [];
             let newChatmessageContent = $(chatMessageContent);
 
             newChatmessageContent.find(".midi-qol-saves-display").empty();
             for (let targetToken of targetsInCrosshairs) {
 
                 let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.dex.save }).evaluate({ async: true });
+
                 let save = saveRoll.total;
                 targetTokens.add(targetToken)
                 if (save >= saveDC) {
-                    saves.add(targetToken)
+                    saves.add(targetToken);
+                    saveRolls.push({ saveRoll: saveRoll, damageRoll: damage, target: targetToken.name, save: true });
+                }
+                else {
+                    saveRolls.push({ saveRoll: saveRoll, damageRoll: damage, target: targetToken.name, save: false });
                 }
                 //console.log("Adding token to chat card...");
                 newChatmessageContent.find(".midi-qol-saves-display").append(
@@ -272,6 +276,9 @@ export class callLightning {
 
             }
             await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
+
+            let content = callLightning.buildChatData(saveRolls);
+            await ChatMessage.create({ content: content, user: game.user.id, whisper: ChatMessage.getWhisperRecipients(getGM.name) });
 
             await ui.chat.scrollBottom();
 
@@ -394,6 +401,59 @@ export class callLightning {
             await boltSeq.play();
         }
 
+    }
+
+    static buildChatData(saveRolls) {
+        let content = `<table id="callLightningChatTable"><tr><th>${game.i18n.localize("ASE.Target")}</th><th>${game.i18n.localize("ASE.SaveRoll")}</th><th>${game.i18n.localize("ASE.Damage")}</th>`
+
+        console.log('Building chat data...');
+        console.log('Save Rolls: ', saveRolls);
+        //console.log('Damage Rolls: ', damageRolls);
+        //iterate through attackRolls using for in loop
+
+        for (let i = 0; i < saveRolls.length; i++) {
+            //console.log("Attack Roll Data: ", attackRolls[i]);
+            //console.log("Damage Roll Data: ", damageRolls[i]);
+            let currSaveData = saveRolls[i];
+            let currTarget = currSaveData.target;
+            let currSaveRoll = currSaveData.saveRoll;
+            let currDamageRoll = currSaveData.damageRoll;
+            let currDamageRollDieTerms = currDamageRoll.terms.filter(term => {
+                return term.values?.length > 0;
+            });
+            let currDamageRollNumericTerms = currDamageRoll.terms.filter(term => {
+                return (term.number != undefined) && !(term.values?.length > 0);
+            });
+            //console.log('Damage Roll Die Terms: ', currDamageRollDieTerms);
+            //console.log('Damage Roll Numeric Terms: ', currDamageRollNumericTerms);
+            // concatenate the die terms and numeric terms into a single string
+            let currDamageFormula = '';
+            let currDamageBreakdown = '';
+            for (let j = 0; j < currDamageRollDieTerms.length; j++) {
+                currDamageFormula += currDamageRollDieTerms[j].formula + (j < currDamageRollDieTerms.length - 1 ? ' + ' : '');
+                for (let k = 0; k < currDamageRollDieTerms[j].values.length; k++) {
+                    currDamageBreakdown += '[' + (currDamageRollDieTerms[j].values[k]) + ']' + (k < currDamageRollDieTerms[j].values.length - 1 ? ' + ' : '');
+                }
+            }
+            currDamageFormula += currSaveData.save ? '/2: ' : ': ';
+
+            for (let j = 0; j < currDamageRollNumericTerms.length; j++) {
+                currDamageBreakdown += ((j == 0) && currDamageRollDieTerms.length > 0 ? ' + ' : '') + currDamageRollNumericTerms[j].number + (j < currDamageRollNumericTerms.length - 1 ? ' + ' : '');
+            }
+            currDamageBreakdown = currDamageFormula + currDamageBreakdown;
+
+            let currSaveRollResult = currSaveRoll.result.split("+");
+            let currSaveBreakDown = '[';
+            for (let j = 0; j < currSaveRollResult.length; j++) {
+                currSaveBreakDown += `${j == 0 ? currSaveRollResult[j] + ']' : ' + ' + currSaveRollResult[j]}`;
+            }
+            //console.log("Save Roll Result: ", currSaveRollResult);
+
+            //console.log("Damage Roll: ", damageRoll);
+            content += `<tr><td>${currTarget}</td><td title = '${currSaveBreakDown}'>${currSaveRoll._total}</td><td title = '${currDamageBreakdown}'>${currSaveData.save ? Math.floor(currDamageRoll.total / 2) : currDamageRoll.total}</td></tr>`;
+        }
+
+        return content;
     }
 
     static async handleConcentration(casterActor, casterToken, effectOptions) {

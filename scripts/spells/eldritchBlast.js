@@ -32,11 +32,11 @@ export class eldritchBlast {
         aseEffectOptions['dmgMod'] = aseEffectOptions.dmgMod ?? 0;
         aseEffectOptions['impactDelay'] = -3000;
         let invocations = aseEffectOptions.invocations;
-        console.log('ASEEffectOptions.dmgMod: ', aseEffectOptions.dmgMod);
+        //console.log('ASEEffectOptions.dmgMod: ', aseEffectOptions.dmgMod);
         if (invocations.agonizingBlast) {
             aseEffectOptions.dmgMod += casterActor?.data?.data?.abilities?.cha?.mod ?? 0;
         }
-        console.log('ASEEffectOptions: ', aseEffectOptions);
+        //console.log('ASEEffectOptions: ', aseEffectOptions);
         new MissileDialog({
             casterId: casterToken.id,
             numMissiles: numMissiles,
