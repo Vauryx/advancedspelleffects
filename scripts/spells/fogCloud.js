@@ -46,7 +46,7 @@ export class fogCloud {
         let casterActor = caster.actor;
         let cloudSize;
         if (aseFlags.scaleWithLevel == undefined || aseFlags.scaleWithLevel) {
-            cloudSize = (8 * itemLevel);
+            cloudSize = ((Number(aseFlags.fogCloudRadius ?? 20) / 2.5) * itemLevel);
         }
         else {
             cloudSize = Number(aseFlags.fogCloudRadius ?? 20) / 2.5;

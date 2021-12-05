@@ -135,7 +135,7 @@
   "ASE.FogCloudSoundDelayLabel": "Fog Cloud Sound Delay: ",
   "ASE.FogCloudVolumeLabel": "Fog Cloud Volume: ",
   "ASE.FogCloudRadiusLabel": "Fog Cloud Radius: ",
-  "ASE.FogCloudRadiusTooltip": "If not scaling with spell level, the radius of the fog cloud in feet",
+  "ASE.FogCloudRadiusTooltip": "The radius of the fog cloud in feet(per spell level if scaling)",
 
   "ASE.DartColorLabel": "Dart Color: ",
   "ASE.DartIntroSoundLabel": "Dart Intro Sound: ",
