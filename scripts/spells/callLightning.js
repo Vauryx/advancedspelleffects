@@ -244,7 +244,7 @@ export class callLightning {
             // console.log("Item: ", item);
             let damage = await new Roll(`${spellLevel}d10`).evaluate({ async: true });
             if (game.modules.get("dice-so-nice")?.active) {
-                game.dice3d?.showForRoll(fullDamageRoll);
+                game.dice3d?.showForRoll(damage);
             }
 
             const chatMessage = await game.messages.get(itemCardId);
