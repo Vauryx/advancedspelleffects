@@ -21,7 +21,7 @@ export class fogCloud {
         let wallDocuments = [];
         walls = await Tagger.getByTag([`FogCloudWall-${tileD.id}`]);
         walls.forEach((wall) => {
-            console.log(wall);
+            //console.log(wall);
             wallDocuments.push(wall.id);
         });
         if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
@@ -43,8 +43,16 @@ export class fogCloud {
         let aseFlags = item.getFlag("advancedspelleffects", 'effectOptions');
         let caster = await canvas.tokens.get(midiData.tokenId);
         let casterActor = caster.actor;
+        let cloudSize;
+        if (aseFlags.scaleWithLevel == undefined || aseFlags.scaleWithLevel) {
+            cloudSize = (8 * itemLevel);
+        }
+        else {
+            cloudSize = Number(aseFlags.fogCloudRadius ?? 20) / 2.5;
+        }
+        if (cloudSize < 2.5) cloudSize = 2.5;
         let crosshairsConfig = {
-            size: 8 * itemLevel,
+            size: cloudSize,
             icon: item.img,
             label: game.i18n.localize("ASE.FogCloud"),
             tag: 'fog-cloud-crosshairs',
@@ -78,6 +86,7 @@ export class fogCloud {
 
         async function placeCloudAsTile(template, casterId, spellLevel, soundOptions) {
             let templateData = template;
+            console.log(templateData);
             let tileWidth;
             let tileHeight;
             let tileX;
@@ -89,10 +98,10 @@ export class fogCloud {
 
             let wall_number = aseFlags.wallNumber * spellLevel;
             let wall_angles = 2 * Math.PI / wall_number
-            tileWidth = (templateData.width * canvas.grid.size);
-            tileHeight = (templateData.width * canvas.grid.size);
+            tileWidth = (templateData.width * canvas.grid.size) + (canvas.grid.size / 2);
+            tileHeight = (templateData.width * canvas.grid.size) + (canvas.grid.size / 2);
 
-            let outerCircleRadius = tileWidth / 2.2;
+            let outerCircleRadius = (templateData.width * canvas.grid.size) / 2;
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
             let data = [{
@@ -162,6 +171,25 @@ export class fogCloud {
             flagName: 'wallNumber',
             flagValue: currFlags.wallNumber ?? 12,
         });
+
+        animOptions.push({
+            label: game.i18n.localize("ASE.ScaleWithLevelLabel"),
+            tooltip: game.i18n.localize("ASE.ScaleWithLevelTooltip"),
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.scaleWithLevel',
+            flagName: 'scaleWithLevel',
+            flagValue: currFlags.scaleWithLevel ?? true,
+        });
+
+        animOptions.push({
+            label: game.i18n.localize("ASE.FogCloudRadiusLabel"),
+            tooltip: game.i18n.localize("ASE.FogCloudRadiusTooltip"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.fogCloudRadius',
+            flagName: 'fogCloudRadius',
+            flagValue: currFlags.fogCloudRadius ?? 20,
+        });
+
         soundOptions.push({
             label: game.i18n.localize("ASE.FogCloudSoundLabel"),
             type: 'fileInput',

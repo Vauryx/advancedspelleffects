@@ -134,6 +134,8 @@
   "ASE.FogCloudSoundLabel": "Fog Cloud Sound: ",
   "ASE.FogCloudSoundDelayLabel": "Fog Cloud Sound Delay: ",
   "ASE.FogCloudVolumeLabel": "Fog Cloud Volume: ",
+  "ASE.FogCloudRadiusLabel": "Fog Cloud Radius: ",
+  "ASE.FogCloudRadiusTooltip": "If not scaling with spell level, the radius of the fog cloud in feet",
 
   "ASE.DartColorLabel": "Dart Color: ",
   "ASE.DartIntroSoundLabel": "Dart Intro Sound: ",
@@ -148,6 +150,7 @@
   "ASE.StartingTurnInMoonbeam": "{name} is starting their turn in the space of a moonbeam tile",
   "ASE.MoveMoonbeamDescription": "Command your Moonbeam to move up to 60 feet in any direction.",
   "ASE.ScaleWithLevelLabel": "Scale with spell level: ",
+  "ASE.ScaleWithLevelTooltip": "Scale the value with the level of the spell",
   "ASE.MoonbeamInitialSoundLabel": "Moonbeam Initial Sound: ",
   "ASE.MoonbeamInitialSoundDelayLabel": "Moonbeam Initial Sound Delay: ",
   "ASE.MoonbeamInitialVolumeLabel": "Moonbeam Initial Volume: ",
