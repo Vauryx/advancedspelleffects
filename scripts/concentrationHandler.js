@@ -48,25 +48,25 @@ export class concentrationHandler {
 
         switch (spellEffect) {
             case game.i18n.localize("ASE.Darkness"):
-                darkness.handleConcentration(casterActor, casterToken, effectOptions);
+                await darkness.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
             case game.i18n.localize('ASE.DetectMagic'):
-                detectMagic.handleConcentration(casterActor, casterToken, effectOptions);
+                await detectMagic.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
             case game.i18n.localize('ASE.CallLightning'):
-                callLightning.handleConcentration(casterActor, casterToken, effectOptions);
+                await callLightning.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
             case game.i18n.localize('ASE.FogCloud'):
-                fogCloud.handleConcentration(casterActor, casterToken, effectOptions);
+                await fogCloud.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
             case game.i18n.localize('ASE.WitchBolt'):
-                witchBolt.handleConcentration(casterActor, casterToken, effectOptions);
+                await witchBolt.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
             case game.i18n.localize('ASE.VampiricTouch'):
-                vampiricTouch.handleConcentration(casterActor, casterToken, effectOptions);
+                await vampiricTouch.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
             case game.i18n.localize('ASE.Moonbeam'):
-                moonBeam.handleConcentration(casterActor, casterToken, effectOptions);
+                await moonBeam.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }
         if (effectSource.includes(game.i18n.localize("ASE.Summon"))) {

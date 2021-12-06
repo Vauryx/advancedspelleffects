@@ -23,7 +23,7 @@ export class callLightning {
         const stormCloudSound = aseFlags?.stormCloudSound ?? "";
         const stormCloudVolume = aseFlags?.stormCloudVolume ?? 1;
         const stormCloudSoundDelay = aseFlags?.stormCloudSoundDelay ?? 0;
-
+        const placeCrackAsTile = aseFlags?.placeCrackAsTile ?? true;
 
         let weatherDialogData = {
             buttons: [{ label: game.i18n.localize('ASE.Yes'), value: true }, { label: game.i18n.localize('ASE.No'), value: false }],
@@ -68,7 +68,8 @@ export class callLightning {
             boltSoundDelay: boltSoundDelay,
             boltStyle: boltStyle,
             spellLevel: spellLevel,
-            itemId: item.id
+            itemId: item.id,
+            placeCrackAsTile: placeCrackAsTile
         };
         let stormTileId = await placeCloudAsTile(effectOptions);
         //console.log("StomeTileID: ", stormTileId);
@@ -125,7 +126,7 @@ export class callLightning {
             const boltStyle = effectOptions.boltStyle;
             const spellLevel = effectOptions.spellLevel;
             const itemId = effectOptions.itemId;
-
+            const placeCrackAsTile = effectOptions.placeCrackAsTile;
             let templateData = castTemplate;
             let tileWidth;
             let tileHeight;
@@ -163,7 +164,8 @@ export class callLightning {
                         'stormDamage': isStorm,
                         'boltSound': boltSound,
                         'boltVolume': boltVolume,
-                        'boltSoundDelay': boltSoundDelay
+                        'boltSoundDelay': boltSoundDelay,
+                        'placeCrackAsTile': placeCrackAsTile,
                     }
                 }
             }
@@ -227,6 +229,7 @@ export class callLightning {
             boltSound: stormCloudTile.getFlag("advancedspelleffects", "boltSound") ?? "",
             boltVolume: stormCloudTile.getFlag("advancedspelleffects", "boltVolume") ?? 0,
             boltSoundDelay: Number(stormCloudTile.getFlag("advancedspelleffects", "boltSoundDelay")) ?? 0,
+            placeCrackAsTile: stormCloudTile.getFlag("advancedspelleffects", "placeCrackAsTile") ?? true,
         }
         //console.log("Storm cloud tile:", stormCloudTile);
 
@@ -314,7 +317,8 @@ export class callLightning {
             const boltSound = boltOptions.boltSound;
             const boltVolume = boltOptions.boltVolume;
             const boltSoundDelay = boltOptions.boltSoundDelay;
-
+            const placeCrackAsTile = boltOptions.placeCrackAsTile;
+            console.log("Place crack as tile: ", placeCrackAsTile);
             let boltEffect;
             switch (boltStyle) {
                 case 'chain':
@@ -396,7 +400,9 @@ export class callLightning {
                 .scale(0.5)
                 .waitUntilFinished(-3000)
                 .thenDo(async () => {
-                    placeCracksAsTile(boltTemplate, groundCrackImgPath);
+                    if (placeCrackAsTile) {
+                        placeCracksAsTile(boltTemplate, groundCrackImgPath);
+                    }
                 })
             await boltSeq.play();
         }
@@ -465,7 +471,7 @@ export class callLightning {
             await aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
             await warpgate.revert(casterToken.document, `${casterActor.id}-call-lightning`);
             ui.notifications.info(game.i18n.format("ASE.RemovedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
-            ChatMessage.create({ content: game.i18n.localize('ASE.ActivateCallLightningDissipate') });
+            await ChatMessage.create({ content: game.i18n.localize('ASE.ActivateCallLightningDissipate') });
         }
 
     }
@@ -511,6 +517,14 @@ export class callLightning {
             name: "flags.advancedspelleffects.effectOptions.boltStyle",
             flagName: "boltStyle",
             flagValue: currFlags.boltStyle,
+        });
+        animOptions.push({
+            label: game.i18n.localize('ASE.PlaceCrackAsTileLabel'),
+            tooltip: game.i18n.localize('ASE.PlaceCrackAsTileTooltip'),
+            type: "checkbox",
+            name: "flags.advancedspelleffects.effectOptions.placeCrackAsTile",
+            flagName: "placeCrackAsTile",
+            flagValue: currFlags.placeCrackAsTile ?? true,
         });
         soundOptions.push({
             label: game.i18n.localize('ASE.BoltSoundLabel'),

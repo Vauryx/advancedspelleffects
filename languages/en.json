@@ -101,6 +101,8 @@
   "ASE.CallLightningSavingThrowFlavor": "Call Lightning Saving Throw",
   "ASE.CallLightningFullDamageFlavor": "Lightning Bolt Damage Roll Full {damageRoll} Lightning",
   "ASE.CallLightningHalfDamageFlavor": "Lightning Bolt Damage Roll Half {damageRoll} Lightning",
+  "ASE.PlaceCrackAsTileLabel": "Place Bolt Ground-Crack as Tile: ",
+  "ASE.PlaceCrackAsTileTooltip": "Place a ground-crack tile on the ground where the bolt lands",
   "ASE.Chain": "Chain",
   "ASE.Strike": "Strike",
   "ASE.SelectBoltStyleLabel": "Select Bolt Style: ",

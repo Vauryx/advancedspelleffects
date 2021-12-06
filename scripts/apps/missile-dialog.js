@@ -271,6 +271,7 @@ export class MissileDialog extends FormApplication {
 
     async getData() {
         game.user.updateTokenTargets([]);
+        let missilesNum = Number(this.object.numMissiles) ?? 0;
         Hooks.once('closeMissileDialog', async () => {
             let tokens = Array.from(canvas.tokens.placeables).filter(t => t.data.flags.advancedspelleffects && t.data.flags.advancedspelleffects.missileSpell);
             for await (let target of tokens) {
@@ -286,7 +287,8 @@ export class MissileDialog extends FormApplication {
         });
 
         return {
-            data: this.data
+            data: this.data,
+            numMissiles: missilesNum,
         };
 
     }
@@ -329,7 +331,8 @@ export class MissileDialog extends FormApplication {
             //console.log(this);
             //console.log('Attack Mods Info: ', this.data.attackMods);
             let caster = canvas.tokens.get(this.data.caster);
-            let rollData = caster.actor.getRollData();
+            const item = this.data.item;
+            let rollData = item.getRollData();
             let damageBonus = rollData.bonuses[this.data.actionType]?.damage || "";
             const chatMessage = await game.messages.get(this.data.itemCardId);
             //console.log(`${caster.name} is firing Missiles at Selected Targets...`);
@@ -549,6 +552,8 @@ export class MissileDialog extends FormApplication {
                 //currDamageBreakdown += ` ${currExtraDamage ? '+ ' : ''}${currExtraDamage ? currExtraDamage : ''}`;
 
                 let currAttackRollResult = currAttackRoll.result.split("+");
+                let currAttackBreakDown = '[';
+
                 if (currAttackData.crit) {
                     currAttackRoll._total = "Critical!";
                 }
@@ -562,11 +567,13 @@ export class MissileDialog extends FormApplication {
                     let higherRoll = Math.max(currAttackRoll.terms[0].results[0].result, currAttackRoll.terms[0].results[1].result);
                     currAttackRollResult[0] = `Dis: ${lowerRoll}, ${higherRoll} `;
                 }
-                currAttackRollResult = `[ ${currAttackRollResult[0]}] + ${currAttackRollResult[1]} + ${currAttackRollResult[2]}`;
+                for (let j = 0; j < currAttackRollResult.length; j++) {
+                    currAttackBreakDown += `${j == 0 ? currAttackRollResult[j] + ']' : ' + ' + currAttackRollResult[j]}`;
+                }
                 //console.log("Attack Roll Result: ", currAttackRollResult);
 
                 //console.log("Damage Roll: ", damageRoll);
-                content += `<tr><td>${currTarget}</td><td title = '${currAttackRollResult}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${currDamageRoll.total}</td></tr>`;
+                content += `<tr><td>${currTarget}</td><td title = '${currAttackBreakDown}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${currDamageRoll.total}</td></tr>`;
             }
         }
         return content;
