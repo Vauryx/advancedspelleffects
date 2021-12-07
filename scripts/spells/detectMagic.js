@@ -121,7 +121,6 @@ export class detectMagic {
             .playIf(waveSound != "")
             .effect(`jb2a.detect_magic.circle.${waveColor}`)
             .attachTo(caster)
-            .JB2A()
             .belowTiles()
             .scale(2.33333)
             .effect()

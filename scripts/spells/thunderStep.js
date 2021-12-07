@@ -205,7 +205,6 @@ export class thunderStep {
             .baseFolder("modules/jb2a_patreon/Library/Generic/Impact")
             .file("Impact_01_Regular_Blue_400x400.webm")
             .atLocation(tokenD)
-            .JB2A()
             .scale(1.75)
             .wait(50)
             .thenDo(async () => {

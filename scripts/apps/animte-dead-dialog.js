@@ -187,7 +187,6 @@ export class animateDeadDialog extends FormApplication {
                 .effect()
                 .file(effectAAnim)
                 .atLocation(animLoc)
-                .JB2A()
                 .waitUntilFinished(-1000)
                 .endTime(3300)
                 .playbackRate(0.7)

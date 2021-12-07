@@ -51,7 +51,6 @@ export class mirrorImage {
         new Sequence()
             .effect(imageDestroyEffect)
             .atLocation(adjustedPos)
-            .JB2A()
             .sound()
             .file(imageDestroySound)
             .volume(imageDestroyVolume)

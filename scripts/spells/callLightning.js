@@ -381,7 +381,6 @@ export class callLightning {
                 .playIf(boltSound != "")
                 .effect()
                 .file(boltEffect)
-                .JB2A()
                 .atLocation(cloud)
                 .reachTowards(boltTemplate)
                 .waitUntilFinished(-1500)

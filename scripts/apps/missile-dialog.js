@@ -254,7 +254,6 @@ export class MissileDialog extends FormApplication {
             .effect()
             .file(missileAnim)
             .atLocation(caster)
-            .JB2A()
             .randomizeMirrorY()
             .missed(!hit)
             .reachTowards(target)

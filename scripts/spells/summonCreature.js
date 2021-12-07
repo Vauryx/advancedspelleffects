@@ -63,7 +63,6 @@ export class summonCreature {
                 .file(effectAAnim)
                 .offset({ x: 0, y: canvas.grid.size })
                 .atLocation(template)
-                .JB2A()
                 .waitUntilFinished(-1000)
                 .endTime(3300)
                 .playbackRate(0.7)

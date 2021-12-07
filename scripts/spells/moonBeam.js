@@ -431,7 +431,6 @@ export class moonBeam {
             .effect()
             .file(`jb2a.impact.004.${effectOptions.moonbeamDmgColor}`)
             .attachTo(token)
-            .JB2A()
             .randomRotation()
             .scaleIn(0.5, 200)
             .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
