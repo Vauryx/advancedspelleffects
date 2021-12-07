@@ -25,6 +25,8 @@ export class vampiricTouch {
         const siphonSoundDelay = Number(effectOptions.vtSiphonSoundDelay) ?? 0;
         const siphonVolume = effectOptions.vtSiphonVolume ?? 1;
 
+        const maxStrands = effectOptions.vtMaxStrands ?? 20;
+        let strandNum = 12;
         const updates = {
             embedded: {
                 Item: {}
@@ -62,6 +64,7 @@ export class vampiricTouch {
                         'vtImpactSound': impactSound,
                         'vtImpactSoundDelay': impactSoundDelay,
                         'vtImpactVolume': impactVolume,
+                        'vtMaxStrands': maxStrands
                     }
                 }
             }
@@ -76,6 +79,7 @@ export class vampiricTouch {
                     "data.attributes.hp.value": Math.min(tactor.data.data.attributes.hp.max, updatedHP)
                 });
             }
+            strandNum = Math.min(Math.floor(damageTotal), maxStrands);
         }
 
         new Sequence('Advanced Spell Effects')
@@ -100,7 +104,7 @@ export class vampiricTouch {
             .atLocation(target)
             .playIf(!missed)
             .reachTowards(tokenD)
-            .repeats(Math.max(1, Math.floor(damageTotal)), 100, 200)
+            .repeats(Math.max(1, strandNum), 100, 200)
             .randomizeMirrorY()
             .sound()
             .file(casterSound)
@@ -150,6 +154,7 @@ export class vampiricTouch {
         const impactSound = effectOptions.vtImpactSound;
         const impactSoundDelay = Number(effectOptions.vtImpactSoundDelay) ?? 0;
         const impactVolume = effectOptions.vtImpactVolume ?? 1;
+        const maxStrands = Number(effectOptions.vtMaxStrands) ?? 20;
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
             damageTotal = midiData.damageRoll?.total ?? 12;
@@ -160,6 +165,7 @@ export class vampiricTouch {
                 })
             }
         }
+        const strandNum = Math.min(Math.floor(damageTotal), maxStrands);
         new Sequence('Advanced Spell Effects')
             .sound()
             .file(impactSound)
@@ -182,7 +188,7 @@ export class vampiricTouch {
             .atLocation(target)
             .playIf(!missed)
             .reachTowards(tokenD)
-            .repeats(Math.max(1, Math.floor(damageTotal)), 100, 200)
+            .repeats(Math.max(1, strandNum), 100, 200)
             .randomizeMirrorY()
             .play()
     }
@@ -202,7 +208,8 @@ export class vampiricTouch {
         let soundOptions = [];
 
         animOptions.push({
-            label: 'Caster Effect:',
+            label: game.i18n.localize('ASE.VTCasterEffectLabel'),
+            tooltip: game.i18n.localize('ASE.VTCasterEffectTooltip'),
             type: 'dropdown',
             options: vampiricTouchCasterColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.vtCasterColor',
@@ -211,7 +218,8 @@ export class vampiricTouch {
         });
 
         soundOptions.push({
-            label: 'Caster Sound:',
+            label: game.i18n.localize('ASE.VTCasterSoundLabel'),
+            tooltip: game.i18n.localize('ASE.VTCasterSoundTooltip'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.vtCasterSound',
             flagName: 'vtCasterSound',
@@ -219,7 +227,8 @@ export class vampiricTouch {
         });
 
         soundOptions.push({
-            label: 'Caster Sound Delay:',
+            label: game.i18n.localize('ASE.VTCasterSoundDelayLabel'),
+            tooltip: game.i18n.localize('ASE.VTCasterSoundDelayTooltip'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.vtCasterSoundDelay',
             flagName: 'vtCasterSoundDelay',
@@ -227,7 +236,8 @@ export class vampiricTouch {
         });
 
         soundOptions.push({
-            label: 'Caster Sound Volume:',
+            label: game.i18n.localize('ASE.VTCasterVolumeLabel'),
+            tooltip: game.i18n.localize('ASE.VTCasterVolumeTooltip'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.vtCasterVolume',
             flagName: 'vtCasterVolume',
@@ -238,7 +248,8 @@ export class vampiricTouch {
         });
 
         animOptions.push({
-            label: 'Siphon Effect:',
+            label: game.i18n.localize('ASE.VTSiphonEffectLabel'),
+            tooltip: game.i18n.localize('ASE.VTSiphonEffectTooltip'),
             type: 'dropdown',
             options: vampiricTouchStrandColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.vtStrandColor',
@@ -247,7 +258,8 @@ export class vampiricTouch {
         });
 
         soundOptions.push({
-            label: 'Siphon Sound:',
+            label: game.i18n.localize('ASE.VTSiphonSoundLabel'),
+            tooltip: game.i18n.localize('ASE.VTSiphonSoundTooltip'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.vtSiphonSound',
             flagName: 'vtSiphonSound',
@@ -255,7 +267,8 @@ export class vampiricTouch {
         });
 
         soundOptions.push({
-            label: 'Siphon Sound Delay:',
+            label: game.i18n.localize('ASE.VTSiphonSoundDelayLabel'),
+            tooltip: game.i18n.localize('ASE.VTSiphonSoundDelayTooltip'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.vtSiphonSoundDelay',
             flagName: 'vtSiphonSoundDelay',
@@ -263,7 +276,8 @@ export class vampiricTouch {
         });
 
         soundOptions.push({
-            label: 'Siphon Sound Volume:',
+            label: game.i18n.localize('ASE.VTSiphonVolumeLabel'),
+            tooltip: game.i18n.localize('ASE.VTSiphonVolumeTooltip'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.vtSiphonVolume',
             flagName: 'vtSiphonVolume',
@@ -274,7 +288,8 @@ export class vampiricTouch {
         });
 
         animOptions.push({
-            label: 'Impact Effect:',
+            label: game.i18n.localize('ASE.VTImpactEffectLabel'),
+            tooltip: game.i18n.localize('ASE.VTImpactEffectTooltip'),
             type: 'dropdown',
             options: vampiricTouchImpactColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.vtImpactColor',
@@ -283,7 +298,8 @@ export class vampiricTouch {
         });
 
         soundOptions.push({
-            label: 'Impact Sound:',
+            label: game.i18n.localize('ASE.VTImpactSoundLabel'),
+            tooltip: game.i18n.localize('ASE.VTImpactSoundTooltip'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.vtImpactSound',
             flagName: 'vtImpactSound',
@@ -291,7 +307,8 @@ export class vampiricTouch {
         });
 
         soundOptions.push({
-            label: 'Impact Sound Delay:',
+            label: game.i18n.localize('ASE.VTImpactSoundDelayLabel'),
+            tooltip: game.i18n.localize('ASE.VTImpactSoundDelayTooltip'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.vtImpactSoundDelay',
             flagName: 'vtImpactSoundDelay',
@@ -299,7 +316,8 @@ export class vampiricTouch {
         });
 
         soundOptions.push({
-            label: 'Impact Sound Volume:',
+            label: game.i18n.localize('ASE.VTImpactVolumeLabel'),
+            tooltip: game.i18n.localize('ASE.VTImpactVolumeTooltip'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.vtImpactVolume',
             flagName: 'vtImpactVolume',
@@ -307,6 +325,15 @@ export class vampiricTouch {
             min: 0,
             max: 1,
             step: 0.01
+        });
+
+        animOptions.push({
+            label: game.i18n.localize('ASE.VTMaxStrandsLabel'),
+            tooltip: game.i18n.localize('ASE.VTMaxStrandsTooltip'),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.vtMaxStrands',
+            flagName: 'vtMaxStrands',
+            flagValue: currFlags.vtMaxStrands ?? 20,
         });
 
         return {
