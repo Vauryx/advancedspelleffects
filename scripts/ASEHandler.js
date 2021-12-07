@@ -18,6 +18,7 @@ import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { chainLightning } from "./spells/chainLightning.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
+import { viciousMockery } from "./spells/viciousMockery.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -118,6 +119,10 @@ export class ASEHandler {
             case game.i18n.localize('ASE.MirrorImage'):
                 const mirrorImageSpell = new mirrorImage(data);
                 mirrorImageSpell.cast();
+                return;
+            case game.i18n.localize('ASE.ViciousMockery'):
+                const viciousMockerySpell = new viciousMockery(data);
+                viciousMockerySpell.cast();
                 return;
         }
         if (item.name.includes(game.i18n.localize("ASE.Summon"))) {

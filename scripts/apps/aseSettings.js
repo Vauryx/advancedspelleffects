@@ -17,6 +17,8 @@ import { vampiricTouch } from "../spells/vampiricTouch.js";
 import { moonBeam } from "../spells/moonBeam.js";
 import { chainLightning } from "../spells/chainLightning.js";
 import { mirrorImage } from "../spells/mirrorImage.js";
+import { viciousMockery } from "../spells/viciousMockery.js";
+
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
@@ -44,6 +46,7 @@ export class ASESettings extends FormApplication {
         this.spellList[game.i18n.localize("ASE.ChainLightning")] = chainLightning;
         this.spellList[game.i18n.localize("ASE.MirrorImage")] = mirrorImage;
         this.spellList[game.i18n.localize("ASE.Summon")] = summonCreature;
+        this.spellList[game.i18n.localize("ASE.ViciousMockery")] = viciousMockery;
     }
 
     static get defaultOptions() {
@@ -131,6 +134,14 @@ export class ASESettings extends FormApplication {
                 data.damage.parts.push([damageFormula, "lightning"]);
                 data.save = { ability: "dex", dc: null, scaling: "spell" };
                 data.target = { value: 1, width: null, units: "", type: "creature" };
+                break;
+            case game.i18n.localize("ASE.ViciousMockery"):
+                data.level = 0;
+                data.actionType = "save";
+                data.damage.parts.push(["1d4", "psychic"]);
+                data.save = { ability: "wis", dc: null, scaling: "spell" };
+                data.target = { value: 1, width: null, units: "", type: "creature" };
+                data.scaling = { mode: "cantrip", formula: "1d4" };
                 break;
         }
         let updates = { data };
