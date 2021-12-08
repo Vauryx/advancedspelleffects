@@ -108,7 +108,7 @@ export class callLightning {
 
         await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-call-lightning` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
-        ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage'), { name: caster.actor.name }}` });
+        await ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage'), { name: caster.actor.name }}` });
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         await callLightning.callLightningBolt(stormTileId, midiData.itemCardId, midiData.item.id);
 
@@ -318,7 +318,7 @@ export class callLightning {
             const boltVolume = boltOptions.boltVolume;
             const boltSoundDelay = boltOptions.boltSoundDelay;
             const placeCrackAsTile = boltOptions.placeCrackAsTile;
-            console.log("Place crack as tile: ", placeCrackAsTile);
+            //console.log("Place crack as tile: ", placeCrackAsTile);
             let boltEffect;
             switch (boltStyle) {
                 case 'chain':
@@ -411,8 +411,8 @@ export class callLightning {
     static buildChatData(saveRolls) {
         let content = `<table id="callLightningChatTable"><tr><th>${game.i18n.localize("ASE.Target")}</th><th>${game.i18n.localize("ASE.SaveRoll")}</th><th>${game.i18n.localize("ASE.Damage")}</th>`
 
-        console.log('Building chat data...');
-        console.log('Save Rolls: ', saveRolls);
+        //console.log('Building chat data...');
+        console.log('ASE CALL LIGHTNING - Save Rolls: ', saveRolls);
         //console.log('Damage Rolls: ', damageRolls);
         //iterate through attackRolls using for in loop
 

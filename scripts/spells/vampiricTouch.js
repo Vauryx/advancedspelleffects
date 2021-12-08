@@ -125,7 +125,7 @@ export class vampiricTouch {
             .play()
         await warpgate.mutate(tokenD.document, updates, {}, { name: `${tactor.id}-vampiric-touch` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.VampiricTouchAttack") }));
-        ChatMessage.create({ content: `${tactor.name}'s hands are wrapped in darkness...` });
+        await ChatMessage.create({ content: `${tactor.name}'s hands are wrapped in darkness...` });
 
     }
     static async handleConcentration(casterActor, casterToken, effectOptions) {
@@ -136,7 +136,7 @@ export class vampiricTouch {
 
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-vampiric-touch` });
 
-        ChatMessage.create({ content: `${casterActor.name}'s returns to normal.` });
+        await ChatMessage.create({ content: `${casterActor.name}'s returns to normal.` });
     }
 
     static async activateTouch(midiData) {
