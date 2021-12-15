@@ -28,7 +28,7 @@ export class MissileDialog extends FormApplication {
             //console.log('Target: ',target);
             let effectsOnTarget = await Sequencer.EffectManager.getEffects({ object: target }).filter((e) => {
                 //console.log('e data name',e.data.name);
-                return e.data?.name?.startsWith("missile-target-");
+                return e.data.name && e.data?.name?.startsWith("missile-target-");
             }).forEach(async (e) => {
                 console.log('Cleaning up leftover ASE Missile Effects...', e);
                 await Sequencer.EffectManager.endEffects({ object: target, name: e.data.name });
