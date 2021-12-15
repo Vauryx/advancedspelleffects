@@ -67,7 +67,7 @@ export class mirrorImage {
 
         let target = Array.from(data.targets)[0];
         if (!target) return;
-        const mirrorImages = await Sequencer.EffectManager.getEffects().filter(effect => effect.data.name.startsWith(`MirrorImage-${target.id}`));
+        const mirrorImages = await Sequencer.EffectManager.getEffects().filter(effect => effect.data?.name?.startsWith(`MirrorImage-${target.id}`));
         console.log("Mirror Images: ", mirrorImages);
         // assign every mirror image effect name to a variable
 
