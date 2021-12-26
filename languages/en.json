@@ -21,6 +21,7 @@
   "ASE.LightningBolt": "Lightning Bolt",
   "ASE.ChainLightning": "Chain Lightning",
   "ASE.MirrorImage": "Mirror Image",
+  "ASE.StatusEffect": "Status Effect",
 
   "ASE.SummonAberrantSpirit": "Summon Aberrant Spirit",
   "ASE.SummonBeast": "Summon Beast",
@@ -345,5 +346,14 @@
   "ASE.MirrorImageDestroyVolumeLabel": "Image Destruction Volume: ",
   "ASE.MirrorImageDestroyVolumeTooltip": "Volume of the Mirror Image destruction sound",
   "ASE.MirrorImageDestroyEffectColorLabel": "Image Destruction Effect Color: ",
-  "ASE.MirrorImageDestroyEffectColorTooltip": "Color of the Mirror Image destruction effect"
+  "ASE.MirrorImageDestroyEffectColorTooltip": "Color of the Mirror Image destruction effect",
+
+  "ASE.StatusEffectTargetTypesLabel": "Effect applies to: ",
+  "ASE.StatusEffectTargetTypesTooltip": "Select the type of status effect that is applied",
+  "ASE.StatusEffectTypesLabel": "Type of status effect: ",
+  "ASE.StatusEffectTypesTooltip": "Select the type of status effect that is applied",
+  "ASE.StatusEffectValueLabel": "Effect Value: ",
+  "ASE.StatusEffectValueTooltip": "Value of the status effect",
+  "ASE.StatusEffectSourceLabel": "Effect Source: ",
+  "ASE.StatusEffectSourceTooltip": "Limit the status effect application to a specific source"
 }

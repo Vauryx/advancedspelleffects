@@ -21,6 +21,7 @@ import { scorchingRay } from "./spells/scorchingRay.js";
 import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
+import { statusEffectHandler } from "./statusEffectHandler.js";
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
     setupASESocket();
@@ -46,11 +47,14 @@ const aseModules = {
     scorchingRay,
     eldritchBlast,
     moonBeam,
-    mirrorImage
+    mirrorImage,
+    statusEffectHandler
 
 }
 Hooks.once('ready', async function () {
+
     Object.values(aseModules).forEach(cl => cl.registerHooks());
+
     Hooks.on('sequencerReady', () => {
         function easeOutElasticCustom(x) {
             const c4 = (2 * Math.PI) / 10;
@@ -62,4 +66,5 @@ Hooks.once('ready', async function () {
         }
         Sequencer.registerEase("easeOutElasticCustom", easeOutElasticCustom);
     });
+
 });

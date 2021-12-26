@@ -137,6 +137,10 @@
                                                 <input type="range" min="{{this.min}}" max="{{this.max}}"
                                                     step="{{this.step}}" name="{{this.name}}" value={{this.flagValue}}>
                                             {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'formula'}}
+                                                <input class="ase-spell-settings-formulaInput" type="text"
+                                                    name="{{this.name}}" value={{this.flagValue}}>
+                                            {{/ifCondASE}}
                                         </td>
                                     </tr>
                                 {{/each}}

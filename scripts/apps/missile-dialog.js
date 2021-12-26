@@ -32,7 +32,7 @@ export class MissileDialog extends FormApplication {
             }).forEach(async (e) => {
                 console.log('Cleaning up leftover ASE Missile Effects...', e);
                 await Sequencer.EffectManager.endEffects({ object: target, name: e.data.name });
-            })
+            });
             await target?.document.unsetFlag("advancedspelleffects", 'missileSpell');
         }
     }

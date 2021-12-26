@@ -17,6 +17,9 @@ import { vampiricTouch } from "../spells/vampiricTouch.js";
 import { moonBeam } from "../spells/moonBeam.js";
 import { chainLightning } from "../spells/chainLightning.js";
 import { mirrorImage } from "../spells/mirrorImage.js";
+import { statusEffect } from "../spells/statusEffect.js";
+import { statusEffectHandler } from "../statusEffectHandler.js";
+
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
@@ -44,6 +47,7 @@ export class ASESettings extends FormApplication {
         this.spellList[game.i18n.localize("ASE.ChainLightning")] = chainLightning;
         this.spellList[game.i18n.localize("ASE.MirrorImage")] = mirrorImage;
         this.spellList[game.i18n.localize("ASE.Summon")] = summonCreature;
+        this.spellList[game.i18n.localize("ASE.StatusEffect")] = statusEffect;
     }
 
     static get defaultOptions() {
@@ -286,6 +290,39 @@ export class ASESettings extends FormApplication {
             this.submit({ preventClose: true }).then(() => this.render());
             $("#ase-item-settings").height("auto");
             $("#ase-item-settings").width("auto");
+        });
+        html.find('.ase-spell-settings-formulaInput').change(evt => {
+            this.submit({ preventClose: true }).then(() => this.render());
+            $("#ase-item-settings").height("auto");
+            $("#ase-item-settings").width("auto");
+        });
+
+        html.find('.ase-spell-settings-formulaInput').keypress(evt => {
+            console.log('Kepypress event detected!', evt);
+            const regexFormula = new RegExp("^(?!\d+$)(([1-9]\d*)?[Dd]?[1-9]\d*( ?[+-] ?)?)+(?<![+-] ?)$");
+            if (evt.currentTarget.value == '' || evt.currentTarget.value == undefined) {
+                if (!(Number(evt.key) < 10)
+                    && !(evt.key == 'd')
+                    && !(evt.key == '+')
+                    && !(evt.key == '-')) {
+                    evt.returnValue = false;
+                    if (evt.preventDefault) {
+                        evt.preventDefault();
+                    }
+                }
+            } else {
+                if ((!regexFormula.test(evt.currentTarget.value)
+                    && !(Number(evt.key) < 10)
+                    && !(evt.key == 'd')
+                    && !(evt.key == '+')
+                    && !(evt.key == '-'))) {
+                    evt.returnValue = false;
+                    if (evt.preventDefault) {
+                        evt.preventDefault();
+                    }
+                }
+            };
+
         });
 
         //console.log(this);

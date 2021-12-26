@@ -18,6 +18,7 @@ import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { chainLightning } from "./spells/chainLightning.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
+import { statusEffect } from "./spells/statusEffect.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -118,6 +119,13 @@ export class ASEHandler {
             case game.i18n.localize('ASE.MirrorImage'):
                 const mirrorImageSpell = new mirrorImage(data);
                 mirrorImageSpell.cast();
+                return;
+            case game.i18n.localize('ASE.StatusEffect'):
+
+                const statusEffectData = { item: data.item, duration: '', effects: data.item.getFlag('advancedspelleffects', 'effectOptions.statusEffects') };
+                console.log('Status Effect data', statusEffectData);
+                const tokenStatusEffect = new statusEffect(statusEffectData);
+                tokenStatusEffect.apply(Array.from(data.targets)[0]);
                 return;
         }
         if (item.name.includes(game.i18n.localize("ASE.Summon"))) {
