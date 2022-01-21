@@ -43,9 +43,6 @@ export class mirrorImage {
         //console.log("Arrack Roll: ", attackRoll.total);
         const targetAC = target.document.actor.data.data.attributes.ac.value;
         //console.log("Target AC: ", targetAC);
-        if (attackRoll.total < targetAC) {
-            return;
-        }
 
         const imagesRemaining = mirrorImages.length;
         const imageAC = 10 + target.actor.data.data.abilities.dex.mod;
