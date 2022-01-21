@@ -6,7 +6,7 @@ export class midiHandler {
         }
     }
     static async _handleASE(workflow) {
-        console.log("MIDI Workflow: ", workflow);
+        //console.log("MIDI Workflow: ", workflow);
         ASEHandler.handleASE(workflow)
     }
 }

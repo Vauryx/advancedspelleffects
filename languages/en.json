@@ -55,7 +55,7 @@
 
   "ASE.ZombieActorLabel": "Associated Zombie Actor: ",
   "ASE.SkeletonActorLabel": "Associated Skeleton Actor: ",
-
+  "ASE.animateDeadRangeLabel": "Spell Range: ",
   "ASE.MagicSchoolLabel": "Magic School: ",
   "ASE.MagicSchoolColorLabel": "Magic School Color: ",
   "ASE.MagicSchoolIntroSoundLabel": "Magic School Intro Sound: ",

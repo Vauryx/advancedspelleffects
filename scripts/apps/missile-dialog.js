@@ -26,7 +26,7 @@ export class MissileDialog extends FormApplication {
         //console.log("ASE Magic Missile Targets Detected...", tokens);
         for await (let target of tokens) {
             //console.log('Target: ',target);
-            let effectsOnTarget = await Sequencer.EffectManager.getEffects({ object: target }).filter((e) => {
+            let effectsOnTarget = Sequencer.EffectManager.getEffects({ object: target }).filter((e) => {
                 //console.log('e data name',e.data.name);
                 return e.data.name && e.data?.name?.startsWith("missile-target-");
             }).forEach(async (e) => {
@@ -274,7 +274,7 @@ export class MissileDialog extends FormApplication {
         Hooks.once('closeMissileDialog', async () => {
             let tokens = Array.from(canvas.tokens.placeables).filter(t => t.data.flags.advancedspelleffects && t.data.flags.advancedspelleffects.missileSpell);
             for await (let target of tokens) {
-                await Sequencer.EffectManager.getEffects({ object: target }).filter(async (e) => {
+                Sequencer.EffectManager.getEffects({ object: target }).filter(async (e) => {
                     e.data.name.startsWith("missile-target-")
                 }).forEach(async (e) => {
                     await Sequencer.EffectManager.endEffects({ object: target, name: e.data.name })
@@ -456,7 +456,7 @@ export class MissileDialog extends FormApplication {
 
 
                 }
-                const targetMarkers = await Sequencer.EffectManager.getEffects({ object: targetToken }).filter(effect => effect.data.name?.startsWith(`missile-target`));
+                const targetMarkers = Sequencer.EffectManager.getEffects({ object: targetToken }).filter(effect => effect.data.name?.startsWith(`missile-target`));
                 for await (let targetMarker of targetMarkers) {
                     await Sequencer.EffectManager.endEffects({ name: targetMarker.data.name, object: targetToken });
                 }
