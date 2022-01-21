@@ -72,7 +72,6 @@ export class animateDead {
                 && target !== tokenD
         });
 
-        console.log("Detected corpses in range: ", corpses);
         new animateDeadDialog(corpses, { raiseLimit: raiseLimit, effectSettings: aseSettings }).render(true);
 
     }
@@ -96,13 +95,17 @@ export class animateDead {
 
         const portalImpactColorsRaw = `jb2a.impact.010`;
         const portalImpactColorOptions = utilFunctions.getDBOptions(portalImpactColorsRaw);
-        const summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
+        let summonActorsFolder = game.folders?.getName("ASE-Summons");
+        let summonActorsList = summonActorsFolder?.contents ?? [];
+
+        if(!summonActorsFolder || summonActorsList.length === 0){
+            summonActorsList = await utilFunctions.createFolderWithActors("ASE-Summons", ["Skeleton", "Zombie"]);
+        }
+
         let summonOptions = {};
-        let currentSummonTypes = {};
         summonActorsList.forEach((actor) => {
             summonOptions[actor.id] = actor.name;
         });
-        currentSummonTypes = currFlags.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" } };
 
         let spellOptions = [];
         let animOptions = [];
