@@ -1,26 +1,31 @@
 <form id="animateDeadForm" class="flexcol" autocomplete="off" novalidate>
+
     <section class="content">
-        <p>{{localize "ASE.AnimateDeadDialogRaiseMessage"}}<b><input type="number" id="raiseLimit" style='width: 2em;'
-                    readonly value="{{data.raiseLimit}}"></input></b>
-        </p>
-        <table width="100%">
-            <tbody>
-                <tr>
-                    <th>{{localize "ASE.AnimateDeadDialogHeaderCorpse"}}</th>
-                    <th>{{localize "ASE.AnimateDeadDialogHeaderRaise"}}</th>
-                </tr>
-                {{#each data.corpses as |corpse|}}
-                    <tr class='corpseToken' id={{corpse.id}}>
-                        <td><img src="{{corpse.data.img}}" width="30" height="30" style="border:0px"> - {{corpse.name}}
-                        </td>
-                        <td><button class='raiseCorpse' type="button" id="{{corpse.id}}">{{localize "ASE.ZombieLabel"}}
-                        </td>
-                        <td><button class='raiseCorpse' type="button"
-                                id="{{corpse.id}}">{{localize "ASE.SkeletonLabel"}}</td>
+        {{#if noCorpses}}
+            <p style="text-align: center; margin: 2rem;">{{localize "ASE.AnimateDeadDialogNoCorpses"}}</p>
+        {{else}}
+            <p>{{localize "ASE.AnimateDeadDialogRaiseMessage"}}</p>
+            <p><input type="number" id="raiseLimit" style='width: 2em;' readonly value="{{data.raiseLimit}}"/></p>
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <th>{{localize "ASE.AnimateDeadDialogHeaderCorpse"}}</th>
+                        <th>{{localize "ASE.AnimateDeadDialogHeaderRaise"}}</th>
                     </tr>
-                {{/each}}
-            </tbody>
-        </table>
+                    {{#each data.corpses as |corpse|}}
+                        <tr class='corpseToken' id={{corpse.id}}>
+                            <td><img src="{{corpse.data.img}}" width="30" height="30" style="border:0px"> - {{corpse.name}}
+                            </td>
+                            <td><button class='raiseCorpse' type="button" id="{{corpse.id}}">{{localize "ASE.ZombieLabel"}}
+                            </td>
+                            <td><button class='raiseCorpse' type="button"
+                                    id="{{corpse.id}}">{{localize "ASE.SkeletonLabel"}}</td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+
+        {{/if}}
 
         <input type="hidden" id="hdnEffectAColor" value="{{data.effectSettings.effectAColor}}" />
         <input type="hidden" id="hdnEffectBColor" value="{{data.effectSettings.effectBColor}}" />

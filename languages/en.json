@@ -281,6 +281,7 @@
   "ASE.AnimateDeadDialogRaiseMessage": "Corpses left to raise: ",
   "ASE.AnimateDeadDialogHeaderCorpse": "Corpse",
   "ASE.AnimateDeadDialogHeaderRaise": "Raise As",
+  "ASE.AnimateDeadDialogNoCorpses": "No corpses to raise in range!",
   "ASE.ZombieLabel": "Zombie",
   "ASE.SkeletonLabel": "Skeleton",
 

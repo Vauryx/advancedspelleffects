@@ -5,12 +5,12 @@ export class animateDeadDialog extends FormApplication {
     constructor(corpses, options = { raiseLimit: 1, effectSettings: { summons: { skeleton: { actor: "" }, zombie: { actor: "" } }, effectAColor: "blue", effectBColor: "blue", magicSchool: "evocation", magicSchoolColor: "blue" } }) {
         super(options);
         foundry.utils.mergeObject(this.options, options);
-        //console.log(this);
         this.data = {};
         this.data.corpses = corpses;
         this.data.raiseLimit = this.options.raiseLimit;
         this.data.effectSettings = this.options.effectSettings;
     }
+
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             template: './modules/advancedspelleffects/scripts/templates/animate-dead-dialog.html',
@@ -22,16 +22,16 @@ export class animateDeadDialog extends FormApplication {
             close: () => { ui.notify }
         });
     }
+
     async getData() {
-        return {
-            data: this.data
-        };
-
+        let data = super.getData();
+        data = foundry.utils.mergeObject(data, this.data);
+        data.noCorpses = data.corpses.length === 0;
+        return data;
     }
-    async _updateObject(event, formData) {
-        console.log(formData);
 
-    }
+    async _updateObject(event, formData) {}
+
     activateListeners(html) {
         //console.log(html);
         super.activateListeners(html);

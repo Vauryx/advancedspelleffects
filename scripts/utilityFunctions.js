@@ -1,3 +1,39 @@
+export async function createFolderWithActors(folderName, actorNames) {
+
+    let folder = game.folders?.getName(folderName);
+
+    if(!folder) {
+        folder = await Folder.create({
+            name: folderName,
+            type: 'Actor',
+            color: "#646cdd",
+            parent: null
+        });
+    }
+
+    const folderId = folder.id;
+
+    const monsterPack = game.packs.get("dnd5e.monsters");
+
+    if(!monsterPack) return [];
+
+    // Loop through each actor name and try to find them in the D&D 5e monsters compendia
+    const actors = [];
+    for(const name of actorNames){
+
+        const creature = await monsterPack.getDocuments({ "name": name })
+
+        if(!creature.length) continue
+        actors.push(await Actor.create({
+            ...creature[0].toObject(),
+            folder: folderId
+        }));
+    }
+
+    return actors;
+
+}
+
 export function checkModules() {
     let error = false;
 
