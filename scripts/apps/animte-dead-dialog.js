@@ -217,8 +217,9 @@ export class animateDeadDialog extends FormApplication {
                         const sheet = token.actor.sheet;
                         await token.actor.sheet.close();
                         token.actor._sheet = null;
-                        delete token.actor.apps[sheet.appId]
-                        let mutateUpdates = { token: summonTokenData, actor: summonActorData }
+                        delete token.actor.apps[sheet.appId];
+                        let mutateUpdates = { token: summonTokenData, actor: summonActorData };
+                        await aseSocket.executeAsGM("checkGMAlwaysAccept");
                         await warpgate.mutate(corpseDoc, mutateUpdates);
                     }
                     catch (err) {

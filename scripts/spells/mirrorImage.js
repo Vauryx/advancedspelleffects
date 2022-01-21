@@ -73,7 +73,7 @@ export class mirrorImage {
 
         if (mirrorImages.length == 0) return;
         const mirrorImageEffectNames = mirrorImages.map(effect => effect.data.name);
-        const effectOptions = target.getFlag("advancedspelleffects", "mirrorImage");
+        const effectOptions = target.document.getFlag("advancedspelleffects", "mirrorImage");
         if (!effectOptions) return;
         const attackRoll = data.attackRoll;
         console.log("Arrack Roll: ", attackRoll);

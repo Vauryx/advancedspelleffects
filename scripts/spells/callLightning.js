@@ -382,7 +382,7 @@ export class callLightning {
                 .effect()
                 .file(boltEffect)
                 .atLocation(cloud)
-                .reachTowards(boltTemplate)
+                .stretchTo(boltTemplate)
                 .waitUntilFinished(-1500)
                 .playIf(boltStyle == "chain")
                 .effect()

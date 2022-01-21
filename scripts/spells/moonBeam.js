@@ -425,7 +425,7 @@ export class moonBeam {
         new Sequence("Advanced Spell Effects")
             .sound()
             .file(effectOptions.moonbeamDmgSound)
-            .delay(Number(effectOptions.moonbeamDmgDelay) ?? 0)
+            .delay(Number(effectOptions.moonbeamDmgSoundDelay) ?? 0)
             .volume(effectOptions.moonbeamDmgVolume ?? 1)
             .playIf(effectOptions.moonbeamDmgSound && effectOptions.moonbeamDmgSound != "")
             .effect()
