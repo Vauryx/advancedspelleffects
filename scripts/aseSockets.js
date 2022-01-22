@@ -9,6 +9,7 @@ export function setupASESocket() {
         aseSocket.register("placeTiles", placeTiles);
         aseSocket.register("placeWalls", placeWalls);
         aseSocket.register("deleteTiles", deleteTiles);
+        aseSocket.register("deleteTemplates", deleteTemplates);
         aseSocket.register("updateFlag", updateFlag);
         aseSocket.register("removeFlag", removeFlag);
         aseSocket.register("moveWalls", moveWalls);
@@ -72,6 +73,10 @@ async function deleteTiles(tileIds) {
     await canvas.scene.deleteEmbeddedDocuments("Tile", tileIds);
 }
 
+async function deleteTemplates(tileIds) {
+    await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", tileIds);
+}
+
 async function moveTile(newLocation, tileId) {
     let tile = canvas.scene.tiles.get(tileId);
     const distance = utilFunctions.getDistanceClassic({ x: tile.data.x + canvas.grid.size, y: tile.data.y + canvas.grid.size }, { x: newLocation.x, y: newLocation.y });
@@ -117,7 +122,7 @@ async function placeWalls(wallData) {
 }
 
 async function moveWalls(tileId, wallType, numWalls) {
-    let tileD = await canvas.scene.tiles.get(tileId);
+    let tileD = canvas.scene.tiles.get(tileId) ?? canvas.scene.templates.get(tileId);
     let placedX = tileD.data.x + (tileD.data.width / 2);
     let placedY = tileD.data.y + (tileD.data.height / 2);
     let outerCircleRadius = tileD.data.width / 2.2;
