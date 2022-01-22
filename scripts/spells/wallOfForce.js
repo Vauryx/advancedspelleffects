@@ -31,11 +31,9 @@ export class wallOfForce {
 
     static async createWallOfForce(midiData) {
 
-        let item = midiData.item;
-
         const aseData = {
             itemLevel: midiData.itemLevel,
-            flags: item.getFlag("advancedspelleffects", 'effectOptions'),
+            flags: midiData.item.getFlag("advancedspelleffects", 'effectOptions'),
             caster: canvas.tokens.get(midiData.tokenId),
             casterActor: canvas.tokens.get(midiData.tokenId).actor
         }
@@ -95,6 +93,8 @@ export class wallOfForce {
             ]
         },'column');
 
+        if(!dimensions || !texture) return;
+
         aseData.dimensions = dimensions;
         aseData.texture = texture;
 
@@ -103,7 +103,8 @@ export class wallOfForce {
             direction: 0,
             x: 0,
             y: 0,
-            color: "",
+            color: "#FFFFFF",
+            fillColor: "#FFFFFF",
             flags: {
                 tagger: { tags: [`WallOfForce-${aseData.casterActor.id}`] },
                 advancedspelleffects: {
@@ -114,13 +115,13 @@ export class wallOfForce {
         }
 
         if(dimensions.radius){
-            templateData["t"] = "circle";
+            templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.CIRCLE;
             templateData["distance"] = dimensions.radius;
         }else if(dimensions.height){
-            templateData["t"] = "ray";
+            templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RAY;
             templateData["distance"] = dimensions.length;
         }else{
-            templateData["t"] = "rect";
+            templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE;
             templateData["distance"] = Math.sqrt(Math.pow(dimensions.length,2) + Math.pow(dimensions.width,2));
             templateData["direction"] = 180*Math.atan2(dimensions.length, dimensions.width)/Math.PI;
         }
@@ -143,7 +144,7 @@ export class wallOfForce {
 
     static async _placeWalls(templateDocument, deleteOldWalls = false){
 
-        if(templateDocument.data.t === "rect") return;
+        if(templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) return;
 
         if(deleteOldWalls){
             const walls = Tagger.getByTag([`WallOfForce-Wall${templateDocument.id}`]).map(wall => wall.id);
@@ -156,7 +157,7 @@ export class wallOfForce {
 
         const walls = [];
 
-        if(templateDocument.data.t === "circle"){
+        if(templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE){
 
             const placedX = template.x;
             const placedY = template.y;
@@ -218,7 +219,7 @@ export class wallOfForce {
 
     static _playEffects(aseData, template){
 
-        if (template.data.t === "circle") {
+        if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
             new Sequence()
                 .effect(aseData.texture)
@@ -230,7 +231,7 @@ export class wallOfForce {
                     .persist()
                 .play()
 
-        }else if(template.data.t === "rect"){
+        }else if(template.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE){
 
             new Sequence()
                 .effect(aseData.texture)
@@ -253,8 +254,7 @@ export class wallOfForce {
                     .attachTo(template)
                     .stretchTo(template, { attachTo: true, onlyX: true })
                     .tilingTexture({
-                        x: aseData.flags.wallOfForceSegmentSize / 10,
-                        y: 1
+                        x: aseData.flags.wallOfForceSegmentSize / 10
                     })
                     .fadeIn(250)
                     .fadeOut(250)
