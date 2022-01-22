@@ -7,6 +7,7 @@ export class animateDeadDialog extends FormApplication {
         foundry.utils.mergeObject(this.options, options);
         this.data = {};
         this.data.corpses = corpses;
+        this.data.noCorpses = corpses.length === 0;
         this.data.raiseLimit = this.options.raiseLimit;
         this.data.effectSettings = this.options.effectSettings;
     }
@@ -24,13 +25,10 @@ export class animateDeadDialog extends FormApplication {
     }
 
     async getData() {
-        let data = super.getData();
-        data = foundry.utils.mergeObject(data, this.data);
-        data.noCorpses = data.corpses.length === 0;
-        return data;
+        return { data: this.data };
     }
 
-    async _updateObject(event, formData) {}
+    async _updateObject(event, formData) { }
 
     activateListeners(html) {
         //console.log(html);

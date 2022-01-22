@@ -209,7 +209,7 @@ export class summonCreature {
             let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
             //console.log(damageItems);
             switch (item.name) {
-                case game.i18n.localize("ASE.SummonAberrantSpirit"):
+                case game.i18n.localize("ASE.SummonAberration"):
                     hpBonus = 10 * (spellLevel - 4);
                     break;
                 case game.i18n.localize("ASE.SummonBeast"):
