@@ -18,7 +18,6 @@ import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { chainLightning } from "./spells/chainLightning.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
-import { wallOfForce } from "./spells/wallOfForce.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -119,10 +118,6 @@ export class ASEHandler {
             case game.i18n.localize('ASE.MirrorImage'):
                 const mirrorImageSpell = new mirrorImage(data);
                 mirrorImageSpell.cast();
-                return;
-
-            case game.i18n.localize('ASE.WallOfForce'):
-                wallOfForce.createWallOfForce(data);
                 return;
         }
         if (item.name.includes(game.i18n.localize("ASE.Summon"))) {

@@ -2,7 +2,6 @@
   "ASE.Darkness": "Darkness",
   "ASE.DetectMagic": "Detect Magic",
   "ASE.FogCloud": "Fog Cloud",
-  "ASE.WallOfForce": "Wall of Force",
   "ASE.SteelWindStrike": "Steel Wind Strike",
   "ASE.ThunderStep": "Thunder Step",
   "ASE.SpiritualWeapon": "Spiritual Weapon",
@@ -140,12 +139,6 @@
   "ASE.FogCloudVolumeLabel": "Fog Cloud Volume: ",
   "ASE.FogCloudRadiusLabel": "Fog Cloud Radius: ",
   "ASE.FogCloudRadiusTooltip": "The radius of the fog cloud in feet(per spell level if scaling)",
-
-  "ASE.WallOfForceColorLabel": "Wall of Force color: ",
-  "ASE.WallOfForceRadiusLabel": "Wall of Force Radius: ",
-  "ASE.WallOfForceRadiusTooltip": "The radius of the wall of force in feet",
-  "ASE.WallOfForceSegmentSizeLabel": "Wall of Force segment size: ",
-  "ASE.WallOfForceSegmentSizeTooltip": "The size of each individual segment of the wall of force in feet",
 
   "ASE.DartColorLabel": "Dart Color: ",
   "ASE.DartIntroSoundLabel": "Dart Intro Sound: ",
