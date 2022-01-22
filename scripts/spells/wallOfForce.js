@@ -218,12 +218,7 @@ export class wallOfForce {
 
     static _playEffects(aseData, template){
 
-        if (template.data.t === "circle" || template.data.t === "rect"){
-
-            const tileScale = {
-                x: aseData.dimensions.radius ? aseData.dimensions.radius / 10 : aseData.flags.wallOfForceSegmentSize / 10,
-                y: aseData.dimensions.radius ? aseData.dimensions.radius / 10 : aseData.flags.wallOfForceSegmentSize / 10
-            }
+        if (template.data.t === "circle") {
 
             new Sequence()
                 .effect(aseData.texture)
@@ -231,10 +226,27 @@ export class wallOfForce {
                     .scaleToObject()
                     .fadeIn(250)
                     .fadeOut(250)
-                    .belowTokens(template.data.t === "rect")
-                    .zIndex(template.data.t === "rect" ? -1000 : 1000)
+                    .zIndex(1000)
                     .persist()
                 .play()
+
+        }else if(template.data.t === "rect"){
+
+            new Sequence()
+                .effect(aseData.texture)
+                    .attachTo(template)
+                    .scaleToObject()
+                    .fadeIn(250)
+                    .fadeOut(250)
+                    .tilingTexture({
+                        x: aseData.flags.wallOfForceSegmentSize / 10,
+                        y: aseData.flags.wallOfForceSegmentSize / 10
+                    })
+                    .belowTokens()
+                    .zIndex(-1000)
+                    .persist()
+                .play()
+
         }else{
             new Sequence()
                 .effect(aseData.texture)
