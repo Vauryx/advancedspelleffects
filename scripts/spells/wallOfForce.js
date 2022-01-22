@@ -231,7 +231,6 @@ export class wallOfForce {
                     .scaleToObject()
                     .fadeIn(250)
                     .fadeOut(250)
-                    .tilingTexture(tileScale)
                     .belowTokens(template.data.t === "rect")
                     .zIndex(template.data.t === "rect" ? -1000 : 1000)
                     .persist()
