@@ -1,0 +1,14 @@
+<form id="wofPanelForm" class="flexcol" autocomplete="off" novalidate>
+
+    <section class="content">
+
+        <p>Panels Remaining: </p>
+        <p><input type="number" id="panelsRemaining" style='width: 2em;' readonly value="{{data.count}}" /></p>
+
+    </section>
+    <footer class="sheet-footer flexrow">
+        <button type="submit" name="submit">
+            <i class="fa fa-check-square"></i> {{localize "ASE.Done"}}
+        </button>
+    </footer>
+</form>

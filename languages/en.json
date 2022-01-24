@@ -146,6 +146,8 @@
   "ASE.WallOfForceRadiusTooltip": "The radius of the wall of force in feet",
   "ASE.WallOfForceSegmentSizeLabel": "Wall of Force segment size: ",
   "ASE.WallOfForceSegmentSizeTooltip": "The size of each individual segment of the wall of force in feet",
+  "ASE.WallOfForcePanelCountLabel": "Panel Count: ",
+  "ASE.WallOfForcePanelCountTooltip": "The number of panels in total when placing manually",
 
   "ASE.DartColorLabel": "Dart Color: ",
   "ASE.DartIntroSoundLabel": "Dart Intro Sound: ",
