@@ -24,8 +24,12 @@ export class wallOfForce {
 
     static async handleConcentration(casterActor, casterToken, effectOptions) {
         let wallOfForceTemplate = Tagger.getByTag(`WallOfForce-${casterActor.id}`);
+        let wofTemplateIds = [];
         if (wallOfForceTemplate.length > 0) {
-            aseSocket.executeAsGM("deleteTemplates", [wallOfForceTemplate[0].id]);
+            wallOfForceTemplate.forEach(template => {
+                wofTemplateIds.push(template.id);
+            });
+            aseSocket.executeAsGM("deleteTemplates", wofTemplateIds);
         }
     }
 
@@ -153,24 +157,206 @@ export class wallOfForce {
             templateData["direction"] = 180 * Math.atan2(dimensions.length, dimensions.width) / Math.PI;
         }
         if (type == "h-panels" || type == "v-panels") {
-            //wallOfForce._placePanels(aseData, templateData, type);
-            new wofPanelDialog(aseData.flags.wallOfForcePanelCount, { aseData: aseData, templateData: templateData, type: type }).render(true);
+            if (type == "h-panels") {
+                templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE;
+                templateData["distance"] = Math.sqrt(Math.pow(dimensions.length, 2) + Math.pow(dimensions.width, 2));
+                templateData["direction"] = 180 * Math.atan2(dimensions.length, dimensions.width) / Math.PI;
+            } else if (type == "v-panels") {
+                templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RAY;
+                templateData["distance"] = dimensions.length;
+            }
+            templateData.flags.tagger.tags.push('0');
+            let wofPanelDiag = new wofPanelDialog({ aseData: aseData, templateData: templateData, type: type }).render(true);
+
+            let wofPanelData = await wofPanelDiag.getData();
+
+            Hooks.once('createMeasuredTemplate', (template) => this._placePanels(aseData, template, wofPanelDiag, type));
+
+            const doc = new MeasuredTemplateDocument(templateData, { parent: canvas.scene });
+            let template = new game.dnd5e.canvas.AbilityTemplate(doc);
+            template.actorSheet = aseData.casterActor.sheet;
+            template.drawPreview();
+
+
         }
         else {
             console.log("ASE DATA: ", aseData);
-            Hooks.once('createMeasuredTemplate', (template) => this._placeWallOfForce(aseData, template));
+            Hooks.on('createMeasuredTemplate', (template) => this._placeWallOfForce(aseData, template));
+
+            const doc = new MeasuredTemplateDocument(templateData, { parent: canvas.scene });
+            let template = new game.dnd5e.canvas.AbilityTemplate(doc);
+            template.actorSheet = aseData.casterActor.sheet;
+            template.drawPreview();
         }
 
-
-        const doc = new MeasuredTemplateDocument(templateData, { parent: canvas.scene });
-        let template = new game.dnd5e.canvas.AbilityTemplate(doc);
-        template.actorSheet = aseData.casterActor.sheet;
-        template.drawPreview();
-
     }
+    static sourceSquare(center, widthSquares, heightSquares) {
 
-    static _placePanels(aseData, templateData, type) {
+        const gridSize = canvas.grid.h;
+        const h = gridSize * heightSquares;
+        const w = gridSize * widthSquares;
 
+        const bottom = center.y + h / 2;
+        const left = center.x - w / 2;
+        const top = center.y - h / 2;
+        const right = center.x + w / 2;
+
+        const rightSpots = [...new Array(1)].map((_, i) => ({
+            direction: 45,
+            x: right,
+            y: top,
+        }));
+        const bottomSpots = [...new Array(1)].map((_, i) => ({
+            direction: 45,
+            x: left,
+            y: bottom,
+        }));
+        const leftSpots = [...new Array(1)].map((_, i) => ({
+            direction: 135,
+            x: left,
+            y: top,
+        }));
+        const topSpots = [...new Array(1)].map((_, i) => ({
+            direction: 225,
+            x: right,
+            y: top,
+        }));
+        console.log("topSpots: ", topSpots);
+        console.log("leftSpots: ", leftSpots);
+        console.log("bottomSpots: ", bottomSpots);
+        console.log("rightSpots: ", rightSpots);
+        const allSpots = [
+            ...rightSpots.slice(Math.floor(rightSpots.length / 2)),
+            ...bottomSpots,
+            ...leftSpots,
+            ...topSpots,
+            ...rightSpots.slice(0, Math.floor(rightSpots.length / 2)),
+        ];
+        console.log("allSpots: ", allSpots);
+        return {
+            x: left,
+            y: top,
+            center,
+            top,
+            bottom,
+            left,
+            right,
+            h,
+            w,
+            heightSquares,
+            widthSquares,
+            allSpots,
+        };
+    };
+    static async _placePanels(aseData, template, panelDiag, type) {
+
+        wallOfForce._playEffects(aseData, template);
+
+        console.log("wofPanelDiag: ", panelDiag);
+        console.log("type: ", type);
+        console.log("aseData: ", aseData);
+        console.log("template: ", template);
+
+        const gridSize = canvas.grid.h;
+        const previousTemplateData = template.data;
+        let panelsRemaining = panelDiag.data.aseData.flags.wallOfForcePanelCount;
+        console.log("Panels Remaining: ", panelsRemaining);
+        const nextTemplateData = template.toObject();
+        delete nextTemplateData["_id"];
+        console.log("nextTemplateData: ", nextTemplateData);
+        nextTemplateData.flags.tagger.tags[1] = (Number(nextTemplateData.flags.tagger.tags[1]) + 1).toString();
+        if (panelsRemaining < 2 || !panelDiag.rendered) {
+            panelDiag.submit();
+            return
+        };
+
+        panelDiag.data.aseData.flags.wallOfForcePanelCount--;
+        panelDiag.render(true);
+
+        let previousTemplateCenter;
+        if (previousTemplateData.direction == 45) {
+            previousTemplateCenter = {
+                x: previousTemplateData.x + (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
+                y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
+            };
+        } else if (previousTemplateData.direction == 135) {
+            previousTemplateCenter = {
+                x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
+                y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
+            };
+        } else if (previousTemplateData.direction == 225) {
+            previousTemplateCenter = {
+                x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
+                y: previousTemplateData.y - (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
+            };
+        }
+
+        let square;
+        const previousTemplateWidthSquares = previousTemplateData.flags.advancedspelleffects.dimensions.length / 5;
+        const previousTemplateHeightSquares = previousTemplateData.flags.advancedspelleffects.dimensions.width / 5;
+        square = wallOfForce.sourceSquare({ x: previousTemplateCenter.x, y: previousTemplateCenter.y },
+            previousTemplateWidthSquares, previousTemplateHeightSquares);
+        console.log("square: ", square);
+        let displayTemplate = (await canvas.scene.createEmbeddedDocuments('MeasuredTemplate', [nextTemplateData]))[0];
+
+        const targetConfig = {
+            drawIcon: false,
+            drawOutline: false,
+        }
+
+        let currentSpotIndex = 0;
+        const updateTemplateLocation = async (crosshairs) => {
+            while (crosshairs.inFlight) {
+                await warpgate.wait(100);
+
+                const totalSpots = square.allSpots.length;
+                const radToNormalizedAngle = (rad) => {
+                    let angle = (rad * 180 / Math.PI) % 360;
+
+                    // offset the angle for even-sided tokens, because it's centered in the grid it's just wonky without the offset
+                    if (square.heightSquares % 2 === 1 && square.widthSquares % 2 === 1) {
+                        angle -= (360 / totalSpots) / 2;
+                    }
+                    const normalizedAngle = Math.round(angle / (360 / totalSpots)) * (360 / totalSpots);
+                    return normalizedAngle < 0
+                        ? normalizedAngle + 360
+                        : normalizedAngle;
+                }
+
+                const ray = new Ray(square.center, crosshairs);
+                const angle = radToNormalizedAngle(ray.angle);
+                const spotIndex = Math.ceil(angle / 360 * totalSpots);
+
+                if (spotIndex === currentSpotIndex) {
+                    continue;
+                }
+
+                currentSpotIndex = spotIndex;
+                const spot = square.allSpots[currentSpotIndex];
+
+                displayTemplate = await displayTemplate.update({ ...spot });
+            }
+        }
+
+        const rotateCrosshairs = await warpgate.crosshairs.show(
+            targetConfig,
+            {
+                show: updateTemplateLocation
+            });
+        if (rotateCrosshairs.cancelled) {
+            await displayTemplate.delete();
+            game.user.updateTokenTargets();
+            return;
+        }
+
+        wallOfForce._placePanels(aseData, displayTemplate, panelDiag, type);
+
+        //Hooks.once('createMeasuredTemplate', (template) => wallOfForce._placePanels(aseData, template, panelDiag, type));
+
+        //const doc = new MeasuredTemplateDocument(nextTemplateData, { parent: canvas.scene });
+        //let newTemplate = new game.dnd5e.canvas.AbilityTemplate(doc);
+        //newTemplate.actorSheet = aseData.casterActor.sheet;
+        //newTemplate.drawPreview();
     }
 
     static async _placeWallOfForce(aseData, templateDocument) {
