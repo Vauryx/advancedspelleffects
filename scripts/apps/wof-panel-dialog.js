@@ -9,7 +9,7 @@ export class wofPanelDialog extends FormApplication {
         this.data.aseData = this.options.aseData;
         this.data.templateData = this.options.templateData;
         this.data.type = this.options.type;
-        console.log('WOF Panel Dialog Data: ', this.data);
+        //console.log('WOF Panel Dialog Data: ', this.data);
     }
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {

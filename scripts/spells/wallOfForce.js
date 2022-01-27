@@ -51,7 +51,9 @@ export class wallOfForce {
                         dimensions: {
                             radius: aseData.flags.wallOfForceRadius
                         },
-                        texture: "jb2a.wall_of_force.sphere." + aseData.flags.color,
+                        texture: aseData.flags.useWebP
+                            ? `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${aseData.flags.color}_Sphere_Thumb.webp`
+                            : "jb2a.wall_of_force.sphere." + aseData.flags.color,
                         type: "sphere"
                     }
                 },
@@ -62,7 +64,9 @@ export class wallOfForce {
                             length: aseData.flags.wallOfForceSegmentSize * 5,
                             width: aseData.flags.wallOfForceSegmentSize * 2
                         },
-                        texture: "jb2a.wall_of_force.horizontal." + aseData.flags.color,
+                        texture: aseData.flags.useWebP
+                            ? `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${aseData.flags.color}_H_Thumb.webp`
+                            : "jb2a.wall_of_force.horizontal." + aseData.flags.color,
                         type: "horizontal"
                     }
                 },
@@ -73,7 +77,9 @@ export class wallOfForce {
                             length: aseData.flags.wallOfForceSegmentSize * 10,
                             width: aseData.flags.wallOfForceSegmentSize
                         },
-                        texture: "jb2a.wall_of_force.horizontal." + aseData.flags.color,
+                        texture: aseData.flags.useWebP
+                            ? `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${aseData.flags.color}_H_Thumb.webp`
+                            : "jb2a.wall_of_force.horizontal." + aseData.flags.color,
                         type: "horizontal"
                     }
                 },
@@ -84,7 +90,9 @@ export class wallOfForce {
                             length: aseData.flags.wallOfForceSegmentSize * 5,
                             height: aseData.flags.wallOfForceSegmentSize * 2
                         },
-                        texture: "jb2a.wall_of_force.vertical." + aseData.flags.color,
+                        texture: aseData.flags.useWebP
+                            ? `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${aseData.flags.color}_V_Thumb.webp`
+                            : "jb2a.wall_of_force.vertical." + aseData.flags.color,
                         type: "vertical"
                     }
                 },
@@ -95,7 +103,9 @@ export class wallOfForce {
                             length: aseData.flags.wallOfForceSegmentSize * 10,
                             height: aseData.flags.wallOfForceSegmentSize
                         },
-                        texture: "jb2a.wall_of_force.vertical." + aseData.flags.color,
+                        texture: aseData.flags.useWebP
+                            ? `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${aseData.flags.color}_V_Thumb.webp`
+                            : "jb2a.wall_of_force.vertical." + aseData.flags.color,
                         type: "vertical"
                     }
                 },
@@ -106,7 +116,9 @@ export class wallOfForce {
                             length: aseData.flags.wallOfForceSegmentSize,
                             width: aseData.flags.wallOfForceSegmentSize
                         },
-                        texture: "jb2a.wall_of_force.horizontal." + aseData.flags.color,
+                        texture: aseData.flags.useWebP
+                            ? `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${aseData.flags.color}_H_Thumb.webp`
+                            : "jb2a.wall_of_force.horizontal." + aseData.flags.color,
                         type: "h-panels"
                     }
                 },
@@ -117,7 +129,9 @@ export class wallOfForce {
                             length: aseData.flags.wallOfForceSegmentSize,
                             width: aseData.flags.wallOfForceSegmentSize
                         },
-                        texture: "jb2a.wall_of_force.horizontal." + aseData.flags.color,
+                        texture: aseData.flags.useWebP
+                            ? `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${aseData.flags.color}_V_Thumb.webp`
+                            : "jb2a.wall_of_force.vertical." + aseData.flags.color,
                         type: "v-panels"
                     }
                 }
@@ -170,8 +184,8 @@ export class wallOfForce {
 
             let wofPanelData = await wofPanelDiag.getData();
 
-            Hooks.once('createMeasuredTemplate', (template) => this._placePanels(aseData, template, wofPanelDiag, type));
-
+            Hooks.once('createMeasuredTemplate', (template) => wallOfForce._placePanels(aseData, template, wofPanelDiag, type));
+            console.log("template data:", templateData);
             const doc = new MeasuredTemplateDocument(templateData, { parent: canvas.scene });
             let template = new game.dnd5e.canvas.AbilityTemplate(doc);
             template.actorSheet = aseData.casterActor.sheet;
@@ -181,8 +195,8 @@ export class wallOfForce {
         }
         else {
             console.log("ASE DATA: ", aseData);
-            Hooks.on('createMeasuredTemplate', (template) => this._placeWallOfForce(aseData, template));
-
+            Hooks.once('createMeasuredTemplate', (template) => wallOfForce._placeWallOfForce(aseData, template));
+            console.log("template data:", templateData);
             const doc = new MeasuredTemplateDocument(templateData, { parent: canvas.scene });
             let template = new game.dnd5e.canvas.AbilityTemplate(doc);
             template.actorSheet = aseData.casterActor.sheet;
@@ -190,6 +204,17 @@ export class wallOfForce {
         }
 
     }
+
+    static sourceSquareV(center, distance, direction) {
+        const gridSize = canvas.grid.h;
+        const length = (distance / 5) * gridSize;
+
+        const x = center.x + length * Math.cos(direction * Math.PI / 180);
+        const y = center.y + length * Math.sin(direction * Math.PI / 180);
+        //console.log(`x: ${x}, y: ${y}`);
+        return { x: x, y: y };
+    }
+
     static sourceSquare(center, widthSquares, heightSquares) {
 
         const gridSize = canvas.grid.h;
@@ -251,19 +276,21 @@ export class wallOfForce {
     static async _placePanels(aseData, template, panelDiag, type) {
 
         wallOfForce._playEffects(aseData, template);
-
-        console.log("wofPanelDiag: ", panelDiag);
+        wallOfForce._placeWalls(template);
+        /*console.log("wofPanelDiag: ", panelDiag);
         console.log("type: ", type);
         console.log("aseData: ", aseData);
-        console.log("template: ", template);
+        console.log("template: ", template);*/
 
         const gridSize = canvas.grid.h;
         const previousTemplateData = template.data;
         let panelsRemaining = panelDiag.data.aseData.flags.wallOfForcePanelCount;
-        console.log("Panels Remaining: ", panelsRemaining);
+        //console.log("Panels Remaining: ", panelsRemaining);
         const nextTemplateData = template.toObject();
+
         delete nextTemplateData["_id"];
-        console.log("nextTemplateData: ", nextTemplateData);
+        //console.log("nextTemplateData: ", nextTemplateData);
+        //console.log("previousTemplateData: ", previousTemplateData);
         nextTemplateData.flags.tagger.tags[1] = (Number(nextTemplateData.flags.tagger.tags[1]) + 1).toString();
         if (panelsRemaining < 2 || !panelDiag.rendered) {
             panelDiag.submit();
@@ -274,95 +301,128 @@ export class wallOfForce {
         panelDiag.render(true);
 
         let previousTemplateCenter;
-        if (previousTemplateData.direction == 45) {
-            previousTemplateCenter = {
-                x: previousTemplateData.x + (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
-                y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
-            };
-        } else if (previousTemplateData.direction == 135) {
-            previousTemplateCenter = {
-                x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
-                y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
-            };
-        } else if (previousTemplateData.direction == 225) {
-            previousTemplateCenter = {
-                x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
-                y: previousTemplateData.y - (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
-            };
-        }
-
         let square;
-        const previousTemplateWidthSquares = previousTemplateData.flags.advancedspelleffects.dimensions.length / 5;
-        const previousTemplateHeightSquares = previousTemplateData.flags.advancedspelleffects.dimensions.width / 5;
-        square = wallOfForce.sourceSquare({ x: previousTemplateCenter.x, y: previousTemplateCenter.y },
-            previousTemplateWidthSquares, previousTemplateHeightSquares);
-        console.log("square: ", square);
-        let displayTemplate = (await canvas.scene.createEmbeddedDocuments('MeasuredTemplate', [nextTemplateData]))[0];
+
+        let updateTemplateLocation;
+
+        if (type == "h-panels") {
+            if (previousTemplateData.direction == 45) {
+                previousTemplateCenter = {
+                    x: previousTemplateData.x + (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
+                    y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
+                };
+            } else if (previousTemplateData.direction == 135) {
+                previousTemplateCenter = {
+                    x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
+                    y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
+                };
+            } else if (previousTemplateData.direction == 225) {
+                previousTemplateCenter = {
+                    x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
+                    y: previousTemplateData.y - (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
+                };
+            }
+            const previousTemplateWidthSquares = previousTemplateData.flags.advancedspelleffects.dimensions.length / 5;
+            const previousTemplateHeightSquares = previousTemplateData.flags.advancedspelleffects.dimensions.width / 5;
+            square = wallOfForce.sourceSquare({ x: previousTemplateCenter.x, y: previousTemplateCenter.y },
+                previousTemplateWidthSquares, previousTemplateHeightSquares);
+
+
+
+        } else if (type == "v-panels") {
+
+            square = wallOfForce.sourceSquareV({ x: previousTemplateData.x, y: previousTemplateData.y },
+                previousTemplateData.distance, previousTemplateData.direction);
+            nextTemplateData.x = square.x;
+            nextTemplateData.y = square.y;
+        }
+        const displayTemplateData = JSON.parse(JSON.stringify(nextTemplateData));
+        delete displayTemplateData.flags.advancedspelleffects["wallOfForceWallNum"];
+        let displayTemplate = (await canvas.scene.createEmbeddedDocuments('MeasuredTemplate', [displayTemplateData]))[0];
+        // console.log("square: ", square);
+        let currentSpotIndex = 0;
+        updateTemplateLocation = async (crosshairs) => {
+            console.log("crosshairs: ", crosshairs);
+            while (crosshairs.inFlight) {
+                if (!panelDiag.rendered) {
+                    crosshairs.inFlight = false;
+                    return;
+                }
+                await warpgate.wait(100);
+                //console.log(displayTemplate);
+                if (!displayTemplate) return;
+                const verticalTemplate = displayTemplate.data.t == CONST.MEASURED_TEMPLATE_TYPES.RAY;
+                //console.log("Vertical Template:", verticalTemplate);
+                let ray;
+                let angle;
+                if (!verticalTemplate) {
+                    const totalSpots = square.allSpots.length;
+                    const radToNormalizedAngle = (rad) => {
+                        let angle = (rad * 180 / Math.PI) % 360;
+
+                        // offset the angle for even-sided tokens, because it's centered in the grid it's just wonky without the offset
+                        if (square.heightSquares % 2 === 1 && square.widthSquares % 2 === 1) {
+                            angle -= (360 / totalSpots) / 2;
+                        }
+                        const normalizedAngle = Math.round(angle / (360 / totalSpots)) * (360 / totalSpots);
+                        return normalizedAngle < 0
+                            ? normalizedAngle + 360
+                            : normalizedAngle;
+                    }
+
+                    ray = new Ray(square.center, crosshairs);
+                    angle = radToNormalizedAngle(ray.angle);
+                    const spotIndex = Math.ceil(angle / 360 * totalSpots);
+
+                    if (spotIndex === currentSpotIndex) {
+                        continue;
+                    }
+
+                    currentSpotIndex = spotIndex;
+                    const spot = square.allSpots[currentSpotIndex];
+
+                    if (!displayTemplate) return;
+                    await displayTemplate.update({ ...spot });
+                } else {
+                    ray = new Ray(square, crosshairs);
+                    angle = (ray.angle * 180 / Math.PI);
+
+                    if (angle == displayTemplate.data.direction) {
+                        continue;
+                    }
+                    if (!displayTemplate) return;
+                    await displayTemplate.update({ direction: angle });
+                }
+            }
+        }
 
         const targetConfig = {
             drawIcon: false,
             drawOutline: false,
+            interval: 20
         }
-
-        let currentSpotIndex = 0;
-        const updateTemplateLocation = async (crosshairs) => {
-            while (crosshairs.inFlight) {
-                await warpgate.wait(100);
-
-                const totalSpots = square.allSpots.length;
-                const radToNormalizedAngle = (rad) => {
-                    let angle = (rad * 180 / Math.PI) % 360;
-
-                    // offset the angle for even-sided tokens, because it's centered in the grid it's just wonky without the offset
-                    if (square.heightSquares % 2 === 1 && square.widthSquares % 2 === 1) {
-                        angle -= (360 / totalSpots) / 2;
-                    }
-                    const normalizedAngle = Math.round(angle / (360 / totalSpots)) * (360 / totalSpots);
-                    return normalizedAngle < 0
-                        ? normalizedAngle + 360
-                        : normalizedAngle;
-                }
-
-                const ray = new Ray(square.center, crosshairs);
-                const angle = radToNormalizedAngle(ray.angle);
-                const spotIndex = Math.ceil(angle / 360 * totalSpots);
-
-                if (spotIndex === currentSpotIndex) {
-                    continue;
-                }
-
-                currentSpotIndex = spotIndex;
-                const spot = square.allSpots[currentSpotIndex];
-
-                displayTemplate = await displayTemplate.update({ ...spot });
-            }
-        }
-
         const rotateCrosshairs = await warpgate.crosshairs.show(
             targetConfig,
             {
                 show: updateTemplateLocation
             });
         if (rotateCrosshairs.cancelled) {
-            await displayTemplate.delete();
+            if (canvas.scene.templates.get(displayTemplate.id)) {
+                await displayTemplate.delete();
+            }
             game.user.updateTokenTargets();
+            panelDiag.submit();
             return;
         }
-
+        await displayTemplate.setFlag('advancedspelleffects', 'wallOfForceWallNum', nextTemplateData.flags.advancedspelleffects["wallOfForceWallNum"]);
         wallOfForce._placePanels(aseData, displayTemplate, panelDiag, type);
 
-        //Hooks.once('createMeasuredTemplate', (template) => wallOfForce._placePanels(aseData, template, panelDiag, type));
-
-        //const doc = new MeasuredTemplateDocument(nextTemplateData, { parent: canvas.scene });
-        //let newTemplate = new game.dnd5e.canvas.AbilityTemplate(doc);
-        //newTemplate.actorSheet = aseData.casterActor.sheet;
-        //newTemplate.drawPreview();
     }
 
     static async _placeWallOfForce(aseData, templateDocument) {
 
-        this._playEffects(aseData, templateDocument);
-        this._placeWalls(templateDocument);
+        wallOfForce._playEffects(aseData, templateDocument);
+        wallOfForce._placeWalls(templateDocument);
 
     }
 
@@ -528,6 +588,15 @@ export class wallOfForce {
             name: 'flags.advancedspelleffects.effectOptions.color',
             flagName: 'color',
             flagValue: currFlags.color,
+        });
+
+        animOptions.push({
+            label: game.i18n.localize("ASE.WallOfForceUseWebPLabel"),
+            tooltip: game.i18n.localize("ASE.WallOfForceUseWebPTooltip"),
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.useWebP',
+            flagName: 'useWebP',
+            flagValue: currFlags.useWebP,
         });
 
         return {
