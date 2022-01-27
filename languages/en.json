@@ -140,6 +140,18 @@
   "ASE.FogCloudRadiusLabel": "Fog Cloud Radius: ",
   "ASE.FogCloudRadiusTooltip": "The radius of the fog cloud in feet(per spell level if scaling)",
 
+  "ASE.WallOfForceColorLabel": "Wall of Force color: ",
+  "ASE.WallOfForceRadiusLabel": "Wall of Force Radius: ",
+  "ASE.WallOfForceRadiusTooltip": "The radius of the wall of force in feet",
+  "ASE.WallOfForceSegmentSizeLabel": "Wall of Force segment size: ",
+  "ASE.WallOfForceSegmentSizeTooltip": "The size of each individual segment of the wall of force in feet",
+  "ASE.WallOfForcePanelCountLabel": "Panel Count: ",
+  "ASE.WallOfForcePanelCountTooltip": "The number of panels in total when placing manually",
+  "ASE.WallOfForceUseWebPLabel": "Use Static Image: ",
+  "ASE.WallOfForceUseWebPTooltip": "Use a static image rather than an animated video(enable if experiencing performance issues)",
+  "ASE.WallOfForcePanelsRemaining": "Panels Remaining: ",
+  "ASE.WallOfForceEndPanelPlacementInstruction": "Right click any where on the canvas to end placement",
+
   "ASE.DartColorLabel": "Dart Color: ",
   "ASE.DartIntroSoundLabel": "Dart Intro Sound: ",
   "ASE.DartIntroSoundDelayLabel": "Dart Intro Sound Delay: ",
