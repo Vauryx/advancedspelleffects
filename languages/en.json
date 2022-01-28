@@ -117,8 +117,10 @@
   "ASE.AgonizingBlastLabel": "Agonizing Blast: ",
 
   "ASE.DamageDieCountLabel": "Damage Die Count: ",
-  "ASE.DamageDieLabel": "Damage Die: ",
+  "ASE.DamageDieLabel": "Damage Die Type: ",
   "ASE.DamageBonusLabel": "Damage Bonus: ",
+  "ASE.OverrideDamageLabel": "Override Damage: ",
+  "ASE.OverrideDamageTooltip": "Override the damage roll with these values instead",
 
   "ASE.TargetmarkerColorLabel": "Target Marker Color: ",
   "ASE.TargetMarkerHueLabel": "Target Marker Hue: ",
