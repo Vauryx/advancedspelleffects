@@ -28,6 +28,10 @@ export class witchBolt {
             volume: streamVolume,
             delay: streamSoundDelay
         };
+
+        const itemData = midiData.item.data.data;
+        console.log(itemData);
+
         let missed = false;
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
@@ -69,7 +73,7 @@ export class witchBolt {
                     "ability": "",
                     "actionType": "other",
                     "activation": { "type": "action", "cost": 1, "condition": "" },
-                    "damage": { "parts": [], "versatile": "" },
+                    "damage": itemData.damage,
                     "level": midiData.itemLevel,
                     "preparation": { "mode": 'atwill', "prepared": true },
                     "range": { "value": null, "long": null, "units": "" },
@@ -141,12 +145,18 @@ export class witchBolt {
         const initialBoltSound = effectOptions.initialBoltSound ?? "";
         const initialBoltSoundDelay = Number(effectOptions.initialBoltSoundDelay) ?? 0;
         const initialBoltSoundVolume = effectOptions.initialBoltSoundVolume ?? 1;
-        let damageRoll = await new Roll(`1d12`).evaluate({ async: true });
         let itemData = midiData.item.data;
+
+        const damageFormula = itemData.data.damage.parts[0];
+        const damageType = itemData.data.damage.parts[1];
+        console.log('damageFormula: ', damageFormula);
+        let damageRoll = await new Roll(`${damageFormula}`).evaluate({ async: true });
+
         itemData.data.components.concentration = false;
+
         if (game.modules.get("midi-qol")?.active) {
             //console.log(damageRoll);
-            new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, "lightning", target ? [target] : [], damageRoll, { flavor: game.i18n.localize("ASE.WitchBoltDamageFlavor"), itemCardId: "new", itemData: itemData });
+            new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, damageType, target ? [target] : [], damageRoll, { flavor: game.i18n.localize("ASE.WitchBoltDamageFlavor"), itemCardId: "new", itemData: itemData });
         }
         new Sequence("Advanced Spell Effects")
             .sound()

@@ -270,7 +270,7 @@
   "ASE.VTMaxStrandsTooltip": "The maximum number of energy strands to during the siphon effect",
 
   "ASE.ActivateWitchBoltDescription": "Send a jolt of lightning along the arc.",
-  "ASE.WitchBoltDamageFlavor": "Witch Bolt - Damage Roll (1d12 Lightning)",
+  "ASE.WitchBoltDamageFlavor": "Witch Bolt - Damage Roll",
   "ASE.WitchBoltPromptTitle": "Activate Witch Bolt?",
   "ASE.InitialBoltColorLabel": "Initial Bolt Color: ",
   "ASE.InitialBoltSoundLabel": "Initial Bolt Sound: ",
