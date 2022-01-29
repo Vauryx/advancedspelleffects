@@ -26,14 +26,14 @@ export class MissileDialog extends FormApplication {
         //console.log("ASE Magic Missile Targets Detected...", tokens);
         for await (let target of tokens) {
             //console.log('Target: ',target);
-            let effectsOnTarget = await Sequencer.EffectManager.getEffects({ object: target }).filter((e) => {
+            let effectsOnTarget = Sequencer.EffectManager.getEffects({ object: target }).filter((e) => {
                 //console.log('e data name',e.data.name);
                 return e.data.name && e.data?.name?.startsWith("missile-target-");
             }).forEach(async (e) => {
                 console.log('Cleaning up leftover ASE Missile Effects...', e);
                 await Sequencer.EffectManager.endEffects({ object: target, name: e.data.name });
-            });
-            await target?.document.unsetFlag("advancedspelleffects", 'missileSpell');
+            })
+            await aseSocket.executeAsGM("removeFlag", target.id, "missileSpell");
         }
     }
 
@@ -105,7 +105,7 @@ export class MissileDialog extends FormApplication {
         else {
             this.data.attackMods[target.id].push({ index: currMissile, type: type });
         }
-        await target.document.setFlag("advancedspelleffects", "missileSpell.missileNum", currMissile + 1);
+        await aseSocket.executeAsGM("updateFlag", target.document.id, "missileSpell.missileNum", currMissile + 1);
         //console.log("Total Missiles assigned: ", currMissile + 1);
         let inTargetList = this.data.targets.find(t => t.id == target.id);
         if (!inTargetList) {
@@ -193,10 +193,10 @@ export class MissileDialog extends FormApplication {
 
     async _removeMarker(target) {
         let missilesAssigned = Number(target.document.getFlag("advancedspelleffects", "missileSpell.missileNum")) ?? 0;
-        //console.log("Removing assigned missile...", missilesAssigned);
+        console.log("Removing assigned missile...", missilesAssigned, target);
         await Sequencer.EffectManager.endEffects({ name: `missile-target-${target.id}-${missilesAssigned - 1}` });
         if (missilesAssigned > 0) {
-            await target.document.setFlag("advancedspelleffects", "missileSpell.missileNum", missilesAssigned - 1);
+            await aseSocket.executeAsGM("updateFlag", target.id, "missileSpell.missileNum", missilesAssigned - 1);
         }
         //console.log("Total missiles assigned: ", missilesAssigned - 1);
     }
@@ -239,8 +239,8 @@ export class MissileDialog extends FormApplication {
         let missileIntroSoundDelay = Number(this.data.effectOptions.missileIntroSoundDelay) ?? 0;
         let missileIntroVolume = Number(this.data.effectOptions.missileIntroVolume) ?? 1;
         const impactDelay = Number(this.data.effectOptions.impactDelay) ?? -1000;
-
         const missileImpactSound = this.data.effectOptions.missileImpactSound ?? "";
+
         let missileImpactSoundDelay = Number(this.data.effectOptions.missileImpactSoundDelay) ?? 0;
         let missileImpactVolume = Number(this.data.effectOptions.missileImpactVolume) ?? 1;
 
@@ -256,7 +256,7 @@ export class MissileDialog extends FormApplication {
             .atLocation(caster)
             .randomizeMirrorY()
             .missed(!hit)
-            .reachTowards(target)
+            .stretchTo(target)
             .randomOffset(0.65)
             //.playbackRate(utilFunctions.getRandomNumber(0.7, 1.3))
             .waitUntilFinished(impactDelay)
@@ -274,12 +274,12 @@ export class MissileDialog extends FormApplication {
         Hooks.once('closeMissileDialog', async () => {
             let tokens = Array.from(canvas.tokens.placeables).filter(t => t.data.flags.advancedspelleffects && t.data.flags.advancedspelleffects.missileSpell);
             for await (let target of tokens) {
-                await Sequencer.EffectManager.getEffects({ object: target }).filter(async (e) => {
+                Sequencer.EffectManager.getEffects({ object: target }).filter(async (e) => {
                     e.data.name.startsWith("missile-target-")
                 }).forEach(async (e) => {
                     await Sequencer.EffectManager.endEffects({ object: target, name: e.data.name })
                 });
-                await target?.document.unsetFlag("advancedspelleffects", 'missileSpell');
+                await await aseSocket.executeAsGM("removeFlag", target.document.id, 'missileSpell');
             }
             //console.log('Done clearing target markers...', ...arguments);
             //this.submit();
@@ -327,8 +327,6 @@ export class MissileDialog extends FormApplication {
 
             }
 
-            //console.log(this);
-            //console.log('Attack Mods Info: ', this.data.attackMods);
             let caster = canvas.tokens.get(this.data.caster);
             const item = this.data.item;
             let rollData = item.getRollData();
@@ -458,12 +456,12 @@ export class MissileDialog extends FormApplication {
 
 
                 }
-                const targetMarkers = await Sequencer.EffectManager.getEffects({ object: targetToken }).filter(effect => effect.data.name?.startsWith(`missile-target`));
+                const targetMarkers = Sequencer.EffectManager.getEffects({ object: targetToken }).filter(effect => effect.data.name?.startsWith(`missile-target`));
                 for await (let targetMarker of targetMarkers) {
                     await Sequencer.EffectManager.endEffects({ name: targetMarker.data.name, object: targetToken });
                 }
 
-                await targetToken.document.unsetFlag("advancedspelleffects", 'missileSpell');
+                await aseSocket.executeAsGM("removeFlag", targetToken.id, "missileSpell");
             }
             let content = this._buildChatData(this.data.allAttackRolls, this.data.allDamRolls, caster);
             await ChatMessage.create({ content: content, user: game.user.id });

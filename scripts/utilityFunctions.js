@@ -1,3 +1,39 @@
+export async function createFolderWithActors(folderName, actorNames) {
+
+    let folder = game.folders?.getName(folderName);
+
+    if (!folder) {
+        folder = await Folder.create({
+            name: folderName,
+            type: 'Actor',
+            color: "#646cdd",
+            parent: null
+        });
+    }
+
+    const folderId = folder.id;
+
+    const monsterPack = game.packs.get("dnd5e.monsters");
+
+    if (!monsterPack) return [];
+
+    // Loop through each actor name and try to find them in the D&D 5e monsters compendia
+    const actors = [];
+    for (const name of actorNames) {
+
+        const creature = await monsterPack.getDocuments({ "name": name })
+
+        if (!creature.length) continue
+        actors.push(await Actor.create({
+            ...creature[0].toObject(),
+            folder: folderId
+        }));
+    }
+
+    return actors;
+
+}
+
 export function checkModules() {
     let error = false;
 
@@ -272,7 +308,7 @@ export async function checkCrosshairs(crosshairs) {
         for await (let tokenD of collected) {
             let token = canvas.tokens.get(tokenD.id);
             //console.log(token);
-            let markerEffect = 'jb2a.ui.indicator.red';
+            let markerEffect = 'jb2a.ui.indicator.red.01.01';
             let markerApplied = Sequencer.EffectManager.getEffects({ name: `ase-crosshairs-marker-${token.id}` });
             if (markerApplied.length == 0) {
                 new Sequence()
@@ -292,6 +328,16 @@ export async function checkCrosshairs(crosshairs) {
             if (markerApplied.length > 0) {
                 Sequencer.EffectManager.endEffects({ name: `ase-crosshairs-marker-${token.id}` });
             }
+        }
+    }
+}
+
+export function cleanUpTemplateGridHighlights() {
+    const ASETemplates = canvas.scene.templates.filter((template) => { return template.data.flags.advancedspelleffects });
+    for (let template of ASETemplates) {
+        const highlight = canvas.grid.getHighlightLayer(`Template.${template.id}`);
+        if (highlight) {
+            highlight.clear();
         }
     }
 }

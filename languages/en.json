@@ -2,6 +2,7 @@
   "ASE.Darkness": "Darkness",
   "ASE.DetectMagic": "Detect Magic",
   "ASE.FogCloud": "Fog Cloud",
+  "ASE.WallOfForce": "Wall of Force",
   "ASE.SteelWindStrike": "Steel Wind Strike",
   "ASE.ThunderStep": "Thunder Step",
   "ASE.SpiritualWeapon": "Spiritual Weapon",
@@ -23,7 +24,7 @@
   "ASE.MirrorImage": "Mirror Image",
   "ASE.StatusEffect": "Status Effect",
 
-  "ASE.SummonAberrantSpirit": "Summon Aberrant Spirit",
+  "ASE.SummonAberration": "Summon Aberration",
   "ASE.SummonBeast": "Summon Beast",
   "ASE.SummonCelestial": "Summon Celestial",
   "ASE.SummonConstruct": "Summon Construct",
@@ -56,7 +57,7 @@
 
   "ASE.ZombieActorLabel": "Associated Zombie Actor: ",
   "ASE.SkeletonActorLabel": "Associated Skeleton Actor: ",
-
+  "ASE.animateDeadRangeLabel": "Spell Range: ",
   "ASE.MagicSchoolLabel": "Magic School: ",
   "ASE.MagicSchoolColorLabel": "Magic School Color: ",
   "ASE.MagicSchoolIntroSoundLabel": "Magic School Intro Sound: ",
@@ -117,8 +118,10 @@
   "ASE.AgonizingBlastLabel": "Agonizing Blast: ",
 
   "ASE.DamageDieCountLabel": "Damage Die Count: ",
-  "ASE.DamageDieLabel": "Damage Die: ",
+  "ASE.DamageDieLabel": "Damage Die Type: ",
   "ASE.DamageBonusLabel": "Damage Bonus: ",
+  "ASE.OverrideDamageLabel": "Override Damage: ",
+  "ASE.OverrideDamageTooltip": "Override the damage roll with these values instead",
 
   "ASE.TargetmarkerColorLabel": "Target Marker Color: ",
   "ASE.TargetMarkerHueLabel": "Target Marker Hue: ",
@@ -140,6 +143,18 @@
   "ASE.FogCloudVolumeLabel": "Fog Cloud Volume: ",
   "ASE.FogCloudRadiusLabel": "Fog Cloud Radius: ",
   "ASE.FogCloudRadiusTooltip": "The radius of the fog cloud in feet(per spell level if scaling)",
+
+  "ASE.WallOfForceColorLabel": "Wall of Force color: ",
+  "ASE.WallOfForceRadiusLabel": "Wall of Force Radius: ",
+  "ASE.WallOfForceRadiusTooltip": "The radius of the wall of force in feet",
+  "ASE.WallOfForceSegmentSizeLabel": "Wall of Force segment size: ",
+  "ASE.WallOfForceSegmentSizeTooltip": "The size of each individual segment of the wall of force in feet",
+  "ASE.WallOfForcePanelCountLabel": "Panel Count: ",
+  "ASE.WallOfForcePanelCountTooltip": "The number of panels in total when placing manually",
+  "ASE.WallOfForceUseWebPLabel": "Use Static Image: ",
+  "ASE.WallOfForceUseWebPTooltip": "Use a static image rather than an animated video(enable if experiencing performance issues)",
+  "ASE.WallOfForcePanelsRemaining": "Panels Remaining: ",
+  "ASE.WallOfForceEndPanelPlacementInstruction": "Right click any where on the canvas to end placement",
 
   "ASE.DartColorLabel": "Dart Color: ",
   "ASE.DartIntroSoundLabel": "Dart Intro Sound: ",
@@ -256,7 +271,7 @@
   "ASE.VTMaxStrandsTooltip": "The maximum number of energy strands to during the siphon effect",
 
   "ASE.ActivateWitchBoltDescription": "Send a jolt of lightning along the arc.",
-  "ASE.WitchBoltDamageFlavor": "Witch Bolt - Damage Roll (1d12 Lightning)",
+  "ASE.WitchBoltDamageFlavor": "Witch Bolt - Damage Roll",
   "ASE.WitchBoltPromptTitle": "Activate Witch Bolt?",
   "ASE.InitialBoltColorLabel": "Initial Bolt Color: ",
   "ASE.InitialBoltSoundLabel": "Initial Bolt Sound: ",
@@ -282,6 +297,7 @@
   "ASE.AnimateDeadDialogRaiseMessage": "Corpses left to raise: ",
   "ASE.AnimateDeadDialogHeaderCorpse": "Corpse",
   "ASE.AnimateDeadDialogHeaderRaise": "Raise As",
+  "ASE.AnimateDeadDialogNoCorpses": "No corpses to raise in range!",
   "ASE.ZombieLabel": "Zombie",
   "ASE.SkeletonLabel": "Skeleton",
 

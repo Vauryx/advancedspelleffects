@@ -20,6 +20,7 @@ import { mirrorImage } from "../spells/mirrorImage.js";
 import { statusEffect } from "../spells/statusEffect.js";
 import { statusEffectHandler } from "../statusEffectHandler.js";
 
+import { wallOfForce } from "../spells/wallOfForce.js";
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
@@ -48,6 +49,7 @@ export class ASESettings extends FormApplication {
         this.spellList[game.i18n.localize("ASE.MirrorImage")] = mirrorImage;
         this.spellList[game.i18n.localize("ASE.Summon")] = summonCreature;
         this.spellList[game.i18n.localize("ASE.StatusEffect")] = statusEffect;
+        this.spellList[game.i18n.localize("ASE.WallOfForce")] = wallOfForce;
     }
 
     static get defaultOptions() {
@@ -94,6 +96,10 @@ export class ASESettings extends FormApplication {
                 break;
             case game.i18n.localize("ASE.FogCloud"):
                 data.level = 1;
+                data.duration = { "value": 10, "units": "minute" };
+                break;
+            case game.i18n.localize("ASE.WallOfForce"):
+                data.level = 5;
                 data.duration = { "value": 10, "units": "minute" };
                 break;
             case game.i18n.localize("ASE.SteelWindStrike"):

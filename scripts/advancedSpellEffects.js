@@ -22,6 +22,7 @@ import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
 import { statusEffectHandler } from "./statusEffectHandler.js";
+import { wallOfForce } from "./spells/wallOfForce.js";
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
     setupASESocket();
@@ -48,8 +49,8 @@ const aseModules = {
     eldritchBlast,
     moonBeam,
     mirrorImage,
-    statusEffectHandler
-
+    statusEffectHandler,
+    wallOfForce
 }
 Hooks.once('ready', async function () {
 

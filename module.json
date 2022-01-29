@@ -7,7 +7,7 @@
   "library": "false",
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.8.9",
-  "compatibleCoreVersion": "0.8.9",
+  "compatibleCoreVersion": "9.0",
   "packs": [],
   "authors": [
     {
@@ -27,7 +27,11 @@
       "name": "socketlib"
     }
   ],
-  "conflicts": [],
+  "conflicts": [
+    {
+      "name": "betterrolls5e"
+    }
+  ],
   "esmodules": ["/scripts/setup.js", "/scripts/advancedSpellEffects.js"],
   "scripts": [],
   "styles": ["/styles/module.css"],

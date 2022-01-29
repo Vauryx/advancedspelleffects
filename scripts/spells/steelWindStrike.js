@@ -59,7 +59,7 @@ export class steelWindStrike {
 
         async function evaluateAttack(target) {
             //console.log("Evalute attack target: ", target);
-            let attackRoll = new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
+            let attackRoll = await new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
             // game.dice3d?.showForRoll(attackRoll);
             if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
                 onMiss(target, attackRoll);
@@ -72,11 +72,11 @@ export class steelWindStrike {
         async function onHit(target, attackRoll) {
             //console.log('Attack hit!');
             //console.log("Attack roll: ", attackRoll);
-            let currentRoll = new Roll('6d10', caster.actor.getRollData()).roll();
-            //console.log("Current damage dice roll total: ", currentRoll.total);
+            let currentRoll = await new Roll('6d10', caster.actor.getRollData()).roll();
+            console.log("Current damage dice roll total: ", currentRoll.total);
             //game.dice3d?.showForRoll(currentRoll);
             if (game.modules.get("midi-qol")?.active) {
-                let damageData = new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item.data });
+                new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item.data });
             }
             //console.log("damage data: ", damageData);
             rollDataForDisplay.push({
@@ -84,7 +84,7 @@ export class steelWindStrike {
                 "attackroll": attackRoll.total,
                 "hit": true,
                 "damageroll": currentRoll.total
-            })
+            });
         }
         async function onMiss(target, attackRoll) {
             //console.log('Missed attack...');
@@ -94,7 +94,7 @@ export class steelWindStrike {
                 "attackroll": attackRoll.total,
                 "hit": false,
                 "damageroll": 0
-            })
+            });
             //let currentRoll = new Roll(`${damageDie}`, caster.actor.getRollData()).roll({ async: false });
             //game.dice3d?.showForRoll(currentRoll);
             //new MidiQOL.DamageOnlyWorkflow(midiDataactor, midiDatatokenId, currentRoll.total, "bludgeoning", [target], currentRoll, { flavor: `Flurry of Blows - Damage Roll (${damageDie} Bludgeoning)`, itemCardId: midiDataitemCardId });
@@ -120,7 +120,7 @@ export class steelWindStrike {
                 .effect()
                 .atLocation(startLocation)
                 .file(gustAnim)
-                .reachTowards(location)
+                .stretchTo(location)
                 .opacity(0.8)
                 .fadeOut(250)
                 .belowTokens()
@@ -218,7 +218,7 @@ export class steelWindStrike {
                     .effect()
                     .atLocation({ x: caster.x + (canvas.grid.size / 2), y: caster.y + (canvas.grid.size / 2) })
                     .file(gustAnim)
-                    .reachTowards({ x: openPosition.x + (canvas.grid.size / 2), y: openPosition.y + (canvas.grid.size / 2) })
+                    .stretchTo({ x: openPosition.x + (canvas.grid.size / 2), y: openPosition.y + (canvas.grid.size / 2) })
                     .opacity(0.8)
                     .fadeOut(250)
                     .belowTokens()
@@ -241,7 +241,7 @@ export class steelWindStrike {
                     .file(swordAnim)
                     .startTime(animStartTimeMap[swingType])
                     .endTime(animEndTimeMap[swingType])
-                    .reachTowards(target)
+                    .stretchTo(target)
                     .fadeOut(250, { ease: "easeOutQuint" })
                     .waitUntilFinished()
                 await steelWindSequence.play();

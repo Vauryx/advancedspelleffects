@@ -301,7 +301,7 @@ export class spiritualWeapon {
             .missed(game.modules.get("midi-qol")?.active && Array.from(data.hitTargets ?? []).length == 0)
             .atLocation(casterToken)
             .fadeOut(500)
-            .reachTowards(target)
+            .stretchTo(target)
             .waitUntilFinished(-250)
             .animation()
             .on(casterToken)

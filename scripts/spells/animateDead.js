@@ -10,52 +10,7 @@ export class animateDead {
         }
         return;
     }
-    static async _preloadAssets() {
-        /* BULK PRELOADER 
-        console.log('Preloading assets for ASE Animate Dead...');
-        let assetDBPaths = [
-            "jb2a.magic_signs.circle.02",
-            "jb2a.eldritch_blast",
-            "jb2a.energy_strands.complete",
-            "jb2a.portals.vertical.vortex",
-            "jb2a.impact.010"
-        ];
-        let assetFilePaths = await utilFunctions.getAssetFilePaths(assetDBPaths);
-        //console.log('Files about to be preloaded...', assetDBPaths);
-        await Sequencer.Preloader.preloadForClients(assetFilePaths, true);
-        console.log(`Preloaded ${assetFilePaths.length} assets!`);
-        */
-        // iterate over all actors in game.actors and find all items with the ASE Animate Dead effect
-        // and preload the assets for the effect 
-        console.log('Preloading assets for ASE Animate Dead...');
-        let assetDBPaths = [];
-        let animateDeadItems = utilFunctions.getAllItemsNamed("Animate Dead");
-        if (animateDeadItems.length > 0) {
-            animateDeadItems.forEach(async function (item) {
-                let aseSettings = item.getFlag("advancedspelleffects", "effectOptions");
-                //console.log(aseSettings);
 
-                let portalAnimIntro = `jb2a.magic_signs.circle.02.${aseSettings.magicSchool}.intro.${aseSettings.magicSchoolColor}`;
-                let portalAnimLoop = `jb2a.magic_signs.circle.02.${aseSettings.magicSchool}.loop.${aseSettings.magicSchoolColor}`;
-                let portalAnimOutro = `jb2a.magic_signs.circle.02.${aseSettings.magicSchool}.outro.${aseSettings.magicSchoolColor}`;
-                let effectAAnim = `jb2a.eldritch_blast.${aseSettings.effectAColor}.05ft`;
-                let effectBAnim = `jb2a.energy_strands.complete.${aseSettings.effectBColor}.01`;
-
-                if (!assetDBPaths)
-                    //Add animation to assetDBPaths if it is not already in the list
-                    if (!assetDBPaths.includes(portalAnimIntro)) assetDBPaths.push(portalAnimIntro);
-                if (!assetDBPaths.includes(portalAnimLoop)) assetDBPaths.push(portalAnimLoop);
-                if (!assetDBPaths.includes(portalAnimOutro)) assetDBPaths.push(portalAnimOutro);
-                if (!assetDBPaths.includes(effectAAnim)) assetDBPaths.push(effectAAnim);
-                if (!assetDBPaths.includes(effectBAnim)) assetDBPaths.push(effectBAnim);
-            });
-        }
-        //console.log('DB Paths about to be preloaded...', assetDBPaths);
-        //console.log('Files about to be preloaded...', assetFilePaths);
-        console.log(`Preloaded ${assetDBPaths.length} assets for Animate Dead!`);
-        await Sequencer.Preloader.preloadForClients(assetDBPaths, true);
-        return;
-    }
     static async rise(midiData) {
 
         const actorD = midiData.actor;
@@ -65,14 +20,13 @@ export class animateDead {
         const spellLevel = midiData.itemLevel ? Number(midiData.itemLevel) : 3;
         const spellSaveDC = midiData.actor?.data?.data?.attributes?.spelldc ?? 10;
         const raiseLimit = (2 * spellLevel) - 5;
-
+        const detectRange = aseSettings.range ?? 10;
         let corpses = canvas.tokens.placeables.filter(function (target) {
             return target?.actor?.data?.data?.attributes?.hp?.value == 0
-                && utilFunctions.measureDistance(utilFunctions.getCenter(tokenD.data), utilFunctions.getCenter(target.data)) <= 10
+                && utilFunctions.measureDistance(utilFunctions.getCenter(tokenD.data), utilFunctions.getCenter(target.data)) <= detectRange
                 && target !== tokenD
         });
 
-        console.log("Detected corpses in range: ", corpses);
         new animateDeadDialog(corpses, { raiseLimit: raiseLimit, effectSettings: aseSettings }).render(true);
 
     }
@@ -96,13 +50,17 @@ export class animateDead {
 
         const portalImpactColorsRaw = `jb2a.impact.010`;
         const portalImpactColorOptions = utilFunctions.getDBOptions(portalImpactColorsRaw);
-        const summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
+        let summonActorsFolder = game.folders?.getName("ASE-Summons");
+        let summonActorsList = summonActorsFolder?.contents ?? [];
+
+        if(!summonActorsFolder || summonActorsList.length === 0){
+            summonActorsList = await utilFunctions.createFolderWithActors("ASE-Summons", ["Skeleton", "Zombie"]);
+        }
+
         let summonOptions = {};
-        let currentSummonTypes = {};
         summonActorsList.forEach((actor) => {
             summonOptions[actor.id] = actor.name;
         });
-        currentSummonTypes = currFlags.summons ?? { Zombie: { name: "", actor: "" }, Skeleton: { name: "", actor: "" } };
 
         let spellOptions = [];
         let animOptions = [];
@@ -123,6 +81,14 @@ export class animateDead {
             name: 'flags.advancedspelleffects.effectOptions.summons.skeleton.actor',
             flagName: 'summons.skeleton.actor',
             flagValue: currFlags.summons?.skeleton?.actor ?? '',
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize('ASE.animateDeadRangeLabel'),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.range',
+            flagName: 'range',
+            flagValue: currFlags.range ?? 10
         });
 
         animOptions.push({
