@@ -49,7 +49,7 @@ export class callLightning {
         boltDamageDieCount = stormyWeather ? boltDamageDieCount + 1 : boltDamageDieCount;
 
         const boltDamage = `${boltDamageDieCount}${boltDamageDieType}${boltDamageDieMod != 0 ? `+${boltDamageDieMod}` : ''}`;
-        console.log('boltDamage: ', boltDamage);
+        //console.log('boltDamage: ', boltDamage);
 
         const displayCrosshairs = async (crosshairs) => {
             new Sequence("Advanced Spell Effects")
