@@ -14,12 +14,23 @@ Hooks.once('init', async function () {
     default: true,
     onChange: debouncedReload
   });
+  game.settings.register("advancedspelleffects", "overrideTemplateBorder", {
+    name: "Enable ASE Template Border Override",
+    hint: "This overrides the foundry default template behaviour and removes the border for templates specifically placed by ASE spells. Other templates should function as normal.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: debouncedReload
+  });
 });
 
 Hooks.once('ready', async function () {
   if (game.settings.get("advancedspelleffects", "overrideGridHighlight")) {
     libWrapper.register('advancedspelleffects', "MeasuredTemplate.prototype.highlightGrid", _ASEGridHighlight, "OVERRIDE");
-    libWrapper.register("advancedspelleffects", "MeasuredTemplate.prototype.render", _ASERemoveTemplateBorder, "WRAPPER");
+    if (!game.modules.get("tokenmagic")?.active && game.settings.get("advancedspelleffects", "overrideTemplateBorder")) {
+      libWrapper.register("advancedspelleffects", "MeasuredTemplate.prototype.render", _ASERemoveTemplateBorder, "WRAPPER");
+    }
     utilFunctions.cleanUpTemplateGridHighlights();
   }
 
