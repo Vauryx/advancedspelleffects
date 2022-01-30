@@ -5,10 +5,6 @@ export class detectMagic {
 
     static registerHooks() {
         Hooks.on("updateToken", detectMagic._updateToken);
-        if (game.settings.get("advancedspelleffects", "preloadFiles")) {
-            //console.log("Starting Preload of ASE Animate Dead...");
-            //Hooks.on("sequencer.ready", detectMagic._preloadAssets);
-        }
     }
     static async _preloadAssets() {
         console.log('Preloading assets for ASE Detect Magic...');

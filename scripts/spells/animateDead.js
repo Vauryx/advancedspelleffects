@@ -4,10 +4,6 @@ import * as utilFunctions from "../utilityFunctions.js";
 
 export class animateDead {
     static registerHooks() {
-        if (game.settings.get("advancedspelleffects", "preloadFiles")) {
-            //console.log("Starting Preload of ASE Animate Dead...");
-            //Hooks.on("sequencer.ready", animateDead._preloadAssets);
-        }
         return;
     }
 
@@ -53,7 +49,7 @@ export class animateDead {
         let summonActorsFolder = game.folders?.getName("ASE-Summons");
         let summonActorsList = summonActorsFolder?.contents ?? [];
 
-        if(!summonActorsFolder || summonActorsList.length === 0){
+        if (!summonActorsFolder || summonActorsList.length === 0) {
             summonActorsList = await utilFunctions.createFolderWithActors("ASE-Summons", ["Skeleton", "Zombie"]);
         }
 

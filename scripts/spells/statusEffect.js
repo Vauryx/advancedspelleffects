@@ -1,3 +1,6 @@
+import { aseSocket } from "../aseSockets.js";
+import * as utilFunctions from "../utilityFunctions.js";
+
 export class statusEffect {
     constructor(data) {
         this.item = data.item;
@@ -21,7 +24,8 @@ export class statusEffect {
 
         console.log('statusEffects: ', this.statusEffect);
         statusEffects.push(this.statusEffect);
-        await target.setFlag('advancedspelleffects', 'statusEffects', statusEffects);
+        //await target.setFlag('advancedspelleffects', 'statusEffects', statusEffects);
+        await aseSocket.executeAsGM("updateFlag", target.id, "statusEffects", statusEffects);
 
     }
 
@@ -96,7 +100,7 @@ export class statusEffect {
             options: effectTypes,
             name: 'flags.advancedspelleffects.effectOptions.statusEffects.effectType',
             flagName: 'statusEffects.effectType',
-            flagValue: currFlags.statusEffects.effectType ?? 'buff',
+            flagValue: currFlags.statusEffects?.effectType ?? 'buff',
         });
 
         spellOptions.push({
@@ -106,7 +110,7 @@ export class statusEffect {
             options: effectTargetTypes,
             name: 'flags.advancedspelleffects.effectOptions.statusEffects.effectTargetType',
             flagName: 'statusEffects.effectTargetType',
-            flagValue: currFlags.statusEffects.effectTargetType ?? 'damageRolls',
+            flagValue: currFlags.statusEffects?.effectTargetType ?? 'damageRolls',
         });
 
         spellOptions.push({
@@ -115,7 +119,7 @@ export class statusEffect {
             type: 'formula',
             name: 'flags.advancedspelleffects.effectOptions.statusEffects.value',
             flagName: 'statusEffects.value',
-            flagValue: currFlags.statusEffects.value ?? '1d4',
+            flagValue: currFlags.statusEffects?.value ?? '1d4',
 
         });
 
@@ -125,7 +129,7 @@ export class statusEffect {
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.statusEffects.source',
             flagName: 'statusEffects.source',
-            flagValue: currFlags.statusEffects.source ?? false,
+            flagValue: currFlags.statusEffects?.source ?? false,
         });
 
         return {

@@ -304,7 +304,7 @@ export class ASESettings extends FormApplication {
         });
 
         html.find('.ase-spell-settings-formulaInput').keypress(evt => {
-            console.log('Kepypress event detected!', evt);
+            //console.log('Kepypress event detected!', evt);
             const regexFormula = new RegExp("^(?!\d+$)(([1-9]\d*)?[Dd]?[1-9]\d*( ?[+-] ?)?)+(?<![+-] ?)$");
             if (evt.currentTarget.value == '' || evt.currentTarget.value == undefined) {
                 if (!(Number(evt.key) < 10)
