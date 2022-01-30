@@ -4,18 +4,36 @@ import * as utilFunctions from "./utilityFunctions.js";
 
 Hooks.once('init', async function () {
   console.log("Registering ASE game settings...");
-  game.settings.register("advancedspelleffects", "preloadFiles", {
-    name: "Preload animation files on start-up?",
-    hint: "This caches the video files when foundry starts for all users. This will use some extra bandwidth, but animations will play more smoothly the first time.",
+  const debouncedReload = foundry.utils.debounce(() => { window.location.reload(); }, 100);
+  game.settings.register("advancedspelleffects", "overrideGridHighlight", {
+    name: "Enable ASE Grid Highlight Override",
+    hint: "This overrides the foundry default template behaviour and removes the grid highlighting for templates specifically placed by ASE spells. Other templates should function as normal.",
     scope: "world",
     config: true,
     type: Boolean,
-    default: false
+    default: true,
+    onChange: debouncedReload
   });
 });
 
 Hooks.once('ready', async function () {
-  libWrapper.register('advancedspelleffects', "MeasuredTemplate.prototype.highlightGrid", _ASEGridHighlight, "OVERRIDE");
+  if (game.settings.get("advancedspelleffects", "overrideGridHighlight")) {
+    libWrapper.register('advancedspelleffects', "MeasuredTemplate.prototype.highlightGrid", _ASEGridHighlight, "OVERRIDE");
+    libWrapper.register("advancedspelleffects", "MeasuredTemplate.prototype.render", _ASERemoveTemplateBorder, "WRAPPER");
+    utilFunctions.cleanUpTemplateGridHighlights();
+  }
+
+  function _ASERemoveTemplateBorder(wrapped, ...args) {
+    wrapped(...args);
+    if (this.data?.flags?.advancedspelleffects) {
+      if (this.data?.flags?.advancedspelleffects?.placed) {
+        this.template.alpha = 0;
+      } else {
+        return;
+      }
+    }
+  }
+
   function _ASEGridHighlight() {
     if (this.data.flags.advancedspelleffects) return;
     const grid = canvas.grid;
@@ -71,9 +89,6 @@ Hooks.once('ready', async function () {
       }
     }
   }
-
-  utilFunctions.cleanUpTemplateGridHighlights();
-
 
   if (!game.user.isGM) return;
 

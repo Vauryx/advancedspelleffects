@@ -184,7 +184,10 @@ export class wallOfForce {
 
             let wofPanelData = await wofPanelDiag.getData();
 
-            Hooks.once('createMeasuredTemplate', (template) => wallOfForce._placePanels(aseData, template, wofPanelDiag, type));
+            Hooks.once('createMeasuredTemplate', async (template) => {
+                await template.setFlag('advancedspelleffects', 'placed', true);
+                wallOfForce._placePanels(aseData, template, wofPanelDiag, type);
+            });
             console.log("template data:", templateData);
             const doc = new MeasuredTemplateDocument(templateData, { parent: canvas.scene });
             let template = new game.dnd5e.canvas.AbilityTemplate(doc);
@@ -195,7 +198,10 @@ export class wallOfForce {
         }
         else {
             console.log("ASE DATA: ", aseData);
-            Hooks.once('createMeasuredTemplate', (template) => wallOfForce._placeWallOfForce(aseData, template));
+            Hooks.once('createMeasuredTemplate', async (template) => {
+                await template.setFlag('advancedspelleffects', 'placed', true);
+                wallOfForce._placeWallOfForce(aseData, template);
+            });
             console.log("template data:", templateData);
             const doc = new MeasuredTemplateDocument(templateData, { parent: canvas.scene });
             let template = new game.dnd5e.canvas.AbilityTemplate(doc);
@@ -286,6 +292,7 @@ export class wallOfForce {
         const previousTemplateData = template.data;
         let panelsRemaining = panelDiag.data.aseData.flags.wallOfForcePanelCount;
         //console.log("Panels Remaining: ", panelsRemaining);
+        await template.unsetFlag("advancedspelleffects", 'placed');
         const nextTemplateData = template.toObject();
 
         delete nextTemplateData["_id"];
@@ -414,7 +421,15 @@ export class wallOfForce {
             panelDiag.submit();
             return;
         }
-        await displayTemplate.setFlag('advancedspelleffects', 'wallOfForceWallNum', nextTemplateData.flags.advancedspelleffects["wallOfForceWallNum"]);
+        const newFlags = {
+            flags: {
+                advancedspelleffects: {
+                    placed: true,
+                    wallOfForceWallNum: nextTemplateData.flags.advancedspelleffects["wallOfForceWallNum"]
+                }
+            }
+        }
+        await displayTemplate.update(newFlags);
         wallOfForce._placePanels(aseData, displayTemplate, panelDiag, type);
 
     }

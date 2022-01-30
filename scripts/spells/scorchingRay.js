@@ -3,9 +3,6 @@ import { MissileDialog } from "../apps/missile-dialog.js";
 import * as utilFunctions from "../utilityFunctions.js";
 export class scorchingRay {
     static async registerHooks() {
-        if (game.settings.get("advancedspelleffects", "preloadFiles")) {
-            //Hooks.on("sequencer.ready", scorchingRay._preloadAssets);
-        }
         return;
     }
 
