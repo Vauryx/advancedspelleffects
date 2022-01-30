@@ -292,9 +292,9 @@ export class wallOfForce {
         const previousTemplateData = template.data;
         let panelsRemaining = panelDiag.data.aseData.flags.wallOfForcePanelCount;
         //console.log("Panels Remaining: ", panelsRemaining);
-        await template.unsetFlag("advancedspelleffects", 'placed');
-        const nextTemplateData = template.toObject();
 
+        const nextTemplateData = template.toObject();
+        nextTemplateData.flags.advancedspelleffects['placed'] = false;
         delete nextTemplateData["_id"];
         //console.log("nextTemplateData: ", nextTemplateData);
         //console.log("previousTemplateData: ", previousTemplateData);
@@ -424,11 +424,14 @@ export class wallOfForce {
         const newFlags = {
             flags: {
                 advancedspelleffects: {
-                    placed: true,
-                    wallOfForceWallNum: nextTemplateData.flags.advancedspelleffects["wallOfForceWallNum"]
+                    placed: true
                 }
             }
         }
+        if (type == "v-panels") {
+            newFlags.flags.advancedspelleffects["wallOfForceWallNum"] = nextTemplateData.flags.advancedspelleffects["wallOfForceWallNum"]
+        }
+
         await displayTemplate.update(newFlags);
         wallOfForce._placePanels(aseData, displayTemplate, panelDiag, type);
 
