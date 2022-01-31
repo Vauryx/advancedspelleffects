@@ -27,11 +27,19 @@ Hooks.once('init', async function () {
 
 Hooks.once('ready', async function () {
   if (game.settings.get("advancedspelleffects", "overrideGridHighlight")) {
-    libWrapper.register('advancedspelleffects', "MeasuredTemplate.prototype.highlightGrid", _ASEGridHighlight, "OVERRIDE");
-    if (!game.modules.get("tokenmagic")?.active && game.settings.get("advancedspelleffects", "overrideTemplateBorder")) {
-      libWrapper.register("advancedspelleffects", "MeasuredTemplate.prototype.render", _ASERemoveTemplateBorder, "WRAPPER");
+    if (!game.modules.get("df-qol")?.active) {
+      libWrapper.register('advancedspelleffects', "MeasuredTemplate.prototype.highlightGrid", _ASEGridHighlight, "OVERRIDE");
+      utilFunctions.cleanUpTemplateGridHighlights();
+    } else {
+      ui.notifications.info("ASE Grid Highlight Override disabled due to conflict with DF-QOL Module");
     }
-    utilFunctions.cleanUpTemplateGridHighlights();
+  }
+  if (game.settings.get("advancedspelleffects", "overrideTemplateBorder")) {
+    if (!game.modules.get("tokenmagic")?.active) {
+      libWrapper.register("advancedspelleffects", "MeasuredTemplate.prototype.render", _ASERemoveTemplateBorder, "WRAPPER");
+    } else {
+      ui.notifications.info("ASE Template Border Override disabled due to conflict with TokenMagicFX Module");
+    }
   }
 
   function _ASERemoveTemplateBorder(wrapped, ...args) {
