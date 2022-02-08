@@ -220,6 +220,19 @@
                                                 <input type="checkbox" name="{{this.name}}" {{checked this.flagValue}}>
                                             </td>
                                         {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'dropdown'}}
+                                            <td>
+                                                <select name="{{this.name}}">
+                                                    {{#select this.flagValue}}
+                                                        {{#each this.options as |name key|}}
+                                                            <option value="{{key}}">
+                                                                {{name}}
+                                                            </option>
+                                                        {{/each}}
+                                                    {{/select}}
+                                                </select>
+                                            </td>
+                                        {{/ifCondASE}}
                                     </tr>
                                 {{/each}}
                             </tbody>

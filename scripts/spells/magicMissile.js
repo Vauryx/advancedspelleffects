@@ -62,6 +62,10 @@ export class magicMissile {
             'd20': 'd20',
         };
 
+        const soundPlaybackOptions = {
+            'indiv': 'Individual',
+            'group': 'Group'
+        };
 
         spellOptions.push({
             label: game.i18n.localize('ASE.DamageDieCountLabel'),
@@ -170,6 +174,16 @@ export class magicMissile {
             max: 1,
             step: 0.01,
         });
+        soundOptions.push({
+            label: game.i18n.localize("ASE.BeamIntroSoundPlaybackOptionsLabel"),
+            tooltip: game.i18n.localize("ASE.BeamIntroSoundPlaybackOptionsTooltip"),
+            type: 'dropdown',
+            options: soundPlaybackOptions,
+            name: 'flags.advancedspelleffects.effectOptions.missileIntroSoundPlayback',
+            flagName: 'missileIntroSoundPlayback',
+            flagValue: currFlags.missileIntroSoundPlayback ?? 'indiv',
+
+        });
 
         soundOptions.push({
             label: game.i18n.localize('ASE.DartImpactSoundLabel'),
@@ -180,6 +194,7 @@ export class magicMissile {
         });
         soundOptions.push({
             label: game.i18n.localize('ASE.DartImpactSoundDelayLabel'),
+            tooltip: game.i18n.localize("ASE.DartImpactSoundDelayTooltip"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactSoundDelay',
             flagName: 'missileImpactSoundDelay',
@@ -194,6 +209,16 @@ export class magicMissile {
             min: 0,
             max: 1,
             step: 0.01,
+        });
+        soundOptions.push({
+            label: game.i18n.localize("ASE.BeamImpactSoundPlaybackOptionsLabel"),
+            tooltip: game.i18n.localize("ASE.BeamImpactSoundPlaybackOptionsTooltip"),
+            type: 'dropdown',
+            options: soundPlaybackOptions,
+            name: 'flags.advancedspelleffects.effectOptions.missileImpactSoundPlayback',
+            flagName: 'missileImpactSoundPlayback',
+            flagValue: currFlags.missileImpactSoundPlayback ?? 'indiv',
+
         });
 
         return {

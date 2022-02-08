@@ -125,7 +125,7 @@ export class ASEHandler {
                 wallOfForce.createWallOfForce(data);
                 return;
         }
-        if (item.name.includes(game.i18n.localize("ASE.Summon"))) {
+        if (item.name.includes(game.i18n.localize("ASE.Summon")) || aseFlags.spellEffect.includes(game.i18n.localize("ASE.Summon"))) {
             await summonCreature.doSummon(data);
             return;
         }

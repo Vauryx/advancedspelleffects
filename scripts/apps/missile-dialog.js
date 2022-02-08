@@ -235,12 +235,13 @@ export class MissileDialog extends FormApplication {
         let missileAnim = `${this.data.effectOptions.missileAnim}.${this.data.effectOptions.missileColor}`;
 
         const missileIntroSound = this.data.effectOptions.missileIntroSound ?? "";
-
+        const missleIntroPlayback = this.data.effectOptions.missileIntroSoundPlayback ?? "indiv";
         let missileIntroSoundDelay = Number(this.data.effectOptions.missileIntroSoundDelay) ?? 0;
         let missileIntroVolume = Number(this.data.effectOptions.missileIntroVolume) ?? 1;
+
         const impactDelay = Number(this.data.effectOptions.impactDelay) ?? -1000;
         const missileImpactSound = this.data.effectOptions.missileImpactSound ?? "";
-
+        const missleImpactPlayback = this.data.effectOptions.missileImpactSoundPlayback ?? "indiv";
         let missileImpactSoundDelay = Number(this.data.effectOptions.missileImpactSoundDelay) ?? 0;
         let missileImpactVolume = Number(this.data.effectOptions.missileImpactVolume) ?? 1;
 
@@ -250,7 +251,7 @@ export class MissileDialog extends FormApplication {
             .file(missileIntroSound)
             .delay(missileIntroSoundDelay)
             .volume(missileIntroVolume)
-            .playIf(missileIntroSound != "")
+            .playIf(missileIntroSound != "" && missleIntroPlayback == "indiv")
             .effect()
             .file(missileAnim)
             .atLocation(caster)
@@ -264,7 +265,7 @@ export class MissileDialog extends FormApplication {
             .file(missileImpactSound)
             .delay(missileImpactSoundDelay)
             .volume(missileImpactVolume)
-            .playIf(missileImpactSound != "")
+            .playIf(missileImpactSound != "" && missleImpactPlayback == "indiv")
             .play();
     }
 
@@ -334,6 +335,31 @@ export class MissileDialog extends FormApplication {
             const chatMessage = await game.messages.get(this.data.itemCardId);
             //console.log(`${caster.name} is firing Missiles at Selected Targets...`);
             //console.log("Missile Data: ", this.data);
+
+            const missileIntroSound = this.data.effectOptions.missileIntroSound ?? "";
+            const missleIntroPlayback = this.data.effectOptions.missileIntroSoundPlayback ?? "indiv";
+            let missileIntroSoundDelay = Number(this.data.effectOptions.missileIntroSoundDelay) ?? 0;
+            let missileIntroVolume = Number(this.data.effectOptions.missileIntroVolume) ?? 1;
+
+            const impactDelay = Number(this.data.effectOptions.impactDelay) ?? -1000;
+            const missileImpactSound = this.data.effectOptions.missileImpactSound ?? "";
+            const missleImpactPlayback = this.data.effectOptions.missileImpactSoundPlayback ?? "indiv";
+            let missileImpactSoundDelay = Number(this.data.effectOptions.missileImpactSoundDelay) ?? 0;
+            let missileImpactVolume = Number(this.data.effectOptions.missileImpactVolume) ?? 1;
+
+            new Sequence("Advanced Spell Effects")
+                .sound()
+                .file(missileIntroSound)
+                .delay(missileIntroSoundDelay)
+                .volume(missileIntroVolume)
+                .playIf(missileIntroSound != "" && missleIntroPlayback == "group")
+                .sound()
+                .file(missileImpactSound)
+                .delay(missileImpactSoundDelay)
+                .volume(missileImpactVolume)
+                .playIf(missileImpactSound != "" && missleImpactPlayback == "group")
+                .play();
+
             for await (let target of this.data.targets) {
                 let targetToken = canvas.tokens.get(target.id);
                 //console.log("Target: ", targetToken);

@@ -224,7 +224,7 @@ export class mirrorImage {
 
         positions.forEach((position, index) => {
             seq.effect()
-                .file(casterTokenImg)
+                .from(casterToken)
                 .fadeIn(1000)
                 .attachTo(casterToken)
                 .loopProperty("sprite", "position.x", {
@@ -239,7 +239,6 @@ export class mirrorImage {
                 })
                 .persist()
                 .scaleOut(0, 300, { ease: "easeInExpo" })
-                .scaleToObject(1)
                 .opacity(imageOpacity)
                 .name(`MirrorImage-${casterToken.id}-${index}`);
         });

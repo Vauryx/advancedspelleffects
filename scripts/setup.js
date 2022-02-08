@@ -27,12 +27,8 @@ Hooks.once('init', async function () {
 
 Hooks.once('ready', async function () {
   if (game.settings.get("advancedspelleffects", "overrideGridHighlight")) {
-    if (!game.modules.get("df-qol")?.active) {
-      libWrapper.register('advancedspelleffects', "MeasuredTemplate.prototype.highlightGrid", _ASEGridHighlight, "OVERRIDE");
-      utilFunctions.cleanUpTemplateGridHighlights();
-    } else {
-      ui.notifications.info("ASE Grid Highlight Override disabled due to conflict with DF-QOL Module");
-    }
+    libWrapper.register('advancedspelleffects', "MeasuredTemplate.prototype.highlightGrid", _ASEGridHighlightWrapper, "WRAPPER");
+    utilFunctions.cleanUpTemplateGridHighlights();
   }
   if (game.settings.get("advancedspelleffects", "overrideTemplateBorder")) {
     if (!game.modules.get("tokenmagic")?.active) {
@@ -53,59 +49,12 @@ Hooks.once('ready', async function () {
     }
   }
 
-  function _ASEGridHighlight() {
-    if (this.data.flags.advancedspelleffects) return;
-    const grid = canvas.grid;
-    const d = canvas.dimensions;
-    const border = this.borderColor;
-    const color = this.fillColor;
-
-    // Only highlight for objects which have a defined shape
-    if (!this.id || !this.shape) return;
-
-    // Clear existing highlight
-    const hl = grid.getHighlightLayer(`Template.${this.id}`);
-    hl.clear();
-
-    // If we are in gridless mode, highlight the shape directly
-    if (grid.type === CONST.GRID_TYPES.GRIDLESS) {
-      const shape = this.shape.clone();
-      if ("points" in shape) {
-        shape.points = shape.points.map((p, i) => {
-          if (i % 2) return this.y + p;
-          else return this.x + p;
-        });
-      } else {
-        shape.x += this.x;
-        shape.y += this.y;
-      }
-      return grid.grid.highlightGridPosition(hl, { border, color, shape });
-    }
-
-    // Get number of rows and columns
-    const [maxr, maxc] = grid.grid.getGridPositionFromPixels(d.width, d.height);
-    let nr = Math.ceil(((this.data.distance * 1.5) / d.distance) / (d.size / grid.h));
-    let nc = Math.ceil(((this.data.distance * 1.5) / d.distance) / (d.size / grid.w));
-    nr = Math.min(nr, maxr);
-    nc = Math.min(nc, maxc);
-
-    // Get the offset of the template origin relative to the top-left grid space
-    const [tx, ty] = canvas.grid.getTopLeft(this.data.x, this.data.y);
-    const [row0, col0] = grid.grid.getGridPositionFromPixels(tx, ty);
-    const hx = Math.ceil(canvas.grid.w / 2);
-    const hy = Math.ceil(canvas.grid.h / 2);
-    const isCenter = (this.data.x - tx === hx) && (this.data.y - ty === hy);
-
-    // Identify grid coordinates covered by the template Graphics
-    for (let r = -nr; r < nr; r++) {
-      for (let c = -nc; c < nc; c++) {
-        let [gx, gy] = canvas.grid.grid.getPixelsFromGridPosition(row0 + r, col0 + c);
-        const testX = (gx + hx) - this.data.x;
-        const testY = (gy + hy) - this.data.y;
-        let contains = ((r === 0) && (c === 0) && isCenter) || this.shape.contains(testX, testY);
-        if (!contains) continue;
-        grid.grid.highlightGridPosition(hl, { x: gx, y: gy, border, color });
-      }
+  function _ASEGridHighlightWrapper(wrapped, ...args) {
+    wrapped(...args);
+    if (!this.data?.flags?.advancedspelleffects) return;
+    const highlight = canvas.grid.getHighlightLayer(`Template.${this.id}`);
+    if (highlight) {
+      highlight.clear();
     }
   }
 

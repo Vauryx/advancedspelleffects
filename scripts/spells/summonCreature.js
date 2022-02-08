@@ -206,7 +206,7 @@ export class summonCreature {
             let attackBonus = casterActor.data.data.attributes.spelldc - 8;
             let summonActor = game.actors.getName(chosenSummon[0]);
             //console.log(summonActor);
-            let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
+            //let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
             //console.log(damageItems);
             switch (item.name) {
                 case game.i18n.localize("ASE.SummonAberration"):

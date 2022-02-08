@@ -9,17 +9,21 @@ export class spiritualWeapon {
     static async createSpiritualWeapon(midiData) {
         const casterActor = midiData.actor;
         const casterActorRollData = casterActor.getRollData();
+        //console.log("Caster Actor Roll Data: ", casterActorRollData);
         const casterToken = canvas.tokens.get(midiData.tokenId);
         const item = midiData.item;
         const effectOptions = item.getFlag('advancedspelleffects', 'effectOptions') ?? {};
         //console.log(effectOptions);
-        const level = midiData.spellLevel;
+        //console.log("Midi Data: ", midiData);
+        const level = midiData.itemLevel;
         let summonType = "Spiritual Weapon";
+
+        const casterActorSpellcastingMod = casterActorRollData.abilities[casterActorRollData.attributes.spellcasting].mod;
         const summonerDc = casterActor.data.data.attributes.spelldc;
-        const summonerAttack = (casterActorRollData.attributes.prof + casterActorRollData.mod) + Number(casterActorRollData.bonuses?.msak?.attack ?? 0);
+        const summonerAttack = (casterActorRollData.attributes.prof + casterActorSpellcastingMod) + Number(casterActorRollData.bonuses?.msak?.attack ?? 0);
 
         //console.log("Caster Actor Roll Data: ", casterActorRollData);
-        const summonerMod = casterActorRollData.mod + Number(casterActorRollData.bonuses?.msak?.damage ?? 0);
+        const summonerMod = casterActorSpellcastingMod + Number(casterActorRollData.bonuses?.msak?.damage ?? 0);
         let damageScale = '';
 
         async function myEffectFunction(template, options, update) {
@@ -191,9 +195,11 @@ export class spiritualWeapon {
         }
         //console.log("Spiritual Weapon Attack path: ", spiritualWeaponAttackImg);
         const spiritualWeaponActorImg = spiritualWeapon.replace("200x200.webm", "Thumb.webp");
+        //console.log("Level: ", level);
         if ((level - 3) > 0) {
             damageScale = `+ ${Math.floor((level - 2) / 2)}d8[upcast]`;
         }
+        //console.log("Damage Scale: ", damageScale);
         const attackItemName = game.i18n.localize('ASE.SpiritAttackItemName');
         let updates = {
             token: {
