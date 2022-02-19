@@ -280,7 +280,7 @@ export class MissileDialog extends FormApplication {
                 }).forEach(async (e) => {
                     await Sequencer.EffectManager.endEffects({ object: target, name: e.data.name })
                 });
-                await await aseSocket.executeAsGM("removeFlag", target.document.id, 'missileSpell');
+                await aseSocket.executeAsGM("removeFlag", target.document.id, 'missileSpell');
             }
             //console.log('Done clearing target markers...', ...arguments);
             //this.submit();

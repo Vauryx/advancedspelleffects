@@ -40,7 +40,9 @@ async function updateDocument(objectId, updateData) {
         || game.scenes.get(objectId)
         || game.users.get(objectId)
         || game.actors.get(objectId);
-    await object.update(updateData, { animate: false });
+    if (object) {
+        await object.update(updateData, { animate: false });
+    }
 }
 
 async function updateFlag(objectId, flag, value) {
@@ -51,7 +53,9 @@ async function updateFlag(objectId, flag, value) {
         || canvas.scene.lights.get(objectId)
         || game.scenes.get(objectId)
         || game.users.get(objectId);
-    await object.setFlag("advancedspelleffects", flag, value);
+    if (object) {
+        await object.setFlag("advancedspelleffects", flag, value);
+    }
 }
 
 async function removeFlag(objectId, flag) {
@@ -62,7 +66,9 @@ async function removeFlag(objectId, flag) {
         || canvas.scene.lights.get(objectId)
         || game.scenes.get(objectId)
         || game.users.get(objectId);
-    await object.unsetFlag("advancedspelleffects", flag);
+    if (object) {
+        await object.unsetFlag("advancedspelleffects", flag);
+    }
 }
 
 async function placeTiles(tileData) {
