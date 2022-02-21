@@ -21,18 +21,7 @@ export class MissileDialog extends FormApplication {
         this.data.targets = [];
     }
 
-    static async _clearTargets() {
-        //
-        const missileEffects = Sequencer.EffectManager.getEffects({ name: 'missile-target-*' });
-        if (missileEffects.length > 0) {
-            console.log("ASE Missile effects leftover detected...", missileEffects);
-            await Sequencer.EffectManager.endEffects({ name: 'missile-target-*' });
-        }
-    }
-
     static async registerHooks() {
-        console.log('Clearing ASE Magic Missile Targets...');
-        //Hooks.on("sequencerEffectManagerReady", MissileDialog._clearTargets);
         return;
     }
 
