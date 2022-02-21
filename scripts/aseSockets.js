@@ -18,6 +18,7 @@ export function setupASESocket() {
         aseSocket.register("placeSounds", placeSounds);
         aseSocket.register("moveSound", moveSound);
         aseSocket.register("updateDocument", updateDocument);
+        aseSocket.register("updateDocuments", updateDocuments);
         aseSocket.register("checkGMAlwaysAccept", checkGMAlwaysAccept);
     }
 };
@@ -43,6 +44,13 @@ async function updateDocument(objectId, updateData) {
     if (object) {
         await object.update(updateData, { animate: false });
     }
+}
+async function updateDocuments(objectType = '', updateData) {
+
+    if (updateData.length > 0 && objectType != '') {
+        await canvas.scene.updateEmbeddedDocuments(objectType, updateData);
+    }
+
 }
 
 async function updateFlag(objectId, flag, value) {
