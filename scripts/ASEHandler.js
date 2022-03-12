@@ -3,6 +3,7 @@ import { versionMigration } from "./versionMigration.js"
 // Importing spells
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
+import { chaosBolt } from "./spells/chaosBolt.js";
 import { callLightning } from "./spells/callLightning.js";
 import { fogCloud } from "./spells/fogCloud.js";
 import { spiritualWeapon } from "./spells/spiritualWeapon.js";
@@ -48,6 +49,9 @@ export class ASEHandler {
                 if (!data.flavor) {
                     await callLightning.createStormCloud(data);
                 }
+                return;
+            case game.i18n.localize('ASE.ChaosBolt'):
+                await chaosBolt.cast(data);
                 return;
             case game.i18n.localize('ASE.ActivateCallLightning'):
 
