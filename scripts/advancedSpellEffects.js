@@ -1,12 +1,11 @@
-import * as utilFunctions from "./utilityFunctions.js";
 import { setupASESocket } from "./aseSockets.js";
-import { aseSocket } from "./aseSockets.js";
 import { concentrationHandler } from "./concentrationHandler.js";
 import { midiHandler } from "./midiHandler.js";
 import { noMidiHandler } from "./noMidiHandler.js";
 import { MissileDialog } from "./apps/missile-dialog.js";
 // Importing spells
 import { animateDead } from "./spells/animateDead.js";
+import { chaosBolt } from "./spells/chaosBolt.js";
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
 import { callLightning } from "./spells/callLightning.js";
@@ -30,6 +29,7 @@ Hooks.once('setup', function () {
 //Take care of Setup
 const aseModules = {
     animateDead,
+    chaosBolt,
     callLightning,
     concentrationHandler,
     detectMagic,

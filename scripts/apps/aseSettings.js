@@ -18,6 +18,7 @@ import { moonBeam } from "../spells/moonBeam.js";
 import { chainLightning } from "../spells/chainLightning.js";
 import { mirrorImage } from "../spells/mirrorImage.js";
 import { wallOfForce } from "../spells/wallOfForce.js";
+import { chaosBolt } from "../spells/chaosBolt.js";
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
@@ -30,6 +31,7 @@ export class ASESettings extends FormApplication {
         this.spellList = {};
         this.spellList[game.i18n.localize("ASE.AnimateDead")] = animateDead;
         this.spellList[game.i18n.localize("ASE.CallLightning")] = callLightning;
+        this.spellList[game.i18n.localize("ASE.ChaosBolt")] = chaosBolt;
         this.spellList[game.i18n.localize("ASE.DetectMagic")] = detectMagic;
         this.spellList[game.i18n.localize("ASE.FogCloud")] = fogCloud;
         this.spellList[game.i18n.localize("ASE.Darkness")] = darkness;
