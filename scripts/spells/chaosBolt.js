@@ -183,12 +183,12 @@ export class chaosBolt extends baseSpellClass{
 
             const options = {
                 buttons: [{
-                    label: `<img src="${this.elements[firstElement]}"/> ${firstElement.toSentenceCase()} damage`,
+                    label: `<img src="${this.elements[firstElement]}"/> ${firstElement.slice(0,1).toUpperCase() + firstElement.slice(1)} damage`,
                     value: {
                         element: firstElement
                     }
                 }, {
-                    label: `<img src="${this.elements[secondElement]}"/> ${secondElement.toSentenceCase()} damage`,
+                    label: `<img src="${this.elements[secondElement]}"/> ${secondElement.slice(0,1).toUpperCase() + secondElement.slice(1)} damage`,
                     value: {
                         element: secondElement
                     }
