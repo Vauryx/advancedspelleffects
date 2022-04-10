@@ -7,8 +7,11 @@ export class eldritchBlast {
     }
     static async selectTargets(midiData) {
         const casterActor = midiData.actor;
+        //console.log("casterActor", casterActor);
         const casterToken = canvas.tokens.get(midiData.tokenId);
-        const characterLevel = casterActor.data?.data?.details?.level ?? 1;
+        //console.log("casterToken", casterToken);
+        const characterLevel = casterActor.data?.data?.details?.level ?? casterActor.data?.data?.details?.spellLevel ?? 1;
+        //console.log(`Caster level: ${characterLevel}`);
         let numMissiles = 1;
         if (characterLevel >= 5) {
             numMissiles += 1;

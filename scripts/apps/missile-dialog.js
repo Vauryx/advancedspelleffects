@@ -358,7 +358,7 @@ export class MissileDialog extends FormApplication {
                 .play();
             //console.log("Finished set up...");
             for await (let target of this.data.targets) {
-                console.log("Inside target loop...");
+                //console.log("Inside target loop...");
                 let targetToken = canvas.tokens.get(target.id);
                 //console.log("Target: ", targetToken);
                 //let missileNum = targetToken.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 0;
@@ -439,7 +439,7 @@ export class MissileDialog extends FormApplication {
 
                     if (game.modules.get("midi-qol")?.active) {
                         //console.log(attackData);
-                        console.log("Applying MIDI Damage...");
+                        //console.log("Applying MIDI Damage...");
                         if (attackData.hit) {
                             //console.log(this.data.item);
                             // log all data going into MIDIQOL.DamageOnlyWorkflow
