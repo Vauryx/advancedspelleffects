@@ -429,7 +429,7 @@ export class summonCreature {
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.portalCloseSound',
             flagName: 'portalCloseSound',
-            flagValue: currFlags.portalImpactSound ?? '',
+            flagValue: currFlags.portalCloseSound ?? '',
         });
         soundOptions.push({
             label: game.i18n.localize("ASE.PortalCloseSoundDelayLabel"),
