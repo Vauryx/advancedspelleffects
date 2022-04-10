@@ -25,6 +25,9 @@
     },
     {
       "name": "socketlib"
+    },
+    {
+      "name": "warpgate"
     }
   ],
   "conflicts": [
