@@ -10,6 +10,7 @@ export class steelWindStrike {
     static async doStrike(midiData) {
         let item = midiData.item;
         let aseFlags = item.getFlag("advancedspelleffects", 'effectOptions');
+        //console.log("aseFlags", aseFlags);
         let weapon = aseFlags.weapon ?? 'sword';
         let weaponColor = aseFlags.weaponColor ?? 'blue';
 
@@ -57,7 +58,7 @@ export class steelWindStrike {
         //console.log ("Auto Rotate Flag status: ",caster.document.getFlag("autorotate", "enabled"));
         await steelWindStrike(caster, targets, aseFlags);
 
-        async function evaluateAttack(target, rollData) {
+        async function evaluateAttack(target, rollData, damageFormula) {
             //console.log("Evalute attack target: ", target);
             let attackRoll = await new Roll(`1d20 + @mod + @prof`, rollData).evaluate({ async: true });
             //console.log("Attack roll: ", attackRoll);
@@ -66,14 +67,14 @@ export class steelWindStrike {
                 onMiss(target, attackRoll);
             }
             else {
-                onHit(target, attackRoll);
+                onHit(target, attackRoll, damageFormula);
             }
         }
 
-        async function onHit(target, attackRoll) {
+        async function onHit(target, attackRoll, damageFormula) {
             //console.log('Attack hit!');
             //console.log("Attack roll: ", attackRoll);
-            let currentRoll = await new Roll('6d10', caster.actor.getRollData()).evaluate({ async: true });
+            let currentRoll = await new Roll(damageFormula, caster.actor.getRollData()).evaluate({ async: true });
             //console.log("Current damage dice roll total: ", currentRoll.total);
             //game.dice3d?.showForRoll(currentRoll);
             if (game.modules.get("midi-qol")?.active) {
@@ -180,8 +181,12 @@ export class steelWindStrike {
             let strikeSoundDelay = options.strikeSoundDelay ?? 0;
             const strikeVolume = options.strikeVolume ?? 1;
 
-            const casterRollData = caster.actor.getRollData();
+            let casterRollData = caster.actor.getRollData();
             const casterRollMod = casterRollData.mod;
+
+            const damageFormula = `${options.dmgDieCount}${options.dmgDie}${options.dmgMod > 0 ? "+" : ""}${options.dmgMod > 0 ? options.dmgMod : ""}`;
+            //console.log("Damage formula: ", damageFormula);
+
             let currentX;
             let targetX;
             let currentY;
@@ -203,7 +208,7 @@ export class steelWindStrike {
                 //console.log(targets[i]);
                 let target = targets[i];
                 casterRollData.mod = casterRollMod;
-                evaluateAttack(target, casterRollData);
+                evaluateAttack(target, casterRollData, damageFormula);
                 //debugger;
                 const openPosition = getFreePosition({ x: target.x, y: target.y });
                 let rotateAngle = new Ray(openPosition, target).angle * (180 / Math.PI);
@@ -256,7 +261,7 @@ export class steelWindStrike {
                 let attackTotal = data.attackroll;
                 let damageTotal = data.damageroll;
                 let hitStatus = data.hit;
-                contentHTML = contentHTML + `<section style="border: 1px solid black">
+                contentHTML = contentHTML + `<section>
                                         <li class="flexrow">
                                             <h4>${name}</h4>
                                             <div>
@@ -318,9 +323,43 @@ export class steelWindStrike {
         const SwordColors = `jb2a.sword.melee.01`;
         const swordColorOptions = utilFunctions.getDBOptions(SwordColors);
 
+        const dieOptions = {
+            'd4': 'd4',
+            'd6': 'd6',
+            'd8': 'd8',
+            'd10': 'd10',
+            'd12': 'd12',
+            'd20': 'd20',
+        };
+
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DamageDieCountLabel"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
+            flagName: 'dmgDieCount',
+            flagValue: currFlags.dmgDieCount ?? 6,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DamageDieLabel"),
+            type: 'dropdown',
+            options: dieOptions,
+            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
+            flagName: 'dmgDie',
+            flagValue: currFlags.dmgDie ?? 'd10',
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DamageBonusLabel"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
+            flagName: 'dmgMod',
+            flagValue: currFlags.dmgMod ?? 0,
+        });
 
         animOptions.push({
             label: game.i18n.localize("ASE.SwordColorLabel"),
