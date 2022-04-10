@@ -197,7 +197,7 @@ export class ASESettings extends FormApplication {
     async getSpellOptions() {
         let spellOptions = {};
         let spellList = this.spellList;
-        let spellNames = Object.keys(spellList);
+        let spellNames = Object.keys(spellList).sort();
         //console.log(spellNames);
         spellNames.forEach((spellName) => {
             spellOptions[spellName] = spellName;
