@@ -57,9 +57,10 @@ export class steelWindStrike {
         //console.log ("Auto Rotate Flag status: ",caster.document.getFlag("autorotate", "enabled"));
         await steelWindStrike(caster, targets, aseFlags);
 
-        async function evaluateAttack(target) {
+        async function evaluateAttack(target, rollData) {
             //console.log("Evalute attack target: ", target);
-            let attackRoll = await new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
+            let attackRoll = await new Roll(`1d20 + @mod + @prof`, rollData).evaluate({ async: true });
+            //console.log("Attack roll: ", attackRoll);
             // game.dice3d?.showForRoll(attackRoll);
             if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
                 onMiss(target, attackRoll);
@@ -72,8 +73,8 @@ export class steelWindStrike {
         async function onHit(target, attackRoll) {
             //console.log('Attack hit!');
             //console.log("Attack roll: ", attackRoll);
-            let currentRoll = await new Roll('6d10', caster.actor.getRollData()).roll();
-            console.log("Current damage dice roll total: ", currentRoll.total);
+            let currentRoll = await new Roll('6d10', caster.actor.getRollData()).evaluate({ async: true });
+            //console.log("Current damage dice roll total: ", currentRoll.total);
             //game.dice3d?.showForRoll(currentRoll);
             if (game.modules.get("midi-qol")?.active) {
                 new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item.data });
@@ -101,7 +102,7 @@ export class steelWindStrike {
         }
 
         async function finalTeleport(caster, location) {
-            console.log("template: ", location);
+            //console.log("template: ", location);
             let startLocation = { x: caster.x, y: caster.y };
             //let adjustedLocation = { x: location.x - (canvas.grid.size / 2), y: location.y - (canvas.grid.size / 2) }
             let distance = Math.sqrt(Math.pow((location.x - caster.x), 2) + Math.pow((location.y - caster.y), 2));
@@ -179,6 +180,8 @@ export class steelWindStrike {
             let strikeSoundDelay = options.strikeSoundDelay ?? 0;
             const strikeVolume = options.strikeVolume ?? 1;
 
+            const casterRollData = caster.actor.getRollData();
+            const casterRollMod = casterRollData.mod;
             let currentX;
             let targetX;
             let currentY;
@@ -199,7 +202,8 @@ export class steelWindStrike {
                 swordAnim = `jb2a.${weapon}.${weaponsPathMap[weapon]}.${weaponColor}.${swingType}`;
                 //console.log(targets[i]);
                 let target = targets[i];
-                evaluateAttack(target);
+                casterRollData.mod = casterRollMod;
+                evaluateAttack(target, casterRollData);
                 //debugger;
                 const openPosition = getFreePosition({ x: target.x, y: target.y });
                 let rotateAngle = new Ray(openPosition, target).angle * (180 / Math.PI);

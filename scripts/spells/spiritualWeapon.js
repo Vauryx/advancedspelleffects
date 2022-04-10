@@ -93,7 +93,6 @@ export class spiritualWeapon {
                 .file(effect)
                 .atLocation(template)
                 .center()
-                .scale(1.5)
                 .belowTokens()
                 .play()
         }

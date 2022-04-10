@@ -289,7 +289,7 @@ export class detectMagic {
             new Sequence("Advanced Spell Effects")
                 .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                 .forUsers(users)
-                .atLocation(magical.obj)
+                .attachTo(magical.obj)
                 .scale(0.25)
                 .setMustache(magical)
                 .zIndex(0)

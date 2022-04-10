@@ -80,7 +80,7 @@ export class chainLightning {
         //console.log("firstTarget", firstTarget);
         //console.log("tokenD", tokenD);
         const potentialTargets = canvas.tokens.placeables.filter(function (target) {
-            return target.actor.data.data.attributes.hp.value > 0
+            return target.actor?.data?.data?.attributes.hp.value > 0
                 && canvas.grid.measureDistance(firstTarget, target) <= 32.5
                 && target !== firstTarget
                 && target !== tokenD

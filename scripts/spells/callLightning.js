@@ -344,7 +344,7 @@ export class callLightning {
                     boltEffect = 'jb2a.chain_lightning.primary.blue'
                     break;
                 case 'strike':
-                    boltEffect = 'jb2a.lightning_strike'
+                    boltEffect = 'jb2a.lightning_strike.blue'
                     break;
                 default:
                     boltEffect = 'jb2a.chain_lightning.primary.blue'
