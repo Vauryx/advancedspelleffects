@@ -263,12 +263,21 @@ export function isFirstGM() {
 export function getDBOptions(rawSet) {
     let options = {};
     let setOptions = Sequencer.Database.getPathsUnder(rawSet);
-    //console.log(setOptions)
     if (setOptions) {
         setOptions.forEach((elem) => {
             options[elem] = capitalizeFirstLetter(elem);
         });
         //console.log(options);
+    }
+    return options;
+}
+export function getDBOptionsIcons(rawSet) {
+    let options = {};
+    const seqFiles = Sequencer.Database.getEntry(rawSet);
+    if (seqFiles.length > 0) {
+        seqFiles.forEach((elem) => {
+            options[elem.dbPath] = elem.dbPath.substring(10);
+        });
     }
     return options;
 }

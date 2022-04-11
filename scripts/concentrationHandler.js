@@ -10,7 +10,7 @@ import { witchBolt } from "./spells/witchBolt.js";
 import { vampiricTouch } from "./spells/vampiricTouch.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { wallOfForce } from "./spells/wallOfForce.js";
-
+import { detectStuff } from "./spells/detectStuff.js";
 export class concentrationHandler {
 
     static registerHooks() {
@@ -53,6 +53,9 @@ export class concentrationHandler {
                 return;
             case game.i18n.localize('ASE.DetectMagic'):
                 await detectMagic.handleConcentration(casterActor, casterToken, effectOptions);
+                return;
+            case game.i18n.localize('ASE.DetectStuff'):
+                await detectStuff.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
             case game.i18n.localize('ASE.CallLightning'):
                 await callLightning.handleConcentration(casterActor, casterToken, effectOptions);

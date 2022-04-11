@@ -20,6 +20,7 @@ import { moonBeam } from "./spells/moonBeam.js";
 import { chainLightning } from "./spells/chainLightning.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
 import { wallOfForce } from "./spells/wallOfForce.js";
+import { detectStuff } from "./spells/detectStuff.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -44,6 +45,10 @@ export class ASEHandler {
                 return;
             case game.i18n.localize('ASE.DetectMagic'):
                 await detectMagic.activateDetectMagic(data);
+                return;
+            case game.i18n.localize('ASE.DetectStuff'):
+                const detectSpell = new detectStuff(data);
+                detectSpell.cast();
                 return;
             case game.i18n.localize('ASE.CallLightning'):
                 if (!data.flavor) {

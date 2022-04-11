@@ -21,6 +21,7 @@ import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
 import { wallOfForce } from "./spells/wallOfForce.js";
+import { detectStuff } from "./spells/detectStuff.js";
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
     setupASESocket();
@@ -34,6 +35,7 @@ const aseModules = {
     concentrationHandler,
     detectMagic,
     fogCloud,
+    detectStuff,
     darkness,
     magicMissile,
     spiritualWeapon,
