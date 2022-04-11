@@ -197,12 +197,12 @@ export class wallOfForce {
 
         }
         else {
-            console.log("ASE DATA: ", aseData);
+            //console.log("ASE DATA: ", aseData);
             Hooks.once('createMeasuredTemplate', async (template) => {
                 await template.setFlag('advancedspelleffects', 'placed', true);
                 wallOfForce._placeWallOfForce(aseData, template);
             });
-            console.log("template data:", templateData);
+            //console.log("template data:", templateData);
             const doc = new MeasuredTemplateDocument(templateData, { parent: canvas.scene });
             let template = new game.dnd5e.canvas.AbilityTemplate(doc);
             template.actorSheet = aseData.casterActor.sheet;
@@ -349,7 +349,7 @@ export class wallOfForce {
         // console.log("square: ", square);
         let currentSpotIndex = 0;
         updateTemplateLocation = async (crosshairs) => {
-            console.log("crosshairs: ", crosshairs);
+            //console.log("crosshairs: ", crosshairs);
             while (crosshairs.inFlight) {
                 if (!panelDiag.rendered) {
                     crosshairs.inFlight = false;
@@ -481,7 +481,8 @@ export class wallOfForce {
                         c: [...lastPoint, ...currentPoint],
                         flags: { tagger: { tags: [`WallOfForce-Wall${templateDocument.id}`] } },
                         move: 20,
-                        sight: 0
+                        sight: 0,
+                        light: 0
                     })
                 }
                 lastPoint = [...currentPoint]
@@ -492,7 +493,8 @@ export class wallOfForce {
                 c: [...lastPoint, ...firstPoint],
                 flags: { tagger: { tags: [`WallOfForce-Wall${templateDocument.id}`] } },
                 move: 20,
-                sight: 0
+                sight: 0,
+                light: 0
             })
 
         } else {
@@ -511,6 +513,7 @@ export class wallOfForce {
                 },
                 move: 20,
                 sight: 0,
+                light: 0
             })
 
         }

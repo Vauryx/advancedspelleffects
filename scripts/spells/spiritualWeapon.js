@@ -17,8 +17,7 @@ export class spiritualWeapon {
         //console.log("Midi Data: ", midiData);
         const level = midiData.itemLevel;
         let summonType = "Spiritual Weapon";
-
-        const casterActorSpellcastingMod = casterActorRollData.abilities[casterActorRollData.attributes.spellcasting].mod;
+        const casterActorSpellcastingMod = casterActorRollData.abilities[casterActorRollData.attributes.spellcasting]?.mod ?? 0;
         const summonerDc = casterActor.data.data.attributes.spelldc;
         const summonerAttack = (casterActorRollData.attributes.prof + casterActorSpellcastingMod) + Number(casterActorRollData.bonuses?.msak?.attack ?? 0);
 

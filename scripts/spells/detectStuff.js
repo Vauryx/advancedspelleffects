@@ -215,6 +215,7 @@ export class detectStuff {
     }
 
     static async handleConcentration(casterActor, casterToken, effectOptions) {
+        await aseSocket.executeAsGM("removeFlag", casterToken.id, "detectItemId");
         let users = [];
         for (const user in casterActor.data.permission) {
             if (user == "default") continue;
@@ -458,14 +459,15 @@ export class detectStuff {
             }
         }
         //remove id of each detectedObjectOutOfRange from detectedObjectsIDs
-        for (let detectedObj of detectedObjectsOutOfRange) {
-            detectedObjectsIDs = detectedObjectsIDs.filter(id => id != detectedObj.obj.id) ?? [];
+        if (detectedObjectsIDs?.length > 0) {
+            for (let detectedObj of detectedObjectsOutOfRange) {
+                detectedObjectsIDs = detectedObjectsIDs?.filter(id => id != detectedObj.obj.id) ?? [];
+            }
+            await aseSocket.executeAsGM("updateFlag", tokenDocument.id, "objectsDetected", detectedObjectsIDs);
         }
-        await aseSocket.executeAsGM("updateFlag", tokenDocument.id, "objectsDetected", detectedObjectsIDs);
-
         //handle in range objects
         for await (let detectedObj of detectedObjectsInRange) {
-            if (detectedObjectsIDs.includes(detectedObj.obj.id)) {
+            if (detectedObjectsIDs?.includes(detectedObj.obj.id)) {
                 continue;
             }
             if (preset == 'magic') {
@@ -505,8 +507,10 @@ export class detectStuff {
         }
         //add id of each detectedObjectInRange to detectedObjectsIDs if not already in it
         for (let detectedObj of detectedObjectsInRange) {
-            if (!detectedObjectsIDs.includes(detectedObj.obj.id)) {
-                detectedObjectsIDs.push(detectedObj.obj.id);
+            if (detectedObjectsIDs?.length > 0) {
+                if (!detectedObjectsIDs.includes(detectedObj.obj.id)) {
+                    detectedObjectsIDs.push(detectedObj.obj.id);
+                }
             }
         }
         await aseSocket.executeAsGM("updateFlag", tokenDocument.id, "objectsDetected", detectedObjectsIDs);
