@@ -482,7 +482,8 @@ export class wallOfForce {
                         flags: { tagger: { tags: [`WallOfForce-Wall${templateDocument.id}`] } },
                         move: 20,
                         sight: 0,
-                        light: 0
+                        light: 0,
+                        sound: 0
                     })
                 }
                 lastPoint = [...currentPoint]
@@ -494,7 +495,8 @@ export class wallOfForce {
                 flags: { tagger: { tags: [`WallOfForce-Wall${templateDocument.id}`] } },
                 move: 20,
                 sight: 0,
-                light: 0
+                light: 0,
+                sound: 0
             })
 
         } else {
@@ -513,7 +515,8 @@ export class wallOfForce {
                 },
                 move: 20,
                 sight: 0,
-                light: 0
+                light: 0,
+                sound: 0
             })
 
         }
