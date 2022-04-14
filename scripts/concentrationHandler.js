@@ -9,7 +9,8 @@ import { summonCreature } from "./spells/summonCreature.js";
 import { witchBolt } from "./spells/witchBolt.js";
 import { vampiricTouch } from "./spells/vampiricTouch.js";
 import { moonBeam } from "./spells/moonBeam.js";
-
+import { wallOfForce } from "./spells/wallOfForce.js";
+import { detectStuff } from "./spells/detectStuff.js";
 export class concentrationHandler {
 
     static registerHooks() {
@@ -53,6 +54,9 @@ export class concentrationHandler {
             case game.i18n.localize('ASE.DetectMagic'):
                 await detectMagic.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
+            case game.i18n.localize('ASE.DetectStuff'):
+                await detectStuff.handleConcentration(casterActor, casterToken, effectOptions);
+                return;
             case game.i18n.localize('ASE.CallLightning'):
                 await callLightning.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
@@ -67,6 +71,9 @@ export class concentrationHandler {
                 return;
             case game.i18n.localize('ASE.Moonbeam'):
                 await moonBeam.handleConcentration(casterActor, casterToken, effectOptions);
+                return;
+            case game.i18n.localize('ASE.WallOfForce'):
+                await wallOfForce.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }
         if (effectSource.includes(game.i18n.localize("ASE.Summon"))) {

@@ -1,12 +1,11 @@
-import * as utilFunctions from "./utilityFunctions.js";
 import { setupASESocket } from "./aseSockets.js";
-import { aseSocket } from "./aseSockets.js";
 import { concentrationHandler } from "./concentrationHandler.js";
 import { midiHandler } from "./midiHandler.js";
 import { noMidiHandler } from "./noMidiHandler.js";
 import { MissileDialog } from "./apps/missile-dialog.js";
 // Importing spells
 import { animateDead } from "./spells/animateDead.js";
+import { chaosBolt } from "./spells/chaosBolt.js";
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
 import { callLightning } from "./spells/callLightning.js";
@@ -21,6 +20,8 @@ import { scorchingRay } from "./spells/scorchingRay.js";
 import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
+import { wallOfForce } from "./spells/wallOfForce.js";
+import { detectStuff } from "./spells/detectStuff.js";
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
     setupASESocket();
@@ -29,10 +30,12 @@ Hooks.once('setup', function () {
 //Take care of Setup
 const aseModules = {
     animateDead,
+    chaosBolt,
     callLightning,
     concentrationHandler,
     detectMagic,
     fogCloud,
+    detectStuff,
     darkness,
     magicMissile,
     spiritualWeapon,
@@ -46,8 +49,8 @@ const aseModules = {
     scorchingRay,
     eldritchBlast,
     moonBeam,
-    mirrorImage
-
+    mirrorImage,
+    wallOfForce
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());

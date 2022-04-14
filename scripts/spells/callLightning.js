@@ -25,12 +25,32 @@ export class callLightning {
         const stormCloudSoundDelay = aseFlags?.stormCloudSoundDelay ?? 0;
         const placeCrackAsTile = aseFlags?.placeCrackAsTile ?? true;
 
+
+
         let weatherDialogData = {
             buttons: [{ label: game.i18n.localize('ASE.Yes'), value: true }, { label: game.i18n.localize('ASE.No'), value: false }],
             title: game.i18n.localize('ASE.AskStorm')
         };
 
         let stormyWeather = await warpgate.buttonDialog(weatherDialogData, 'row');
+
+        let boltDamageDieCount;
+        let boltDamageDieType;
+        let boltDamageDieMod;
+        if (aseFlags?.overrideDamage) {
+            boltDamageDieCount = Number(aseFlags?.dmgDieCount) || Number(spellLevel);
+            boltDamageDieType = aseFlags?.dmgDie ?? 'd10';
+            boltDamageDieMod = Number(aseFlags?.dmgMod) || 0;
+        } else {
+            boltDamageDieCount = Number(spellLevel);
+            boltDamageDieType = 'd10';
+            boltDamageDieMod = 0;
+        }
+        boltDamageDieCount = stormyWeather ? boltDamageDieCount + 1 : boltDamageDieCount;
+
+        const boltDamage = `${boltDamageDieCount}${boltDamageDieType}${boltDamageDieMod != 0 ? `+${boltDamageDieMod}` : ''}`;
+        //console.log('boltDamage: ', boltDamage);
+
         const displayCrosshairs = async (crosshairs) => {
             new Sequence("Advanced Spell Effects")
                 .effect()
@@ -67,6 +87,7 @@ export class callLightning {
             boltVolume: boltVolume,
             boltSoundDelay: boltSoundDelay,
             boltStyle: boltStyle,
+            boltDamage: boltDamage,
             spellLevel: spellLevel,
             itemId: item.id,
             placeCrackAsTile: placeCrackAsTile
@@ -108,7 +129,7 @@ export class callLightning {
 
         await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-call-lightning` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
-        ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage'), { name: caster.actor.name }}` });
+        await ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage'), { name: caster.actor.name }}` });
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         await callLightning.callLightningBolt(stormTileId, midiData.itemCardId, midiData.item.id);
 
@@ -126,6 +147,7 @@ export class callLightning {
             const boltStyle = effectOptions.boltStyle;
             const spellLevel = effectOptions.spellLevel;
             const itemId = effectOptions.itemId;
+            const boltDamage = effectOptions.boltDamage;
             const placeCrackAsTile = effectOptions.placeCrackAsTile;
             let templateData = castTemplate;
             let tileWidth;
@@ -159,6 +181,7 @@ export class callLightning {
                     advancedspelleffects: {
                         'stormCloudTile': casterId,
                         'boltStyle': boltStyle,
+                        'boltDamage': boltDamage,
                         'spellLevel': spellLevel,
                         'itemID': itemId,
                         'stormDamage': isStorm,
@@ -239,13 +262,9 @@ export class callLightning {
 
             //console.log("Tokens in range: ", tokens);
 
-            let spellLevel = stormCloudTile.getFlag("advancedspelleffects", "spellLevel");
-            if (stormCloudTile.getFlag("advancedspelleffects", "stormDamage")) {
-                spellLevel += 1;
-            }
             // console.log("ItemData: ", itemData);
             // console.log("Item: ", item);
-            let damage = await new Roll(`${spellLevel}d10`).evaluate({ async: true });
+            let damage = await new Roll(`${stormCloudTile.getFlag("advancedspelleffects", "boltDamage")}`).evaluate({ async: true });
             if (game.modules.get("dice-so-nice")?.active) {
                 game.dice3d?.showForRoll(damage);
             }
@@ -318,14 +337,14 @@ export class callLightning {
             const boltVolume = boltOptions.boltVolume;
             const boltSoundDelay = boltOptions.boltSoundDelay;
             const placeCrackAsTile = boltOptions.placeCrackAsTile;
-            console.log("Place crack as tile: ", placeCrackAsTile);
+            //console.log("Place crack as tile: ", placeCrackAsTile);
             let boltEffect;
             switch (boltStyle) {
                 case 'chain':
                     boltEffect = 'jb2a.chain_lightning.primary.blue'
                     break;
                 case 'strike':
-                    boltEffect = 'jb2a.lightning_strike'
+                    boltEffect = 'jb2a.lightning_strike.blue'
                     break;
                 default:
                     boltEffect = 'jb2a.chain_lightning.primary.blue'
@@ -381,9 +400,8 @@ export class callLightning {
                 .playIf(boltSound != "")
                 .effect()
                 .file(boltEffect)
-                .JB2A()
                 .atLocation(cloud)
-                .reachTowards(boltTemplate)
+                .stretchTo(boltTemplate)
                 .waitUntilFinished(-1500)
                 .playIf(boltStyle == "chain")
                 .effect()
@@ -412,8 +430,8 @@ export class callLightning {
     static buildChatData(saveRolls) {
         let content = `<table id="callLightningChatTable"><tr><th>${game.i18n.localize("ASE.Target")}</th><th>${game.i18n.localize("ASE.SaveRoll")}</th><th>${game.i18n.localize("ASE.Damage")}</th>`
 
-        console.log('Building chat data...');
-        console.log('Save Rolls: ', saveRolls);
+        //console.log('Building chat data...');
+        console.log('ASE CALL LIGHTNING - Save Rolls: ', saveRolls);
         //console.log('Damage Rolls: ', damageRolls);
         //iterate through attackRolls using for in loop
 
@@ -509,7 +527,51 @@ export class callLightning {
         const boltOptions = {
             "chain": game.i18n.localize('ASE.Chain'),
             "strike": game.i18n.localize('ASE.Strike')
-        }
+        };
+        const dieOptions = {
+            'd4': 'd4',
+            'd6': 'd6',
+            'd8': 'd8',
+            'd10': 'd10',
+            'd12': 'd12',
+            'd20': 'd20',
+        };
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.OverrideDamageLabel"),
+            tooltip: game.i18n.localize("ASE.OverrideDamageTooltip"),
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.overrideDamage',
+            flagName: 'overrideDamage',
+            flagValue: currFlags.overrideDamage ?? false,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DamageDieCountLabel"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
+            flagName: 'dmgDieCount',
+            flagValue: currFlags.dmgDieCount ?? 3,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DamageDieLabel"),
+            type: 'dropdown',
+            options: dieOptions,
+            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
+            flagName: 'dmgDie',
+            flagValue: currFlags.dmgDie ?? 'd10',
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DamageBonusLabel"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
+            flagName: 'dmgMod',
+            flagValue: currFlags.dmgMod ?? 0,
+        });
+
+
         animOptions.push({
             label: game.i18n.localize('ASE.SelectBoltStyleLabel'),
             type: "dropdown",

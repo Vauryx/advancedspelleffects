@@ -25,6 +25,9 @@ export class vampiricTouch {
         const siphonSoundDelay = Number(effectOptions.vtSiphonSoundDelay) ?? 0;
         const siphonVolume = effectOptions.vtSiphonVolume ?? 1;
 
+        const itemData = midiData.item.data.data;
+        console.log(itemData);
+
         const maxStrands = effectOptions.vtMaxStrands ?? 20;
         let strandNum = 12;
         const updates = {
@@ -39,9 +42,9 @@ export class vampiricTouch {
             "img": midiData.item.img,
             "data": {
                 "ability": "",
-                "actionType": "msak",
+                "actionType": itemData.actionType,
                 "activation": { "type": 'action', "cost": 1 },
-                "damage": { "parts": [[`${midiData.itemLevel}d6`, "necrotic"]] },
+                "damage": itemData.damage,
                 "level": midiData.itemLevel,
                 "preparation": { "mode": 'atwill', "prepared": true },
                 "range": { "value": 5, "units": 'ft' },
@@ -103,7 +106,7 @@ export class vampiricTouch {
             .file(strandAnim)
             .atLocation(target)
             .playIf(!missed)
-            .reachTowards(tokenD)
+            .stretchTo(tokenD)
             .repeats(Math.max(1, strandNum), 100, 200)
             .randomizeMirrorY()
             .sound()
@@ -125,7 +128,7 @@ export class vampiricTouch {
             .play()
         await warpgate.mutate(tokenD.document, updates, {}, { name: `${tactor.id}-vampiric-touch` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.VampiricTouchAttack") }));
-        ChatMessage.create({ content: `${tactor.name}'s hands are wrapped in darkness...` });
+        await ChatMessage.create({ content: `${tactor.name}'s hands are wrapped in darkness...` });
 
     }
     static async handleConcentration(casterActor, casterToken, effectOptions) {
@@ -136,7 +139,7 @@ export class vampiricTouch {
 
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-vampiric-touch` });
 
-        ChatMessage.create({ content: `${casterActor.name}'s returns to normal.` });
+        await ChatMessage.create({ content: `${casterActor.name}'s returns to normal.` });
     }
 
     static async activateTouch(midiData) {
@@ -187,7 +190,7 @@ export class vampiricTouch {
             .file(strandAnim)
             .atLocation(target)
             .playIf(!missed)
-            .reachTowards(tokenD)
+            .stretchTo(tokenD)
             .repeats(Math.max(1, strandNum), 100, 200)
             .randomizeMirrorY()
             .play()

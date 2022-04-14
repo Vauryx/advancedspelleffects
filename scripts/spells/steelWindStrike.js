@@ -10,6 +10,7 @@ export class steelWindStrike {
     static async doStrike(midiData) {
         let item = midiData.item;
         let aseFlags = item.getFlag("advancedspelleffects", 'effectOptions');
+        //console.log("aseFlags", aseFlags);
         let weapon = aseFlags.weapon ?? 'sword';
         let weaponColor = aseFlags.weaponColor ?? 'blue';
 
@@ -57,26 +58,27 @@ export class steelWindStrike {
         //console.log ("Auto Rotate Flag status: ",caster.document.getFlag("autorotate", "enabled"));
         await steelWindStrike(caster, targets, aseFlags);
 
-        async function evaluateAttack(target) {
+        async function evaluateAttack(target, rollData, damageFormula) {
             //console.log("Evalute attack target: ", target);
-            let attackRoll = new Roll(`1d20 + @mod + @prof`, caster.actor.getRollData()).roll();
+            let attackRoll = await new Roll(`1d20 + @mod + @prof`, rollData).evaluate({ async: true });
+            //console.log("Attack roll: ", attackRoll);
             // game.dice3d?.showForRoll(attackRoll);
             if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
                 onMiss(target, attackRoll);
             }
             else {
-                onHit(target, attackRoll);
+                onHit(target, attackRoll, damageFormula);
             }
         }
 
-        async function onHit(target, attackRoll) {
+        async function onHit(target, attackRoll, damageFormula) {
             //console.log('Attack hit!');
             //console.log("Attack roll: ", attackRoll);
-            let currentRoll = new Roll('6d10', caster.actor.getRollData()).roll();
+            let currentRoll = await new Roll(damageFormula, caster.actor.getRollData()).evaluate({ async: true });
             //console.log("Current damage dice roll total: ", currentRoll.total);
             //game.dice3d?.showForRoll(currentRoll);
             if (game.modules.get("midi-qol")?.active) {
-                let damageData = new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item.data });
+                new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item.data });
             }
             //console.log("damage data: ", damageData);
             rollDataForDisplay.push({
@@ -84,7 +86,7 @@ export class steelWindStrike {
                 "attackroll": attackRoll.total,
                 "hit": true,
                 "damageroll": currentRoll.total
-            })
+            });
         }
         async function onMiss(target, attackRoll) {
             //console.log('Missed attack...');
@@ -94,14 +96,14 @@ export class steelWindStrike {
                 "attackroll": attackRoll.total,
                 "hit": false,
                 "damageroll": 0
-            })
+            });
             //let currentRoll = new Roll(`${damageDie}`, caster.actor.getRollData()).roll({ async: false });
             //game.dice3d?.showForRoll(currentRoll);
             //new MidiQOL.DamageOnlyWorkflow(midiDataactor, midiDatatokenId, currentRoll.total, "bludgeoning", [target], currentRoll, { flavor: `Flurry of Blows - Damage Roll (${damageDie} Bludgeoning)`, itemCardId: midiDataitemCardId });
         }
 
         async function finalTeleport(caster, location) {
-            console.log("template: ", location);
+            //console.log("template: ", location);
             let startLocation = { x: caster.x, y: caster.y };
             //let adjustedLocation = { x: location.x - (canvas.grid.size / 2), y: location.y - (canvas.grid.size / 2) }
             let distance = Math.sqrt(Math.pow((location.x - caster.x), 2) + Math.pow((location.y - caster.y), 2));
@@ -119,9 +121,8 @@ export class steelWindStrike {
                 .waitUntilFinished(-750)
                 .effect()
                 .atLocation(startLocation)
-                .JB2A()
                 .file(gustAnim)
-                .reachTowards(location)
+                .stretchTo(location)
                 .opacity(0.8)
                 .fadeOut(250)
                 .belowTokens()
@@ -180,6 +181,12 @@ export class steelWindStrike {
             let strikeSoundDelay = options.strikeSoundDelay ?? 0;
             const strikeVolume = options.strikeVolume ?? 1;
 
+            let casterRollData = caster.actor.getRollData();
+            const casterRollMod = casterRollData.mod;
+
+            const damageFormula = `${options.dmgDieCount}${options.dmgDie}${options.dmgMod > 0 ? "+" : ""}${options.dmgMod > 0 ? options.dmgMod : ""}`;
+            //console.log("Damage formula: ", damageFormula);
+
             let currentX;
             let targetX;
             let currentY;
@@ -200,7 +207,8 @@ export class steelWindStrike {
                 swordAnim = `jb2a.${weapon}.${weaponsPathMap[weapon]}.${weaponColor}.${swingType}`;
                 //console.log(targets[i]);
                 let target = targets[i];
-                evaluateAttack(target);
+                casterRollData.mod = casterRollMod;
+                evaluateAttack(target, casterRollData, damageFormula);
                 //debugger;
                 const openPosition = getFreePosition({ x: target.x, y: target.y });
                 let rotateAngle = new Ray(openPosition, target).angle * (180 / Math.PI);
@@ -218,9 +226,8 @@ export class steelWindStrike {
                     .playIf(dashSound != "")
                     .effect()
                     .atLocation({ x: caster.x + (canvas.grid.size / 2), y: caster.y + (canvas.grid.size / 2) })
-                    .JB2A()
                     .file(gustAnim)
-                    .reachTowards({ x: openPosition.x + (canvas.grid.size / 2), y: openPosition.y + (canvas.grid.size / 2) })
+                    .stretchTo({ x: openPosition.x + (canvas.grid.size / 2), y: openPosition.y + (canvas.grid.size / 2) })
                     .opacity(0.8)
                     .fadeOut(250)
                     .belowTokens()
@@ -240,11 +247,10 @@ export class steelWindStrike {
                     .playIf(strikeSound != "")
                     .effect()
                     .atLocation(caster, { cacheLocation: false })
-                    .JB2A()
                     .file(swordAnim)
                     .startTime(animStartTimeMap[swingType])
                     .endTime(animEndTimeMap[swingType])
-                    .reachTowards(target)
+                    .stretchTo(target)
                     .fadeOut(250, { ease: "easeOutQuint" })
                     .waitUntilFinished()
                 await steelWindSequence.play();
@@ -255,7 +261,7 @@ export class steelWindStrike {
                 let attackTotal = data.attackroll;
                 let damageTotal = data.damageroll;
                 let hitStatus = data.hit;
-                contentHTML = contentHTML + `<section style="border: 1px solid black">
+                contentHTML = contentHTML + `<section>
                                         <li class="flexrow">
                                             <h4>${name}</h4>
                                             <div>
@@ -317,9 +323,43 @@ export class steelWindStrike {
         const SwordColors = `jb2a.sword.melee.01`;
         const swordColorOptions = utilFunctions.getDBOptions(SwordColors);
 
+        const dieOptions = {
+            'd4': 'd4',
+            'd6': 'd6',
+            'd8': 'd8',
+            'd10': 'd10',
+            'd12': 'd12',
+            'd20': 'd20',
+        };
+
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DamageDieCountLabel"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
+            flagName: 'dmgDieCount',
+            flagValue: currFlags.dmgDieCount ?? 6,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DamageDieLabel"),
+            type: 'dropdown',
+            options: dieOptions,
+            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
+            flagName: 'dmgDie',
+            flagValue: currFlags.dmgDie ?? 'd10',
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DamageBonusLabel"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
+            flagName: 'dmgMod',
+            flagValue: currFlags.dmgMod ?? 0,
+        });
 
         animOptions.push({
             label: game.i18n.localize("ASE.SwordColorLabel"),

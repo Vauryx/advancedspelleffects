@@ -7,7 +7,7 @@
   "library": "false",
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.8.9",
-  "compatibleCoreVersion": "0.8.9",
+  "compatibleCoreVersion": "9.0",
   "packs": [],
   "authors": [
     {
@@ -25,9 +25,16 @@
     },
     {
       "name": "socketlib"
+    },
+    {
+      "name": "warpgate"
     }
   ],
-  "conflicts": [],
+  "conflicts": [
+    {
+      "name": "betterrolls5e"
+    }
+  ],
   "esmodules": ["/scripts/setup.js", "/scripts/advancedSpellEffects.js"],
   "scripts": [],
   "styles": ["/styles/module.css"],
@@ -51,5 +58,6 @@
       "type": "icon",
       "url": "https://avatars2.githubusercontent.com/u/71292812?s=400&u=ccdb4eeb7abf551ca8f314e5a9bfd0479a4d3d41&v=4"
     }
-  ]
+  ],
+  "system": ["dnd5e"]
 }

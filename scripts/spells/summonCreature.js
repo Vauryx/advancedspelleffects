@@ -14,11 +14,17 @@ export class summonCreature {
             const portalCloseAnim = `jb2a.impact.010.${effectInfo.portalImpactColor}`;
 
             const portalSound = effectInfo.portalSound ?? "";
-            const portalSoundDelay = Number(effectInfo.portalSoundDelay) ?? 0;
+            let portalSoundDelay = Number(effectInfo.portalSoundDelay) ?? 0;
+            if (!typeof (portalSoundDelay) === "number") {
+                portalSoundDelay = 0;
+            }
             const portalSoundVolume = effectInfo.portalSoundVolume ?? 1;
 
             const circleSound = effectInfo.circleSound ?? "";
-            const circleSoundDelay = Number(effectInfo.circleSoundDelay) ?? 0;
+            let circleSoundDelay = Number(effectInfo.circleSoundDelay) ?? 0;
+            if (!typeof (circleSoundDelay) === "number") {
+                circleSoundDelay = 0;
+            }
             const circleSoundVolume = effectInfo.circleSoundVolume ?? 1;
 
             const effectASound = effectInfo.effectASound ?? "";
@@ -26,7 +32,10 @@ export class summonCreature {
             const effectASoundVolume = effectInfo.effectASoundVolume ?? 1;
 
             const portalCloseSound = effectInfo.portalCloseSound ?? "";
-            const portalCloseSoundDelay = Number(effectInfo.portalCloseSoundDelay) ?? 0;
+            let portalCloseSoundDelay = Number(effectInfo.portalCloseSoundDelay) ?? 0;
+            if (!typeof (portalCloseSoundDelay) === "number") {
+                portalCloseSoundDelay = 0;
+            }
             const portalCloseSoundVolume = effectInfo.portalCloseSoundVolume ?? 1;
 
 
@@ -63,7 +72,6 @@ export class summonCreature {
                 .file(effectAAnim)
                 .offset({ x: 0, y: canvas.grid.size })
                 .atLocation(template)
-                .JB2A()
                 .waitUntilFinished(-1000)
                 .endTime(3300)
                 .playbackRate(0.7)
@@ -207,10 +215,10 @@ export class summonCreature {
             let attackBonus = casterActor.data.data.attributes.spelldc - 8;
             let summonActor = game.actors.getName(chosenSummon[0]);
             //console.log(summonActor);
-            let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
+            //let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
             //console.log(damageItems);
             switch (item.name) {
-                case game.i18n.localize("ASE.SummonAberrantSpirit"):
+                case game.i18n.localize("ASE.SummonAberration"):
                     hpBonus = 10 * (spellLevel - 4);
                     break;
                 case game.i18n.localize("ASE.SummonBeast"):
@@ -421,7 +429,7 @@ export class summonCreature {
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.portalCloseSound',
             flagName: 'portalCloseSound',
-            flagValue: currFlags.portalImpactSound ?? '',
+            flagValue: currFlags.portalCloseSound ?? '',
         });
         soundOptions.push({
             label: game.i18n.localize("ASE.PortalCloseSoundDelayLabel"),

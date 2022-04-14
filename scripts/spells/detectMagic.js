@@ -5,10 +5,6 @@ export class detectMagic {
 
     static registerHooks() {
         Hooks.on("updateToken", detectMagic._updateToken);
-        if (game.settings.get("advancedspelleffects", "preloadFiles")) {
-            //console.log("Starting Preload of ASE Animate Dead...");
-            //Hooks.on("sequencer.ready", detectMagic._preloadAssets);
-        }
     }
     static async _preloadAssets() {
         console.log('Preloading assets for ASE Detect Magic...');
@@ -121,7 +117,6 @@ export class detectMagic {
             .playIf(waveSound != "")
             .effect(`jb2a.detect_magic.circle.${waveColor}`)
             .attachTo(caster)
-            .JB2A()
             .belowTiles()
             .scale(2.33333)
             .effect()
@@ -151,7 +146,7 @@ export class detectMagic {
             new Sequence("Advanced Spell Effects")
                 .effect("jb2a.magic_signs.rune.{{school}}.intro.{{color}}")
                 .forUsers(users)
-                .atLocation(magical.obj)
+                .attachTo(magical.obj)
                 .scale(0.25)
                 .delay(magical.delay)
                 .setMustache(magical)
@@ -220,7 +215,7 @@ export class detectMagic {
                 new Sequence("Advanced Spell Effects")
                     .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                     .forUsers(users)
-                    .atLocation(magical.obj)
+                    .attachTo(magical.obj)
                     .playIf(magical.distance <= 30)
                     .scale(0.25)
                     .setMustache(magical)
@@ -275,9 +270,9 @@ export class detectMagic {
 
         let objects = await Tagger.getByTag("magical", { ignore: [tokenDocument] });
 
-        magicalObjectsOutOfRange = objects.map(o => {
+        const magicalObjects = objects.map(o => {
             let pointA = { x: newPos.x + (canvas.grid.size / 2), y: newPos.y + (canvas.grid.size / 2) };
-            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) }
+            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) };
             let distance = utilFunctions.measureDistance(pointA, pointB);
             return {
                 delay: 0,
@@ -286,7 +281,9 @@ export class detectMagic {
                 school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
                 color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
             }
-        }).filter(o => o.distance > 30)
+        });
+
+        magicalObjectsOutOfRange = magicalObjects.filter(o => o.distance > 30);
         for await (let magical of magicalObjectsOutOfRange) {
             if (!magical.school) {
                 continue;
@@ -294,7 +291,7 @@ export class detectMagic {
             new Sequence("Advanced Spell Effects")
                 .effect("jb2a.magic_signs.rune.{{school}}.outro.{{color}}")
                 .forUsers(users)
-                .atLocation(magical.obj)
+                .attachTo(magical.obj)
                 .scale(0.25)
                 .setMustache(magical)
                 .zIndex(0)
@@ -305,18 +302,7 @@ export class detectMagic {
                 await Sequencer.EffectManager.endEffects({ name: `${magical.obj.id}-magicRune`, object: magical.obj._object });
             }
         }
-        magicalObjectsInRange = objects.map(o => {
-            let pointA = { x: newPos.x + (canvas.grid.size / 2), y: newPos.y + (canvas.grid.size / 2) };
-            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) }
-            let distance = utilFunctions.measureDistance(pointA, pointB);
-            return {
-                delay: 0,
-                distance: distance,
-                obj: o,
-                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
-            }
-        }).filter(o => o.distance <= 30)
+        magicalObjectsInRange = magicalObjects.filter(o => o.distance <= 30);
 
         for await (let magical of magicalObjectsInRange) {
             if (!magical.school) {

@@ -1,40 +1,67 @@
 import ASESettings from "./apps/aseSettings.js";
 import { versionMigration } from "./versionMigration.js"
+import * as utilFunctions from "./utilityFunctions.js";
 
 Hooks.once('init', async function () {
   console.log("Registering ASE game settings...");
-  game.settings.register("advancedspelleffects", "preloadFiles", {
-    name: "Preload animation files on start-up?",
-    hint: "This caches the video files when foundry starts for all users. This will use some extra bandwidth, but animations will play more smoothly the first time.",
+  const debouncedReload = foundry.utils.debounce(() => { window.location.reload(); }, 100);
+  game.settings.register("advancedspelleffects", "overrideGridHighlight", {
+    name: "Enable ASE Grid Highlight Override",
+    hint: "This overrides the foundry default template behaviour and removes the grid highlighting for templates specifically placed by ASE spells. Other templates should function as normal.",
     scope: "world",
     config: true,
     type: Boolean,
-    default: false
+    default: true,
+    onChange: debouncedReload
+  });
+  game.settings.register("advancedspelleffects", "overrideTemplateBorder", {
+    name: "Enable ASE Template Border Override",
+    hint: "This overrides the foundry default template behaviour and removes the border for templates specifically placed by ASE spells. Other templates should function as normal.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: debouncedReload
   });
 });
 
 Hooks.once('ready', async function () {
+  if (game.settings.get("advancedspelleffects", "overrideGridHighlight")) {
+    libWrapper.register('advancedspelleffects', "MeasuredTemplate.prototype.highlightGrid", _ASEGridHighlightWrapper, "WRAPPER");
+    utilFunctions.cleanUpTemplateGridHighlights();
+  }
+  if (game.settings.get("advancedspelleffects", "overrideTemplateBorder")) {
+    if (!game.modules.get("tokenmagic")?.active) {
+      libWrapper.register("advancedspelleffects", "MeasuredTemplate.prototype.render", _ASERemoveTemplateBorder, "WRAPPER");
+    } else {
+      ui.notifications.info("ASE Template Border Override disabled due to conflict with TokenMagicFX Module");
+    }
+  }
+
+  function _ASERemoveTemplateBorder(wrapped, ...args) {
+    wrapped(...args);
+    if (this.data?.flags?.advancedspelleffects) {
+      if (this.data?.flags?.advancedspelleffects?.placed) {
+        this.template.alpha = 0;
+      } else {
+        return;
+      }
+    }
+  }
+
+  function _ASEGridHighlightWrapper(wrapped, ...args) {
+    wrapped(...args);
+    if (!this.data?.flags?.advancedspelleffects) return;
+    const highlight = canvas.grid.getHighlightLayer(`Template.${this.id}`);
+    if (highlight) {
+      highlight.clear();
+    }
+  }
+
   if (!game.user.isGM) return;
+
   Hooks.on(`renderItemSheet5e`, async (app, html, data) => {
     //console.log("ASE: Caught actor sheet render hook!", data);
-    let aseSpellList = [game.i18n.localize("ASE.Darkness"),
-    game.i18n.localize('ASE.DetectMagic'),
-    game.i18n.localize('ASE.FogCloud'),
-    game.i18n.localize('ASE.SteelWindStrike'),
-    game.i18n.localize('ASE.ThunderStep'),
-    game.i18n.localize('ASE.SpiritualWeapon'),
-    game.i18n.localize('ASE.CallLightning'),
-    game.i18n.localize('ASE.AnimateDead'),
-    game.i18n.localize('ASE.WitchBolt'),
-    game.i18n.localize('ASE.VampiricTouch'),
-    game.i18n.localize('ASE.MagicMissile'),
-    game.i18n.localize('ASE.ScorchingRay'),
-    game.i18n.localize('ASE.EldritchBlast'),
-    game.i18n.localize('ASE.Moonbeam'),
-    game.i18n.localize('ASE.ChainLightning'),
-    game.i18n.localize('ASE.MirrorImage'),];
-
-    let isSummon = data.item.name.includes(game.i18n.localize("ASE.Summon"));
     //console.log('ASE Spell List: ', aseSpellList);
     if (app.document.getFlag("advancedspelleffects", "disableSettings")) {
       return;

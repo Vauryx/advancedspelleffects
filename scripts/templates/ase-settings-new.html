@@ -53,12 +53,13 @@
                     </button>
                 </div>
                 <div id="ase-settings-body">
-                    <div id="ase-spell-settings" class="show">
+                    <div id="ase-spell-settings" class="show" style="margin:auto;">
                         {{#ifCondASE itemName 'includes' (localize 'ASE.Summon')}}
                             <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
                             <input type="hidden" id="hdnSummonerId" value="{{effectData.summonerId}}" />
                             <table id="summonsTable" width="100%">
                                 <tbody>
+                                    <!-- custom summon section  -->
                                     {{#each effectData.summons}}
                                         <tr>
                                             <td>
@@ -137,11 +138,61 @@
                                                 <input type="range" min="{{this.min}}" max="{{this.max}}"
                                                     step="{{this.step}}" name="{{this.name}}" value={{this.flagValue}}>
                                             {{/ifCondASE}}
+                                            {{#ifCondASE this.type '==' 'textInput'}}
+                                                <input type="text" name="{{this.name}}" value={{this.flagValue}}>
+                                            {{/ifCondASE}}
                                         </td>
                                     </tr>
                                 {{/each}}
                             </tbody>
                         </table>
+                        <!-- custom detect stuff section -->
+                        {{#ifCondASE itemName 'includes' (localize 'ASE.DetectStuff')}}
+                            <input type="hidden" id="hdnItemId" value="{{effectData.itemId}}" />
+                            <input type="hidden" id="hdnCasterId" value="{{effectData.casterId}}" />
+                            <table id="tagsTable" width="100%" title="Custom Tags">
+                                <tbody>
+                                    <tr>
+                                        <th colspan="4">{{localize "ASE.TagTableLabel"}}</th>
+                                    </tr>
+                                    {{#each effectData.tagOptions}}
+                                        <tr>
+                                            <td>
+                                                <label
+                                                    title='{{localize "ASE.TagNameTooltip"}}'><b>{{localize "ASE.TagNameLabel"}}</b></label>
+                                            </td>
+                                            <td>
+                                                <input type="text"
+                                                    name="flags.advancedspelleffects.effectOptions.tagOptions.{{@index}}.tagLabel"
+                                                    value="{{this.tagLabel}}">
+                                            </td>
+                                            <td>
+                                                <label
+                                                    title='{{localize "ASE.TagEffectTooltip"}}'><b>{{localize "ASE.TagEffectLabel"}}</b></label>
+                                            </td>
+                                            <td>
+                                                <input type="text"
+                                                    name="flags.advancedspelleffects.effectOptions.tagOptions.{{@index}}.tagEffect"
+                                                    value="{{this.tagEffect}}">
+                                            </td>
+                                        </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                            <div style="text-align:center;">
+                                <div style="margin:auto;">
+                                    <button class='addTag' type="button" style="width:40%;text-align:center;"
+                                        title='{{localize "ASE.AddTagButtonTooltip"}}'>
+                                        {{localize "ASE.AddTagButtonLabel"}}
+                                    </button>
+
+                                    <button class='removeTag' type="button" style="width:40%;text-align:center;"
+                                        title='{{localize "ASE.RemoveTagButtonTooltip"}}'>
+                                        <i class="fas fa-times"></i> {{localize "ASE.RemoveTagButtonLabel"}}
+                                    </button>
+                                </div>
+                            </div>
+                        {{/ifCondASE}}
                     </div>
                     <div id="ase-anim-settings" class="hide">
                         <table>
@@ -218,6 +269,19 @@
                                         {{#ifCondASE this.type '==' 'checkbox'}}
                                             <td colspan="2">
                                                 <input type="checkbox" name="{{this.name}}" {{checked this.flagValue}}>
+                                            </td>
+                                        {{/ifCondASE}}
+                                        {{#ifCondASE this.type '==' 'dropdown'}}
+                                            <td>
+                                                <select name="{{this.name}}">
+                                                    {{#select this.flagValue}}
+                                                        {{#each this.options as |name key|}}
+                                                            <option value="{{key}}">
+                                                                {{name}}
+                                                            </option>
+                                                        {{/each}}
+                                                    {{/select}}
+                                                </select>
                                             </td>
                                         {{/ifCondASE}}
                                     </tr>

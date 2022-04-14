@@ -7,8 +7,11 @@ export class eldritchBlast {
     }
     static async selectTargets(midiData) {
         const casterActor = midiData.actor;
+        //console.log("casterActor", casterActor);
         const casterToken = canvas.tokens.get(midiData.tokenId);
-        const characterLevel = casterActor.data?.data?.details?.level ?? 1;
+        //console.log("casterToken", casterToken);
+        const characterLevel = casterActor.data?.data?.details?.level ?? casterActor.data?.data?.details?.spellLevel ?? 1;
+        //console.log(`Caster level: ${characterLevel}`);
         let numMissiles = 1;
         if (characterLevel >= 5) {
             numMissiles += 1;
@@ -60,6 +63,11 @@ export class eldritchBlast {
             'd10': 'd10',
             'd12': 'd12',
             'd20': 'd20',
+        };
+
+        const soundPlaybackOptions = {
+            'indiv': 'Individual',
+            'group': 'Group'
         };
 
         let spellOptions = [];
@@ -183,6 +191,18 @@ export class eldritchBlast {
         });
 
         soundOptions.push({
+            label: game.i18n.localize("ASE.BeamIntroSoundPlaybackOptionsLabel"),
+            tooltip: game.i18n.localize("ASE.BeamIntroSoundPlaybackOptionsTooltip"),
+            type: 'dropdown',
+            options: soundPlaybackOptions,
+            name: 'flags.advancedspelleffects.effectOptions.missileIntroSoundPlayback',
+            flagName: 'missileIntroSoundPlayback',
+            flagValue: currFlags.missileIntroSoundPlayback ?? 'indiv',
+
+        });
+
+
+        soundOptions.push({
             label: game.i18n.localize("ASE.BeamImpactSoundLabel"),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactSound',
@@ -191,6 +211,7 @@ export class eldritchBlast {
         });
         soundOptions.push({
             label: game.i18n.localize("ASE.BeamImpactSoundDelayLabel"),
+            tooltip: game.i18n.localize("ASE.BeamImpactSoundDelayTooltip"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactSoundDelay',
             flagName: 'missileImpactSoundDelay',
@@ -205,6 +226,16 @@ export class eldritchBlast {
             min: 0,
             max: 1,
             step: 0.01,
+        });
+        soundOptions.push({
+            label: game.i18n.localize("ASE.BeamImpactSoundPlaybackOptionsLabel"),
+            tooltip: game.i18n.localize("ASE.BeamImpactSoundPlaybackOptionsTooltip"),
+            type: 'dropdown',
+            options: soundPlaybackOptions,
+            name: 'flags.advancedspelleffects.effectOptions.missileImpactSoundPlayback',
+            flagName: 'missileImpactSoundPlayback',
+            flagValue: currFlags.missileImpactSoundPlayback ?? 'indiv',
+
         });
 
         return {

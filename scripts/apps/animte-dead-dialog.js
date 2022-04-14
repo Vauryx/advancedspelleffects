@@ -5,12 +5,13 @@ export class animateDeadDialog extends FormApplication {
     constructor(corpses, options = { raiseLimit: 1, effectSettings: { summons: { skeleton: { actor: "" }, zombie: { actor: "" } }, effectAColor: "blue", effectBColor: "blue", magicSchool: "evocation", magicSchoolColor: "blue" } }) {
         super(options);
         foundry.utils.mergeObject(this.options, options);
-        //console.log(this);
         this.data = {};
         this.data.corpses = corpses;
+        this.data.noCorpses = corpses.length === 0;
         this.data.raiseLimit = this.options.raiseLimit;
         this.data.effectSettings = this.options.effectSettings;
     }
+
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             template: './modules/advancedspelleffects/scripts/templates/animate-dead-dialog.html',
@@ -22,16 +23,13 @@ export class animateDeadDialog extends FormApplication {
             close: () => { ui.notify }
         });
     }
+
     async getData() {
-        return {
-            data: this.data
-        };
-
+        return { data: this.data };
     }
-    async _updateObject(event, formData) {
-        console.log(formData);
 
-    }
+    async _updateObject(event, formData) { }
+
     activateListeners(html) {
         //console.log(html);
         super.activateListeners(html);
@@ -187,7 +185,6 @@ export class animateDeadDialog extends FormApplication {
                 .effect()
                 .file(effectAAnim)
                 .atLocation(animLoc)
-                .JB2A()
                 .waitUntilFinished(-1000)
                 .endTime(3300)
                 .playbackRate(0.7)
@@ -218,8 +215,9 @@ export class animateDeadDialog extends FormApplication {
                         const sheet = token.actor.sheet;
                         await token.actor.sheet.close();
                         token.actor._sheet = null;
-                        delete token.actor.apps[sheet.appId]
-                        let mutateUpdates = { token: summonTokenData, actor: summonActorData }
+                        delete token.actor.apps[sheet.appId];
+                        let mutateUpdates = { token: summonTokenData, actor: summonActorData };
+                        await aseSocket.executeAsGM("checkGMAlwaysAccept");
                         await warpgate.mutate(corpseDoc, mutateUpdates);
                     }
                     catch (err) {

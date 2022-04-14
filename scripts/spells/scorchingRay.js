@@ -3,9 +3,6 @@ import { MissileDialog } from "../apps/missile-dialog.js";
 import * as utilFunctions from "../utilityFunctions.js";
 export class scorchingRay {
     static async registerHooks() {
-        if (game.settings.get("advancedspelleffects", "preloadFiles")) {
-            //Hooks.on("sequencer.ready", scorchingRay._preloadAssets);
-        }
         return;
     }
 
@@ -72,6 +69,11 @@ export class scorchingRay {
             'd10': 'd10',
             'd12': 'd12',
             'd20': 'd20',
+        };
+
+        const soundPlaybackOptions = {
+            'indiv': 'Individual',
+            'group': 'Group'
         };
 
         spellOptions.push({
@@ -182,6 +184,17 @@ export class scorchingRay {
             max: 1,
             step: 0.01,
         });
+        soundOptions.push({
+            label: game.i18n.localize("ASE.BeamIntroSoundPlaybackOptionsLabel"),
+            tooltip: game.i18n.localize("ASE.BeamIntroSoundPlaybackOptionsTooltip"),
+            type: 'dropdown',
+            options: soundPlaybackOptions,
+            name: 'flags.advancedspelleffects.effectOptions.missileIntroSoundPlayback',
+            flagName: 'missileIntroSoundPlayback',
+            flagValue: currFlags.missileIntroSoundPlayback ?? 'indiv',
+
+        });
+
 
         soundOptions.push({
             label: game.i18n.localize("ASE.RayImpactSoundLabel"),
@@ -192,6 +205,7 @@ export class scorchingRay {
         });
         soundOptions.push({
             label: game.i18n.localize("ASE.RayImpactSoundDelayLabel"),
+            tooltip: game.i18n.localize("ASE.RayImpactSoundDelayTooltip"),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactSoundDelay',
             flagName: 'missileImpactSoundDelay',
@@ -206,6 +220,16 @@ export class scorchingRay {
             min: 0,
             max: 1,
             step: 0.01,
+        });
+        soundOptions.push({
+            label: game.i18n.localize("ASE.BeamImpactSoundPlaybackOptionsLabel"),
+            tooltip: game.i18n.localize("ASE.BeamImpactSoundPlaybackOptionsTooltip"),
+            type: 'dropdown',
+            options: soundPlaybackOptions,
+            name: 'flags.advancedspelleffects.effectOptions.missileImpactSoundPlayback',
+            flagName: 'missileImpactSoundPlayback',
+            flagValue: currFlags.missileImpactSoundPlayback ?? 'indiv',
+
         });
 
         return {

@@ -9,7 +9,7 @@ export class mirrorImage {
     }
     static registerHooks() {
         if (utilFunctions.isMidiActive()) {
-            Hooks.on("midi-qol.preDamageRollComplete", mirrorImage.handlePreDamageRoll);
+            Hooks.on("midi-qol.preCheckHits", mirrorImage.handlePreCheckHits);
         }
         Hooks.on("endedSequencerEffect", mirrorImage.handleMirrorImageEnded);
         return;
@@ -22,6 +22,77 @@ export class mirrorImage {
         await this.token.document.setFlag("advancedspelleffects", "mirrorImage", this.effectOptions);
         if (utilFunctions.isMidiActive()) {
         }
+    }
+
+    static async handlePreCheckHits(data) {
+
+        //console.log(data);
+
+        let target = Array.from(data.targets)[0];
+        if (!target) return;
+
+        const mirrorImages = Sequencer.EffectManager.getEffects().filter(effect => effect.data.name && effect.data.name.startsWith(`MirrorImage-${target.id}`));
+        if (mirrorImages.length == 0) return;
+
+        const effectOptions = target.document.getFlag("advancedspelleffects", "mirrorImage");
+        if (!effectOptions) return;
+
+        const mirrorImageEffectNames = mirrorImages.map(effect => effect.data.name);
+
+        const attackRoll = data.attackRoll;
+        //console.log("Arrack Roll: ", attackRoll.total);
+        const targetAC = target.document.actor.data.data.attributes.ac.value;
+        //console.log("Target AC: ", targetAC);
+
+        const imagesRemaining = mirrorImages.length;
+        const imageAC = 10 + target.actor.data.data.abilities.dex.mod;
+
+        const roll = new Roll(`1d20`).evaluate({ async: false });
+        //console.log("Mirror Image Roll: ", roll.total);
+
+        let dc;
+        if (imagesRemaining == 3) {
+            dc = 6;
+
+        }
+        else if (imagesRemaining == 2) {
+            dc = 8;
+        }
+        else if (imagesRemaining == 1) {
+            dc = 11;
+        }
+        else {
+            console.log("Error: Mirror Images remaining is not 1, 2, or 3.");
+            return;
+        }
+        //console.log("Mirror Image DC: ", dc);
+
+        if (roll.total < dc) {
+            console.log("Mirror Image failed.");
+            await warpgate.wait(500);
+            await mirrorImage.updateChatCardFailed(data.itemCardId, target, roll.total);
+            return;
+        }
+        else {
+            console.log("Mirror Image succeeded.");
+            data.noAutoDamage = true;
+            if (attackRoll.total >= imageAC) {
+                // console.log("Mirror Image hit.");
+                await warpgate.wait(effectOptions.imageDestroyDelay);
+                await Sequencer.EffectManager.endEffects({ name: mirrorImageEffectNames[0] });
+                await mirrorImage.updateChatCard(data.itemCardId, target, roll.total, true);
+                //console.log("------------Done Mirror Image Pre Check Hits------------");
+                return;
+            }
+            else {
+                await warpgate.wait(500);
+                await mirrorImage.updateChatCard(data.itemCardId, target, roll.total, false);
+                //console.log("------------Done Mirror Image Pre Check Hits------------");
+                return;
+            }
+        }
+
+
     }
 
     static async handleMirrorImageEnded(effect) {
@@ -51,83 +122,12 @@ export class mirrorImage {
         new Sequence()
             .effect(imageDestroyEffect)
             .atLocation(adjustedPos)
-            .JB2A()
             .sound()
             .file(imageDestroySound)
             .volume(imageDestroyVolume)
             .delay(imageDestroySoundDelay)
             .playIf(imageDestroySound != "")
             .play()
-    }
-
-
-    static async handlePreDamageRoll(data) {
-        // console.log("Handling ASE Mirror Image...");
-        //console.log(item);
-        // console.log(data);
-
-        let target = Array.from(data.targets)[0];
-        if (!target) return;
-        const mirrorImages = await Sequencer.EffectManager.getEffects().filter(effect => effect.data.name.startsWith(`MirrorImage-${target.id}`));
-        console.log("Mirror Images: ", mirrorImages);
-        // assign every mirror image effect name to a variable
-
-        if (mirrorImages.length == 0) return;
-        const mirrorImageEffectNames = mirrorImages.map(effect => effect.data.name);
-        const effectOptions = target.getFlag("advancedspelleffects", "mirrorImage");
-        if (!effectOptions) return;
-        const attackRoll = data.attackRoll;
-        console.log("Arrack Roll: ", attackRoll);
-
-        const imagesRemaining = mirrorImages.length;
-        const imageAC = 10 + target.actor.data.data.abilities.dex.mod;
-
-        const roll = await new Roll(`1d20`).evaluate({ async: true });
-
-        console.log("Mirror Image Roll: ", roll);
-        let dc;
-        if (imagesRemaining == 3) {
-            dc = 6;
-
-        }
-        else if (imagesRemaining == 2) {
-            dc = 8;
-        }
-        else if (imagesRemaining == 1) {
-            dc = 11;
-        }
-        else {
-            console.log("Error: Mirror Images remaining is not 1, 2, or 3.");
-            return;
-        }
-        console.log("Mirror Image DC: ", dc);
-
-        if (roll.total < dc) {
-            console.log("Mirror Image failed.");
-            await warpgate.wait(500);
-            await mirrorImage.updateChatCardFailed(data.itemCardId, target, roll.total);
-            return;
-        }
-        else {
-            // console.log("Mirror Image succeeded.");
-            const zeroDamageRoll = await new Roll(`0`).evaluate({ async: true });
-            data.damageTotal = zeroDamageRoll.total;
-            data.damageDetail[0].damage = zeroDamageRoll.total;
-            data.damageRoll = zeroDamageRoll;
-            if (attackRoll.total >= imageAC) {
-                // console.log("Mirror Image hit.");
-                await warpgate.wait(effectOptions.imageDestroyDelay);
-                await Sequencer.EffectManager.endEffects({ name: mirrorImageEffectNames[0] });
-                await mirrorImage.updateChatCard(data.itemCardId, target, roll.total, true);
-                return;
-            }
-            else {
-                await warpgate.wait(500);
-                await mirrorImage.updateChatCard(data.itemCardId, target, roll.total, false);
-                return;
-            }
-        }
-
     }
 
     static async updateChatCardFailed(itemCardId, target, attackRoll) {
@@ -150,7 +150,7 @@ export class mirrorImage {
         // console.log(chatMessage);
         let chatMessageContent = $(await duplicate(chatMessage.data.content));
         // console.log(chatMessageContent);
-        //chatMessageContent.find(".midi-qol-hits-display").empty();
+        chatMessageContent.find(".midi-qol-hits-display").empty();
         chatMessageContent.find(".midi-qol-hits-display").append(`<div class="midi-qol-flex-container">
                     <div>
                         Mirror Image Roll: <b>${attackRoll}</b>  - Attack ${hit ? 'hits' : 'misses'}
@@ -224,7 +224,7 @@ export class mirrorImage {
 
         positions.forEach((position, index) => {
             seq.effect()
-                .file(casterTokenImg)
+                .from(casterToken)
                 .fadeIn(1000)
                 .attachTo(casterToken)
                 .loopProperty("sprite", "position.x", {
@@ -239,7 +239,6 @@ export class mirrorImage {
                 })
                 .persist()
                 .scaleOut(0, 300, { ease: "easeInExpo" })
-                .scaleToObject(1)
                 .opacity(imageOpacity)
                 .name(`MirrorImage-${casterToken.id}-${index}`);
         });

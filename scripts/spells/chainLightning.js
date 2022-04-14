@@ -80,7 +80,7 @@ export class chainLightning {
         //console.log("firstTarget", firstTarget);
         //console.log("tokenD", tokenD);
         const potentialTargets = canvas.tokens.placeables.filter(function (target) {
-            return target.actor.data.data.attributes.hp.value > 0
+            return target.actor?.data?.data?.attributes.hp.value > 0
                 && canvas.grid.measureDistance(firstTarget, target) <= 32.5
                 && target !== firstTarget
                 && target !== tokenD
@@ -224,7 +224,7 @@ export class chainLightning {
             .effect()
             .file(`jb2a.chain_lightning.primary.${this.effectOptions.primaryBoltColor}`)
             .atLocation(this.token)
-            .reachTowards(this.firstTarget)
+            .stretchTo(this.firstTarget)
             .randomizeMirrorY()
             .effect()
             .file(`jb2a.static_electricity.02.${this.effectOptions.saveFailEffectColor}`)
@@ -246,7 +246,7 @@ export class chainLightning {
                 .effect()
                 .file(`jb2a.chain_lightning.secondary.${this.effectOptions.secondaryBoltColor}`)
                 .atLocation(this.firstTarget)
-                .reachTowards(target.token)
+                .stretchTo(target.token)
                 .randomizeMirrorY()
                 .delay(randomDelay)
                 .effect()

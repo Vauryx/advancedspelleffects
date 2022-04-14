@@ -19,6 +19,7 @@ export class darkness {
         walls.forEach((wall) => {
             wallDocuments.push(wall.id);
         });
+        //console.log("Deleting walls: " + wallDocuments);
         if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
             await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
         }
@@ -35,6 +36,7 @@ export class darkness {
     static async createDarkness(midiData) {
         const item = midiData.item;
         const displayCrosshairs = async (crosshairs) => {
+            //console.log("Displaying crosshairs...");
             new Sequence("Advanced Spell Effects")
                 .effect()
                 .file("jb2a.darkness.black")

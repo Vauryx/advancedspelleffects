@@ -17,6 +17,9 @@ import { vampiricTouch } from "../spells/vampiricTouch.js";
 import { moonBeam } from "../spells/moonBeam.js";
 import { chainLightning } from "../spells/chainLightning.js";
 import { mirrorImage } from "../spells/mirrorImage.js";
+import { wallOfForce } from "../spells/wallOfForce.js";
+import { chaosBolt } from "../spells/chaosBolt.js";
+import { detectStuff } from "../spells/detectStuff.js";
 import { viciousMockery } from "../spells/viciousMockery.js";
 
 export class ASESettings extends FormApplication {
@@ -31,6 +34,7 @@ export class ASESettings extends FormApplication {
         this.spellList = {};
         this.spellList[game.i18n.localize("ASE.AnimateDead")] = animateDead;
         this.spellList[game.i18n.localize("ASE.CallLightning")] = callLightning;
+        this.spellList[game.i18n.localize("ASE.ChaosBolt")] = chaosBolt;
         this.spellList[game.i18n.localize("ASE.DetectMagic")] = detectMagic;
         this.spellList[game.i18n.localize("ASE.FogCloud")] = fogCloud;
         this.spellList[game.i18n.localize("ASE.Darkness")] = darkness;
@@ -46,6 +50,8 @@ export class ASESettings extends FormApplication {
         this.spellList[game.i18n.localize("ASE.ChainLightning")] = chainLightning;
         this.spellList[game.i18n.localize("ASE.MirrorImage")] = mirrorImage;
         this.spellList[game.i18n.localize("ASE.Summon")] = summonCreature;
+        this.spellList[game.i18n.localize("ASE.WallOfForce")] = wallOfForce;
+        this.spellList[game.i18n.localize("ASE.DetectStuff")] = detectStuff;
         this.spellList[game.i18n.localize("ASE.ViciousMockery")] = viciousMockery;
     }
 
@@ -93,6 +99,10 @@ export class ASESettings extends FormApplication {
                 break;
             case game.i18n.localize("ASE.FogCloud"):
                 data.level = 1;
+                data.duration = { "value": 10, "units": "minute" };
+                break;
+            case game.i18n.localize("ASE.WallOfForce"):
+                data.level = 5;
                 data.duration = { "value": 10, "units": "minute" };
                 break;
             case game.i18n.localize("ASE.SteelWindStrike"):
@@ -156,7 +166,7 @@ export class ASESettings extends FormApplication {
         //console.log("Detected item name: ", itemName);
 
         let requiredSettings;
-        console.log("ASE (setEffectData) Item name: ", itemName);
+        //console.log("ASE (setEffectData) Item name: ", itemName);
         if (itemName.includes(game.i18n.localize("ASE.Summon"))) {
             requiredSettings = await summonCreature.getRequiredSettings(flags.advancedspelleffects.effectOptions);
             //console.log(requiredSettings);
@@ -183,6 +193,24 @@ export class ASESettings extends FormApplication {
             returnOBJ.summonOptions = summonOptions;
             //console.log(returnOBJ);
         }
+        else if (itemName.includes(game.i18n.localize("ASE.DetectStuff"))) {
+            requiredSettings = await detectStuff.getRequiredSettings(flags.advancedspelleffects.effectOptions);
+            //console.log(requiredSettings);
+            returnOBJ.requiredSettings = requiredSettings;
+            let customTags = flags.advancedspelleffects?.effectOptions?.tags ?? '';
+            let tags = customTags.split(",");
+            let tagOptions = flags.advancedspelleffects?.effectOptions?.tagOptions ?? { tagLabel: "", tagEffect: "" };
+
+            returnOBJ.tags = tags;
+            returnOBJ.tagOptions = tagOptions;
+            returnOBJ["itemId"] = item.id;
+            if (item.parent) {
+                returnOBJ["casterId"] = item.parent.id;
+            }
+            else {
+                returnOBJ["casterId"] = "";
+            }
+        }
         else {
             if (this.spellList[game.i18n.localize(itemName)] != undefined) {
                 requiredSettings = await this.spellList[game.i18n.localize(itemName)].getRequiredSettings(flags.advancedspelleffects.effectOptions);
@@ -200,7 +228,7 @@ export class ASESettings extends FormApplication {
     async getSpellOptions() {
         let spellOptions = {};
         let spellList = this.spellList;
-        let spellNames = Object.keys(spellList);
+        let spellNames = Object.keys(spellList).sort();
         //console.log(spellNames);
         spellNames.forEach((spellName) => {
             spellOptions[spellName] = spellName;
@@ -302,6 +330,8 @@ export class ASESettings extends FormApplication {
         //console.log(this);
         html.find('.addType').click(this._addSummonType.bind(this));
         html.find('.removeType').click(this._removeSummonType.bind(this));
+        html.find('.addTag').click(this._addTag.bind(this));
+        html.find('.removeTag').click(this._removeTag.bind(this));
     }
 
     async _removeSummonType(e) {
@@ -359,6 +389,50 @@ export class ASESettings extends FormApplication {
         newQtyInput.innerHTML = `<input style='width: 3em;' type="text"
     name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.qty"
     value=1>`;
+        this.submit({ preventClose: true }).then(() => this.render());
+    }
+
+    async _addTag(e) {
+        //console.log(e);
+        let tagsTable = document.getElementById("tagsTable").getElementsByTagName('tbody')[0];
+        //console.log(tagsTable);
+        //console.log(this);
+        let newTagRow = tagsTable.insertRow(-1);
+        let newLabel1 = newTagRow.insertCell(0);
+        let newTextInput = newTagRow.insertCell(1);
+        newLabel1.innerHTML = `<label><b>${game.i18n.localize("ASE.TagNameLabel")}</b></label>`;
+        newTextInput.innerHTML = `<input type="text"
+        name="flags.advancedspelleffects.effectOptions.tagOptions.${tagsTable.rows.length - 1}.tagLabel"
+        value="">`;
+        this.submit({ preventClose: true }).then(() => this.render());
+    }
+
+    async _removeTag(e) {
+        //console.log(e);
+        let tagsTable = document.getElementById("tagsTable").getElementsByTagName('tbody')[0];
+        let row = tagsTable.rows[tagsTable.rows.length - 1];
+        let cells = row.cells;
+        //console.log(row, cells);
+        let tagIndex = cells[1].children[0].name.match(/\d+/)[0];
+        //console.log(tagIndex);
+        let itemId = document.getElementById("hdnItemId").value;
+        let actorId = document.getElementById("hdnCasterId").value;
+        let item;
+        if (actorId != "") {
+            let caster = game.actors.get(actorId);
+            item = caster.items.get(itemId);
+            //console.log(summoner, item);
+        } else {
+            item = game.items.get(itemId);
+            //console.log(item);
+        }
+        tagsTable.rows[tagsTable.rows.length - 1].remove();
+        await item.unsetFlag("advancedspelleffects", `effectOptions.tagOptions.${tagIndex}`);
+        if (this.flags) {
+            delete this.flags.effectOptions.tagOptions[tagIndex];
+        }
+
+        //console.log(this.flags);
         this.submit({ preventClose: true }).then(() => this.render());
     }
 

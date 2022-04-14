@@ -9,14 +9,49 @@ export function setupASESocket() {
         aseSocket.register("placeTiles", placeTiles);
         aseSocket.register("placeWalls", placeWalls);
         aseSocket.register("deleteTiles", deleteTiles);
+        aseSocket.register("deleteTemplates", deleteTemplates);
         aseSocket.register("updateFlag", updateFlag);
+        aseSocket.register("removeFlag", removeFlag);
         aseSocket.register("moveWalls", moveWalls);
         aseSocket.register("moveTile", moveTile);
         aseSocket.register("fadeTile", fadeTile);
         aseSocket.register("placeSounds", placeSounds);
         aseSocket.register("moveSound", moveSound);
+        aseSocket.register("updateDocument", updateDocument);
+        aseSocket.register("updateDocuments", updateDocuments);
+        aseSocket.register("checkGMAlwaysAccept", checkGMAlwaysAccept);
     }
 };
+
+async function checkGMAlwaysAccept() {
+
+    const alwaysAccept = game.settings.get("warpgate", "alwaysAccept");
+    console.log("GM Always Accept: ", alwaysAccept);
+    if (!alwaysAccept) {
+        ui.notifications.info("Warpgate 'Always Accept' is disabled. You must manually accept the mutation.");
+    }
+}
+
+async function updateDocument(objectId, updateData) {
+    let object = canvas.scene.tiles.get(objectId)
+        || canvas.scene.tokens.get(objectId)
+        || canvas.scene.drawings.get(objectId)
+        || canvas.scene.walls.get(objectId)
+        || canvas.scene.lights.get(objectId)
+        || game.scenes.get(objectId)
+        || game.users.get(objectId)
+        || game.actors.get(objectId);
+    if (object) {
+        await object.update(updateData, { animate: false });
+    }
+}
+async function updateDocuments(objectType = '', updateData) {
+
+    if (updateData.length > 0 && objectType != '') {
+        await canvas.scene.updateEmbeddedDocuments(objectType, updateData);
+    }
+
+}
 
 async function updateFlag(objectId, flag, value) {
     let object = canvas.scene.tiles.get(objectId)
@@ -26,7 +61,22 @@ async function updateFlag(objectId, flag, value) {
         || canvas.scene.lights.get(objectId)
         || game.scenes.get(objectId)
         || game.users.get(objectId);
-    await object.setFlag("advancedspelleffects", flag, value);
+    if (object) {
+        await object.setFlag("advancedspelleffects", flag, value);
+    }
+}
+
+async function removeFlag(objectId, flag) {
+    let object = canvas.scene.tiles.get(objectId)
+        || canvas.scene.tokens.get(objectId)
+        || canvas.scene.drawings.get(objectId)
+        || canvas.scene.walls.get(objectId)
+        || canvas.scene.lights.get(objectId)
+        || game.scenes.get(objectId)
+        || game.users.get(objectId);
+    if (object) {
+        await object.unsetFlag("advancedspelleffects", flag);
+    }
 }
 
 async function placeTiles(tileData) {
@@ -35,6 +85,10 @@ async function placeTiles(tileData) {
 
 async function deleteTiles(tileIds) {
     await canvas.scene.deleteEmbeddedDocuments("Tile", tileIds);
+}
+
+async function deleteTemplates(tileIds) {
+    await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", tileIds);
 }
 
 async function moveTile(newLocation, tileId) {
@@ -82,7 +136,7 @@ async function placeWalls(wallData) {
 }
 
 async function moveWalls(tileId, wallType, numWalls) {
-    let tileD = await canvas.scene.tiles.get(tileId);
+    let tileD = canvas.scene.tiles.get(tileId) ?? canvas.scene.templates.get(tileId);
     let placedX = tileD.data.x + (tileD.data.width / 2);
     let placedY = tileD.data.y + (tileD.data.height / 2);
     let outerCircleRadius = tileD.data.width / 2.2;

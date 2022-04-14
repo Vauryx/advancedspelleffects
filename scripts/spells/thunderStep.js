@@ -1,4 +1,5 @@
 import * as utilFunctions from "../utilityFunctions.js";
+import { aseSocket } from "../aseSockets.js";
 
 export class thunderStep {
 
@@ -186,12 +187,12 @@ export class thunderStep {
                     }
                 }
 
-                for (let passenger of passengers) {
-                    await passenger.document.update({
+                for await (let passenger of passengers) {
+                    const updateData = {
                         x: position.x - (canvas.grid.size / 2) + passenger.center.x - tokenD.center.x,
-                        y: position.y - (canvas.grid.size / 2) + passenger.center.y - tokenD.center.y,
-                        hidden: true
-                    }, { animate: false });
+                        y: position.y - (canvas.grid.size / 2) + passenger.center.y - tokenD.center.y
+                    };
+                    await aseSocket.executeAsGM("updateDocument", passenger.id, updateData);
                 }
 
             }, true)
@@ -205,16 +206,10 @@ export class thunderStep {
             .baseFolder("modules/jb2a_patreon/Library/Generic/Impact")
             .file("Impact_01_Regular_Blue_400x400.webm")
             .atLocation(tokenD)
-            .JB2A()
             .scale(1.75)
             .wait(50)
             .thenDo(async () => {
                 damage_range[0].delete();
-                for await (let passenger of passengers) {
-                    await passenger.document.update({
-                        hidden: false
-                    }, { animate: false });
-                }
             }, true)
             .play();
 

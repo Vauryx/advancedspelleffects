@@ -3,6 +3,7 @@ import { versionMigration } from "./versionMigration.js"
 // Importing spells
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
+import { chaosBolt } from "./spells/chaosBolt.js";
 import { callLightning } from "./spells/callLightning.js";
 import { fogCloud } from "./spells/fogCloud.js";
 import { spiritualWeapon } from "./spells/spiritualWeapon.js";
@@ -18,6 +19,8 @@ import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { chainLightning } from "./spells/chainLightning.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
+import { wallOfForce } from "./spells/wallOfForce.js";
+import { detectStuff } from "./spells/detectStuff.js";
 import { viciousMockery } from "./spells/viciousMockery.js";
 
 export class ASEHandler {
@@ -44,10 +47,17 @@ export class ASEHandler {
             case game.i18n.localize('ASE.DetectMagic'):
                 await detectMagic.activateDetectMagic(data);
                 return;
+            case game.i18n.localize('ASE.DetectStuff'):
+                const detectSpell = new detectStuff(data);
+                detectSpell.cast();
+                return;
             case game.i18n.localize('ASE.CallLightning'):
                 if (!data.flavor) {
                     await callLightning.createStormCloud(data);
                 }
+                return;
+            case game.i18n.localize('ASE.ChaosBolt'):
+                await chaosBolt.cast(data);
                 return;
             case game.i18n.localize('ASE.ActivateCallLightning'):
 
@@ -120,12 +130,16 @@ export class ASEHandler {
                 const mirrorImageSpell = new mirrorImage(data);
                 mirrorImageSpell.cast();
                 return;
+
+            case game.i18n.localize('ASE.WallOfForce'):
+                wallOfForce.createWallOfForce(data);
+                return;
             case game.i18n.localize('ASE.ViciousMockery'):
                 const viciousMockerySpell = new viciousMockery(data);
                 viciousMockerySpell.cast();
                 return;
         }
-        if (item.name.includes(game.i18n.localize("ASE.Summon"))) {
+        if (item.name.includes(game.i18n.localize("ASE.Summon")) || aseFlags.spellEffect.includes(game.i18n.localize("ASE.Summon"))) {
             await summonCreature.doSummon(data);
             return;
         }
