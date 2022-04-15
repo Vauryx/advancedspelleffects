@@ -99,6 +99,24 @@ export function rgbToHex(r, g, b) {
     return "0x" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+export function getRandomColor(type) {
+    let color = rgbToHex(getRandomInt(0, 155), getRandomInt(0, 155), getRandomInt(0, 155));
+    if (type == "0x") {
+        return color;
+    } else if (type == "#") {
+        return "#" + color.substring(2);
+    }
+    return color;
+}
+
+export function convertColorHexTo0x(color) {
+    return "0x" + color.substring(1);
+}
+
+export function convertColor0xToHex(color) {
+    return "#" + color.substring(2);
+}
+
 export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }

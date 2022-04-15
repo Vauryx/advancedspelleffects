@@ -136,7 +136,10 @@
                                             {{/ifCondASE}}
                                             {{#ifCondASE this.type '==' 'rangeInput'}}
                                                 <input type="range" min="{{this.min}}" max="{{this.max}}"
-                                                    step="{{this.step}}" name="{{this.name}}" value={{this.flagValue}}>
+                                                    step="{{this.step}}"
+                                                    oninput="this.nextElementSibling.value = this.value"
+                                                    name="{{this.name}}" value={{this.flagValue}}>
+                                                <output style="font-weight: bold;">{{this.flagValue}}</output>
                                             {{/ifCondASE}}
                                             {{#ifCondASE this.type '==' 'textInput'}}
                                                 <input type="text" name="{{this.name}}" value={{this.flagValue}}>
@@ -220,7 +223,10 @@
                                             {{/ifCondASE}}
                                             {{#ifCondASE this.type '==' 'rangeInput'}}
                                                 <input type="range" min="{{this.min}}" max="{{this.max}}"
-                                                    step="{{this.step}}" name="{{this.name}}" value={{this.flagValue}}>
+                                                    step="{{this.step}}"
+                                                    oninput="this.nextElementSibling.value = this.value"
+                                                    name="{{this.name}}" value={{this.flagValue}}>
+                                                <output style="font-weight: bold;">{{this.flagValue}}</output>
                                             {{/ifCondASE}}
                                             {{#ifCondASE this.type '==' 'colorPicker'}}
                                                 <input type="color" name="{{this.name}}" value={{this.flagValue}}>
@@ -263,7 +269,10 @@
                                         {{#ifCondASE this.type '==' 'rangeInput'}}
                                             <td colspan="2">
                                                 <input type="range" min="{{this.min}}" max="{{this.max}}"
-                                                    step="{{this.step}}" name="{{this.name}}" value={{this.flagValue}}>
+                                                    step="{{this.step}}"
+                                                    oninput="this.nextElementSibling.value = this.value"
+                                                    name="{{this.name}}" value={{this.flagValue}}>
+                                                <output style="font-weight: bold;">{{this.flagValue}}</output>
                                             </td>
                                         {{/ifCondASE}}
                                         {{#ifCondASE this.type '==' 'checkbox'}}
