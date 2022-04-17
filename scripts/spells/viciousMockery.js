@@ -20,7 +20,6 @@ export class viciousMockery {
 
     async cast() {
         await this.playSequence();
-
     }
 
     async playSequence() {

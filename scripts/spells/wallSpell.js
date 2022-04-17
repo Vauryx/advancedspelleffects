@@ -1,0 +1,1185 @@
+import { aseSocket } from "../aseSockets.js";
+import * as utilFunctions from "../utilityFunctions.js";
+import baseSpellClass from "./baseSpellClass.js";
+import { wallPanelDialog } from "../apps/wall-panel-dialog.js";
+
+
+export class wallSpell extends baseSpellClass {
+    constructor(data) {
+        super();
+        this.data = data;
+
+        this.actor = game.actors.get(this.data.actor.id);
+        this.token = canvas.tokens.get(this.data.tokenId);
+        this.item = this.data.item;
+        this.itemLevel = this.data.itemLevel;
+        this.effectOptions = this.item.getFlag("advancedspelleffects", "effectOptions") ?? {};
+        //console.log('effectOptions:', this.effectOptions);
+        this.wallType = this.effectOptions.wallType.toLowerCase();
+        this.wallCategory = "";
+        this.wallOptions = {};
+        this.baseTemplateData = {
+            user: game.user.id,
+            direction: 0,
+            x: 0,
+            y: 0,
+            color: "#FFFFFF",
+            fillColor: "#FFFFFF",
+            flags: {
+                tagger: { tags: [`wallSpell-${this.wallType}-${this.actor.id}`] },
+                advancedspelleffects: {
+                    wallSpellWallNum: 12,
+                    dimensions: {},
+                    wallType: this.wallType,
+                    length: this.effectOptions.length,
+                    wallOperationalData: {},
+                    wallName: this.item.name
+                }
+            }
+        }
+    }
+
+    async cast() {
+        this._setWallCategory();
+        this._setWallOptions();
+        console.log(this);
+        const { dimensions, texture, type } = await warpgate.buttonDialog(this._getDialogData(), 'column');
+        console.log('dimensions:', dimensions);
+        console.log('texture:', texture);
+        console.log('type:', type);
+        if (!dimensions || !texture) return;
+
+
+        this._setBaseTemplateData(dimensions, type);
+
+        const aseData = {
+            itemLevel: this.itemLevel,
+            flags: this.effectOptions,
+            caster: this.token,
+            casterActor: this.actor,
+            dimensions: dimensions,
+            texture: texture,
+        }
+        console.log("Dialog return type", type);
+        if (type == "h-panels" || type == "v-panels") {
+            let wallPanelDiag = new wallPanelDialog({ aseData: aseData, templateData: this.baseTemplateData, type: type }).render(true);
+            let wallSpellPanelData = await wallPanelDiag.getData();
+            console.log('wallSpellPanelData:', wallSpellPanelData);
+            Hooks.once('createMeasuredTemplate', async (template) => {
+                await template.setFlag('advancedspelleffects', 'placed', true);
+                wallSpell.placePanels(aseData, template, wallPanelDiag, type);
+            });
+            //console.log("template data:", this.baseTemplateData);
+            const doc = new MeasuredTemplateDocument(this.baseTemplateData, { parent: canvas.scene });
+            let template = new game.dnd5e.canvas.AbilityTemplate(doc);
+            template.actorSheet = aseData.casterActor.sheet;
+            template.drawPreview();
+        } else {
+            Hooks.once('createMeasuredTemplate', async (template) => {
+
+                const direction = template.data.direction;
+                const templateDimensions = template.getFlag('advancedspelleffects', 'dimensions') ?? {};
+                const templateLength = templateDimensions?.length ?? 0;
+                if ((direction == 0 || direction == 180 || direction == 90 || direction == 270) && templateLength > 0) {
+                    await template.update({ distance: templateLength, flags: { advancedspelleffects: { placed: true } } });
+                } else {
+                    await template.setFlag('advancedspelleffects', 'placed', true);
+                }
+
+                wallSpell.playEffects(aseData, template);
+                wallSpell.placeWalls(template);
+                if (this.wallType.includes('fire')) {
+                    await wallSpell.pickFireSide(template);
+                }
+                wallSpell.handleOnCast(template);
+            });
+            const doc = new MeasuredTemplateDocument(this.baseTemplateData, { parent: canvas.scene });
+            let template = new game.dnd5e.canvas.AbilityTemplate(doc);
+            template.actorSheet = aseData.casterActor.sheet;
+            template.drawPreview();
+        }
+    }
+
+    _setWallCategory() {
+        if (this.wallType.includes('thorns') || this.wallType.includes('fire') || this.wallType.includes('light')
+            || this.wallType.includes('sand') || this.wallType.includes('water')) {
+            this.wallCategory = 'wall';
+        } else if (this.wallType.includes('force') || this.wallType.includes('ice') || this.wallType.includes('stone')) {
+            this.wallCategory = 'panels';
+        }
+    }
+
+    _setWallOptions() {
+        //console.log('wallCategory:', this.wallCategory);
+        //console.log('effectOptions:', this.effectOptions);
+        switch (this.wallCategory) {
+            case "wall":
+                this.wallOptions = {
+                    wallCategory: "wall",
+                    rect: {
+                        dimensions: {
+                            length: this.effectOptions.wallLength,
+                            width: this.effectOptions.wallHeight
+                        }
+                    },
+                    circle: {
+                        dimensions: {
+                            radius: this.effectOptions.wallRadius
+                        }
+                    }
+                };
+                break;
+            case "panels":
+                this.wallOptions = {
+                    wallCategory: "panels",
+                    rect: {
+                        horizontal: {
+                            dimensions: {
+                                length: this.effectOptions.wallSegmentSize,
+                                width: this.effectOptions.wallSegmentSize
+                            }
+                        },
+                        vertical: {
+                            dimensions: {
+                                length: this.effectOptions.wallSegmentSize,
+                                width: this.effectOptions.wallSegmentSize
+                            }
+                        }
+                    },
+                    circle: {
+                        dimensions: {
+                            radius: this.effectOptions.wallRadius
+                        }
+                    }
+                }
+                break;
+            default:
+                this.wallOptions = {
+                    wallCategory: "wall",
+                    rect: {
+                        dimensions: {
+                            length: this.effectOptions.wallLength,
+                            height: this.effectOptions.wallHeight
+                        }
+                    },
+                    circle: {
+                        dimensions: {
+                            radius: this.effectOptions.wallRadius
+                        }
+                    }
+                };
+                break;
+        }
+    }
+
+    _getDialogData() {
+        const wallType = this.wallType;
+        const wallOptions = this.wallOptions;
+        console.log('wallOptions:', wallOptions);
+        const wallCategory = this.wallCategory;
+        const effectOptions = this.effectOptions;
+        const useWebP = effectOptions.useWebP ?? false;
+        let dialogData = {
+            title: `Choose your Wall of ${this.wallType} shape`,
+            buttons: []
+        };
+
+        if (!wallType.toLowerCase().includes("light") && !wallType.toLowerCase().includes("sand")) {
+            dialogData.buttons.push({
+                label: `Sphere/Dome/Ring(${wallOptions.circle.dimensions.radius}ft radius)`,
+                value: {
+                    dimensions: wallOptions.circle.dimensions,
+                    texture: this._getTexture({ type: 'circle' }, wallType, useWebP),
+                    type: "circle"
+                }
+            });
+        }
+        switch (wallCategory) {
+            case "wall":
+                dialogData.buttons.push({
+                    label: `Wall(${wallOptions.rect.dimensions.length}ft x ${wallOptions.rect.dimensions.width}ft)`,
+                    value: {
+                        dimensions: wallOptions.rect.dimensions,
+                        texture: this._getTexture({ type: 'wall' }, wallType, useWebP),
+                        type: "ray"
+                    }
+                });
+                break;
+            case "panels":
+                dialogData.buttons.push({
+                    label: `Horizontal Panels(${wallOptions.rect.horizontal.dimensions.length}ft x ${wallOptions.rect.horizontal.dimensions.width}ft)`,
+                    value: {
+                        dimensions: wallOptions.rect.horizontal.dimensions,
+                        texture: this._getTexture({ type: 'panel', subtype: 'horizontal' }, wallType, useWebP),
+                        type: "h-panels"
+                    }
+                });
+                dialogData.buttons.push({
+                    label: `Vertical Panels(${wallOptions.rect.vertical.dimensions.length}ft x ${wallOptions.rect.vertical.dimensions.width}ft)`,
+                    value: {
+                        dimensions: wallOptions.rect.vertical.dimensions,
+                        texture: this._getTexture({ type: 'panel', subtype: 'vertical' }, wallType, useWebP),
+                        type: "v-panels"
+                    }
+                });
+                break;
+            default:
+                break;
+        }
+        return dialogData;
+
+    }
+
+    _setBaseTemplateData(dimensions, type) {
+        this.baseTemplateData.flags.advancedspelleffects.dimensions = dimensions;
+        this.baseTemplateData.flags.tagger.tags.push('0');
+        if (type == "circle") {
+            this.baseTemplateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.CIRCLE;
+            this.baseTemplateData["distance"] = dimensions.radius;
+        } else if (type == "ray") {
+            this.baseTemplateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RAY;
+            this.baseTemplateData["distance"] = Math.sqrt(Math.pow(dimensions.length, 2) + Math.pow(dimensions.width, 2));
+            //this.baseTemplateData["direction"] = 180 * Math.atan2(dimensions.length, dimensions.width) / Math.PI;
+            this.baseTemplateData["width"] = this.effectOptions.wallWidth;
+        } else if (type == "v-panels") {
+            this.baseTemplateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RAY;
+            this.baseTemplateData["distance"] = dimensions.length;
+        } else if (type == "h-panels") {
+            this.baseTemplateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE;
+            this.baseTemplateData["distance"] = Math.sqrt(Math.pow(dimensions.length, 2) + Math.pow(dimensions.width, 2));
+            this.baseTemplateData["direction"] = 180 * Math.atan2(dimensions.length, dimensions.width) / Math.PI;
+        }
+        switch (this.wallType) {
+            case 'fire':
+                this.baseTemplateData.flags.advancedspelleffects.wallOperationalData = {
+                    savingThrowOnCast: true,
+                    savingThrow: 'dex',
+                    halfDamOnSave: true,
+                    damage: '5d8',
+                    damageType: 'fire',
+                    damageOnTouch: true,
+                    savingThrowOnTouch: false,
+                    checkForTouch: true,
+                    damageSide: '',
+                    damageInArea: true,
+                    damageArea: {},
+                    damageOnCast: true,
+                    savingThrowDC: this.actor.data.data.attributes.spelldc ?? 0,
+                }
+        }
+
+    }
+
+    _getTexture(options, wallType, useWebP = false) {
+        let texture = "";
+        switch (wallType) {
+            case "thorns":
+                if (useWebP) {
+                    texture = 'modules/jb2a_patreon/Library/1st_Level/Entangle/Entangle_01_Brown_Thumb.webp';
+                } else {
+                    texture = 'jb2a.entangle.brown';
+                }
+                break;
+            case "fire":
+                if (options.type == "circle") {
+                    if (useWebP) {
+                        texture = 'modules/jb2a_patreon/Library/Generic/Fire/FireRing_01_Circle_Red_Thumb.webp';
+                    } else {
+                        texture = 'jb2a.fire_ring.900px.red';
+                    }
+                } else if (options.type == "wall") {
+                    if (useWebP) {
+                        texture = 'modules/jb2a_patreon/Library/4th_Level/Wall_Of_Fire/WallOfFire_01_Yellow_Thumb.webp';
+                    } else {
+                        texture = 'jb2a.wall_of_fire.300x100.yellow';
+                    }
+                }
+                break;
+            case "force":
+                if (options.type == "circle") {
+                    if (useWebP) {
+                        texture = 'modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_blue_Sphere_Thumb.webp';
+                    } else {
+                        texture = 'jb2a.wall_of_force.sphere.blue';
+                    }
+                } else if (options.type == "panel") {
+                    if (options.subtype == "horizontal") {
+                        if (useWebP) {
+                            texture = 'modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_blue_H_Thumb.webp';
+                        } else {
+                            texture = 'jb2a.wall_of_force.horizontal.blue';
+                        }
+                    } else if (options.subtype == "vertical") {
+                        if (useWebP) {
+                            texture = 'modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_blue_V_Thumb.webp';
+                        } else {
+                            texture = 'jb2a.wall_of_force.vertical.blue';
+                        }
+                    }
+                }
+                break;
+        }
+        return texture;
+    }
+
+    static registerHooks() {
+        if (!game.user.isGM) return;
+        Hooks.on("updateMeasuredTemplate", wallSpell.updateMeasuredTemplate);
+        Hooks.on("deleteMeasuredTemplate", wallSpell.deleteMeasuredTemplate);
+        Hooks.on("preUpdateToken", wallSpell.preUpdateToken);
+        return;
+    }
+
+
+    static async preUpdateToken(tokenDocument, updateData) {
+        const isGM = utilFunctions.isFirstGM();
+        if (!isGM) return;
+
+        if ((!updateData.x && !updateData.y)) return;
+        const token = tokenDocument;
+        const grid = canvas?.scene?.data.grid;
+        if (!grid) return false;
+
+        const oldPos = { x: tokenDocument.data.x, y: tokenDocument.data.y };
+        let newPos = { x: 0, y: 0 };
+        newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
+        newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
+        const movementRay = new Ray(oldPos, newPos);
+
+        const templates = Array.from(canvas?.scene?.templates ?? {});
+        if (templates.length == 0) return;
+        let templateDocument = {};
+
+        let wallsTouched = token.getFlag("advancedspelleffects", "wallTouchedData.wallsTouched") ?? [];
+        let wallName = "";
+        for (let i = 0; i < templates.length; i++) {
+
+            templateDocument = templates[i];
+            const templateData = templateDocument.data;
+            if (!templateData) return;
+            const aseData = templateDocument.getFlag("advancedspelleffects", 'wallOperationalData');
+            if (!aseData || !aseData.damageOnTouch) return;
+            if (!aseData.checkForTouch) return;
+            wallName = templateDocument.getFlag("advancedspelleffects", "wallName") ?? "";
+            const mTemplate = templateDocument.object;
+            const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: mTemplate.shape, distance: mTemplate.data.distance }
+            const templatePointA = { x: templateDetails.x, y: templateDetails.y };
+            const templateAngle = (templateData.direction) * (Math.PI / 180.0);
+            const templateLength = ((templateData.distance) * grid) / 5.0;
+            const templatePointBX = templatePointA.x + (templateLength * Math.cos(templateAngle));
+            const templatePointBY = templatePointA.y + (templateLength * Math.sin(templateAngle));
+            const templatePointB = { x: templatePointBX, y: templatePointBY };
+
+            const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
+            const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
+
+            widthLoop: for (let x = startX; x < token.data.width; x++) {
+                for (let y = startY; y < token.data.height; y++) {
+
+                    const currGrid = {
+                        x: newPos.x + x * grid - templatePointA.x,
+                        y: newPos.y + y * grid - templatePointA.y,
+                    };
+                    const oldCurrGrid = {
+                        x: oldPos.x + x * grid - templatePointA.x,
+                        y: oldPos.y + y * grid - templatePointA.y,
+                    }
+                    let previousContains = templateDetails.shape?.contains(oldCurrGrid.x, oldCurrGrid.y);
+                    let contains = templateDetails.shape?.contains(currGrid.x, currGrid.y);
+
+                    let crossed = false;
+                    if (!contains) {
+                        const dragCoordOld = {
+                            x: movementRay.A.x + x * grid,
+                            y: movementRay.A.y + y * grid,
+                        };
+                        const dragCoordNew = {
+                            x: movementRay.B.x + x * grid,
+                            y: movementRay.B.y + y * grid,
+                        };
+                        if (templateData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                            crossed = utilFunctions.lineCrossesCircle(dragCoordOld, dragCoordNew, templatePointA, (templateDetails.distance / 5) * grid);
+                        } else {
+                            crossed = utilFunctions.lineCrossesLine(dragCoordOld, dragCoordNew, templatePointA, templatePointB);
+                        }
+
+                    }
+
+                    if (((previousContains && contains) || (!previousContains)) && (crossed || contains)) {
+                        console.log("Token touched wall!");
+                        if (wallsTouched.includes(templateDocument.id)) {
+                            console.log(`${token.name} has already been effected by this ${wallName} this turn - ${templateDocument.id}`);
+                            ui.notifications.info(game.i18n.format("ASE.WallSpellAlreadyEffected", { name: token.name, wallName: wallName }));
+                            break widthLoop;
+                        } else {
+                            console.log(`${token.name} touched ${wallName} - ${templateDocument.id}`);
+                            ui.notifications.info(game.i18n.format("ASE.WallSpellTouchingWall", { name: token.name, wallName: wallName }));
+                            wallsTouched.push(templateDocument.id);
+                            const tokenFlagData = {
+                                wallName: wallName,
+                                wallTemplateId: templateDocument.id,
+                                wallType: templateDocument.getFlag("advancedspelleffects", 'wallType') ?? '',
+                                wallOperationalData: aseData,
+                            }
+                            //await token.setFlag("advancedspelleffects", "wallTouchedData", tokenFlagData);
+                            await wallSpell.activateWallEffect(token, tokenFlagData);
+                            break widthLoop;
+                        }
+                    } else {
+                        //console.log("Token did not cross template area...");
+                    }
+                }
+            }
+        }
+        await token.setFlag("advancedspelleffects", "wallTouchedData.wallsTouched", wallsTouched);
+    }
+
+    static async activateWallEffect(token, tokenFlagData) {
+        console.log("Activating Wall Effect...");
+        console.log("Token: ", token);
+        console.log("Token Flag Data: ", tokenFlagData);
+        return;
+        function addTokenToText(token, saveTotal, savePassed, damageTotal) {
+
+            return `<div class="midi-qol-flex-container">
+      <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
+      <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
+      <div>
+      ${savePassed ? game.i18n.format("ASE.SavePassMessage", { saveTotal: saveTotal, damageTotal: damageTotal }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: saveTotal, damageTotal: damageTotal })}
+        
+      </div>
+      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
+    </div>`;
+
+        }
+
+        function customHalfRollChatCard(roll) {
+            //console.log(roll);
+            const formula = roll.formula;
+            const dieFaces = roll.terms[0].faces;
+            const partTotal = roll.terms[0].total;
+            const diceResults = roll.terms[0].results;
+            let colorMod = "";
+            let toolTipHTML = "";
+
+            toolTipHTML += `<section class="tooltip-part"> <div class="dice">`;
+            toolTipHTML += `<header class="part-header flexrow">
+                        <span class="part-formula">${formula}</span>
+                        <span class="part-total">${partTotal}</span>
+                    </header>`;
+            toolTipHTML += `<ol class="dice-rolls">`;
+
+            for (let dieResult of diceResults) {
+                if (dieFaces == dieResult.result) {
+                    colorMod = "max";
+                }
+                else if (dieResult.result == 1) {
+                    colorMod = "min";
+                }
+                else {
+                    colorMod = "";
+                }
+                toolTipHTML += `<li class="roll die d${dieFaces} ${colorMod}">${dieResult.result}</li>`;
+            }
+            toolTipHTML += `</ol>
+                </div>
+            </section>`;
+
+            return toolTipHTML;
+        }
+
+        const rollInfo = effectOptions.rollInfo;
+        //console.log('ROLL INFO: ', rollInfo);
+        const spellItem = await fromUuid(rollInfo.itemUUID);
+        const casterToken = canvas.tokens.get(rollInfo.casterTokenId);
+        const casterActor = casterToken.actor;
+        const spellSaveDC = rollInfo.spellSaveDc;
+
+        let itemData = spellItem.data;
+        itemData.data.components.concentration = false;
+
+        if (game.modules.get("midi-qol")?.active) {
+            const fullDamageRoll = await new Roll(rollInfo.damageFormula).evaluate({ async: true });
+            const halfdamageroll = await new Roll(`${Math.floor(fullDamageRoll.total / 2)}`).evaluate({ async: true });
+            const saveRoll = await new Roll(`1d20+@mod`, { mod: token.actor.data.data.abilities.con.save }).evaluate({ async: true });
+            console.log('Rolls: ');
+            console.log(fullDamageRoll);
+            //console.log(halfdamageroll);
+            console.log(saveRoll);
+            if (game.modules.get("dice-so-nice")?.active) {
+                game.dice3d?.showForRoll(fullDamageRoll);
+                game.dice3d?.showForRoll(saveRoll);
+            }
+            const saveTotal = saveRoll.total;
+            const passedSave = saveTotal >= spellSaveDC;
+            let savePassed;
+            let damageTotal;
+            let midiData;
+            if (passedSave) {
+                savePassed = true;
+                damageTotal = halfdamageroll.total;
+                midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, halfdamageroll.total, "radiant", [token],
+                    halfdamageroll, {
+                    flavor: `Moonbeam - Damage Roll (${rollInfo.damageFormula} Radiant)`,
+                    itemCardId: "new",
+                    itemData: spellItem.data
+                });
+            }
+            else {
+                savePassed = false;
+                damageTotal = fullDamageRoll.total;
+                midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, fullDamageRoll.total, "radiant", [token],
+                    fullDamageRoll, {
+                    flavor: `Moonbeam - Damage Roll (${rollInfo.damageFormula} Radiant)`,
+                    itemCardId: "new",
+                    itemData: spellItem.data
+                });
+            }
+            const chatMessage = await game.messages.get(midiData.itemCardId);
+            let chatMessageContent = await duplicate(chatMessage.data.content);
+            let newChatmessageContent = $(chatMessageContent);
+
+            newChatmessageContent.find(".midi-qol-hits-display").empty();
+            newChatmessageContent.find(".midi-qol-hits-display").append(
+                $(addTokenToText(token, saveTotal, savePassed, damageTotal))
+            );
+            if (passedSave) {
+                newChatmessageContent.find(".midi-qol-other-roll .dice-tooltip").empty();
+                newChatmessageContent.find(".midi-qol-other-roll .dice-tooltip").append(
+                    $(customHalfRollChatCard(fullDamageRoll))
+                );
+                newChatmessageContent.find(".midi-qol-other-roll .dice-formula").empty();
+                newChatmessageContent.find(".midi-qol-other-roll .dice-formula").append(fullDamageRoll.formula);
+
+                newChatmessageContent.find(".midi-qol-other-roll .dice-total").empty();
+                newChatmessageContent.find(".midi-qol-other-roll .dice-total").append(fullDamageRoll.total);
+            }
+            await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
+            await ui.chat.scrollBottom();
+        }
+
+
+        new Sequence("Advanced Spell Effects")
+            .sound()
+            .file(effectOptions.moonbeamDmgSound)
+            .delay(Number(effectOptions.moonbeamDmgSoundDelay) ?? 0)
+            .volume(effectOptions.moonbeamDmgVolume ?? 1)
+            .playIf(effectOptions.moonbeamDmgSound && effectOptions.moonbeamDmgSound != "")
+            .effect()
+            .file(`jb2a.impact.004.${effectOptions.moonbeamDmgColor}`)
+            .attachTo(token)
+            .randomRotation()
+            .scaleIn(0.5, 200)
+            .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
+            .randomOffset(0.5)
+            .repeats(4, 100, 250)
+            .play()
+    }
+
+    static async updateMeasuredTemplate(template, changes) {
+        if (template.getFlag("advancedspelleffects", "wallSpellWallNum") && (changes.x !== undefined || changes.y !== undefined || changes.direction !== undefined)) {
+            wallSpell.placeWalls(template, true);
+        }
+    }
+
+    static async deleteMeasuredTemplate(template) {
+        console.log('template', template);
+        const walls = Tagger.getByTag([`wallSpell-${template.getFlag("advancedspelleffects", "wallType")}-Wall${template.id}`]).map(wall => wall.id);
+        if (walls.length) {
+            await canvas.scene.deleteEmbeddedDocuments("Wall", walls);
+        }
+    }
+
+    static async handleConcentration(casterActor, casterToken, effectOptions) {
+        let wallSpellTemplates = Tagger.getByTag(`wallSpell-${effectOptions.wallType}-${casterActor.id}`);
+        let wsTemplateIds = [];
+        if (wallSpellTemplates.length > 0) {
+            wallSpellTemplates.forEach(template => {
+                wsTemplateIds.push(template.id);
+            });
+            await aseSocket.executeAsGM("deleteTemplates", wsTemplateIds);
+        }
+        //loop through every token and remove the templateID from the flag wallTouchedData.wallsTouched that matches wsTemplateIds
+        const tokens = canvas.tokens.placeables;
+        let tokenDocument = {};
+        let wallsTouched = [];
+        for (let i = 0; i < tokens.length; i++) {
+            tokenDocument = tokens[i].document;
+            wallsTouched = tokenDocument.getFlag("advancedspelleffects", "wallTouchedData.wallsTouched");
+            if (!wallsTouched || wallsTouched.length == 0) continue;
+            wallsTouched = wallsTouched.filter(wallId => !wsTemplateIds.includes(wallId));
+            await tokenDocument.setFlag("advancedspelleffects", "wallTouchedData.wallsTouched", wallsTouched);
+        }
+    }
+
+    static async placeWalls(templateDocument, deleteOldWalls = false) {
+        //console.log("placing walls...");
+        if (templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) return;
+
+        const wallType = templateDocument.getFlag("advancedspelleffects", "wallType") ?? "";
+        //console.log('wallType: ', wallType);
+        if (wallType != "force") return;
+
+        if (deleteOldWalls) {
+            const walls = Tagger.getByTag([`wallSpell-${wallType}-Wall${templateDocument.id}`]).map(wall => wall.id);
+            if (walls.length) {
+                await canvas.scene.deleteEmbeddedDocuments("Wall", walls);
+            }
+        }
+
+        const template = templateDocument.object;
+        //console.log('template: ', template);
+
+        const walls = [];
+
+        if (templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+
+            const placedX = template.x;
+            const placedY = template.y;
+
+            let wall_number = 12;
+            let wall_angles = 2 * Math.PI / wall_number
+
+            let outerCircleRadius = template.shape.radius;
+
+            let lastPoint = false;
+            let firstPoint;
+            for (let i = 0; i < wall_number; i++) {
+                const currentPoint = [
+                    placedX + outerCircleRadius * Math.cos(i * wall_angles),
+                    placedY + outerCircleRadius * Math.sin(i * wall_angles)
+                ]
+                if (lastPoint) {
+                    walls.push({
+                        c: [...lastPoint, ...currentPoint],
+                        flags: { tagger: { tags: [`wallSpell-${wallType}-Wall${templateDocument.id}`] } },
+                        move: 20,
+                        sight: 0,
+                        light: 0,
+                        sound: 0
+                    })
+                }
+                lastPoint = [...currentPoint]
+                if (!firstPoint) firstPoint = [...currentPoint]
+            }
+
+            walls.push({
+                c: [...lastPoint, ...firstPoint],
+                flags: { tagger: { tags: [`wallSpell-${wallType}-Wall${templateDocument.id}`] } },
+                move: 20,
+                sight: 0,
+                light: 0,
+                sound: 0
+            })
+
+        } else {
+
+            const startPoint = template.ray.A;
+            const endPoint = template.ray.B;
+
+            walls.push({
+                c: [startPoint.x, startPoint.y, endPoint.x, endPoint.y],
+                flags: {
+                    tagger: { tags: [`wallSpell-${wallType}-Wall${templateDocument.id}`] },
+                    wallHeight: {
+                        wallHeightTop: templateDocument.getFlag('advancedspelleffects', 'dimensions').width,
+                        wallHeightBottom: 0
+                    }
+                },
+                move: 20,
+                sight: 0,
+                light: 0,
+                sound: 0
+            })
+
+        }
+        //console.log('walls: ', walls);
+        await aseSocket.executeAsGM("placeWalls", walls);
+
+    }
+
+    static sourceSquareV(center, distance, direction) {
+        const gridSize = canvas.grid.h;
+        const length = (distance / 5) * gridSize;
+
+        const x = center.x + length * Math.cos(direction * Math.PI / 180);
+        const y = center.y + length * Math.sin(direction * Math.PI / 180);
+        //console.log(`x: ${x}, y: ${y}`);
+        return { x: x, y: y };
+    }
+
+    static sourceSquare(center, widthSquares, heightSquares) {
+
+        const gridSize = canvas.grid.h;
+        const h = gridSize * heightSquares;
+        const w = gridSize * widthSquares;
+
+        const bottom = center.y + h / 2;
+        const left = center.x - w / 2;
+        const top = center.y - h / 2;
+        const right = center.x + w / 2;
+
+        const rightSpots = [...new Array(1)].map((_, i) => ({
+            direction: 45,
+            x: right,
+            y: top,
+        }));
+        const bottomSpots = [...new Array(1)].map((_, i) => ({
+            direction: 45,
+            x: left,
+            y: bottom,
+        }));
+        const leftSpots = [...new Array(1)].map((_, i) => ({
+            direction: 135,
+            x: left,
+            y: top,
+        }));
+        const topSpots = [...new Array(1)].map((_, i) => ({
+            direction: 225,
+            x: right,
+            y: top,
+        }));
+        //console.log("topSpots: ", topSpots);
+        // console.log("leftSpots: ", leftSpots);
+        //console.log("bottomSpots: ", bottomSpots);
+        //console.log("rightSpots: ", rightSpots);
+        const allSpots = [
+            ...rightSpots.slice(Math.floor(rightSpots.length / 2)),
+            ...bottomSpots,
+            ...leftSpots,
+            ...topSpots,
+            ...rightSpots.slice(0, Math.floor(rightSpots.length / 2)),
+        ];
+        console.log("allSpots: ", allSpots);
+        return {
+            x: left,
+            y: top,
+            center,
+            top,
+            bottom,
+            left,
+            right,
+            h,
+            w,
+            heightSquares,
+            widthSquares,
+            allSpots,
+        };
+    };
+
+    static async pickFireSide(templateDocument) {
+        const wallData = templateDocument?.data;
+        if (!wallData) return;
+        let buttonDialogData;
+        if (wallData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+            buttonDialogData = {
+                title: "Pick dome/ring/sphere damaging side",
+                buttons: [
+                    {
+                        label: "Inside",
+                        value: 'inside'
+                    },
+                    {
+                        label: "Outside",
+                        value: 'outside'
+                    },
+                ]
+            };
+        } else {
+            const direction = wallData.direction;
+            if ((direction == 0 || direction == 180)) {
+                buttonDialogData = {
+                    title: "Pick wall damaging side",
+                    buttons: [
+                        {
+                            label: "Top",
+                            value: 'top'
+                        },
+                        {
+                            label: "Bottom",
+                            value: 'bottom'
+                        },
+                    ]
+                };
+            } else {
+                buttonDialogData = {
+                    title: "Pick wall damaging side",
+                    buttons: [
+                        {
+                            label: "Left",
+                            value: 'left'
+                        },
+                        {
+                            label: "Right",
+                            value: 'right'
+                        },
+                    ]
+                };
+            }
+
+        }
+        let damageSidePicked = await warpgate.buttonDialog(buttonDialogData, 'column');
+        if (!damageSidePicked) return;
+        await templateDocument.setFlag('advancedspelleffects', 'wallOperationalData.damageSide', damageSidePicked);
+        console.log("damageSidePicked: ", damageSidePicked);
+    }
+
+    static async handleOnCast(templateDocument) {
+        const wallData = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData');
+        if (!wallData) return;
+        const grid = canvas?.scene?.data.grid;
+        if (!grid) return false;
+        const damageOnCast = wallData.damageOnCast;
+        const savingThrowOnCast = wallData.savingThrowOnCast;
+        const mTemplate = templateDocument.object;
+        const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: mTemplate.shape, distance: mTemplate.data.distance }
+        if (savingThrowOnCast) {
+            const saveType = wallData.savingThrow;
+            const saveDC = wallData.savingThrowDC;
+            const tokens = canvas.tokens.placeables;
+            const targets = [];
+            if (tokens.length > 0) {
+                for (let i = 0; i < tokens.length; i++) {
+                    const token = tokens[i];
+                    const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
+                    const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
+                    widthLoop: for (let x = startX; x < token.data.width; x++) {
+                        for (let y = startY; y < token.data.height; y++) {
+                            const currGrid = {
+                                x: token.data.x + x * grid - templateDetails.x,
+                                y: token.data.y + y * grid - templateDetails.y,
+                            };
+                            let contains = templateDetails.shape?.contains(currGrid.x, currGrid.y);
+
+                            if (contains) {
+                                targets.push(token);
+                                break widthLoop;
+                            } else {
+                                //console.log("Token did not cross template area...");
+                            }
+                        }
+                    }
+                }
+            }
+            console.log("targets: ", targets);
+            //game.user.updateTokenTargets(targets);
+
+        }
+    }
+
+    static async placePanels(aseData, template, panelDiag, type) {
+
+        wallSpell.playEffects(aseData, template);
+        wallSpell.placeWalls(template);
+        /*console.log("wofPanelDiag: ", panelDiag);
+        console.log("type: ", type);
+        console.log("aseData: ", aseData);
+        console.log("template: ", template);*/
+
+        const gridSize = canvas.grid.h;
+        const previousTemplateData = template.data;
+        //console.log("previousTemplateData: ", previousTemplateData);
+        let panelsRemaining = panelDiag.data.aseData.flags.panelCount;
+        //console.log("Panels Remaining: ", panelsRemaining);
+
+        const nextTemplateData = template.toObject();
+        nextTemplateData.flags.advancedspelleffects['placed'] = false;
+        delete nextTemplateData["_id"];
+        //console.log("nextTemplateData: ", nextTemplateData);
+        //console.log("previousTemplateData: ", previousTemplateData);
+        nextTemplateData.flags.tagger.tags[1] = (Number(nextTemplateData.flags.tagger.tags[1]) + 1).toString();
+        if (panelsRemaining < 2 || !panelDiag.rendered) {
+            panelDiag.submit();
+            return
+        };
+
+        panelDiag.data.aseData.flags.panelCount--;
+        panelDiag.render(true);
+
+        let previousTemplateCenter = {};
+        let square;
+
+        let updateTemplateLocation;
+
+        if (type == "h-panels") {
+            if (previousTemplateData.direction == 45) {
+                previousTemplateCenter = {
+                    x: previousTemplateData.x + (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
+                    y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
+                };
+            } else if (previousTemplateData.direction == 135) {
+                previousTemplateCenter = {
+                    x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
+                    y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
+                };
+            } else if (previousTemplateData.direction == 225) {
+                previousTemplateCenter = {
+                    x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
+                    y: previousTemplateData.y - (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
+                };
+            }
+            const previousTemplateWidthSquares = previousTemplateData.flags.advancedspelleffects.dimensions.length / 5;
+            const previousTemplateHeightSquares = previousTemplateData.flags.advancedspelleffects.dimensions.width / 5;
+            square = wallSpell.sourceSquare({ x: previousTemplateCenter.x, y: previousTemplateCenter.y },
+                previousTemplateWidthSquares, previousTemplateHeightSquares);
+
+
+
+        } else if (type == "v-panels") {
+
+            square = wallSpell.sourceSquareV({ x: previousTemplateData.x, y: previousTemplateData.y },
+                previousTemplateData.distance, previousTemplateData.direction);
+            nextTemplateData.x = square.x;
+            nextTemplateData.y = square.y;
+        }
+        const displayTemplateData = JSON.parse(JSON.stringify(nextTemplateData));
+        delete displayTemplateData.flags.advancedspelleffects["wallSpellWallNum"];
+        let displayTemplate = (await canvas.scene.createEmbeddedDocuments('MeasuredTemplate', [displayTemplateData]))[0];
+        // console.log("square: ", square);
+        let currentSpotIndex = 0;
+        updateTemplateLocation = async (crosshairs) => {
+            //console.log("crosshairs: ", crosshairs);
+            while (crosshairs.inFlight) {
+                if (!panelDiag.rendered) {
+                    crosshairs.inFlight = false;
+                    return;
+                }
+                await warpgate.wait(100);
+                //console.log(displayTemplate);
+                if (!displayTemplate) return;
+                const verticalTemplate = displayTemplate.data.t == CONST.MEASURED_TEMPLATE_TYPES.RAY;
+                //console.log("Vertical Template:", verticalTemplate);
+                let ray;
+                let angle;
+                if (!verticalTemplate) {
+                    const totalSpots = square.allSpots.length;
+                    const radToNormalizedAngle = (rad) => {
+                        let angle = (rad * 180 / Math.PI) % 360;
+
+                        // offset the angle for even-sided tokens, because it's centered in the grid it's just wonky without the offset
+                        if (square.heightSquares % 2 === 1 && square.widthSquares % 2 === 1) {
+                            angle -= (360 / totalSpots) / 2;
+                        }
+                        const normalizedAngle = Math.round(angle / (360 / totalSpots)) * (360 / totalSpots);
+                        return normalizedAngle < 0
+                            ? normalizedAngle + 360
+                            : normalizedAngle;
+                    }
+
+                    ray = new Ray(square.center, crosshairs);
+                    angle = radToNormalizedAngle(ray.angle);
+                    const spotIndex = Math.ceil(angle / 360 * totalSpots);
+
+                    if (spotIndex === currentSpotIndex) {
+                        continue;
+                    }
+
+                    currentSpotIndex = spotIndex;
+                    const spot = square.allSpots[currentSpotIndex];
+
+                    if (!displayTemplate) return;
+                    await displayTemplate.update({ ...spot });
+                } else {
+                    ray = new Ray(square, crosshairs);
+                    angle = (ray.angle * 180 / Math.PI);
+
+                    if (angle == displayTemplate.data.direction) {
+                        continue;
+                    }
+                    if (!displayTemplate) return;
+                    await displayTemplate.update({ direction: angle });
+                }
+            }
+        }
+
+        const targetConfig = {
+            drawIcon: false,
+            drawOutline: false,
+            interval: 20
+        }
+        const rotateCrosshairs = await warpgate.crosshairs.show(
+            targetConfig,
+            {
+                show: updateTemplateLocation
+            });
+        if (rotateCrosshairs.cancelled) {
+            if (canvas.scene.templates.get(displayTemplate.id)) {
+                await displayTemplate.delete();
+            }
+            game.user.updateTokenTargets();
+            panelDiag.submit();
+            return;
+        }
+        const newFlags = {
+            flags: {
+                advancedspelleffects: {
+                    placed: true
+                }
+            }
+        }
+        if (type == "v-panels") {
+            newFlags.flags.advancedspelleffects["wallSpellWallNum"] = nextTemplateData.flags.advancedspelleffects["wallSpellWallNum"]
+        }
+
+        await displayTemplate.update(newFlags);
+        wallSpell.placePanels(aseData, displayTemplate, panelDiag, type);
+
+    }
+
+    static playEffects(aseData, template) {
+        console.log("Playing effects...");
+        console.log("template: ", template);
+        console.log("aseData: ", aseData);
+        if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+
+            new Sequence()
+                .effect(aseData.texture)
+                .attachTo(template)
+                .scaleToObject()
+                .fadeIn(250)
+                .fadeOut(250)
+                .zIndex(1000)
+                .persist()
+                .play()
+
+        } else if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) {
+
+            new Sequence()
+                .effect(aseData.texture)
+                .attachTo(template)
+                .scaleToObject()
+                .fadeIn(250)
+                .fadeOut(250)
+                .tilingTexture({
+                    x: aseData.flags.wallSegmentSize / 10,
+                    y: aseData.flags.wallSegmentSize / 10
+                })
+                .belowTokens()
+                .zIndex(-1000)
+                .persist()
+                .play()
+
+        } else {
+
+            new Sequence()
+                .effect(aseData.texture)
+                .attachTo(template)
+                .stretchTo(template, { attachTo: true, onlyX: true })
+                //.tilingTexture({
+                //    x: aseData.flags.wallSegmentSize / 10
+                // })
+                .fadeIn(250)
+                .fadeOut(250)
+                .persist()
+                .play()
+        }
+
+    }
+
+    static async getRequiredSettings(currFlags) {
+        if (!currFlags) currFlags = {};
+        let spellOptions = [];
+        let animOptions = [];
+        let soundOptions = [];
+
+        const wallTypeOptions = {
+            //'thorns': "Wall of Thorns",
+            'fire': "Wall of Fire",
+            'force': "Wall of Force",
+            //'ice': "Wall of Ice",
+            //'light': "Wall of Light",
+            //'sand': "Wall of Sand",
+            //'stone': "Wall of Stone",
+            //'water': "Wall of Water"
+        };
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.WallTypeOptionsLabel"),
+            tooltip: game.i18n.localize("ASE.WallTypeOptionsTooltip"),
+            type: 'dropdown',
+            options: wallTypeOptions,
+            name: 'flags.advancedspelleffects.effectOptions.wallType',
+            flagName: 'wallType',
+            flagValue: currFlags.wallType ?? 'force',
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.WallRadiusLabel"),
+            tooltip: game.i18n.localize("ASE.WallRadiusTooltip"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.wallRadius',
+            flagName: 'wallRadius',
+            flagValue: currFlags.wallRadius ?? 10,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.WallLengthLabel"),
+            tooltip: game.i18n.localize("ASE.WallLengthTooltip"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.wallLength',
+            flagName: 'wallLength',
+            flagValue: currFlags.wallLength ?? 10,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.WallHeightLabel"),
+            tooltip: game.i18n.localize("ASE.WallHeightTooltip"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.wallHeight',
+            flagName: 'wallHeight',
+            flagValue: currFlags.wallHeight ?? 10,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.WallWidthLabel"),
+            tooltip: game.i18n.localize("ASE.WallWidthTooltip"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.wallWidth',
+            flagName: 'wallWidth',
+            flagValue: currFlags.wallWidth ?? 5,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.WallSegmentSizeLabel"),
+            tooltip: game.i18n.localize("ASE.WallSegmentSizeTooltip"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.wallSegmentSize',
+            flagName: 'wallSegmentSize',
+            flagValue: currFlags.wallSegmentSize ?? 10,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.WallPanelCountLabel"),
+            tooltip: game.i18n.localize("ASE.WallPanelCountTooltip"),
+            type: 'numberInput',
+            name: 'flags.advancedspelleffects.effectOptions.panelCount',
+            flagName: 'panelCount',
+            flagValue: currFlags.panelCount ?? 10,
+        });
+
+        /*animOptions.push({
+            label: game.i18n.localize("ASE.WallOfForceColorLabel"),
+            type: 'dropdown',
+            options: utilFunctions.getDBOptions('jb2a.wall_of_force.horizontal'),
+            name: 'flags.advancedspelleffects.effectOptions.color',
+            flagName: 'color',
+            flagValue: currFlags.color,
+        });*/
+
+        animOptions.push({
+            label: game.i18n.localize("ASE.WallUseWebPLabel"),
+            tooltip: game.i18n.localize("ASE.WallUseWebPTooltip"),
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.useWebP',
+            flagName: 'useWebP',
+            flagValue: currFlags.useWebP,
+        });
+
+        return {
+            spellOptions: spellOptions,
+            animOptions: animOptions,
+            soundOptions: soundOptions
+        }
+
+    }
+}

@@ -21,6 +21,7 @@ import { wallOfForce } from "../spells/wallOfForce.js";
 import { chaosBolt } from "../spells/chaosBolt.js";
 import { detectStuff } from "../spells/detectStuff.js";
 import { viciousMockery } from "../spells/viciousMockery.js";
+import { wallSpell } from "../spells/wallSpell.js";
 
 export class ASESettings extends FormApplication {
     constructor() {
@@ -53,6 +54,7 @@ export class ASESettings extends FormApplication {
         this.spellList[game.i18n.localize("ASE.WallOfForce")] = wallOfForce;
         this.spellList[game.i18n.localize("ASE.DetectStuff")] = detectStuff;
         this.spellList[game.i18n.localize("ASE.ViciousMockery")] = viciousMockery;
+        this.spellList[game.i18n.localize("ASE.WallSpell")] = wallSpell;
     }
 
     static get defaultOptions() {

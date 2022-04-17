@@ -22,6 +22,7 @@ import { mirrorImage } from "./spells/mirrorImage.js";
 import { wallOfForce } from "./spells/wallOfForce.js";
 import { detectStuff } from "./spells/detectStuff.js";
 import { viciousMockery } from "./spells/viciousMockery.js";
+import { wallSpell } from "./spells/wallSpell.js";
 
 export class ASEHandler {
     static async handleASE(data) {
@@ -133,6 +134,10 @@ export class ASEHandler {
 
             case game.i18n.localize('ASE.WallOfForce'):
                 wallOfForce.createWallOfForce(data);
+                return;
+            case game.i18n.localize('ASE.WallSpell'):
+                const newWallSpell = new wallSpell(data);
+                newWallSpell.cast();
                 return;
             case game.i18n.localize('ASE.ViciousMockery'):
                 const viciousMockerySpell = new viciousMockery(data);

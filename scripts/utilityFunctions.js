@@ -368,3 +368,54 @@ export function cleanUpTemplateGridHighlights() {
         }
     }
 }
+// function to detect when a line crosses another line
+export function lineCrossesLine(a, b, c, d) {
+    const aSide = (d.x - c.x) * (a.y - c.y) - (d.y - c.y) * (a.x - c.x) > 0;
+    const bSide = (d.x - c.x) * (b.y - c.y) - (d.y - c.y) * (b.x - c.x) > 0;
+    const cSide = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > 0;
+    const dSide = (b.x - a.x) * (d.y - a.y) - (b.y - a.y) * (d.x - a.x) > 0;
+    //console.log(aSide, bSide, cSide, dSide);
+    return aSide !== bSide && cSide !== dSide;
+};
+
+export function lineCrossesCircle(pointA, pointB, circleCenter, radius) {
+
+    const x = circleCenter.x;
+    const y = circleCenter.y;
+    const x1 = pointA.x;
+    const y1 = pointA.y;
+    const x2 = pointB.x;
+    const y2 = pointB.y;
+
+    var A = x - x1;
+    var B = y - y1;
+    var C = x2 - x1;
+    var D = y2 - y1;
+
+    var dot = A * C + B * D;
+    var len_sq = C * C + D * D;
+    var param = -1;
+    if (len_sq != 0)
+        param = dot / len_sq;
+
+    var xx, yy;
+
+    if (param < 0) {
+        xx = x1;
+        yy = y1;
+    }
+    else if (param > 1) {
+        xx = x2;
+        yy = y2;
+    }
+    else {
+        xx = x1 + param * C;
+        yy = y1 + param * D;
+    }
+
+    var dx = x - xx;
+    var dy = y - yy;
+    let distanceToLine = Math.sqrt(dx * dx + dy * dy);
+    console.log('distance: ', distanceToLine);
+    return distanceToLine < radius;
+}

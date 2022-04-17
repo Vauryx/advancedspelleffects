@@ -25,6 +25,7 @@
   "ASE.ChainLightning": "Chain Lightning",
   "ASE.MirrorImage": "Mirror Image",
   "ASE.ViciousMockery": "Vicious Mockery",
+  "ASE.WallSpell": "Wall Spell",
 
   "ASE.SummonAberration": "Summon Aberration",
   "ASE.SummonBeast": "Summon Beast",
@@ -499,5 +500,25 @@
   "ASE.ViscousMockerySoundDelayLabel": "Effect Sound Delay: ",
   "ASE.ViscousMockerySoundDelayTooltip": "Delay before playing the effect sound relative to the effect",
   "ASE.ViscousMockerySoundVolumeLabel": "Effect Volume: ",
-  "ASE.ViscousMockerySoundVolumeTooltip": "Volume of the effect sound"
+  "ASE.ViscousMockerySoundVolumeTooltip": "Volume of the effect sound",
+
+  "ASE.WallTypeOptionsLabel": "Wall Type: ",
+  "ASE.WallTypeOptionsTooltip": "Which Wall Spell to assign to this effect",
+  "ASE.WallRadiusLabel": "Wall Radius: ",
+  "ASE.WallRadiusTooltip": "Radius of the Wall Spell",
+  "ASE.WallLengthLabel": "Wall Length: ",
+  "ASE.WallLengthTooltip": "Length of the Wall Spell",
+  "ASE.WallHeightLabel": "Wall Height: ",
+  "ASE.WallHeightTooltip": "Height of the Wall Spell",
+  "ASE.WallSegmentSizeLabel": "Wall Segment Size: ",
+  "ASE.WallSegmentSizeTooltip": "Size of each panel segment of the Wall Spell",
+  "ASE.WallPanelCountLabel": "Wall Panel Count: ",
+  "ASE.WallPanelCountTooltip": "Number of panels in the Wall Spell",
+  "ASE.WallUseWebPLabel": "Use WebP: ",
+  "ASE.WallUseWebPTooltip": "Whether or not to use a still image for the effect (for lower performance or network bandwidth issues)",
+  "ASE.WallPanelsRemaining": "Panels Remaining: ",
+  "ASE.WallEndPanelPlacementInstruction": "Right click any where on the canvas to end placement",
+
+  "ASE.WallSpellAlreadyEffected": "{name} has already been effected by this {wallName} this turn",
+  "ASE.WallSpellTouchingWall": "{name} is touching a {wallName}!"
 }
