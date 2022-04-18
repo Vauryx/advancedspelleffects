@@ -657,10 +657,11 @@ export class wallSpell extends baseSpellClass {
             .volume(wallEffectData.wallSpellDmgVolume ?? 0.5)
             .playIf(wallEffectData.wallSpellDmgSound && wallEffectData.wallSpellDmgSound != "")
             .effect()
-            .file(`jb2a.impact.004.${wallEffectData?.fireColor ?? 'orange'}`)
+            .file(`jb2a.impact.004.${wallEffectData?.fireImpactColor ?? 'orange'}`)
             .attachTo(token)
             .randomRotation()
             .scaleIn(0.5, 200)
+            .scaleToObject()
             .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
             .randomOffset(0.5)
             .repeats(4, 100, 250)
@@ -1000,7 +1001,7 @@ export class wallSpell extends baseSpellClass {
                             .volume(wallEffectData.wallSpellDmgVolume ?? 0.5)
                             .playIf(wallEffectData.wallSpellDmgSound && wallEffectData.wallSpellDmgSound != "")
                             .effect()
-                            .file(`jb2a.impact.004.${wallEffectData?.fireColor ?? 'orange'}`)
+                            .file(`jb2a.impact.004.${wallEffectData?.fireImpactColor ?? 'orange'}`)
                             .attachTo(targetToken)
                             .randomRotation()
                             .scaleIn(0.5, 200)
@@ -1372,6 +1373,15 @@ export class wallSpell extends baseSpellClass {
                 name: 'flags.advancedspelleffects.effectOptions.fireColor',
                 flagName: 'fireColor',
                 flagValue: currFlags.fireColor,
+            });
+            animOptions.push({
+                label: game.i18n.localize("ASE.WallOfFireImpactColorLabel"),
+                tooltip: game.i18n.localize("ASE.WallOfFireImpactColorTooltip"),
+                type: 'dropdown',
+                options: utilFunctions.getDBOptions('jb2a.impact.004'),
+                name: 'flags.advancedspelleffects.effectOptions.fireImpactColor',
+                flagName: 'fireImpactColor',
+                flagValue: currFlags.fireImpactColor,
             });
             soundOptions.push({
                 label: game.i18n.localize("ASE.WallSpellDamageEffectSoundLabel"),
