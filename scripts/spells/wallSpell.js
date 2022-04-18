@@ -1319,7 +1319,7 @@ export class wallSpell extends baseSpellClass {
                 type: 'numberInput',
                 name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
                 flagName: 'dmgDieCount',
-                flagValue: currFlags.dmgDieCount ?? 1,
+                flagValue: currFlags.dmgDieCount ?? 5,
             });
             spellOptions.push({
                 label: game.i18n.localize("ASE.DamageDieLabel"),
@@ -1328,7 +1328,7 @@ export class wallSpell extends baseSpellClass {
                 options: dieOptions,
                 name: 'flags.advancedspelleffects.effectOptions.dmgDie',
                 flagName: 'dmgDie',
-                flagValue: currFlags.dmgDie ?? 'd10',
+                flagValue: currFlags.dmgDie ?? 'd8',
             });
 
             spellOptions.push({
@@ -1345,7 +1345,7 @@ export class wallSpell extends baseSpellClass {
                 type: 'numberInput',
                 name: 'flags.advancedspelleffects.effectOptions.wallLength',
                 flagName: 'wallLength',
-                flagValue: currFlags.wallLength ?? 10,
+                flagValue: currFlags.wallLength ?? 60,
             });
 
             spellOptions.push({
@@ -1354,7 +1354,7 @@ export class wallSpell extends baseSpellClass {
                 type: 'numberInput',
                 name: 'flags.advancedspelleffects.effectOptions.wallHeight',
                 flagName: 'wallHeight',
-                flagValue: currFlags.wallHeight ?? 10,
+                flagValue: currFlags.wallHeight ?? 20,
             });
             spellOptions.push({
                 label: game.i18n.localize("ASE.WallWidthLabel"),
@@ -1362,7 +1362,7 @@ export class wallSpell extends baseSpellClass {
                 type: 'numberInput',
                 name: 'flags.advancedspelleffects.effectOptions.wallWidth',
                 flagName: 'wallWidth',
-                flagValue: currFlags.wallWidth ?? 5,
+                flagValue: currFlags.wallWidth ?? 1,
             });
             animOptions.push({
                 label: game.i18n.localize("ASE.WallOfFireColorLabel"),
