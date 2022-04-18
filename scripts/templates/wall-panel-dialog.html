@@ -1,0 +1,15 @@
+<form id="wallPanelForm" class="flexcol" autocomplete="off" novalidate>
+
+    <section class="content">
+
+        <p><b>{{localize "ASE.WallPanelsRemaining"}}</b></p>
+        <p><input type="number" id="panelsRemaining" style='width: 2em;' readonly
+                value="{{data.aseData.flags.panelCount}}" /></p>
+        <p><b>{{localize "ASE.WallEndPanelPlacementInstruction"}}</b></p>
+    </section>
+    <footer class="sheet-footer flexrow">
+        <button type="submit" name="submit">
+            <i class="fa fa-check-square"></i> {{localize "ASE.Done"}}
+        </button>
+    </footer>
+</form>

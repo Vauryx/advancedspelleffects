@@ -91,7 +91,7 @@ export function getRandomInt(min, max) {
 }
 
 export function componentToHex(c) {
-    var hex = c.toString(16);
+    let hex = c.toString(16);
     return hex.length == 1 ? "0" + hex : hex;
 }
 
@@ -367,4 +367,114 @@ export function cleanUpTemplateGridHighlights() {
             highlight.clear();
         }
     }
+}
+// function to detect when a line crosses another line
+export function lineCrossesLine(a, b, c, d) {
+    const aSide = (d.x - c.x) * (a.y - c.y) - (d.y - c.y) * (a.x - c.x) > 0;
+    const bSide = (d.x - c.x) * (b.y - c.y) - (d.y - c.y) * (b.x - c.x) > 0;
+    const cSide = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > 0;
+    const dSide = (b.x - a.x) * (d.y - a.y) - (b.y - a.y) * (d.x - a.x) > 0;
+    //console.log(aSide, bSide, cSide, dSide);
+    return aSide !== bSide && cSide !== dSide;
+};
+
+export function lineCrossesCircle(pointA, pointB, circleCenter, radius) {
+
+
+    const x = circleCenter.x;
+    const y = circleCenter.y;
+    const x1 = pointA.x;
+    const y1 = pointA.y;
+    const x2 = pointB.x;
+    const y2 = pointB.y;
+
+    let A = x - x1;
+    let B = y - y1;
+    let C = x2 - x1;
+    let D = y2 - y1;
+
+    let dot = A * C + B * D;
+    let len_sq = C * C + D * D;
+    let param = -1;
+    if (len_sq != 0)
+        param = dot / len_sq;
+
+    let xx, yy;
+
+    if (param < 0) {
+        xx = x1;
+        yy = y1;
+    }
+    else if (param > 1) {
+        xx = x2;
+        yy = y2;
+    }
+    else {
+        xx = x1 + param * C;
+        yy = y1 + param * D;
+    }
+
+    let dx = x - xx;
+    let dy = y - yy;
+    let distanceToLine = Math.sqrt(dx * dx + dy * dy);
+    //return true if distanceToLine < radius and at least one point is outside the circle grid y increases downwards
+    return distanceToLine < radius && (Math.abs(x - x1) > radius || Math.abs(y - y1) > radius || Math.abs(x - x2) > radius || Math.abs(y - y2) > radius);
+}
+
+export function isPointOnLeft(a, b, c) {
+    return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) > 0;
+}
+
+export function isPointNearLine(linePointA, linePointB, checkPoint, range) {
+
+    const x = checkPoint.x;
+    const y = checkPoint.y;
+    const x1 = linePointA.x;
+    const y1 = linePointA.y;
+    const x2 = linePointB.x;
+    const y2 = linePointB.y;
+
+    let A = x - x1;
+    let B = y - y1;
+    let C = x2 - x1;
+    let D = y2 - y1;
+
+    let dot = A * C + B * D;
+    let len_sq = C * C + D * D;
+    let param = -1;
+    if (len_sq != 0)
+        param = dot / len_sq;
+
+    let xx, yy;
+
+    if (param < 0) {
+        xx = x1;
+        yy = y1;
+    }
+    else if (param > 1) {
+        xx = x2;
+        yy = y2;
+    }
+    else {
+        xx = x1 + param * C;
+        yy = y1 + param * D;
+    }
+
+    let dx = x - xx;
+    let dy = y - yy;
+    let distanceToLine = Math.sqrt(dx * dx + dy * dy);
+    return distanceToLine <= range;
+}
+
+export function isPointInCircle(circleCenter, checkPoint, insideRange, outsideRange) {
+    const x = circleCenter.x;
+    const y = circleCenter.y;
+    const x1 = checkPoint.x;
+    const y1 = checkPoint.y;
+
+    let dx = x - x1;
+    let dy = y - y1;
+    let distanceToPoint = Math.sqrt(dx * dx + dy * dy);
+    //console.log('distance: ', distanceToPoint);
+    return distanceToPoint > insideRange && distanceToPoint < outsideRange;
 }

@@ -22,6 +22,7 @@ import { moonBeam } from "./spells/moonBeam.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
 import { wallOfForce } from "./spells/wallOfForce.js";
 import { detectStuff } from "./spells/detectStuff.js";
+import { wallSpell } from "./spells/wallSpell.js";
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
     setupASESocket();
@@ -50,7 +51,8 @@ const aseModules = {
     eldritchBlast,
     moonBeam,
     mirrorImage,
-    wallOfForce
+    wallOfForce,
+    wallSpell
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());

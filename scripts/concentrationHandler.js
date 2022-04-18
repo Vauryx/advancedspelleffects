@@ -11,6 +11,8 @@ import { vampiricTouch } from "./spells/vampiricTouch.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { wallOfForce } from "./spells/wallOfForce.js";
 import { detectStuff } from "./spells/detectStuff.js";
+import { wallSpell } from "./spells/wallSpell.js";
+
 export class concentrationHandler {
 
     static registerHooks() {
@@ -74,6 +76,9 @@ export class concentrationHandler {
                 return;
             case game.i18n.localize('ASE.WallOfForce'):
                 await wallOfForce.handleConcentration(casterActor, casterToken, effectOptions);
+                return;
+            case game.i18n.localize('ASE.WallSpell'):
+                await wallSpell.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }
         if (effectSource.includes(game.i18n.localize("ASE.Summon"))) {
