@@ -380,9 +380,7 @@ export function lineCrossesLine(a, b, c, d) {
 
 export function lineCrossesCircle(pointA, pointB, circleCenter, radius) {
 
-    console.log("point A: ", pointA);
-    console.log("point B: ", pointB);
-    console.log("circle center: ", circleCenter);
+
     const x = circleCenter.x;
     const y = circleCenter.y;
     const x1 = pointA.x;
@@ -419,7 +417,6 @@ export function lineCrossesCircle(pointA, pointB, circleCenter, radius) {
     let dx = x - xx;
     let dy = y - yy;
     let distanceToLine = Math.sqrt(dx * dx + dy * dy);
-    console.log('distance: ', distanceToLine);
     //return true if distanceToLine < radius and at least one point is outside the circle grid y increases downwards
     return distanceToLine < radius && (Math.abs(x - x1) > radius || Math.abs(y - y1) > radius || Math.abs(x - x2) > radius || Math.abs(y - y2) > radius);
 }

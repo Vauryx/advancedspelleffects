@@ -136,8 +136,10 @@ export class ASEHandler {
                 wallOfForce.createWallOfForce(data);
                 return;
             case game.i18n.localize('ASE.WallSpell'):
-                const newWallSpell = new wallSpell(data);
-                newWallSpell.cast();
+                if (!data.flavor?.includes("- Damage Roll")) {
+                    const newWallSpell = new wallSpell(data);
+                    newWallSpell.cast();
+                }
                 return;
             case game.i18n.localize('ASE.ViciousMockery'):
                 const viciousMockerySpell = new viciousMockery(data);

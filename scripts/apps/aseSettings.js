@@ -212,8 +212,7 @@ export class ASESettings extends FormApplication {
             else {
                 returnOBJ["casterId"] = "";
             }
-        }
-        else {
+        } else {
             if (this.spellList[game.i18n.localize(itemName)] != undefined) {
                 requiredSettings = await this.spellList[game.i18n.localize(itemName)].getRequiredSettings(flags.advancedspelleffects.effectOptions);
             }

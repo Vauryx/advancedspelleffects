@@ -35,6 +35,7 @@ export class wallSpell extends baseSpellClass {
                     wallType: this.wallType,
                     length: this.effectOptions.length,
                     wallOperationalData: {},
+                    wallEffectData: this.effectOptions,
                     wallName: this.item.name
                 }
             }
@@ -44,11 +45,11 @@ export class wallSpell extends baseSpellClass {
     async cast() {
         this._setWallCategory();
         this._setWallOptions();
-        console.log(this);
+        //console.log(this);
         const { dimensions, texture, type } = await warpgate.buttonDialog(this._getDialogData(), 'column');
-        console.log('dimensions:', dimensions);
-        console.log('texture:', texture);
-        console.log('type:', type);
+        //console.log('dimensions:', dimensions);
+        //console.log('texture:', texture);
+        //console.log('type:', type);
         if (!dimensions || !texture) return;
         const chatMessage = await game.messages.get(this.itemCardId);
         if (chatMessage) {
@@ -64,12 +65,11 @@ export class wallSpell extends baseSpellClass {
             dimensions: dimensions,
             texture: texture,
         }
-        console.log('this', this);
-        console.log("Dialog return type", type);
+        //console.log("Dialog return type", type);
         if (type == "h-panels" || type == "v-panels") {
             let wallPanelDiag = new wallPanelDialog({ aseData: aseData, templateData: this.baseTemplateData, type: type }).render(true);
             let wallSpellPanelData = await wallPanelDiag.getData();
-            console.log('wallSpellPanelData:', wallSpellPanelData);
+            //console.log('wallSpellPanelData:', wallSpellPanelData);
             Hooks.once('createMeasuredTemplate', async (template) => {
                 await template.setFlag('advancedspelleffects', 'placed', true);
                 wallSpell.placePanels(aseData, template, wallPanelDiag, type);
@@ -196,7 +196,7 @@ export class wallSpell extends baseSpellClass {
                 label: `Sphere/Dome/Ring(${wallOptions.circle.dimensions.radius}ft radius)`,
                 value: {
                     dimensions: wallOptions.circle.dimensions,
-                    texture: this._getTexture({ type: 'circle' }, wallType, useWebP),
+                    texture: this._getTexture({ type: 'circle', effectData: this.effectOptions }, wallType, useWebP),
                     type: "circle"
                 }
             });
@@ -207,7 +207,7 @@ export class wallSpell extends baseSpellClass {
                     label: `Wall(${wallOptions.rect.dimensions.length}ft x ${wallOptions.rect.dimensions.width}ft)`,
                     value: {
                         dimensions: wallOptions.rect.dimensions,
-                        texture: this._getTexture({ type: 'wall' }, wallType, useWebP),
+                        texture: this._getTexture({ type: 'wall', effectData: this.effectOptions }, wallType, useWebP),
                         type: "ray"
                     }
                 });
@@ -217,7 +217,7 @@ export class wallSpell extends baseSpellClass {
                     label: `Horizontal Panels(${wallOptions.rect.horizontal.dimensions.length}ft x ${wallOptions.rect.horizontal.dimensions.width}ft)`,
                     value: {
                         dimensions: wallOptions.rect.horizontal.dimensions,
-                        texture: this._getTexture({ type: 'panel', subtype: 'horizontal' }, wallType, useWebP),
+                        texture: this._getTexture({ type: 'panel', subtype: 'horizontal', effectData: this.effectOptions }, wallType, useWebP),
                         type: "h-panels"
                     }
                 });
@@ -225,7 +225,7 @@ export class wallSpell extends baseSpellClass {
                     label: `Vertical Panels(${wallOptions.rect.vertical.dimensions.length}ft x ${wallOptions.rect.vertical.dimensions.width}ft)`,
                     value: {
                         dimensions: wallOptions.rect.vertical.dimensions,
-                        texture: this._getTexture({ type: 'panel', subtype: 'vertical' }, wallType, useWebP),
+                        texture: this._getTexture({ type: 'panel', subtype: 'vertical', effectData: this.effectOptions }, wallType, useWebP),
                         type: "v-panels"
                     }
                 });
@@ -258,11 +258,19 @@ export class wallSpell extends baseSpellClass {
         }
         switch (this.wallType) {
             case 'fire':
+                let damageRoll;
+                if (this.effectOptions.levelScaling) {
+                    damageRoll = `${Number(this.itemLevel) + 1}d8`;
+                } else {
+                    damageRoll = `${this.effectOptions.dmgDieCount}${this.effectOptions.dmgDie}${this.effectOptions.dmgMod > 0 ? ` + ${this.effectOptions.dmgMod}` : ''}`;
+
+                }
+
                 this.baseTemplateData.flags.advancedspelleffects.wallOperationalData = {
                     savingThrowOnCast: true,
                     savingThrow: 'dex',
                     halfDamOnSave: true,
-                    damage: '5d8',
+                    damage: damageRoll,
                     damageType: 'fire',
                     damageOnTouch: true,
                     savingThrowOnTouch: false,
@@ -276,6 +284,7 @@ export class wallSpell extends baseSpellClass {
                     item: this.item.id,
                     casterActor: this.actor.id,
                     range: this.effectOptions?.range ?? 10,
+                    casterToken: this.token.id
                 }
         }
 
@@ -283,6 +292,7 @@ export class wallSpell extends baseSpellClass {
 
     _getTexture(options, wallType, useWebP = false) {
         let texture = "";
+        //console.log('options:', options);
         switch (wallType) {
             case "thorns":
                 if (useWebP) {
@@ -294,37 +304,37 @@ export class wallSpell extends baseSpellClass {
             case "fire":
                 if (options.type == "circle") {
                     if (useWebP) {
-                        texture = 'modules/jb2a_patreon/Library/Generic/Fire/FireRing_01_Circle_Red_Thumb.webp';
+                        texture = `modules/jb2a_patreon/Library/Generic/Fire/FireRing_01_Circle_${options.effectData.fireColor == "yellow" ? "red" : options.effectData.fireColor}_Thumb.webp`;
                     } else {
-                        texture = 'jb2a.fire_ring.900px.red';
+                        texture = `jb2a.fire_ring.900px.${options.effectData.fireColor == "yellow" ? "red" : options.effectData.fireColor}`;
                     }
                 } else if (options.type == "wall") {
                     if (useWebP) {
-                        texture = 'modules/jb2a_patreon/Library/4th_Level/Wall_Of_Fire/WallOfFire_01_Yellow_Thumb.webp';
+                        texture = `modules/jb2a_patreon/Library/4th_Level/Wall_Of_Fire/WallOfFire_01_${options.effectData.fireColor}_Thumb.webp`;
                     } else {
-                        texture = 'jb2a.wall_of_fire.300x100.yellow';
+                        texture = `jb2a.wall_of_fire.300x100.${options.effectData.fireColor}`;
                     }
                 }
                 break;
             case "force":
                 if (options.type == "circle") {
                     if (useWebP) {
-                        texture = 'modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_blue_Sphere_Thumb.webp';
+                        texture = `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${options.effectData.forceColor}_Sphere_Thumb.webp`;
                     } else {
-                        texture = 'jb2a.wall_of_force.sphere.blue';
+                        texture = `jb2a.wall_of_force.sphere.${options.effectData.forceColor}`;
                     }
                 } else if (options.type == "panel") {
                     if (options.subtype == "horizontal") {
                         if (useWebP) {
-                            texture = 'modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_blue_H_Thumb.webp';
+                            texture = `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${options.effectData.forceColor}_H_Thumb.webp`;
                         } else {
-                            texture = 'jb2a.wall_of_force.horizontal.blue';
+                            texture = `jb2a.wall_of_force.horizontal.${options.effectData.forceColor}`;
                         }
                     } else if (options.subtype == "vertical") {
                         if (useWebP) {
-                            texture = 'modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_blue_V_Thumb.webp';
+                            texture = `modules/jb2a_patreon/Library/5th_Level/Wall_Of_Force/WallOfForce_01_${options.effectData.forceColor}_V_Thumb.webp`;
                         } else {
-                            texture = 'jb2a.wall_of_force.vertical.blue';
+                            texture = `jb2a.wall_of_force.vertical.${options.effectData.forceColor}`;
                         }
                     }
                 }
@@ -365,6 +375,7 @@ export class wallSpell extends baseSpellClass {
                 const templateData = templateDocument.data;
                 if (!templateData) return;
                 const aseData = templateDocument.getFlag("advancedspelleffects", 'wallOperationalData');
+                const aseEffectData = templateDocument.getFlag("advancedspelleffects", 'wallEffectData');
                 if (!aseData || !aseData.damageOnTouch) return;
                 if (!aseData.checkForTouch) return;
                 const wallData = {
@@ -372,6 +383,7 @@ export class wallSpell extends baseSpellClass {
                     wallTemplateId: templateDocument.id,
                     wallType: templateDocument.getFlag("advancedspelleffects", 'wallType') ?? '',
                     wallOperationalData: aseData,
+                    wallEffectData: aseEffectData,
                 }
                 const wallName = templateDocument.getFlag("advancedspelleffects", "wallName") ?? "";
                 const mTemplate = templateDocument.object;
@@ -417,12 +429,18 @@ export class wallSpell extends baseSpellClass {
                     const templatePointBX = templatePointA.x + (templateLength * Math.cos(templateAngle));
                     const templatePointBY = templatePointA.y + (templateLength * Math.sin(templateAngle));
                     let templatePointB = { x: templatePointBX, y: templatePointBY };
-                    if (templatePointA.x > templatePointB.x) {
+                    if ((templatePointA.x > templatePointB.x && templatePointA.y > templatePointB.y) || (templatePointA.x < templatePointB.x && templatePointA.y > templatePointB.y)) {
                         const temp = templatePointA;
                         templatePointA = templatePointB;
                         templatePointB = temp;
                     } else if (templatePointA.x == templatePointB.x) {
                         if (templatePointA.y > templatePointB.y) {
+                            const temp = templatePointA;
+                            templatePointA = templatePointB;
+                            templatePointB = temp;
+                        }
+                    } else if (templatePointA.y == templatePointB.y) {
+                        if (templatePointA.x > templatePointB.x) {
                             const temp = templatePointA;
                             templatePointA = templatePointB;
                             templatePointB = temp;
@@ -495,6 +513,7 @@ export class wallSpell extends baseSpellClass {
             const templateData = templateDocument.data;
             if (!templateData) return;
             const aseData = templateDocument.getFlag("advancedspelleffects", 'wallOperationalData');
+            const aseEffectData = templateDocument.getFlag("advancedspelleffects", 'wallEffectData');
             if (!aseData || !aseData.damageOnTouch) return;
             if (!aseData.checkForTouch) return;
             wallName = templateDocument.getFlag("advancedspelleffects", "wallName") ?? "";
@@ -562,6 +581,7 @@ export class wallSpell extends baseSpellClass {
                                 wallTemplateId: templateDocument.id,
                                 wallType: templateDocument.getFlag("advancedspelleffects", 'wallType') ?? '',
                                 wallOperationalData: aseData,
+                                wallEffectData: aseEffectData,
                             }
                             //await token.setFlag("advancedspelleffects", "wallTouchedData", tokenFlagData);
                             await wallSpell.activateWallEffect(token, wallData);
@@ -575,19 +595,20 @@ export class wallSpell extends baseSpellClass {
         }
         await token.setFlag("advancedspelleffects", "wallTouchedData.wallsTouched", wallsTouched);
     }
-    //---------------INCOMPELTE------------------//
+
     static async activateWallEffect(token, wallData) {
-        console.log("Activating Wall Effect...");
-        console.log("Token: ", token);
-        console.log("Wall Data: ", wallData);
-        return;
-        function addTokenToText(token, saveTotal, savePassed, damageTotal) {
+        //console.log("Activating Wall Effect...");
+        //console.log("Token: ", token);
+        //console.log("Wall Data: ", wallData);
+        const wallOperationalData = wallData.wallOperationalData;
+        const wallEffectData = wallData.wallEffectData;
+        function addTokenToText(token, damageTotal) {
 
             return `<div class="midi-qol-flex-container">
       <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
       <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
       <div>
-      ${savePassed ? game.i18n.format("ASE.SavePassMessage", { saveTotal: saveTotal, damageTotal: damageTotal }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: saveTotal, damageTotal: damageTotal })}
+      ${game.i18n.format("ASE.TookDamageMessage", { damageTotal: damageTotal })}
         
       </div>
       <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
@@ -595,120 +616,48 @@ export class wallSpell extends baseSpellClass {
 
         }
 
-        function customHalfRollChatCard(roll) {
-            //console.log(roll);
-            const formula = roll.formula;
-            const dieFaces = roll.terms[0].faces;
-            const partTotal = roll.terms[0].total;
-            const diceResults = roll.terms[0].results;
-            let colorMod = "";
-            let toolTipHTML = "";
-
-            toolTipHTML += `<section class="tooltip-part"> <div class="dice">`;
-            toolTipHTML += `<header class="part-header flexrow">
-                        <span class="part-formula">${formula}</span>
-                        <span class="part-total">${partTotal}</span>
-                    </header>`;
-            toolTipHTML += `<ol class="dice-rolls">`;
-
-            for (let dieResult of diceResults) {
-                if (dieFaces == dieResult.result) {
-                    colorMod = "max";
-                }
-                else if (dieResult.result == 1) {
-                    colorMod = "min";
-                }
-                else {
-                    colorMod = "";
-                }
-                toolTipHTML += `<li class="roll die d${dieFaces} ${colorMod}">${dieResult.result}</li>`;
-            }
-            toolTipHTML += `</ol>
-                </div>
-            </section>`;
-
-            return toolTipHTML;
-        }
-
-        const rollInfo = effectOptions.rollInfo;
-        //console.log('ROLL INFO: ', rollInfo);
-        const spellItem = await fromUuid(rollInfo.itemUUID);
-        const casterToken = canvas.tokens.get(rollInfo.casterTokenId);
-        const casterActor = casterToken.actor;
-        const spellSaveDC = rollInfo.spellSaveDc;
+        const casterActor = game.actors.get(wallOperationalData.casterActor);
+        const casterToken = canvas.tokens.get(wallOperationalData.casterToken);
+        const spellItem = casterActor.items.get(wallOperationalData.item);
+        //console.log("Caster Token: ", casterToken);
+        //console.log("Caster Actor: ", casterActor);
+        //console.log("Spell Item: ", spellItem);
 
         let itemData = spellItem.data;
         itemData.data.components.concentration = false;
 
-        if (game.modules.get("midi-qol")?.active) {
-            const fullDamageRoll = await new Roll(rollInfo.damageFormula).evaluate({ async: true });
-            const halfdamageroll = await new Roll(`${Math.floor(fullDamageRoll.total / 2)}`).evaluate({ async: true });
-            const saveRoll = await new Roll(`1d20+@mod`, { mod: token.actor.data.data.abilities.con.save }).evaluate({ async: true });
-            console.log('Rolls: ');
-            console.log(fullDamageRoll);
-            //console.log(halfdamageroll);
-            console.log(saveRoll);
+        if (utilFunctions.isMidiActive()) {
+            const damageRoll = await new Roll(wallOperationalData.damage).evaluate({ async: true });
+            //console.log(damageRoll);
             if (game.modules.get("dice-so-nice")?.active) {
-                game.dice3d?.showForRoll(fullDamageRoll);
-                game.dice3d?.showForRoll(saveRoll);
+                game.dice3d?.showForRoll(damageRoll);
             }
-            const saveTotal = saveRoll.total;
-            const passedSave = saveTotal >= spellSaveDC;
-            let savePassed;
-            let damageTotal;
             let midiData;
-            if (passedSave) {
-                savePassed = true;
-                damageTotal = halfdamageroll.total;
-                midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, halfdamageroll.total, "radiant", [token],
-                    halfdamageroll, {
-                    flavor: `Moonbeam - Damage Roll (${rollInfo.damageFormula} Radiant)`,
-                    itemCardId: "new",
-                    itemData: spellItem.data
-                });
-            }
-            else {
-                savePassed = false;
-                damageTotal = fullDamageRoll.total;
-                midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, fullDamageRoll.total, "radiant", [token],
-                    fullDamageRoll, {
-                    flavor: `Moonbeam - Damage Roll (${rollInfo.damageFormula} Radiant)`,
-                    itemCardId: "new",
-                    itemData: spellItem.data
-                });
-            }
+            midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, damageRoll.total, wallOperationalData.damageType, [token],
+                damageRoll, {
+                flavor: `${wallData.wallName} - Damage Roll (${wallOperationalData.damage} ${wallOperationalData.damageType})`,
+                itemCardId: "new",
+                itemData: spellItem.data
+            });
             const chatMessage = await game.messages.get(midiData.itemCardId);
             let chatMessageContent = await duplicate(chatMessage.data.content);
             let newChatmessageContent = $(chatMessageContent);
 
             newChatmessageContent.find(".midi-qol-hits-display").empty();
             newChatmessageContent.find(".midi-qol-hits-display").append(
-                $(addTokenToText(token, saveTotal, savePassed, damageTotal))
+                $(addTokenToText(token, damageRoll.total))
             );
-            if (passedSave) {
-                newChatmessageContent.find(".midi-qol-other-roll .dice-tooltip").empty();
-                newChatmessageContent.find(".midi-qol-other-roll .dice-tooltip").append(
-                    $(customHalfRollChatCard(fullDamageRoll))
-                );
-                newChatmessageContent.find(".midi-qol-other-roll .dice-formula").empty();
-                newChatmessageContent.find(".midi-qol-other-roll .dice-formula").append(fullDamageRoll.formula);
-
-                newChatmessageContent.find(".midi-qol-other-roll .dice-total").empty();
-                newChatmessageContent.find(".midi-qol-other-roll .dice-total").append(fullDamageRoll.total);
-            }
             await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
             await ui.chat.scrollBottom();
         }
-
-
         new Sequence("Advanced Spell Effects")
             .sound()
-            .file(effectOptions.moonbeamDmgSound)
-            .delay(Number(effectOptions.moonbeamDmgSoundDelay) ?? 0)
-            .volume(effectOptions.moonbeamDmgVolume ?? 1)
-            .playIf(effectOptions.moonbeamDmgSound && effectOptions.moonbeamDmgSound != "")
+            .file(wallEffectData.wallSpellDmgSound)
+            .delay(Number(wallEffectData.wallSpellDmgSoundDelay) ?? 0)
+            .volume(wallEffectData.wallSpellDmgVolume ?? 0.5)
+            .playIf(wallEffectData.wallSpellDmgSound && wallEffectData.wallSpellDmgSound != "")
             .effect()
-            .file(`jb2a.impact.004.${effectOptions.moonbeamDmgColor}`)
+            .file(`jb2a.impact.004.${wallEffectData?.fireColor ?? 'orange'}`)
             .attachTo(token)
             .randomRotation()
             .scaleIn(0.5, 200)
@@ -716,8 +665,9 @@ export class wallSpell extends baseSpellClass {
             .randomOffset(0.5)
             .repeats(4, 100, 250)
             .play()
+        return;
     }
-    //------------------------------------------//
+
     static async updateMeasuredTemplate(template, changes) {
         if (template.getFlag("advancedspelleffects", "wallSpellWallNum") && (changes.x !== undefined || changes.y !== undefined || changes.direction !== undefined)) {
             wallSpell.placeWalls(template, true);
@@ -725,7 +675,7 @@ export class wallSpell extends baseSpellClass {
     }
 
     static async deleteMeasuredTemplate(template) {
-        console.log('template', template);
+        //console.log('template', template);
         const walls = Tagger.getByTag([`wallSpell-${template.getFlag("advancedspelleffects", "wallType")}-Wall${template.id}`]).map(wall => wall.id);
         if (walls.length) {
             await canvas.scene.deleteEmbeddedDocuments("Wall", walls);
@@ -892,7 +842,7 @@ export class wallSpell extends baseSpellClass {
             ...topSpots,
             ...rightSpots.slice(0, Math.floor(rightSpots.length / 2)),
         ];
-        console.log("allSpots: ", allSpots);
+        //console.log("allSpots: ", allSpots);
         return {
             x: left,
             y: top,
@@ -963,12 +913,13 @@ export class wallSpell extends baseSpellClass {
         let damageSidePicked = await warpgate.buttonDialog(buttonDialogData, 'column');
         if (!damageSidePicked) return;
         await templateDocument.setFlag('advancedspelleffects', 'wallOperationalData.damageSide', damageSidePicked);
-        console.log("damageSidePicked: ", damageSidePicked);
+        //console.log("damageSidePicked: ", damageSidePicked);
     }
 
     static async handleOnCast(templateDocument) {
         const wallData = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData');
         if (!wallData) return;
+        const wallEffectData = templateDocument.getFlag('advancedspelleffects', 'wallEffectData');
         const grid = canvas?.scene?.data.grid;
         if (!grid) return false;
         const damageOnCast = wallData.damageOnCast;
@@ -1017,10 +968,10 @@ export class wallSpell extends baseSpellClass {
                     }
                 }
             }
-            console.log("targets: ", targets);
+            //console.log("targets: ", targets);
             //game.user.updateTokenTargets(targets);
             if (targets.length && targets.length > 0) {
-                console.log('chat message', chatMessage);
+                //console.log('chat message', chatMessage);
                 let chatMessageContent = await duplicate(chatMessage.data.content);
                 let targetTokens = new Set();
                 let saves = new Set();
@@ -1037,10 +988,26 @@ export class wallSpell extends baseSpellClass {
                         if (save >= saveDC) {
                             saves.add(targetToken)
                         }
-                        console.log("Adding token to chat card...");
+                        //console.log("Adding token to chat card...");
                         newChatmessageContent.find(".midi-qol-saves-display").append(
                             $(wallSpell.addTokenToText(targetToken, save, saveDC, damage))
                         );
+                        //console.log("Wall Effect Data: ", wallEffectData);
+                        new Sequence("Advanced Spell Effects")
+                            .sound()
+                            .file(wallEffectData.wallSpellDmgSound)
+                            .delay(Number(wallEffectData.wallSpellDmgSoundDelay) ?? 0)
+                            .volume(wallEffectData.wallSpellDmgVolume ?? 0.5)
+                            .playIf(wallEffectData.wallSpellDmgSound && wallEffectData.wallSpellDmgSound != "")
+                            .effect()
+                            .file(`jb2a.impact.004.${wallEffectData?.fireColor ?? 'orange'}`)
+                            .attachTo(targetToken)
+                            .randomRotation()
+                            .scaleIn(0.5, 200)
+                            .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
+                            .randomOffset(0.5)
+                            .repeats(4, 100, 250)
+                            .play()
                     }
                     await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
                     await ui.chat.scrollBottom();
@@ -1058,7 +1025,7 @@ export class wallSpell extends baseSpellClass {
     }
 
     static addTokenToText(token, roll, dc, damageRoll) {
-        console.log(damageRoll);
+        //console.log(damageRoll);
         let saveResult = roll >= dc ? true : false;
 
         return `<div class="midi-qol-flex-container">
@@ -1231,12 +1198,17 @@ export class wallSpell extends baseSpellClass {
     }
 
     static playEffects(aseData, template) {
-        console.log("Playing effects...");
-        console.log("template: ", template);
-        console.log("aseData: ", aseData);
+        //console.log("Playing effects...");
+        //console.log("template: ", template);
+        //console.log("aseData: ", aseData);
         if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
             new Sequence()
+                .sound()
+                .file(aseData.flags.wallSpellSound)
+                .delay(Number(aseData.flags.wallSpellSoundDelay) ?? 0)
+                .volume(aseData.flags.wallSpellVolume ?? 0.5)
+                .playIf(aseData.flags.wallSpellSound && aseData.flags.wallSpellSound != "")
                 .effect(aseData.texture)
                 .attachTo(template)
                 .scaleToObject()
@@ -1249,6 +1221,11 @@ export class wallSpell extends baseSpellClass {
         } else if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) {
 
             new Sequence()
+                .sound()
+                .file(aseData.flags.wallSpellSound)
+                .delay(Number(aseData.flags.wallSpellSoundDelay) ?? 0)
+                .volume(aseData.flags.wallSpellVolume ?? 0.5)
+                .playIf(aseData.flags.wallSpellSound && aseData.flags.wallSpellSound != "")
                 .effect(aseData.texture)
                 .attachTo(template)
                 .scaleToObject()
@@ -1266,12 +1243,14 @@ export class wallSpell extends baseSpellClass {
         } else {
 
             new Sequence()
+                .sound()
+                .file(aseData.flags.wallSpellSound)
+                .delay(Number(aseData.flags.wallSpellSoundDelay) ?? 0)
+                .volume(aseData.flags.wallSpellVolume ?? 0.5)
+                .playIf(aseData.flags.wallSpellSound && aseData.flags.wallSpellSound != "")
                 .effect(aseData.texture)
                 .attachTo(template)
                 .stretchTo(template, { attachTo: true, onlyX: true })
-                //.tilingTexture({
-                //    x: aseData.flags.wallSegmentSize / 10
-                // })
                 .fadeIn(250)
                 .fadeOut(250)
                 .persist()
@@ -1286,6 +1265,15 @@ export class wallSpell extends baseSpellClass {
         let animOptions = [];
         let soundOptions = [];
 
+        const dieOptions = {
+            'd4': 'd4',
+            'd6': 'd6',
+            'd8': 'd8',
+            'd10': 'd10',
+            'd12': 'd12',
+            'd20': 'd20',
+        };
+
         const wallTypeOptions = {
             //'thorns': "Wall of Thorns",
             'fire': "Wall of Fire",
@@ -1297,6 +1285,7 @@ export class wallSpell extends baseSpellClass {
             //'water': "Wall of Water"
         };
 
+        const wallType = currFlags.wallType ?? 'fire';
         spellOptions.push({
             label: game.i18n.localize("ASE.WallTypeOptionsLabel"),
             tooltip: game.i18n.localize("ASE.WallTypeOptionsTooltip"),
@@ -1304,8 +1293,114 @@ export class wallSpell extends baseSpellClass {
             options: wallTypeOptions,
             name: 'flags.advancedspelleffects.effectOptions.wallType',
             flagName: 'wallType',
-            flagValue: currFlags.wallType ?? 'force',
+            flagValue: currFlags.wallType ?? 'fire',
         });
+        animOptions.push({
+            label: game.i18n.localize("ASE.WallUseWebPLabel"),
+            tooltip: game.i18n.localize("ASE.WallUseWebPTooltip"),
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.useWebP',
+            flagName: 'useWebP',
+            flagValue: currFlags.useWebP,
+        });
+
+        if (wallType == 'fire') {
+            spellOptions.push({
+                label: game.i18n.localize("ASE.ScaleWithLevelLabel"),
+                tooltip: game.i18n.localize("ASE.ScaleWithLevelTooltip"),
+                type: 'checkbox',
+                name: 'flags.advancedspelleffects.effectOptions.levelScaling',
+                flagName: 'levelScaling',
+                flagValue: currFlags.levelScaling ?? true,
+            });
+            spellOptions.push({
+                label: game.i18n.localize("ASE.DamageDieCountLabel"),
+                tooltip: game.i18n.localize("ASE.DamageDieCountTooltip"),
+                type: 'numberInput',
+                name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
+                flagName: 'dmgDieCount',
+                flagValue: currFlags.dmgDieCount ?? 1,
+            });
+            spellOptions.push({
+                label: game.i18n.localize("ASE.DamageDieLabel"),
+                tooltip: game.i18n.localize("ASE.DamageDieTooltip"),
+                type: 'dropdown',
+                options: dieOptions,
+                name: 'flags.advancedspelleffects.effectOptions.dmgDie',
+                flagName: 'dmgDie',
+                flagValue: currFlags.dmgDie ?? 'd10',
+            });
+
+            spellOptions.push({
+                label: game.i18n.localize("ASE.DamageBonusLabel"),
+                tooltip: game.i18n.localize("ASE.DamageBonusTooltip"),
+                type: 'numberInput',
+                name: 'flags.advancedspelleffects.effectOptions.dmgMod',
+                flagName: 'dmgMod',
+                flagValue: currFlags.dmgMod ?? 0,
+            });
+            spellOptions.push({
+                label: game.i18n.localize("ASE.WallLengthLabel"),
+                tooltip: game.i18n.localize("ASE.WallLengthTooltip"),
+                type: 'numberInput',
+                name: 'flags.advancedspelleffects.effectOptions.wallLength',
+                flagName: 'wallLength',
+                flagValue: currFlags.wallLength ?? 10,
+            });
+
+            spellOptions.push({
+                label: game.i18n.localize("ASE.WallHeightLabel"),
+                tooltip: game.i18n.localize("ASE.WallHeightTooltip"),
+                type: 'numberInput',
+                name: 'flags.advancedspelleffects.effectOptions.wallHeight',
+                flagName: 'wallHeight',
+                flagValue: currFlags.wallHeight ?? 10,
+            });
+            spellOptions.push({
+                label: game.i18n.localize("ASE.WallWidthLabel"),
+                tooltip: game.i18n.localize("ASE.WallWidthTooltip"),
+                type: 'numberInput',
+                name: 'flags.advancedspelleffects.effectOptions.wallWidth',
+                flagName: 'wallWidth',
+                flagValue: currFlags.wallWidth ?? 5,
+            });
+            animOptions.push({
+                label: game.i18n.localize("ASE.WallOfFireColorLabel"),
+                tooltip: game.i18n.localize("ASE.WallOfFireColorTooltip"),
+                type: 'dropdown',
+                options: utilFunctions.getDBOptions('jb2a.wall_of_fire.300x100'),
+                name: 'flags.advancedspelleffects.effectOptions.fireColor',
+                flagName: 'fireColor',
+                flagValue: currFlags.fireColor,
+            });
+            soundOptions.push({
+                label: game.i18n.localize("ASE.WallSpellDamageEffectSoundLabel"),
+                tooltip: game.i18n.localize("ASE.WallSpellDamageEffectSoundTooltip"),
+                type: 'fileInput',
+                name: 'flags.advancedspelleffects.effectOptions.wallSpellDmgSound',
+                flagName: 'wallSpellDmgSound',
+                flagValue: currFlags.wallSpellDmgSound ?? '',
+            });
+            soundOptions.push({
+                label: game.i18n.localize("ASE.WallSpellDamageEffectSoundDelayLabel"),
+                tooltip: game.i18n.localize("ASE.WallSpellDamageEffectSoundDelayTooltip"),
+                type: 'numberInput',
+                name: 'flags.advancedspelleffects.effectOptions.wallSpellDmgSoundDelay',
+                flagName: 'wallSpellDmgSoundDelay',
+                flagValue: currFlags.wallSpellDmgSoundDelay ?? 0,
+            });
+            soundOptions.push({
+                label: game.i18n.localize("ASE.WallSpellDamageEffectVolumeLabel"),
+                tooltip: game.i18n.localize("ASE.WallSpellDamageEffectVolumeTooltip"),
+                type: 'rangeInput',
+                name: 'flags.advancedspelleffects.effectOptions.wallSpellDmgVolume',
+                flagName: 'wallSpellDmgVolume',
+                flagValue: currFlags.wallSpellDmgVolume ?? 0.5,
+                min: 0,
+                max: 1,
+                step: 0.01,
+            });
+        }
 
         spellOptions.push({
             label: game.i18n.localize("ASE.WallRadiusLabel"),
@@ -1316,69 +1411,62 @@ export class wallSpell extends baseSpellClass {
             flagValue: currFlags.wallRadius ?? 10,
         });
 
-        spellOptions.push({
-            label: game.i18n.localize("ASE.WallLengthLabel"),
-            tooltip: game.i18n.localize("ASE.WallLengthTooltip"),
+        if (wallType == 'force') {
+            spellOptions.push({
+                label: game.i18n.localize("ASE.WallSegmentSizeLabel"),
+                tooltip: game.i18n.localize("ASE.WallSegmentSizeTooltip"),
+                type: 'numberInput',
+                name: 'flags.advancedspelleffects.effectOptions.wallSegmentSize',
+                flagName: 'wallSegmentSize',
+                flagValue: currFlags.wallSegmentSize ?? 10,
+            });
+
+            spellOptions.push({
+                label: game.i18n.localize("ASE.WallPanelCountLabel"),
+                tooltip: game.i18n.localize("ASE.WallPanelCountTooltip"),
+                type: 'numberInput',
+                name: 'flags.advancedspelleffects.effectOptions.panelCount',
+                flagName: 'panelCount',
+                flagValue: currFlags.panelCount ?? 10,
+            });
+            animOptions.push({
+                label: game.i18n.localize("ASE.WallOfForceColorLabel"),
+                type: 'dropdown',
+                options: utilFunctions.getDBOptions('jb2a.wall_of_force.horizontal'),
+                name: 'flags.advancedspelleffects.effectOptions.forceColor',
+                flagName: 'forceColor',
+                flagValue: currFlags.forceColor,
+            });
+        }
+
+
+        soundOptions.push({
+            label: game.i18n.localize("ASE.WallSpellInitialSoundLabel"),
+            tooltip: game.i18n.localize("ASE.WallSpellInitialSoundTooltip"),
+            type: 'fileInput',
+            name: 'flags.advancedspelleffects.effectOptions.wallSpellSound',
+            flagName: 'wallSpellSound',
+            flagValue: currFlags.wallSpellSound ?? '',
+        });
+        soundOptions.push({
+            label: game.i18n.localize("ASE.WallSpellInitialSoundDelayLabel"),
+            tooltip: game.i18n.localize("ASE.WallSpellInitialSoundDelayTooltip"),
             type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.wallLength',
-            flagName: 'wallLength',
-            flagValue: currFlags.wallLength ?? 10,
+            name: 'flags.advancedspelleffects.effectOptions.wallSpellSoundDelay',
+            flagName: 'wallSpellSoundDelay',
+            flagValue: currFlags.wallSpellSoundDelay ?? 0,
         });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.WallHeightLabel"),
-            tooltip: game.i18n.localize("ASE.WallHeightTooltip"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.wallHeight',
-            flagName: 'wallHeight',
-            flagValue: currFlags.wallHeight ?? 10,
+        soundOptions.push({
+            label: game.i18n.localize("ASE.WallSpellInitialVolumeLabel"),
+            tooltip: game.i18n.localize("ASE.WallSpellInitialVolumeTooltip"),
+            type: 'rangeInput',
+            name: 'flags.advancedspelleffects.effectOptions.wallSpellVolume',
+            flagName: 'wallSpellVolume',
+            flagValue: currFlags.wallSpellVolume ?? 0.5,
+            min: 0,
+            max: 1,
+            step: 0.01,
         });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.WallWidthLabel"),
-            tooltip: game.i18n.localize("ASE.WallWidthTooltip"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.wallWidth',
-            flagName: 'wallWidth',
-            flagValue: currFlags.wallWidth ?? 5,
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.WallSegmentSizeLabel"),
-            tooltip: game.i18n.localize("ASE.WallSegmentSizeTooltip"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.wallSegmentSize',
-            flagName: 'wallSegmentSize',
-            flagValue: currFlags.wallSegmentSize ?? 10,
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.WallPanelCountLabel"),
-            tooltip: game.i18n.localize("ASE.WallPanelCountTooltip"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.panelCount',
-            flagName: 'panelCount',
-            flagValue: currFlags.panelCount ?? 10,
-        });
-
-        /*animOptions.push({
-            label: game.i18n.localize("ASE.WallOfForceColorLabel"),
-            type: 'dropdown',
-            options: utilFunctions.getDBOptions('jb2a.wall_of_force.horizontal'),
-            name: 'flags.advancedspelleffects.effectOptions.color',
-            flagName: 'color',
-            flagValue: currFlags.color,
-        });*/
-
-        animOptions.push({
-            label: game.i18n.localize("ASE.WallUseWebPLabel"),
-            tooltip: game.i18n.localize("ASE.WallUseWebPTooltip"),
-            type: 'checkbox',
-            name: 'flags.advancedspelleffects.effectOptions.useWebP',
-            flagName: 'useWebP',
-            flagValue: currFlags.useWebP,
-        });
-
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
