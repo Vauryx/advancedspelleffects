@@ -317,6 +317,7 @@ export class witchBolt {
 
         let currentCombatantId = combat.current.tokenId;
         let caster = canvas.tokens.get(currentCombatantId);
+        if (!caster) return;
         let casterActor = caster.actor;
         //console.log(casterActor, casterActor.isOwner);
         if (!casterActor.isOwner || (game.user.isGM && caster.actor.hasPlayerOwner)) return;

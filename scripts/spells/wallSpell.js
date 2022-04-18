@@ -12,12 +12,14 @@ export class wallSpell extends baseSpellClass {
         this.actor = game.actors.get(this.data.actor.id);
         this.token = canvas.tokens.get(this.data.tokenId);
         this.item = this.data.item;
+        this.itemCardId = this.data.itemCardId;
         this.itemLevel = this.data.itemLevel;
         this.effectOptions = this.item.getFlag("advancedspelleffects", "effectOptions") ?? {};
         //console.log('effectOptions:', this.effectOptions);
         this.wallType = this.effectOptions.wallType.toLowerCase();
         this.wallCategory = "";
         this.wallOptions = {};
+        this.chatMessage = {};
         this.baseTemplateData = {
             user: game.user.id,
             direction: 0,
@@ -48,8 +50,10 @@ export class wallSpell extends baseSpellClass {
         console.log('texture:', texture);
         console.log('type:', type);
         if (!dimensions || !texture) return;
-
-
+        const chatMessage = await game.messages.get(this.itemCardId);
+        if (chatMessage) {
+            this.chatMessage = chatMessage.id;
+        }
         this._setBaseTemplateData(dimensions, type);
 
         const aseData = {
@@ -60,6 +64,7 @@ export class wallSpell extends baseSpellClass {
             dimensions: dimensions,
             texture: texture,
         }
+        console.log('this', this);
         console.log("Dialog return type", type);
         if (type == "h-panels" || type == "v-panels") {
             let wallPanelDiag = new wallPanelDialog({ aseData: aseData, templateData: this.baseTemplateData, type: type }).render(true);
@@ -91,7 +96,9 @@ export class wallSpell extends baseSpellClass {
                 if (this.wallType.includes('fire')) {
                     await wallSpell.pickFireSide(template);
                 }
-                wallSpell.handleOnCast(template);
+                if (utilFunctions.isMidiActive()) {
+                    wallSpell.handleOnCast(template);
+                }
             });
             const doc = new MeasuredTemplateDocument(this.baseTemplateData, { parent: canvas.scene });
             let template = new game.dnd5e.canvas.AbilityTemplate(doc);
@@ -175,7 +182,7 @@ export class wallSpell extends baseSpellClass {
     _getDialogData() {
         const wallType = this.wallType;
         const wallOptions = this.wallOptions;
-        console.log('wallOptions:', wallOptions);
+        //console.log('wallOptions:', wallOptions);
         const wallCategory = this.wallCategory;
         const effectOptions = this.effectOptions;
         const useWebP = effectOptions.useWebP ?? false;
@@ -265,6 +272,10 @@ export class wallSpell extends baseSpellClass {
                     damageArea: {},
                     damageOnCast: true,
                     savingThrowDC: this.actor.data.data.attributes.spelldc ?? 0,
+                    chatMessage: this.chatMessage,
+                    item: this.item.id,
+                    casterActor: this.actor.id,
+                    range: this.effectOptions?.range ?? 10,
                 }
         }
 
@@ -327,9 +338,135 @@ export class wallSpell extends baseSpellClass {
         Hooks.on("updateMeasuredTemplate", wallSpell.updateMeasuredTemplate);
         Hooks.on("deleteMeasuredTemplate", wallSpell.deleteMeasuredTemplate);
         Hooks.on("preUpdateToken", wallSpell.preUpdateToken);
+        Hooks.on("updateCombat", wallSpell.updateCombat);
         return;
     }
 
+    static async updateCombat(combat) {
+        const isGM = utilFunctions.isFirstGM();
+        //console.log("Is first GM: ", isGM);
+        if (!isGM) return;
+        //console.log("Updating combat: ", combat);
+        const token = canvas.tokens.get(combat.previous.tokenId);
+        if (!token) return;
+        const grid = canvas?.scene?.data.grid;
+        if (!grid) return false;
+        const tokenPos = { x: token.data.x, y: token.data.y };
+        await token.document.unsetFlag("advancedspelleffects", "wallTouchedData.wallsTouched");
+        const wallTemplates = canvas.templates.placeables.filter(template =>
+        (template.document.getFlag('advancedspelleffects', 'wallOperationalData.damageOnTouch') == true
+            || template.document.getFlag('advancedspelleffects', 'wallOperationalData.savingThrowOnTouch') == true));
+        //console.log("wall templates: ", wallTemplates);
+        if (wallTemplates.length && wallTemplates.length > 0) {
+            for await (let wallTemplate of wallTemplates) {
+                const templateDocument = wallTemplate.document;
+                if (!templateDocument) return;
+                //console.log(templateDocument.data);
+                const templateData = templateDocument.data;
+                if (!templateData) return;
+                const aseData = templateDocument.getFlag("advancedspelleffects", 'wallOperationalData');
+                if (!aseData || !aseData.damageOnTouch) return;
+                if (!aseData.checkForTouch) return;
+                const wallData = {
+                    wallName: templateDocument.getFlag("advancedspelleffects", "wallName") ?? "",
+                    wallTemplateId: templateDocument.id,
+                    wallType: templateDocument.getFlag("advancedspelleffects", 'wallType') ?? '',
+                    wallOperationalData: aseData,
+                }
+                const wallName = templateDocument.getFlag("advancedspelleffects", "wallName") ?? "";
+                const mTemplate = templateDocument.object;
+                const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: templateData.t, distance: mTemplate.data.distance };
+                //console.log("Wall template details: ", templateDetails);
+                if (templateDetails.shape == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                    //console.log("Circle template detected...");
+                    let templateCenter = { x: templateDetails.x, y: templateDetails.y };
+                    let templateRadius = (templateDetails.distance / 5) * grid;
+                    const sideToCheck = templateDocument.getFlag("advancedspelleffects", "wallOperationalData.damageSide");
+                    //console.log("Side to check: ", sideToCheck);
+
+                    const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
+                    const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
+
+                    widthLoop: for (let x = startX; x < token.data.width; x++) {
+                        for (let y = startY; y < token.data.height; y++) {
+                            const currGrid = {
+                                x: tokenPos.x + x * grid,
+                                y: tokenPos.y + y * grid,
+                            };
+                            let inRange = false;
+                            if (sideToCheck == "inside") {
+                                inRange = utilFunctions.isPointInCircle(templateCenter, currGrid, 0, templateRadius);
+                            } else if (sideToCheck == "outside") {
+                                const outerRadius = templateRadius + ((aseData.range / 5) * grid);
+                                inRange = utilFunctions.isPointInCircle(templateCenter, currGrid, templateRadius, outerRadius);
+                            }
+                            if (inRange) {
+                                wallSpell.activateWallEffect(token, wallData);
+                                break widthLoop;
+                            } else {
+                                console.log("Token not in range of wall circle: ", token.name);
+                            }
+
+                        }
+                    }
+                }
+                else {
+                    let templatePointA = { x: templateDetails.x, y: templateDetails.y };
+                    const templateAngle = (templateData.direction) * (Math.PI / 180.0);
+                    const templateLength = ((templateData.distance) * grid) / 5.0;
+                    const templatePointBX = templatePointA.x + (templateLength * Math.cos(templateAngle));
+                    const templatePointBY = templatePointA.y + (templateLength * Math.sin(templateAngle));
+                    let templatePointB = { x: templatePointBX, y: templatePointBY };
+                    if (templatePointA.x > templatePointB.x) {
+                        const temp = templatePointA;
+                        templatePointA = templatePointB;
+                        templatePointB = temp;
+                    } else if (templatePointA.x == templatePointB.x) {
+                        if (templatePointA.y > templatePointB.y) {
+                            const temp = templatePointA;
+                            templatePointA = templatePointB;
+                            templatePointB = temp;
+                        }
+                    }
+                    //console.log("Template Point A: ", templatePointA);
+                    //console.log("Template Point B: ", templatePointB);
+                    const sideToCheck = templateDocument.getFlag("advancedspelleffects", "wallOperationalData.damageSide");
+                    //console.log("Side to check: ", sideToCheck);
+                    const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
+                    const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
+
+                    widthLoop: for (let x = startX; x < token.data.width; x++) {
+                        for (let y = startY; y < token.data.height; y++) {
+                            const currGrid = {
+                                x: tokenPos.x + x * grid,
+                                y: tokenPos.y + y * grid,
+                            };
+                            const inRange = utilFunctions.isPointNearLine(templatePointA, templatePointB, currGrid, (aseData.range / 5) * grid);
+                            if (inRange) {
+                                let isOnSide = false;
+                                if (sideToCheck == 'bottom' || sideToCheck == 'left') {
+                                    isOnSide = utilFunctions.isPointOnLeft(templatePointA, templatePointB, currGrid);
+                                } else if (sideToCheck == 'top' || sideToCheck == 'right') {
+                                    isOnSide = utilFunctions.isPointOnLeft(templatePointB, templatePointA, currGrid);
+                                }
+                                if (isOnSide) {
+                                    wallSpell.activateWallEffect(token, wallData);
+                                    break widthLoop;
+                                } else {
+                                    console.log("Token not on side of wall: ", token.name);
+                                }
+                            } else {
+                                console.log("Token not in range of wall: ", token.name);
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+
+    }
 
     static async preUpdateToken(tokenDocument, updateData) {
         const isGM = utilFunctions.isFirstGM();
@@ -362,7 +499,7 @@ export class wallSpell extends baseSpellClass {
             if (!aseData.checkForTouch) return;
             wallName = templateDocument.getFlag("advancedspelleffects", "wallName") ?? "";
             const mTemplate = templateDocument.object;
-            const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: mTemplate.shape, distance: mTemplate.data.distance }
+            const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: mTemplate.shape, distance: mTemplate.data.distance };
             const templatePointA = { x: templateDetails.x, y: templateDetails.y };
             const templateAngle = (templateData.direction) * (Math.PI / 180.0);
             const templateLength = ((templateData.distance) * grid) / 5.0;
@@ -386,7 +523,10 @@ export class wallSpell extends baseSpellClass {
                     }
                     let previousContains = templateDetails.shape?.contains(oldCurrGrid.x, oldCurrGrid.y);
                     let contains = templateDetails.shape?.contains(currGrid.x, currGrid.y);
-
+                    if (templateData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                        previousContains = false;
+                        contains = false;
+                    }
                     let crossed = false;
                     if (!contains) {
                         const dragCoordOld = {
@@ -397,16 +537,18 @@ export class wallSpell extends baseSpellClass {
                             x: movementRay.B.x + x * grid,
                             y: movementRay.B.y + y * grid,
                         };
+                        //console.log("Drag Coord Old: ", dragCoordOld);
+                        //console.log("Drag Coord New: ", dragCoordNew);
                         if (templateData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+
                             crossed = utilFunctions.lineCrossesCircle(dragCoordOld, dragCoordNew, templatePointA, (templateDetails.distance / 5) * grid);
                         } else {
                             crossed = utilFunctions.lineCrossesLine(dragCoordOld, dragCoordNew, templatePointA, templatePointB);
                         }
-
                     }
 
                     if (((previousContains && contains) || (!previousContains)) && (crossed || contains)) {
-                        console.log("Token touched wall!");
+                        //console.log("Token touched wall!");
                         if (wallsTouched.includes(templateDocument.id)) {
                             console.log(`${token.name} has already been effected by this ${wallName} this turn - ${templateDocument.id}`);
                             ui.notifications.info(game.i18n.format("ASE.WallSpellAlreadyEffected", { name: token.name, wallName: wallName }));
@@ -415,14 +557,14 @@ export class wallSpell extends baseSpellClass {
                             console.log(`${token.name} touched ${wallName} - ${templateDocument.id}`);
                             ui.notifications.info(game.i18n.format("ASE.WallSpellTouchingWall", { name: token.name, wallName: wallName }));
                             wallsTouched.push(templateDocument.id);
-                            const tokenFlagData = {
+                            const wallData = {
                                 wallName: wallName,
                                 wallTemplateId: templateDocument.id,
                                 wallType: templateDocument.getFlag("advancedspelleffects", 'wallType') ?? '',
                                 wallOperationalData: aseData,
                             }
                             //await token.setFlag("advancedspelleffects", "wallTouchedData", tokenFlagData);
-                            await wallSpell.activateWallEffect(token, tokenFlagData);
+                            await wallSpell.activateWallEffect(token, wallData);
                             break widthLoop;
                         }
                     } else {
@@ -433,11 +575,11 @@ export class wallSpell extends baseSpellClass {
         }
         await token.setFlag("advancedspelleffects", "wallTouchedData.wallsTouched", wallsTouched);
     }
-
-    static async activateWallEffect(token, tokenFlagData) {
+    //---------------INCOMPELTE------------------//
+    static async activateWallEffect(token, wallData) {
         console.log("Activating Wall Effect...");
         console.log("Token: ", token);
-        console.log("Token Flag Data: ", tokenFlagData);
+        console.log("Wall Data: ", wallData);
         return;
         function addTokenToText(token, saveTotal, savePassed, damageTotal) {
 
@@ -575,7 +717,7 @@ export class wallSpell extends baseSpellClass {
             .repeats(4, 100, 250)
             .play()
     }
-
+    //------------------------------------------//
     static async updateMeasuredTemplate(template, changes) {
         if (template.getFlag("advancedspelleffects", "wallSpellWallNum") && (changes.x !== undefined || changes.y !== undefined || changes.direction !== undefined)) {
             wallSpell.placeWalls(template, true);
@@ -830,9 +972,23 @@ export class wallSpell extends baseSpellClass {
         const grid = canvas?.scene?.data.grid;
         if (!grid) return false;
         const damageOnCast = wallData.damageOnCast;
+        const damageType = wallData.damageType;
+        const wallDamage = wallData.damage;
+        const halfDamOnSave = wallData.halfDamOnSave ?? true;
         const savingThrowOnCast = wallData.savingThrowOnCast;
         const mTemplate = templateDocument.object;
-        const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: mTemplate.shape, distance: mTemplate.data.distance }
+        const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: mTemplate.shape, distance: mTemplate.data.distance };
+        const chatMessageId = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData.chatMessage');
+        const chatMessage = await game.messages.get(chatMessageId);
+        const casterActorId = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData.casterActor');
+        const casterActor = await game.actors.get(casterActorId);
+        const wallItemId = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData.item');
+        const wallItem = await casterActor.items.get(wallItemId);
+        //console.log(wallItem);
+        if (!chatMessage) {
+            ui.notifications.info(`No chat message found for wall spell, no damage will be applied`);
+            return;
+        }
         if (savingThrowOnCast) {
             const saveType = wallData.savingThrow;
             const saveDC = wallData.savingThrowDC;
@@ -863,8 +1019,56 @@ export class wallSpell extends baseSpellClass {
             }
             console.log("targets: ", targets);
             //game.user.updateTokenTargets(targets);
+            if (targets.length && targets.length > 0) {
+                console.log('chat message', chatMessage);
+                let chatMessageContent = await duplicate(chatMessage.data.content);
+                let targetTokens = new Set();
+                let saves = new Set();
+                let newChatmessageContent = $(chatMessageContent);
+                newChatmessageContent.find(".midi-qol-saves-display").empty();
+                if (halfDamOnSave) {
+                    let damage = await new Roll(wallDamage).evaluate({ async: true });
+                    for await (let targetToken of targets) {
+                        let targetTokenAbilities = targetToken?.actor?.data?.data?.abilities ?? {};
+                        let targetTokenSaveMod = targetTokenAbilities[saveType]?.save ?? 0;
+                        let saveRoll = await new Roll("1d20+@mod", { mod: targetTokenSaveMod }).evaluate({ async: true });
+                        let save = saveRoll.total;
+                        targetTokens.add(targetToken)
+                        if (save >= saveDC) {
+                            saves.add(targetToken)
+                        }
+                        console.log("Adding token to chat card...");
+                        newChatmessageContent.find(".midi-qol-saves-display").append(
+                            $(wallSpell.addTokenToText(targetToken, save, saveDC, damage))
+                        );
+                    }
+                    await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
+                    await ui.chat.scrollBottom();
+                    MidiQOL.applyTokenDamage(
+                        [{ damage: damage.total, type: damageType }],
+                        damage.total,
+                        targetTokens,
+                        wallItem,
+                        saves
+                    );
+                }
+            }
 
         }
+    }
+
+    static addTokenToText(token, roll, dc, damageRoll) {
+        console.log(damageRoll);
+        let saveResult = roll >= dc ? true : false;
+
+        return `<div class="midi-qol-flex-container">
+      <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
+      <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
+      <div>
+      ${saveResult ? game.i18n.format("ASE.SavePassMessage", { saveTotal: roll, damageTotal: Math.floor(damageRoll.total / 2) }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: roll, damageTotal: damageRoll.total })}
+      </div>
+      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
+    </div>`;
     }
 
     static async placePanels(aseData, template, panelDiag, type) {

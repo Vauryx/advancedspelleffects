@@ -497,6 +497,7 @@ export class callLightning {
     static async _updateCombat(combat) {
         let currentCombatantId = combat.current.tokenId;
         let caster = canvas.tokens.get(currentCombatantId);
+        if (!caster) return;
         if (!caster.actor.isOwner || (game.user.isGM && caster.actor.hasPlayerOwner)) return;
         let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == currentCombatantId);
         //console.log("update hook fired...", stormCloudTiles);
