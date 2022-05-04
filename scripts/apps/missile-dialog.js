@@ -326,7 +326,7 @@ export class MissileDialog extends FormApplication {
             let caster = canvas.tokens.get(this.data.caster);
             const casterActor = game.actors.get(caster.data.actorId);
             const item = this.data.item;
-            let rollData = casterActor.getRollData();
+            let rollData = item.getRollData();
             const rollMod = rollData.mod;
             let damageBonus = rollData.bonuses[this.data.actionType]?.damage || "";
             const chatMessage = await game.messages.get(this.data.itemCardId);
