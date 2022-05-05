@@ -30,7 +30,7 @@ export class scorchingRay {
     static async selectTargets(midiData) {
         const casterActor = midiData.actor;
         const casterToken = canvas.tokens.get(midiData.tokenId);
-        const numMissiles = midiData.itemLevel + 1;
+        const numMissiles = Number(midiData.itemLevel) + 1;
         const itemCardId = midiData.itemCardId;
         const spellItem = midiData.item;
         const aseEffectOptions = spellItem?.getFlag("advancedspelleffects", "effectOptions");
