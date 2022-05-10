@@ -440,7 +440,7 @@ export class ASESettings extends FormApplication {
     async _updateObject(event, formData) {
         //console.log(formData);
         console.log("Saving ASE item...");
-        await this.object.unsetFlag("advancedspelleffects", "effectOptions");
+        //await this.object.unsetFlag("advancedspelleffects", "effectOptions");
         await this.setItemDetails(this.object);
         formData = expandObject(formData);
         //console.log(formData);
