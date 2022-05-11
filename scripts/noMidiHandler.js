@@ -12,7 +12,14 @@ export class noMidiHandler {
         //console.log("Chat Message Data: ", msg);
         let caster = canvas.tokens.get(msg.data.speaker.token);
         let casterActor = caster?.actor;
-        let spellItem = casterActor?.items?.getName(msg.data.flavor);
+        let spellItem;
+        if(msg.data?.flags?.betterrolls5e){
+            console.log("Detected Better Rolls...");
+            spellItem = casterActor?.items?.get(msg.data.flags.betterrolls5e.itemId);
+        }
+        else {
+            spellItem = casterActor?.items?.getName(msg.data.flavor);
+        }
         let aseSpell = spellItem?.data?.flags?.advancedspelleffects ?? false;
         if (!caster || !casterActor || !spellItem || !aseSpell) return;
         let chatContent = msg.data.content;
