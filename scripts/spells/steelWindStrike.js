@@ -56,12 +56,12 @@ export class steelWindStrike {
             await caster.document.setFlag("autorotate", "enabled", false);
         }
         //console.log ("Auto Rotate Flag status: ",caster.document.getFlag("autorotate", "enabled"));
-        await steelWindStrike(caster, targets, aseFlags);
+        await steelWindStrike(item,caster, targets, aseFlags);
 
         async function evaluateAttack(target, rollData, damageFormula) {
             //console.log("Evalute attack target: ", target);
             let attackRoll = await new Roll(`1d20 + @mod + @prof`, rollData).evaluate({ async: true });
-            //console.log("Attack roll: ", attackRoll);
+            console.log("ASE SWS ttack roll: ", attackRoll);
             // game.dice3d?.showForRoll(attackRoll);
             if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
                 onMiss(target, attackRoll);
@@ -173,7 +173,7 @@ export class steelWindStrike {
             return true;
         }
         //---------------------------------------------------------------------------
-        async function steelWindStrike(caster, targets, options) {
+        async function steelWindStrike(item,caster, targets, options) {
             const dashSound = options.dashSound ?? "";
             const dashSoundDelay = options.dashSoundDelay ?? 0;
             const dashVolume = options.dashVolume ?? 1;
@@ -181,8 +181,8 @@ export class steelWindStrike {
             let strikeSoundDelay = options.strikeSoundDelay ?? 0;
             const strikeVolume = options.strikeVolume ?? 1;
 
-            let casterRollData = caster.actor.getRollData();
-            const casterRollMod = casterRollData.mod;
+            let itemRollData = item.getRollData();
+            const itemRollMod = itemRollData.mod;
 
             const damageFormula = `${options.dmgDieCount}${options.dmgDie}${options.dmgMod > 0 ? "+" : ""}${options.dmgMod > 0 ? options.dmgMod : ""}`;
             //console.log("Damage formula: ", damageFormula);
@@ -207,8 +207,8 @@ export class steelWindStrike {
                 swordAnim = `jb2a.${weapon}.${weaponsPathMap[weapon]}.${weaponColor}.${swingType}`;
                 //console.log(targets[i]);
                 let target = targets[i];
-                casterRollData.mod = casterRollMod;
-                evaluateAttack(target, casterRollData, damageFormula);
+                itemRollData.mod = itemRollMod;
+                evaluateAttack(target, itemRollData, damageFormula);
                 //debugger;
                 const openPosition = getFreePosition({ x: target.x, y: target.y });
                 let rotateAngle = new Ray(openPosition, target).angle * (180 / Math.PI);
