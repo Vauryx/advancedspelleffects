@@ -195,7 +195,7 @@ export class spiritualWeapon {
         const spiritualWeaponActorImg = spiritualWeapon.replace("200x200.webm", "Thumb.webp");
         //console.log("Level: ", level);
         if ((level - 3) > 0) {
-            damageScale = `+ ${Math.floor((level - 2) / 2)}d8[upcast]`;
+            damageScale = `+ ${Math.floor((level - 2) / 2)}d8`;
         }
         //console.log("Damage Scale: ", damageScale);
         const attackItemName = game.i18n.localize('ASE.SpiritAttackItemName');
