@@ -35,9 +35,9 @@
       "name": "betterrolls5e"
     }
   ],
-  "esmodules": ["/scripts/setup.js", "/scripts/advancedSpellEffects.js"],
+  "esmodules": ["./dist/module.js"],
   "scripts": [],
-  "styles": ["/styles/module.css"],
+  "styles": ["/styles/module.css", "./dist/module.css"],
   "languages": [
     {
       "lang": "en",
