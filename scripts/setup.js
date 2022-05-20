@@ -1,4 +1,4 @@
-import ASESettings from "./apps/aseSettings.js";
+import ASESettings from "./svelteApps/aseSettings.js";
 import { versionMigration } from "./versionMigration.js"
 import * as utilFunctions from "./utilityFunctions.js";
 import { setupASESocket } from "./aseSockets.js";
@@ -128,14 +128,14 @@ Hooks.once('ready', async function () {
 
   if (!game.user.isGM) return;
 
-  Hooks.on(`renderItemSheet5e`, async (app, html, data) => {
+  Hooks.on(`renderItemSheet`, async (app, html, data) => {
     //console.log("ASE: Caught actor sheet render hook!", data);
     //console.log('ASE Spell List: ', aseSpellList);
     if (app.document.getFlag("advancedspelleffects", "disableSettings")) {
       return;
     }
     const aseBtn = $(`<a class="ase-item-settings" title="Advanced Spell Effects"><i class="fas fa-magic"></i>ASE</a>`);
-    aseBtn.click(async (ev) => {
+    aseBtn.click(async ev => {
       await versionMigration.handle(app.document);
       new ASESettings(app.document, {}).render(true);
     });
