@@ -75,14 +75,14 @@
     console.log("spellList: ", spellList);
 
     let requiredSettings;
-    let spellEffect = spellList.find(x => x.name === flagData.spellEffect);
+    let spellEffect = spellList.find(x => x.name === flagData.spellEffect) ?? spellList[0];
     let settingsPromise = updateRequiredSettings(spellEffect);
 
     $: currentTabId = 0;
     $: flagData.enableASE = enableASE;
     $: flagData.effectOptions = effectOptions;
     $: flagData.spellEffect = spellEffectName;
-    $: {spellEffect = spellList.find(x => x.name === spellEffectName);
+    $: {spellEffect = spellList.find(x => x.name === spellEffectName) ?? spellList[0];
         settingsPromise = updateRequiredSettings(spellEffect);}
 
    // $: console.log("ASE flag is", enableASE ? "enabled" : "disabled");
