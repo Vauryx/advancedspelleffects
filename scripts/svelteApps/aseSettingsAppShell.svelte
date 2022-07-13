@@ -10,17 +10,22 @@ import SharedSettings from "./components/sharedSettings.svelte"
 export let elementRoot;
 export let item;
 export let itemFlags;
-export const flags = itemFlags.advancedspelleffects || {};
-export const flagData = {
-    enableASE: flags.enableASE,
-    spellEffect: flags.spellEffect,
-    effectOptions: flags.effectOptions,
+const flags = itemFlags.advancedspelleffects || {};
+console.log
+let flagData = {
+    itemName: item.name,
+    enableASE: flags.enableASE ?? false,
+    spellEffect: flags.spellEffect ?? {},
+    effectOptions: flags.effectOptions ?? {},
 };
+
 const { application } = getContext("external");
 const oldName = item.name || item.sourceName;
 let form = void 0;
 let enableASE = flags.enableASE;
+
 async function closeApp() {
+        console.log('FlagData Updating: ', flagData);
         const updatedFlags = {
             data: {
                 flags: {
@@ -28,6 +33,7 @@ async function closeApp() {
                 },
             },
         };
+        await item.unsetFlag('advancedspelleffects', 'effectOptions');
         await item.update(updatedFlags.data);
         application.close();
     }

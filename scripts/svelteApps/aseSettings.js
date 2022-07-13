@@ -15,6 +15,8 @@ export default class ASESettings extends SvelteApplication {
                 }
             }
         });
+        console.log("ASE: Caught item sheet render hook!", item);
+        console.log("Item Flags: ", item.data.flags);
         
     }
 

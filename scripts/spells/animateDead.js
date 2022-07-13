@@ -28,11 +28,12 @@ export class animateDead {
     }
 
     static async getRequiredSettings(currFlags) {
+        console.log("Curr Flags: ", currFlags);
         if (!currFlags) currFlags = {};
         const magicSignsRaw = `jb2a.magic_signs.circle.02`;
         const magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
 
-        const magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${currFlags.advancedspelleffects?.effectOptions?.magicSchool ?? 'abjuration'}.intro`;
+        const magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${currFlags.magicSchool ?? 'abjuration'}.intro`;
         const magicSchoolColorOptions = utilFunctions.getDBOptions(magicSchoolColorsRaw);
 
         const effectAColorsRaw = `jb2a.eldritch_blast`;
@@ -53,9 +54,10 @@ export class animateDead {
             summonActorsList = await utilFunctions.createFolderWithActors("ASE-Summons", ["Skeleton", "Zombie"]);
         }
 
-        let summonOptions = {};
+        let summonOptions = [];
         summonActorsList.forEach((actor) => {
-            summonOptions[actor.id] = actor.name;
+            //summonOptions[actor.id] = actor.name;
+            summonOptions.push({id: actor.id, name: actor.name});
         });
 
         let spellOptions = [];
@@ -67,16 +69,16 @@ export class animateDead {
             type: 'dropdown',
             options: summonOptions,
             name: 'flags.advancedspelleffects.effectOptions.summons.zombie.actor',
-            flagName: 'summons.zombie.actor',
-            flagValue: currFlags.summons?.zombie?.actor ?? '',
+            flagName: 'zombieActor',
+            flagValue: currFlags.zombieActor ?? '',
         });
         spellOptions.push({
             label: game.i18n.localize('ASE.SkeletonActorLabel'),
             type: 'dropdown',
             options: summonOptions,
             name: 'flags.advancedspelleffects.effectOptions.summons.skeleton.actor',
-            flagName: 'summons.skeleton.actor',
-            flagValue: currFlags.summons?.skeleton?.actor ?? '',
+            flagName: 'skeletonActor',
+            flagValue: currFlags.skeletonActor ?? '',
         });
 
         spellOptions.push({

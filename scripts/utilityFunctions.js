@@ -360,7 +360,7 @@ export async function checkCrosshairs(crosshairs) {
 }
 
 export function cleanUpTemplateGridHighlights() {
-    const ASETemplates = canvas.scene.templates.filter((template) => { return template.data.flags.advancedspelleffects });
+    const ASETemplates = canvas.scene?.templates.filter((template) => { return template.data.flags.advancedspelleffects }) ?? [];
     for (let template of ASETemplates) {
         const highlight = canvas.grid.getHighlightLayer(`Template.${template.id}`);
         if (highlight) {

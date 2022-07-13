@@ -579,7 +579,7 @@ export class callLightning {
             options: boltOptions,
             name: "flags.advancedspelleffects.effectOptions.boltStyle",
             flagName: "boltStyle",
-            flagValue: currFlags.boltStyle,
+            flagValue: currFlags.boltStyle ?? 'chain',
         });
         animOptions.push({
             label: game.i18n.localize('ASE.PlaceCrackAsTileLabel'),
@@ -594,21 +594,21 @@ export class callLightning {
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.boltSound',
             flagName: 'boltSound',
-            flagValue: currFlags.boltSound,
+            flagValue: currFlags.boltSound ?? '',
         });
         soundOptions.push({
             label: game.i18n.localize('ASE.BoltSoundDelayLabel'),
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.boltSoundDelay',
             flagName: 'boltSoundDelay',
-            flagValue: currFlags.boltSoundDelay,
+            flagValue: currFlags.boltSoundDelay ?? 0,
         });
         soundOptions.push({
             label: game.i18n.localize('ASE.BoltVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.boltVolume',
             flagName: 'boltVolume',
-            flagValue: currFlags.boltVolume,
+            flagValue: currFlags.boltVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
