@@ -5,13 +5,18 @@ import { ApplicationShell } from "@typhonjs-fvtt/runtime/svelte/component/core";
 import { fade, scale } from "svelte/transition";
 import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
 import { getContext } from "svelte";
-import SharedSettings from "./components/sharedSettings.svelte"
+
+import EnableASE from "./components/EnableASE.svelte";
+import SharedSettings from "./components/SharedSettings.svelte";
+import NavBar from "./components/NavBar.svelte";
+import SpellSettings from "./components/SpellSettings.svelte";
 
 export let elementRoot;
 export let item;
 export let itemFlags;
+
 const flags = itemFlags.advancedspelleffects || {};
-console.log
+
 let flagData = {
     itemName: item.name,
     enableASE: flags.enableASE ?? false,
@@ -20,9 +25,16 @@ let flagData = {
 };
 
 const { application } = getContext("external");
+
 const oldName = item.name || item.sourceName;
 let form = void 0;
-let enableASE = flags.enableASE;
+
+let enableASE = flagData.enableASE;
+let spellEffectName = flagData.spellEffect;
+let itemName = flagData.itemName;
+let effectOptions = flagData.effectOptions;
+
+let currentTab = 0;
 
 async function closeApp() {
         console.log('FlagData Updating: ', flagData);
@@ -36,7 +48,24 @@ async function closeApp() {
         await item.unsetFlag('advancedspelleffects', 'effectOptions');
         await item.update(updatedFlags.data);
         application.close();
-    }
+}
+
+$: {
+    flagData.enableASE = enableASE;
+    console.log(`${enableASE ? "Enabled" : "Disabled"} ASE`);
+}
+$: {
+    flagData.spellEffect = spellEffectName;
+    console.log(`Spell Effect for item ${itemName} chaned to ${spellEffectName}`);
+}
+$: {
+    console.log("Switching Nav Tab to: ", currentTab);
+}
+$: {
+    flagData.effectOptions = effectOptions;
+    console.log(`Effect Options for item ${itemName} chaned to: `, effectOptions);
+}
+
 </script>
 
 <ApplicationShell
@@ -51,10 +80,24 @@ async function closeApp() {
     class="overview"
 >
 <div class="ase-settings-section" transition:fade>
-    <SharedSettings
+    <EnableASE
         bind:enableASE
-        {flagData}
     />
+    {#if enableASE}
+        <SharedSettings
+            bind:spellEffectName
+            itemName={itemName}
+        />
+        <NavBar 
+            bind:currentTab
+        />
+        {#if currentTab == 0}
+            <SpellSettings
+                bind:effectOptions
+                spellEffectName={spellEffectName}
+            />
+        {/if}
+    {/if}
 </div>
 <div class="aseBottomSection" style="margin-bottom: 5px">
     <div class="ase-submit">
