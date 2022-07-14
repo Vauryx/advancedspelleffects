@@ -6,51 +6,15 @@ import { concentrationHandler } from "./concentrationHandler.js";
 import { midiHandler } from "./midiHandler.js";
 import { noMidiHandler } from "./noMidiHandler.js";
 import { MissileDialog } from "./apps/missile-dialog.js";
-// Importing spells
-import { animateDead } from "./spells/animateDead.js";
-import { chaosBolt } from "./spells/chaosBolt.js";
-import { darkness } from "./spells/darkness.js";
-import { detectMagic } from "./spells/detectMagic.js";
-import { callLightning } from "./spells/callLightning.js";
-import { fogCloud } from "./spells/fogCloud.js";
-import { spiritualWeapon } from "./spells/spiritualWeapon.js";
-import { steelWindStrike } from "./spells/steelWindStrike.js";
-import { thunderStep } from "./spells/thunderStep.js";
-import { summonCreature } from "./spells/summonCreature.js";
-import { witchBolt } from "./spells/witchBolt.js";
-import { magicMissile } from "./spells/magicMissile.js";
-import { scorchingRay } from "./spells/scorchingRay.js";
-import { eldritchBlast } from "./spells/eldritchBlast.js";
-import { moonBeam } from "./spells/moonBeam.js";
-import { mirrorImage } from "./spells/mirrorImage.js";
-import { wallOfForce } from "./spells/wallOfForce.js";
-import { detectStuff } from "./spells/detectStuff.js";
-import { wallSpell } from "./spells/wallSpell.js";
+
+import { spellStore } from "./stores/spellStore.js";
+
 //Take care of Setup
 const aseModules = {
-  animateDead,
-  chaosBolt,
-  callLightning,
   concentrationHandler,
-  detectMagic,
-  fogCloud,
-  detectStuff,
-  darkness,
-  magicMissile,
-  spiritualWeapon,
-  steelWindStrike,
-  thunderStep,
-  summonCreature,
-  witchBolt,
   midiHandler,
   noMidiHandler,
-  MissileDialog,
-  scorchingRay,
-  eldritchBlast,
-  moonBeam,
-  mirrorImage,
-  wallOfForce,
-  wallSpell
+  MissileDialog
 }
 
 Hooks.once('init', async function () {
@@ -82,7 +46,10 @@ Hooks.once('setup', function () {
 });
 
 Hooks.once('ready', async function () {
+  spellStore.initialize();
+
   Object.values(aseModules).forEach(cl => cl.registerHooks());
+
   Hooks.on('sequencerReady', () => {
     function easeOutElasticCustom(x) {
       const c4 = (2 * Math.PI) / 10;
