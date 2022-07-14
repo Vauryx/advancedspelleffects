@@ -1,29 +1,9 @@
 <script>
     import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
     import { fade } from "svelte/transition";
-    // Importing spells
-        import { animateDead } from "../../spells/animateDead.js";
-        import { darkness } from "../../spells/darkness.js";
-        import { detectMagic } from "../../spells/detectMagic.js";
-        import { callLightning } from "../../spells/callLightning.js";
-        import { fogCloud } from "../../spells/fogCloud.js";
-        import { spiritualWeapon } from "../../spells/spiritualWeapon.js";
-        import { steelWindStrike } from "../../spells/steelWindStrike.js";
-        import { thunderStep } from "../../spells/thunderStep.js";
-        import { summonCreature } from "../../spells/summonCreature.js";
-        import { witchBolt } from "../../spells/witchBolt.js";
-        import { magicMissile } from "../../spells/magicMissile.js";
-        import { scorchingRay } from "../../spells/scorchingRay.js";
-        import { eldritchBlast } from "../../spells/eldritchBlast.js";
-        import { vampiricTouch } from "../../spells/vampiricTouch.js";
-        import { moonBeam } from "../../spells/moonBeam.js";
-        import { chainLightning } from "../../spells/chainLightning.js";
-        import { mirrorImage } from "../../spells/mirrorImage.js";
-        import { wallOfForce } from "../../spells/wallOfForce.js";
-        import { chaosBolt } from "../../spells/chaosBolt.js";
-        import { detectStuff } from "../../spells/detectStuff.js";
-        import { viciousMockery } from "../../spells/viciousMockery.js";
-        import { wallSpell } from "../../spells/wallSpell.js";
+
+    import { spellStore } from "../../stores/spellStore.js";
+
     export let flagData;
     console.log("----------------------ENTERING SETTINGS APP----------------------");
     console.log("flagData", flagData);
@@ -48,41 +28,18 @@
 
     let itemName = flagData.itemName;
     console.log("itemName: ", itemName);
-    let spellList = [];
-        spellList.push({name: game.i18n.localize("ASE.AnimateDead"), effect: animateDead});
-        spellList.push({name: game.i18n.localize("ASE.CallLightning"), effect: callLightning});
-        spellList.push({name: game.i18n.localize("ASE.ChaosBolt"), effect: chaosBolt});
-        spellList.push({name:  game.i18n.localize("ASE.Darkness"), effect: darkness});
-        spellList.push({name: game.i18n.localize("ASE.DetectMagic"), effect: detectMagic});
-        spellList.push({name: game.i18n.localize("ASE.FogCloud"), effect: fogCloud});
-        spellList.push({name: game.i18n.localize("ASE.MagicMissile"), effect: magicMissile});
-        spellList.push({name: game.i18n.localize("ASE.SpiritualWeapon"), effect: spiritualWeapon});
-        spellList.push({name: game.i18n.localize("ASE.SteelWindStrike"), effect: steelWindStrike});
-        spellList.push({name: game.i18n.localize("ASE.ThunderStep"), effect: thunderStep});
-        spellList.push({name: game.i18n.localize("ASE.WitchBolt"), effect: witchBolt});
-        spellList.push({name: game.i18n.localize("ASE.ScorchingRay"), effect: scorchingRay});
-        spellList.push({name: game.i18n.localize("ASE.EldritchBlast"), effect: eldritchBlast});
-        spellList.push({name: game.i18n.localize("ASE.VampiricTouch"), effect: vampiricTouch});
-        spellList.push({name: game.i18n.localize("ASE.Moonbeam"), effect: moonBeam});
-        spellList.push({name: game.i18n.localize("ASE.ChainLightning"), effect: chainLightning});
-        spellList.push({name: game.i18n.localize("ASE.MirrorImage"), effect: mirrorImage});
-        spellList.push({name: game.i18n.localize("ASE.Summon"), effect: summonCreature});
-        spellList.push({name: game.i18n.localize("ASE.WallOfForce"), effect: wallOfForce});
-        spellList.push({name: game.i18n.localize("ASE.DetectStuff"), effect: detectStuff});
-        spellList.push({name: game.i18n.localize("ASE.ViciousMockery"), effect: viciousMockery});
-        spellList.push({name: game.i18n.localize("ASE.WallSpell"), effect: wallSpell});
-    spellList.sort((a,b)=> a.name.localeCompare(b.name));
-    console.log("spellList: ", spellList);
+
+    console.log("spellStore: ", $spellStore);
 
     let requiredSettings;
-    let spellEffect = spellList.find(x => x.name === flagData.spellEffect) ?? spellList[0];
+    let spellEffect = spellStore.findEntry(x => x.name === flagData.spellEffect) ?? spellStore.first;
     let settingsPromise = updateRequiredSettings(spellEffect);
 
     $: currentTabId = 0;
     $: flagData.enableASE = enableASE;
     $: flagData.effectOptions = effectOptions;
     $: flagData.spellEffect = spellEffectName;
-    $: {spellEffect = spellList.find(x => x.name === spellEffectName) ?? spellList[0];
+    $: {spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
         settingsPromise = updateRequiredSettings(spellEffect);}
 
    // $: console.log("ASE flag is", enableASE ? "enabled" : "disabled");
@@ -91,13 +48,13 @@
     //$: console.log("Spell Effect: ", spellEffect);
     //$: console.log("currentTabId is: ", currentTabId);
     //$: console.log("Spell Effect name: ", flagData.spellEffect);
-    
-    
-    
+
+
+
 
     function switchTab(){
         //console.log("Switching tabs...", arguments);
-        
+
         let buttonClicked = arguments[0].target;
         let spellSettingsTab = document.getElementsByClassName("ase-spell-settingsButton")[0];
         let animSettingsTab = document.getElementsByClassName("ase-anim-settingsButton")[0];
@@ -121,7 +78,7 @@
                 tab.classList.remove("selected");
             }
         }
-       
+
     }
     async function updateRequiredSettings(spellEffect){
         requiredSettings = await spellEffect.effect.getRequiredSettings(effectOptions);
@@ -142,7 +99,7 @@
         return {settings: requiredSettings, effectOptions: newEffectOptions};
         //console.log("Required settings: ", requiredSettings);
     }
-    
+
 </script>
 
 <div class="ase-shared-settings">
@@ -186,7 +143,7 @@
                     <td>
                         <!-- drop down input to select spellEffect-->
                         <select id="spellEffect" bind:value={spellEffectName}>
-                            {#each spellList as spell}
+                            {#each $spellStore as spell (spell.id)}
                                 <option value={spell.name}>{spell.name}</option>
                             {/each}
                         </select>
@@ -219,7 +176,7 @@
                 <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
                   {#await settingsPromise}
                   <p> Getting Required Settings...</p>
-                    {:then settings} 
+                    {:then settings}
                         {#each settings.settings.spellOptions as setting}
                             <tr>
                                 <td>
@@ -227,20 +184,20 @@
                                 </td>
                                 <td>
                                     {#if setting.type == "numberInput"}
-                                        <input type="text" id="{setting.flagName}" bind:value={flagData.effectOptions[setting.flagName]}/>
+                                        <input type="text" id={setting.flagName} bind:value={flagData.effectOptions[setting.flagName]}/>
                                     {/if}
-                                    {#if setting.type == "checkbox"} 
-                                        <input type="checkbox" id="{setting.flagName}" bind:checked={flagData.effectOptions[setting.flagName]}/>
+                                    {#if setting.type == "checkbox"}
+                                        <input type="checkbox" id={setting.flagName} bind:checked={flagData.effectOptions[setting.flagName]}/>
                                     {/if}
                                     {#if setting.type == "dropdown"}
-                                        <select id="{setting.flagName}" bind:value={flagData.effectOptions[setting.flagName]}>
+                                        <select id={setting.flagName} bind:value={flagData.effectOptions[setting.flagName]}>
                                             {#each setting.options as {id, name}}
                                                 <option value={id}>{name}</option>
                                             {/each}
                                         </select>
                                     {/if}
                                     {#if setting.type == "textInput"}
-                                        <input type="text" id="{setting.flagName}" bind:value={flagData.effectOptions[setting.flagName]}/>
+                                        <input type="text" id={setting.flagName} bind:value={flagData.effectOptions[setting.flagName]}/>
                                     {/if}
                                     {#if setting.type == "rangeInput"}
                                         <input type="range" min="{setting.min}" max="{setting.max}"
