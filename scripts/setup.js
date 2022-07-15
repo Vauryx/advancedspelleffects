@@ -8,6 +8,7 @@ import { noMidiHandler } from "./noMidiHandler.js";
 import { MissileDialog } from "./apps/missile-dialog.js";
 
 import { spellStore } from "./stores/spellStore.js";
+//import { effectOptionsStore } from "./stores/effectOptionsStore.js";
 
 //Take care of Setup
 const aseModules = {
@@ -46,11 +47,14 @@ Hooks.once('setup', function () {
 });
 
 Hooks.once('ready', async function () {
-  spellStore.initialize();
-
+  
+  
   Object.values(aseModules).forEach(cl => cl.registerHooks());
 
   Hooks.on('sequencerReady', () => {
+    spellStore.initialize();
+    //effectOptionsStore.initialize();
+    //);
     function easeOutElasticCustom(x) {
       const c4 = (2 * Math.PI) / 10;
       return x === 0

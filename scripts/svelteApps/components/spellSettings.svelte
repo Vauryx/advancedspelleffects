@@ -9,16 +9,18 @@
 
     let requiredSettings;
     let spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
-    let settingsPromise = getRequiredSettings(spellEffect);
+    console.log("spell effect", $spellEffect);
+
+    //let settingsPromise = getRequiredSettings(spellEffect);
 
     $: {
         spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
-        settingsPromise = getRequiredSettings(spellEffect);
+        //settingsPromise = getRequiredSettings(spellEffect);
     }
     
     async function getRequiredSettings(spellEffect){
         requiredSettings = await spellEffect.effect.getRequiredSettings(effectOptions);
-        
+        effectOptions = {};
         for(let type in requiredSettings){
             for(let i = 0; i < requiredSettings[type].length; i++){
                 let setting = requiredSettings[type][i];
@@ -35,10 +37,8 @@
 
 <table class="ase-spell-settings-table">
     <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
-      {#await settingsPromise}
       <p> Getting Required Settings...</p>
-        {:then settings}
-            {#each settings.spellOptions as setting}
+            {#each $spellEffect.settings.spellOptions as setting}
                 <tr>
                     <td>
                         <label for="{setting.flagName}">{setting.label}</label>
@@ -70,6 +70,5 @@
                     </td>
                 </tr>
             {/each}
-        {/await}
     </tbody>
 </table>

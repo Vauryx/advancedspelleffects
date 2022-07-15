@@ -23,18 +23,31 @@ export class SpellStore extends ArrayObjectStore {
    /**
     * Loads and registers all hooks from spell classes defined in './spells'.
     */
-   initialize() {
+   async initialize() {
+      let flagData = {};
       if (this.length > 0) { throw new Error(`SpellStore has already been initialized.`); }
 
       for (const [name, effect] of Object.entries(spells)) {
-
+         flagData = {};
+        // console.log(name, effect);
+         //Build flagData object from spell settings
+         let settings = await effect.getRequiredSettings();
+         //console.log(settings);
+         // iterate over settings
+         for (const [settingType, setting] of Object.entries(settings)) {
+            setting.forEach(s => {
+               //console.log("s", s);
+               flagData[s.flagName] = s.flagValue;
+            });
+         }
+         //console.log("flagData", flagData);
          // If there is a static registerHooks; invoke it now.
          if (typeof effect.registerHooks === 'function') { effect.registerHooks(); }
 
          // Add spell data to ArrayObjectStore.
          this.createEntry({
             name: localize(`ASE.${name[0].toUpperCase()}${name.substring(1)}`),
-            effect
+            effect, flagData, settings
          });
       }
    }
@@ -54,6 +67,16 @@ class SpellEntryStore extends SpellStore.EntryStore {
     * @returns {new (data: object) => object} The spell constructor function.
     */
    get effect() { return this._data.effect; }
+
+   /**
+    * @returns {new (data: object) => object} The flag data object for this spell
+    */
+   get flagData() { return this._data.flags; }
+
+   /**
+    * @returns {new (data: object) => object} The settings object for this spell
+    */
+   get settings() { return this._data.settings; }
 
    /**
     * Static getRequiredSettings function from effect class.

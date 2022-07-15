@@ -7,7 +7,7 @@
     export let itemName;
     console.log("----------------------ENTERING SHARED SETTINGS COMPONENT----------------------");
 
-    console.log("spellStore: ", $spellStore);
+    console.log("spellStore: ", spellStore);
 
     let ASESettingsLabel = game.i18n.localize("ASE.ASESettingsLabel");
 
