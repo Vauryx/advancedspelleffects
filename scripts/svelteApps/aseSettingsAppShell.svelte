@@ -10,6 +10,8 @@ import EnableASE from "./components/EnableASE.svelte";
 import SharedSettings from "./components/SharedSettings.svelte";
 import NavBar from "./components/NavBar.svelte";
 import SpellSettings from "./components/SpellSettings.svelte";
+import AnimSettings from "./components/AnimSettings.svelte";
+import SoundSettings from "./components/SoundSettings.svelte";
 
 export let elementRoot;
 export let item;
@@ -34,7 +36,7 @@ let spellEffectName = flagData.spellEffect;
 let itemName = flagData.itemName;
 let effectOptions = flagData.effectOptions;
 
-let currentTab = 0;
+let currentTab = SpellSettings;
 
 async function closeApp() {
         console.log('FlagData Updating: ', flagData);
@@ -51,6 +53,10 @@ async function closeApp() {
 }
 
 $: {
+    
+}
+
+$: {
     flagData.enableASE = enableASE;
     console.log(`${enableASE ? "Enabled" : "Disabled"} ASE`);
 }
@@ -58,12 +64,10 @@ $: {
     flagData.spellEffect = spellEffectName;
     console.log(`Spell Effect for item ${itemName} chaned to ${spellEffectName}`);
 }
-$: {
-    console.log("Switching Nav Tab to: ", currentTab);
-}
+
 $: {
     flagData.effectOptions = effectOptions;
-    console.log(`Effect Options for item ${itemName} chaned to: `, effectOptions);
+    //console.log(`Effect Options for item ${itemName} chaned to: `, effectOptions);
 }
 
 </script>
@@ -91,8 +95,18 @@ $: {
         <NavBar 
             bind:currentTab
         />
-        {#if currentTab == 0}
+        {#if currentTab == SpellSettings}
             <SpellSettings
+                bind:effectOptions
+                spellEffectName={spellEffectName}
+            />
+        {:else if currentTab == AnimSettings}
+            <AnimSettings
+                bind:effectOptions
+                spellEffectName={spellEffectName}
+            />
+        {:else if currentTab == SoundSettings}
+            <SoundSettings
                 bind:effectOptions
                 spellEffectName={spellEffectName}
             />

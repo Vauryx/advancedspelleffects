@@ -1,5 +1,10 @@
 <script>
 
+import SpellSettings from "./SpellSettings.svelte";
+import AnimSettings from "./AnimSettings.svelte";
+import SoundSettings from "./SoundSettings.svelte";
+
+
     export let currentTab;
 
     console.log("----------------------ENTERING NAV BAR COMPONENT----------------------");
@@ -9,16 +14,16 @@
     let SoundSettingsButtonTitleLabel = game.i18n.localize("ASE.SoundSettingsButtonTitle");
 
     const navTabs = [
-        {title: SpellSettingsButtonTitleLabel, class: "nav-tab ase-spell-settingsButton", id: 0, icon: "fas fa-cog", selected: true},
-        {title: AnimationSettingsButtonTitleLabel, class: "nav-tab ase-anim-settingsButton", id: 1, icon: "fas fa-magic", selected: false}, 
-        {title: SoundSettingsButtonTitleLabel, class: "nav-tab ase-sound-settingsButton", id: 2, icon: "fas fa-volume-up", selected: false}
+        {name: 'Spell Settings', title: SpellSettingsButtonTitleLabel, class: "nav-tab ase-spell-settingsButton", id: SpellSettings, icon: "fas fa-cog", selected: true},
+        {name: 'Anim Settings',title: AnimationSettingsButtonTitleLabel, class: "nav-tab ase-anim-settingsButton", id: AnimSettings, icon: "fas fa-magic", selected: false}, 
+        {name: 'Sound Settings',title: SoundSettingsButtonTitleLabel, class: "nav-tab ase-sound-settingsButton", id: SoundSettings, icon: "fas fa-volume-up", selected: false}
     ];
 
     function switchTab(tab){
         currentTab = tab.id;
         navTabs.forEach(function(navTab){
-            let button = document.getElementById(navTab.id);
-            if((navTab.id == tab.id) && (navTab.selected == false)){
+            let button = document.getElementById(navTab.name);
+            if((navTab.name == tab.name) && (navTab.selected == false)){
                 navTab.selected = true;
                 button.classList.add("selected");
             } else {
@@ -37,7 +42,7 @@
                 class={tab.class + " " + (tab.selected ? "selected" : "")}
                 type="button"
                 title={tab.title}
-                id={tab.id}
+                id={tab.name}
                 on:click={function() {switchTab(tab)}}
                 >
                 <div style="text-align:center">

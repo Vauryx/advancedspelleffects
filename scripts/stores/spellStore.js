@@ -29,18 +29,16 @@ export class SpellStore extends ArrayObjectStore {
 
       for (const [name, effect] of Object.entries(spells)) {
          flagData = {};
-        // console.log(name, effect);
-         //Build flagData object from spell settings
+        //build flag data from spell settings
          let settings = await effect.getRequiredSettings();
-         //console.log(settings);
-         // iterate over settings
+         
          for (const [settingType, setting] of Object.entries(settings)) {
             setting.forEach(s => {
                //console.log("s", s);
                flagData[s.flagName] = s.flagValue;
             });
          }
-         //console.log("flagData", flagData);
+
          // If there is a static registerHooks; invoke it now.
          if (typeof effect.registerHooks === 'function') { effect.registerHooks(); }
 

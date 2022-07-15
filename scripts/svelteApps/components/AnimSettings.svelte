@@ -4,10 +4,12 @@
     export let effectOptions;
     export let spellEffectName;
 
-    console.log("----------------------ENTERING SPELL SETTINGS COMPONENT----------------------");
+    console.log("----------------------ENTERING ANIM SETTINGS COMPONENT----------------------");
     //console.log("spellStore", $spellStore);
 
+    let requiredSettings;
     let spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
+    //console.log("spell effect", $spellEffect);
     $: {
         spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
     }
@@ -16,7 +18,7 @@
 
 <table class="ase-spell-settings-table">
     <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
-            {#each $spellEffect.settings.spellOptions as setting}
+            {#each $spellEffect.settings.animOptions as setting}
                 <tr>
                     <td>
                         <label for="{setting.flagName}">{setting.label}</label>
@@ -44,6 +46,9 @@
                                 oninput="this.nextElementSibling.value = this.value"
                                 name="{setting.flagName}" bind:value={effectOptions[setting.flagName]}>
                             <output style="font-weight: bold;">{effectOptions[setting.flagName]}</output>
+                        {/if}
+                        {#if setting.type == 'colorPicker'}
+                            <input type="color" name="{setting.flagName}" bind:value={effectOptions[setting.flagName]}>
                         {/if}
                     </td>
                 </tr>

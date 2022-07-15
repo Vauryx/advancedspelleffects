@@ -4,10 +4,12 @@
     export let effectOptions;
     export let spellEffectName;
 
-    console.log("----------------------ENTERING SPELL SETTINGS COMPONENT----------------------");
+    console.log("----------------------ENTERING SOUND SETTINGS COMPONENT----------------------");
     //console.log("spellStore", $spellStore);
 
+    let requiredSettings;
     let spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
+    //console.log("spell effect", $spellEffect);
     $: {
         spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
     }
@@ -16,7 +18,7 @@
 
 <table class="ase-spell-settings-table">
     <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
-            {#each $spellEffect.settings.spellOptions as setting}
+            {#each $spellEffect.settings.soundOptions as setting}
                 <tr>
                     <td>
                         <label for="{setting.flagName}">{setting.label}</label>
@@ -45,7 +47,19 @@
                                 name="{setting.flagName}" bind:value={effectOptions[setting.flagName]}>
                             <output style="font-weight: bold;">{effectOptions[setting.flagName]}</output>
                         {/if}
+                        {#if setting.type == 'fileInput'}
+                            <input type="text" class="files" name="{setting.flagName}"
+                                bind:value={effectOptions[setting.flagName]}>
+                        {/if}
                     </td>
+                    {#if setting.type == 'fileInput'}
+                    <td>
+                        <button type="button" class="file-picker" data-type="audio"
+                            data-target="{setting.flagName}" tabindex="-1" title="Browse Files">
+                            <i class="fas fa-music fa-sm"></i>
+                        </button>
+                    </td>
+                    {/if}
                 </tr>
             {/each}
     </tbody>
