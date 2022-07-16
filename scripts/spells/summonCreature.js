@@ -303,6 +303,15 @@ export class summonCreature {
         const portalImpactColorsRaw = `jb2a.impact.010`;
         const portalImpactColorOptions = utilFunctions.getDBOptions(portalImpactColorsRaw);
 
+        const summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
+        let summonOptions = {};
+        let currentSummonTypes = {};
+
+        summonActorsList.forEach((actor) => {
+            summonOptions[actor.name] = actor.id;
+        });
+        currentSummonTypes = currFlags.summons ?? [{ name: "", actor: "", qty: 1 }];
+
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];

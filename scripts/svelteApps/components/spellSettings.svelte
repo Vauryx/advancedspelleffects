@@ -7,10 +7,22 @@
     console.log("----------------------ENTERING SPELL SETTINGS COMPONENT----------------------");
     //console.log("spellStore", $spellStore);
 
+    function localize(string){
+        return game.i18n.localize(string);
+    }
+
     let spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
     $: {
         spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
     }
+    
+    if($spellEffect.name.includes(localize("ASE.Summon"))){
+        console.log("Summon Item");
+        console.log("spellEffect: ", $spellEffect);
+    }
+
+    
+
 
 </script>
 
