@@ -21,7 +21,8 @@
     if($spellEffect.name.includes(localize("ASE.Summon"))){
         console.log("Summon Item");
         console.log("spellEffect: ", $spellEffect);
-        
+        console.log("itemId: ", itemId);
+        console.log("itemParent: ", itemParent);
     }
 
     

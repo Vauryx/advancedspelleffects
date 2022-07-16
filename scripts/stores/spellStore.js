@@ -31,9 +31,15 @@ export class SpellStore extends ArrayObjectStore {
          flagData = {};
         //build flag data from spell settings
          let settings = await effect.getRequiredSettings();
-         
+         //console.log(name);
+         if(name == "summonCreature"){
+            console.log(settings);
+         }
          for (const [settingType, setting] of Object.entries(settings)) {
             setting.forEach(s => {
+               if(name == "summonCreature"){
+                  console.log("s", s);
+               }
                //console.log("s", s);
                flagData[s.flagName] = s.flagValue;
             });

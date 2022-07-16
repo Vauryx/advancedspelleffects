@@ -304,15 +304,19 @@ export class summonCreature {
         const portalImpactColorOptions = utilFunctions.getDBOptions(portalImpactColorsRaw);
 
         const summonActorsList = game.folders?.getName("ASE-Summons")?.contents ?? [];
-        let summonOptions = {};
+        let summonOptions = [];
         let currentSummonTypes = {};
 
         summonActorsList.forEach((actor) => {
-            summonOptions[actor.name] = actor.id;
+            let summonActor = {};
+            summonActor.name = actor.name;
+            summonActor.id = actor.id;
+            summonOptions.push(summonActor);
         });
         currentSummonTypes = currFlags.summons ?? [{ name: "", actor: "", qty: 1 }];
+        console.log("currentSummonTypes: " ,currentSummonTypes);
+        console.log("summonOptions: " ,summonOptions);
         
-
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -471,7 +475,9 @@ export class summonCreature {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            summons: currentSummonTypes,
+            summonsOptions: summonOptions
         }
 
     }
