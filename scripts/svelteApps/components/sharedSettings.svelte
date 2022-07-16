@@ -1,5 +1,4 @@
 <script>
-    import { fade } from "svelte/transition";
 
     import { spellStore } from "../../stores/spellStore.js";
 
@@ -14,7 +13,7 @@
 </script>
 
 <div class="ase-shared-settings">
-    <div transition:fade>
+    <div>
         <table>
             <tbody style='border-top: none;border-bottom: none;'>
                 <tr>
