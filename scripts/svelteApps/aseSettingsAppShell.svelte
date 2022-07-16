@@ -2,7 +2,6 @@
 
 <script>
 import { ApplicationShell } from "@typhonjs-fvtt/runtime/svelte/component/core";
-import { fade, scale } from "svelte/transition";
 import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
 import { getContext } from "svelte";
 
@@ -74,7 +73,6 @@ $: {
 
 <ApplicationShell
     bind:elementRoot
-    transition={scale}
     transitionOption={{duration:500}}>
     <form
     bind:this={form}
@@ -83,7 +81,7 @@ $: {
     id="ase-settings"
     class="overview"
 >
-<div class="ase-settings-section" transition:fade>
+<div class="ase-settings-section">
     <EnableASE
         bind:enableASE
     />
