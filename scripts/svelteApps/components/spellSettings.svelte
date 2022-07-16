@@ -3,6 +3,8 @@
 
     export let effectOptions;
     export let spellEffectName;
+    export let itemId;
+    export let itemParent;
 
     console.log("----------------------ENTERING SPELL SETTINGS COMPONENT----------------------");
     //console.log("spellStore", $spellStore);
@@ -19,6 +21,7 @@
     if($spellEffect.name.includes(localize("ASE.Summon"))){
         console.log("Summon Item");
         console.log("spellEffect: ", $spellEffect);
+        
     }
 
     

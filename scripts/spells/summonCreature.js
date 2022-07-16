@@ -311,6 +311,7 @@ export class summonCreature {
             summonOptions[actor.name] = actor.id;
         });
         currentSummonTypes = currFlags.summons ?? [{ name: "", actor: "", qty: 1 }];
+        
 
         let spellOptions = [];
         let animOptions = [];

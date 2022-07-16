@@ -18,8 +18,12 @@ export let itemFlags;
 
 const flags = itemFlags.advancedspelleffects || {};
 
+console.log("item: ", item);
+console.log("item parent: ", item.parent);
 let flagData = {
     itemName: item.name,
+    itemId: item.id,
+    itemParent: item.parent,
     enableASE: flags.enableASE ?? false,
     spellEffect: flags.spellEffect ?? {},
     effectOptions: flags.effectOptions ?? {},
@@ -33,6 +37,8 @@ let form = void 0;
 let enableASE = flagData.enableASE;
 let spellEffectName = flagData.spellEffect;
 let itemName = flagData.itemName;
+let itemId = flagData.itemId;
+let itemParent = flagData.itemParent;
 let effectOptions = flagData.effectOptions;
 
 let currentTab = SpellSettings;
@@ -97,6 +103,8 @@ $: {
             <SpellSettings
                 bind:effectOptions
                 spellEffectName={spellEffectName}
+                itemId={itemId}
+                itemParent={itemParent}
             />
         {:else if currentTab == AnimSettings}
             <AnimSettings
