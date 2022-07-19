@@ -66,13 +66,13 @@
         {/each}
         <tr>
             <td>
-                <button class='addType' style="width:50%;text-align:center;"
+                <button
                     on:click={addSummon}>
                     {localize("ASE.AddTypeButtonLabel")}
                 </button>
             </td>
             <td>
-                <button class='removeType' style="width:50%;text-align:center;"
+                <button
                     on:click={removeSummon}>
                     {localize("ASE.RemoveTypeButtonLabel")}
                 </button>
