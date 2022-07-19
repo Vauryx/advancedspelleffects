@@ -1,18 +1,9 @@
 <script>
-    import { spellStore } from "../../stores/spellStore.js";
+    export let spellEffect;
 
-    export let effectOptions;
-    export let spellEffectName;
-
-    console.log("----------------------ENTERING SOUND SETTINGS COMPONENT----------------------");
-    //console.log("spellStore", $spellStore);
-
-    let requiredSettings;
-    let spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
-    //console.log("spell effect", $spellEffect);
-    $: {
-        spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
-    }
+    console.log("Sound Settings: -------ENTERING SOUND SETTINGS COMPONENT-----");
+    console.log("Sound Settings: spellEffect", $spellEffect);
+    
 
 </script>
 
@@ -25,31 +16,31 @@
                     </td>
                     <td>
                         {#if setting.type == "numberInput"}
-                            <input type="text" id={setting.flagName} bind:value={effectOptions[setting.flagName]}/>
+                            <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
                         {/if}
                         {#if setting.type == "checkbox"}
-                            <input type="checkbox" id={setting.flagName} bind:checked={effectOptions[setting.flagName]}/>
+                            <input type="checkbox" id={setting.flagName} bind:checked={$spellEffect.flagData[setting.flagName]}/>
                         {/if}
                         {#if setting.type == "dropdown"}
-                            <select id={setting.flagName} bind:value={effectOptions[setting.flagName]}>
+                            <select id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}>
                                 {#each setting.options as {id, name}}
                                     <option value={id}>{name}</option>
                                 {/each}
                             </select>
                         {/if}
                         {#if setting.type == "textInput"}
-                            <input type="text" id={setting.flagName} bind:value={effectOptions[setting.flagName]}/>
+                            <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
                         {/if}
                         {#if setting.type == "rangeInput"}
                             <input type="range" min="{setting.min}" max="{setting.max}"
                                 step="{setting.step}"
                                 oninput="this.nextElementSibling.value = this.value"
-                                name="{setting.flagName}" bind:value={effectOptions[setting.flagName]}>
-                            <output style="font-weight: bold;">{effectOptions[setting.flagName]}</output>
+                                id="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
+                            <output style="font-weight: bold;">{$spellEffect.flagData[setting.flagName]}</output>
                         {/if}
                         {#if setting.type == 'fileInput'}
-                            <input type="text" class="files" name="{setting.flagName}"
-                                bind:value={effectOptions[setting.flagName]}>
+                            <input type="text" class="files" id="{setting.flagName}"
+                                bind:value={$spellEffect.flagData[setting.flagName]}>
                         {/if}
                     </td>
                     {#if setting.type == 'fileInput'}

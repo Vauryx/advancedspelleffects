@@ -477,7 +477,7 @@ export class summonCreature {
             animOptions: animOptions,
             soundOptions: soundOptions,
             summons: currentSummonTypes,
-            summonsOptions: summonOptions
+            summonOptions: summonOptions
         }
 
     }

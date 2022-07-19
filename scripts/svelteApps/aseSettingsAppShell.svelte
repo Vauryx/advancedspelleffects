@@ -4,6 +4,7 @@
 import { ApplicationShell } from "@typhonjs-fvtt/runtime/svelte/component/core";
 import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
 import { getContext } from "svelte";
+import { spellStore } from "../stores/spellStore.js";
 
 import EnableASE from "./components/EnableASE.svelte";
 import SharedSettings from "./components/SharedSettings.svelte";
@@ -17,30 +18,38 @@ export let item;
 export let itemFlags;
 
 const flags = itemFlags.advancedspelleffects || {};
+const blankItem = itemFlags.advancedspelleffects?.enableASE;
+
+const { application } = getContext("external");
+let form = void 0;
 
 console.log("item: ", item);
 console.log("item parent: ", item.parent);
+
+
 let flagData = {
     itemName: item.name,
     itemId: item.id,
     itemParent: item.parent,
     enableASE: flags.enableASE ?? false,
-    spellEffect: flags.spellEffect ?? {},
+    spellEffect: flags.spellEffect ?? localize("ASE.AnimateDead"),
     effectOptions: flags.effectOptions ?? {},
 };
 
-const { application } = getContext("external");
-
-const oldName = item.name || item.sourceName;
-let form = void 0;
 
 let enableASE = flagData.enableASE;
 let spellEffectName = flagData.spellEffect;
 let itemName = flagData.itemName;
 let itemId = flagData.itemId;
 let itemParent = flagData.itemParent;
-let effectOptions = flagData.effectOptions;
+// let effectOptions = flagData.effectOptions;
 
+let spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
+console.log("main app: spellEffect: ", $spellEffect);
+
+//$spellEffect.flagData = flagData.effectOptions;
+let effectOptions = blankItem ? flagData.effectOptions : {...$spellEffect.flagData, ...flagData.effectOptions};
+console.log("main app: effectOptions: ", effectOptions);
 let currentTab = SpellSettings;
 
 async function closeApp() {
@@ -58,21 +67,22 @@ async function closeApp() {
 }
 
 $: {
-    
-}
-
-$: {
     flagData.enableASE = enableASE;
     console.log(`${enableASE ? "Enabled" : "Disabled"} ASE`);
 }
 $: {
     flagData.spellEffect = spellEffectName;
-    console.log(`Spell Effect for item ${itemName} chaned to ${spellEffectName}`);
+    spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
+    console.log(`Spell Effect for item ${itemName} changed to ${spellEffectName}`);
 }
 
 $: {
     flagData.effectOptions = effectOptions;
-    //console.log(`Effect Options for item ${itemName} chaned to: `, effectOptions);
+    console.log(`Effect Options for item ${itemName} chaned to: `, effectOptions);
+}
+$: {
+    $spellEffect.flagData.summons = effectOptions.summons ?? [{name: '', actor: '', qty: 1}];
+    console.log(`Summons for item ${itemName} chaned to: `, effectOptions.summons);
 }
 
 </script>
@@ -102,19 +112,19 @@ $: {
         {#if currentTab == SpellSettings}
             <SpellSettings
                 bind:effectOptions
-                spellEffectName={spellEffectName}
+                spellEffect={spellEffect}
                 itemId={itemId}
                 itemParent={itemParent}
             />
         {:else if currentTab == AnimSettings}
             <AnimSettings
                 bind:effectOptions
-                spellEffectName={spellEffectName}
+                spellEffect={spellEffect}
             />
         {:else if currentTab == SoundSettings}
             <SoundSettings
                 bind:effectOptions
-                spellEffectName={spellEffectName}
+                spellEffect={spellEffect}
             />
         {/if}
     {/if}

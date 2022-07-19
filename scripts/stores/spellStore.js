@@ -36,13 +36,16 @@ export class SpellStore extends ArrayObjectStore {
             console.log(settings);
          }
          for (const [settingType, setting] of Object.entries(settings)) {
-            setting.forEach(s => {
-               if(name == "summonCreature"){
-                  console.log("s", s);
-               }
-               //console.log("s", s);
-               flagData[s.flagName] = s.flagValue;
-            });
+            if(settingType == "summons"){
+               flagData['summons'] = setting;
+            }
+            else if(settingType != 'summonOptions') {
+               setting.forEach(s => {
+                  //console.log("s", s);
+                  flagData[s.flagName] = s.flagValue;
+               });
+            }
+            
          }
 
          // If there is a static registerHooks; invoke it now.
@@ -51,7 +54,9 @@ export class SpellStore extends ArrayObjectStore {
          // Add spell data to ArrayObjectStore.
          this.createEntry({
             name: localize(`ASE.${name[0].toUpperCase()}${name.substring(1)}`),
-            effect, flagData, settings
+            effect: effect, 
+            flagData: flagData, 
+            settings: settings
          });
       }
    }
