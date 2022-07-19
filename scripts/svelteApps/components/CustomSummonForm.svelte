@@ -1,25 +1,33 @@
 <script>
     import { spellStore } from "../../stores/spellStore.js";
+    import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
 
     export let spellEffect;
-    //export let summons;
-
     console.log("----------------------ENTERING CUSTOM SUMMON SETTINGS COMPONENT----------------------");
     let summonOptions = $spellEffect.settings.summonOptions;
     console.log("summon options: ", summonOptions);
     console.log("spell Effect: ", $spellEffect);
 
-    //$: summons = effectOptions.summons;
-
-    let summons = $spellEffect.settings.summons ?? [];
-    let currentSummons = $spellEffect.flagData.summons ?? [{name: '', actor: '', qty: 1}];
-    function localize(string){
-        return game.i18n.localize(string);
+    if(!$spellEffect.flagData.summons.length){
+        $spellEffect.flagData.summons = [];
     }
+
+    $: summons = $spellEffect.flagData.summons;
+
+    $: console.log("Flag Data: ", $spellEffect.flagData);
     
     let summonTypeLabel = localize("ASE.SummonTypeNameLabel");
     let associatedActorLabel = localize("ASE.AssociatedActorLabel");
     let summonQuantityLabel = localize("ASE.SummonQuantityLabel");
+
+    function addSummon(){
+        summons.push({name: '', actor: '', qty: 1});
+        summons = summons;
+    }
+    function removeSummon(){
+        summons.pop();
+        summons = summons;
+    }
 </script>
 
 <table id="summonsTable" width="100%">
@@ -33,14 +41,14 @@
                 <td>
                     <input type="text"
                         id={summon.name}
-                        bind:value={currentSummons[i].name}>
+                        bind:value={summons[i].name}>
                 </td>
                 <td>
                     <label for={summon.actor}><b>{associatedActorLabel}</b></label>
                 </td>
                 <td> <select
                         id={summon.actor} 
-                        bind:value={currentSummons[i].actor}>
+                        bind:value={summons[i].actor}>
                         {#each summonOptions as {id, name}}
                             <option value={id}>{name}</option>
                         {/each}
@@ -52,9 +60,23 @@
                 <td>
                     <input style='width: 3em;' type="text"
                         id={summon.qty}
-                        bind:value={currentSummons[i].qty}>
+                        bind:value={summons[i].qty}>
                 </td>
             </tr>
         {/each}
+        <tr>
+            <td>
+                <button class='addType' style="width:50%;text-align:center;"
+                    on:click={addSummon}>
+                    {localize("ASE.AddTypeButtonLabel")}
+                </button>
+            </td>
+            <td>
+                <button class='removeType' style="width:50%;text-align:center;"
+                    on:click={removeSummon}>
+                    {localize("ASE.RemoveTypeButtonLabel")}
+                </button>
+            </td>
+        </tr>
     </tbody>
 </table>

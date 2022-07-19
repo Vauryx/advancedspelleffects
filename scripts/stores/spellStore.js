@@ -45,7 +45,6 @@ export class SpellStore extends ArrayObjectStore {
                   flagData[s.flagName] = s.flagValue;
                });
             }
-            
          }
 
          // If there is a static registerHooks; invoke it now.

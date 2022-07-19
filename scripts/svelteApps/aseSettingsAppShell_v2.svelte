@@ -38,6 +38,10 @@
         $spellEffect.flagData = flags.effectOptions;
     }
 
+    if(flags.effectOptions?.summons?.length > 0){
+        $spellEffect.settings.summons = flags.effectOptions.summons;
+    }
+
     let enableASE = flags.enableASE ?? false;
     let spellEffectName = flags.spellEffect ?? $spellEffect.name;
     let currentTab = SpellSettings;
@@ -82,6 +86,7 @@
     {#if enableASE}
         <SharedSettings
             bind:spellEffectName
+            itemName={item.name}
         />
         <NavBar 
             bind:currentTab
