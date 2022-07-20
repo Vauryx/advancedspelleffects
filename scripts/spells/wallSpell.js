@@ -1260,7 +1260,7 @@ export class wallSpell extends baseSpellClass {
 
     }
 
-    static async getRequiredSettings(currFlags) {
+    static getRequiredSettings(currFlags) {
         if (!currFlags) currFlags = {};
         let spellOptions = [];
         let animOptions = [];
@@ -1372,7 +1372,7 @@ export class wallSpell extends baseSpellClass {
                 options: utilFunctions.getDBOptions('jb2a.wall_of_fire.300x100'),
                 name: 'flags.advancedspelleffects.effectOptions.fireColor',
                 flagName: 'fireColor',
-                flagValue: currFlags.fireColor,
+                flagValue: currFlags.fireColor ?? 'yellow',
             });
             animOptions.push({
                 label: game.i18n.localize("ASE.WallOfFireImpactColorLabel"),
@@ -1381,7 +1381,7 @@ export class wallSpell extends baseSpellClass {
                 options: utilFunctions.getDBOptions('jb2a.impact.004'),
                 name: 'flags.advancedspelleffects.effectOptions.fireImpactColor',
                 flagName: 'fireImpactColor',
-                flagValue: currFlags.fireImpactColor,
+                flagValue: currFlags.fireImpactColor ?? 'yellow',
             });
             soundOptions.push({
                 label: game.i18n.localize("ASE.WallSpellDamageEffectSoundLabel"),
@@ -1445,7 +1445,7 @@ export class wallSpell extends baseSpellClass {
                 options: utilFunctions.getDBOptions('jb2a.wall_of_force.horizontal'),
                 name: 'flags.advancedspelleffects.effectOptions.forceColor',
                 flagName: 'forceColor',
-                flagValue: currFlags.forceColor,
+                flagValue: currFlags.forceColor ?? 'blue',
             });
         }
 

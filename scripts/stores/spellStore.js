@@ -29,8 +29,14 @@ export class SpellStore extends ArrayObjectStore {
 
       for (const [name, effect] of Object.entries(spells)) {
          flagData = {};
+         let settings = {};
         //build flag data from spell settings
-         let settings = await effect.getRequiredSettings();
+         if(name == localize("ASE.WallSpell")){
+            settings = effect.getRequiredSettings();
+         }
+         else {
+            settings = await effect.getRequiredSettings();
+         }
          for (const [settingType, setting] of Object.entries(settings)) {
             if(settingType == "summons"){
                flagData['summons'] = setting;

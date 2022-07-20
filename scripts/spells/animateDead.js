@@ -28,7 +28,7 @@ export class animateDead {
     }
 
     static async getRequiredSettings(currFlags) {
-        console.log("Curr Flags: ", currFlags);
+        //console.log("Curr Flags: ", currFlags);
         if (!currFlags) currFlags = {};
         const magicSignsRaw = `jb2a.magic_signs.circle.02`;
         const magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
@@ -79,7 +79,7 @@ export class animateDead {
             options: summonOptions,
             name: 'flags.advancedspelleffects.effectOptions.summons.zombie.actor',
             flagName: 'zombieActor',
-            flagValue: currFlags.zombieActor ?? Object.keys(summonOptions)[0],
+            flagValue: currFlags.zombieActor ?? Object.keys(Object.values(summonOptions)[0])[0],
         });
         spellOptions.push({
             label: game.i18n.localize('ASE.SkeletonActorLabel'),
@@ -87,7 +87,7 @@ export class animateDead {
             options: summonOptions,
             name: 'flags.advancedspelleffects.effectOptions.summons.skeleton.actor',
             flagName: 'skeletonActor',
-            flagValue: currFlags.skeletonActor ?? Object.keys(summonOptions)[0],
+            flagValue: currFlags.skeletonActor ?? Object.keys(Object.values(summonOptions)[0])[0],
         });
 
         spellOptions.push({
@@ -157,7 +157,7 @@ export class animateDead {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolVolumeOutro',
             flagName: 'magicSchoolVolumeOutro',
-            flagValue: currFlags.magicSchoolVolumeOutro ?? 1,
+            flagValue: currFlags.magicSchoolVolumeOutro ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -169,7 +169,7 @@ export class animateDead {
             options: effectAColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.effectAColor',
             flagName: 'effectAColor',
-            flagValue: currFlags.effectAColor ?? 'blue',
+            flagValue: currFlags.effectAColor ?? 'green',
         });
         soundOptions.push({
             label: game.i18n.localize('ASE.EffectASoundLabel'),
