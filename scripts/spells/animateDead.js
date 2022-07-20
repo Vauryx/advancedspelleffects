@@ -33,6 +33,8 @@ export class animateDead {
         const magicSignsRaw = `jb2a.magic_signs.circle.02`;
         const magicSchoolOptions = utilFunctions.getDBOptions(magicSignsRaw);
 
+        //console.log("ANIMATE DEAD: Magic School Options: ", magicSchoolOptions);
+
         const magicSchoolColorsRaw = `jb2a.magic_signs.circle.02.${currFlags.magicSchool ?? 'abjuration'}.intro`;
         const magicSchoolColorOptions = utilFunctions.getDBOptions(magicSchoolColorsRaw);
 
@@ -55,10 +57,17 @@ export class animateDead {
         }
 
         let summonOptions = [];
+        let tempObj = {};
         summonActorsList.forEach((actor) => {
             //summonOptions[actor.id] = actor.name;
-            summonOptions.push({id: actor.id, name: actor.name});
+            tempObj = {};
+            tempObj[actor.id] = actor.name;
+            summonOptions.push(tempObj);
         });
+
+        if(summonOptions.length === 0) {
+            summonOptions.push({"": "No Summonable Actors"});
+        }
 
         let spellOptions = [];
         let animOptions = [];
@@ -70,7 +79,7 @@ export class animateDead {
             options: summonOptions,
             name: 'flags.advancedspelleffects.effectOptions.summons.zombie.actor',
             flagName: 'zombieActor',
-            flagValue: currFlags.zombieActor ?? '',
+            flagValue: currFlags.zombieActor ?? Object.keys(summonOptions)[0],
         });
         spellOptions.push({
             label: game.i18n.localize('ASE.SkeletonActorLabel'),
@@ -78,7 +87,7 @@ export class animateDead {
             options: summonOptions,
             name: 'flags.advancedspelleffects.effectOptions.summons.skeleton.actor',
             flagName: 'skeletonActor',
-            flagValue: currFlags.skeletonActor ?? '',
+            flagValue: currFlags.skeletonActor ?? Object.keys(summonOptions)[0],
         });
 
         spellOptions.push({
@@ -124,7 +133,7 @@ export class animateDead {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolVolume',
             flagName: 'magicSchoolVolume',
-            flagValue: currFlags.magicSchoolVolume ?? 1,
+            flagValue: currFlags.magicSchoolVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -181,7 +190,7 @@ export class animateDead {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.effectASoundVolume',
             flagName: 'effectASoundVolume',
-            flagValue: currFlags.effectASoundVolume ?? 1,
+            flagValue: currFlags.effectASoundVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -214,7 +223,7 @@ export class animateDead {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.effectBSoundVolume',
             flagName: 'effectBSoundVolume',
-            flagValue: currFlags.effectBSoundVolume ?? 1,
+            flagValue: currFlags.effectBSoundVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,

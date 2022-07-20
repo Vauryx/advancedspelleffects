@@ -525,18 +525,26 @@ export class callLightning {
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
-        const boltOptions = {
-            "chain": game.i18n.localize('ASE.Chain'),
-            "strike": game.i18n.localize('ASE.Strike')
-        };
-        const dieOptions = {
+        const boltOptions = [{
+            "chain": game.i18n.localize('ASE.Chain')},
+            {"strike": game.i18n.localize('ASE.Strike')
+        }];
+        /*const dieOptions = {
             'd4': 'd4',
             'd6': 'd6',
             'd8': 'd8',
             'd10': 'd10',
             'd12': 'd12',
             'd20': 'd20',
-        };
+        };*/
+        const dieOptions = [
+            {'d4': 'd4'},
+            {'d6': 'd6'},
+            {'d8': 'd8'},
+            {'d10': 'd10'},
+            {'d12': 'd12'},
+            {'d20': 'd20'}
+        ];
 
         spellOptions.push({
             label: game.i18n.localize("ASE.OverrideDamageLabel"),

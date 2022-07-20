@@ -53,19 +53,18 @@ export class magicMissile {
         let animOptions = [];
         let soundOptions = [];
 
-        const dieOptions = {
-            'd4': 'd4',
-            'd6': 'd6',
-            'd8': 'd8',
-            'd10': 'd10',
-            'd12': 'd12',
-            'd20': 'd20',
-        };
+        const dieOptions = [
+            {'d4': 'd4'},
+            {'d6': 'd6'},
+            {'d8': 'd8'},
+            {'d10': 'd10'},
+            {'d12': 'd12'},
+            {'d20': 'd20'}
+        ];
 
-        const soundPlaybackOptions = {
-            'indiv': 'Individual',
-            'group': 'Group'
-        };
+        const soundPlaybackOptions = [
+            {'indiv': 'Individual'},
+            {'group': 'Group'}];
 
         spellOptions.push({
             label: game.i18n.localize('ASE.DamageDieCountLabel'),
@@ -98,7 +97,7 @@ export class magicMissile {
             options: targetMarkerColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.targetMarkerColor',
             flagName: 'targetMarkerColor',
-            flagValue: currFlags.targetMarkerColor,
+            flagValue: currFlags.targetMarkerColor ?? 'blue',
         });
         animOptions.push({
             label: game.i18n.localize('ASE.TargetMarkerHueLabel'),
@@ -136,7 +135,7 @@ export class magicMissile {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.markerVolume',
             flagName: 'markerVolume',
-            flagValue: currFlags.markerVolume ?? 1,
+            flagValue: currFlags.markerVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -148,7 +147,7 @@ export class magicMissile {
             options: missileColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.missileColor',
             flagName: 'missileColor',
-            flagValue: currFlags.missileColor,
+            flagValue: currFlags.missileColor ?? 'blue',
         });
         soundOptions.push({
             label: game.i18n.localize('ASE.DartIntroSoundLabel'),
@@ -169,7 +168,7 @@ export class magicMissile {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.missileIntroVolume',
             flagName: 'missileIntroVolume',
-            flagValue: currFlags.missileIntroVolume ?? 1,
+            flagValue: currFlags.missileIntroVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -205,7 +204,7 @@ export class magicMissile {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactVolume',
             flagname: 'missileImpactVolume',
-            flagValue: currFlags.missileImpactVolume ?? 1,
+            flagValue: currFlags.missileImpactVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,

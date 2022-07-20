@@ -377,7 +377,7 @@ export class detectMagic {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.waveVolume',
             flagName: 'waveVolume',
-            flagValue: currFlags.waveVolume ?? 1,
+            flagValue: currFlags.waveVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,

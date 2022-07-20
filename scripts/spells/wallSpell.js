@@ -1266,25 +1266,25 @@ export class wallSpell extends baseSpellClass {
         let animOptions = [];
         let soundOptions = [];
 
-        const dieOptions = {
-            'd4': 'd4',
-            'd6': 'd6',
-            'd8': 'd8',
-            'd10': 'd10',
-            'd12': 'd12',
-            'd20': 'd20',
-        };
+        const dieOptions = [
+            {'d4': 'd4'},
+            {'d6': 'd6'},
+            {'d8': 'd8'},
+            {'d10': 'd10'},
+            {'d12': 'd12'},
+            {'d20': 'd20'}
+        ];
 
-        const wallTypeOptions = {
+        const wallTypeOptions = [
             //'thorns': "Wall of Thorns",
-            'fire': "Wall of Fire",
-            'force': "Wall of Force",
+            {'fire': "Wall of Fire"},
+            {'force': "Wall of Force"},
             //'ice': "Wall of Ice",
             //'light': "Wall of Light",
             //'sand': "Wall of Sand",
             //'stone': "Wall of Stone",
             //'water': "Wall of Water"
-        };
+        ];
 
         const wallType = currFlags.wallType ?? 'fire';
         spellOptions.push({
@@ -1302,7 +1302,7 @@ export class wallSpell extends baseSpellClass {
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.useWebP',
             flagName: 'useWebP',
-            flagValue: currFlags.useWebP,
+            flagValue: currFlags.useWebP ?? false,
         });
 
         if (wallType == 'fire') {

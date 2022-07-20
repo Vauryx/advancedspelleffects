@@ -249,19 +249,19 @@ export class mirrorImage {
     static async getRequiredSettings(currFlags) {
         if (!currFlags) currFlags = {};
         const burstEffectColorOptions = utilFunctions.getDBOptions('jb2a.impact.004');
-        const runeColorOptions = {
-            "0x3c1361": "Dark Purple",
-            "0x00b4ff": "Blue",
-            "0x1DD0DE": "Cyan",
-            "0x1D8B16": "Green",
-            "0xFFCE00": "Yellow",
-            "0xFF9B00": "Orange",
-            "0xFF0000": "Red",
-            "0x7D1DFF": "Purple",
-            "0xFF00FF": "Pink",
-            "0xFFFFFF": "White",
-            "0x000000": "Black"
-        };
+        const runeColorOptions = [
+            {"0x3c1361": "Dark Purple"},
+            {"0x00b4ff": "Blue"},
+            {"0x1DD0DE": "Cyan"},
+            {"0x1D8B16": "Green"},
+            {"0xFFCE00": "Yellow"},
+            {"0xFF9B00": "Orange"},
+            {"0xFF0000": "Red"},
+            {"0x7D1DFF": "Purple"},
+            {"0xFF00FF": "Pink"},
+            {"0xFFFFFF": "White"},
+            {"0x000000": "Black"}
+        ];
 
         let spellOptions = [];
         let animOptions = [];
@@ -297,7 +297,7 @@ export class mirrorImage {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.castVolume',
             flagName: 'castVolume',
-            flagValue: currFlags.castVolume ?? 1,
+            flagValue: currFlags.castVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -382,7 +382,7 @@ export class mirrorImage {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.imageDestroyVolume',
             flagName: 'imageDestroyVolume',
-            flagValue: currFlags.imageDestroyVolume ?? 1,
+            flagValue: currFlags.imageDestroyVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,

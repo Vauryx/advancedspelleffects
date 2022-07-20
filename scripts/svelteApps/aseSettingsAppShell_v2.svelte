@@ -24,6 +24,7 @@
     }
 
     console.log("App Shell: Entering Spell Settings...");
+    console.log("App Shell: Spell Store: ", spellStore);
     console.log("App Shell: item: ", item);
     console.log("App Shell: flags: ", flags);
     console.log("App Shell: blankItem: ", blankItem);

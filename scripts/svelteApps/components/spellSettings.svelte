@@ -28,8 +28,8 @@
                         {/if}
                         {#if setting.type == "dropdown"}
                             <select id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}>
-                                {#each setting.options as {id, name}}
-                                    <option value={id}>{name}</option>
+                                {#each setting.options as option}
+                                    <option value={Object.keys(option)[0]}>{Object.values(option)[0]}</option>
                                 {/each}
                             </select>
                         {/if}

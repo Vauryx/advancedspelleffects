@@ -13,40 +13,50 @@
 
 <table class="ase-spell-settings-table">
     <tbody style='border-top: 1pt solid black;border-bottom: 1pt solid black;'>
-            {#each $spellEffect.settings.animOptions as setting}
-                <tr>
+        {#each $spellEffect.settings.animOptions as setting}
+        <tr>
+            <td>
+                <label for="{setting.flagName}">{setting.label}</label>
+            </td>
+                {#if setting.type == "numberInput"}
                     <td>
-                        <label for="{setting.flagName}">{setting.label}</label>
+                        <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
                     </td>
+                {/if}
+                {#if setting.type == "checkbox"}
                     <td>
-                        {#if setting.type == "numberInput"}
-                            <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
-                        {/if}
-                        {#if setting.type == "checkbox"}
-                            <input type="checkbox" id={setting.flagName} bind:checked={$spellEffect.flagData[setting.flagName]}/>
-                        {/if}
-                        {#if setting.type == "dropdown"}
-                            <select id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}>
-                                {#each setting.options as {id, name}}
-                                    <option value={id}>{name}</option>
-                                {/each}
-                            </select>
-                        {/if}
-                        {#if setting.type == "textInput"}
-                            <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
-                        {/if}
-                        {#if setting.type == "rangeInput"}
-                            <input type="range" min="{setting.min}" max="{setting.max}"
-                                step="{setting.step}"
-                                oninput="this.nextElementSibling.value = this.value"
-                                name="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
-                            <output style="font-weight: bold;">{$spellEffect.flagData[setting.flagName]}</output>
-                        {/if}
-                        {#if setting.type == 'colorPicker'}
-                            <input type="color" name="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
-                        {/if}
+                        <input type="checkbox" id={setting.flagName} bind:checked={$spellEffect.flagData[setting.flagName]}/>
                     </td>
-                </tr>
-            {/each}
+                {/if}
+                {#if setting.type == "dropdown"}
+                    <td>
+                        <select id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}>
+                            {#each setting.options as option}
+                                <option value={Object.keys(option)[0]}>{Object.values(option)[0]}</option>
+                            {/each}
+                        </select>
+                    </td>
+                {/if}
+                {#if setting.type == "textInput"}
+                    <td>
+                        <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
+                    </td>
+                {/if}
+                {#if setting.type == "rangeInput"}
+                    <td colspan="2">
+                        <output style="font-weight: bold;">{$spellEffect.flagData[setting.flagName]}</output>
+                        <input type="range" min="{setting.min}" max="{setting.max}"
+                            step="{setting.step}"
+                            oninput="this.previousElementSibling.value = this.value"
+                            id="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
+                    </td>
+                {/if}
+                {#if setting.type == "colorPicker"}
+                <td>
+                    <input type="color" id="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
+                </td>
+                {/if}
+        </tr>
+    {/each}
     </tbody>
 </table>

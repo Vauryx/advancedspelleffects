@@ -2,9 +2,29 @@
     export let spellEffect;
 
     console.log("Sound Settings: -------ENTERING SOUND SETTINGS COMPONENT-----");
-    console.log("Sound Settings: spellEffect", $spellEffect);
-    
-
+    console.log("Sound Settings: spellEffect: ", $spellEffect);
+    let soundPaths = {};
+    $spellEffect.settings.soundOptions.forEach(soundOption => {
+        if(soundOption.type == 'fileInput'){
+            soundPaths[soundOption.flagName] = $spellEffect.flagData[soundOption.flagName];
+        }
+    });
+    async function selectFile(setting) {
+        const current = $spellEffect.flagData[setting.flagName] ?? "";
+        const picker = new FilePicker({
+            type: "audio",
+            current,
+            callback: (path) => {
+                soundPaths[setting.flagName] = path;
+            },
+        });
+        await picker.browse(current);
+    }
+    $: {
+        for (let flagName in soundPaths) {
+            $spellEffect.flagData[flagName] = soundPaths[flagName];
+        }
+    }
 </script>
 
 <table class="ase-spell-settings-table">
@@ -14,43 +34,50 @@
                     <td>
                         <label for="{setting.flagName}">{setting.label}</label>
                     </td>
-                    <td>
                         {#if setting.type == "numberInput"}
-                            <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
+                            <td>
+                                <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
+                            </td>
                         {/if}
                         {#if setting.type == "checkbox"}
-                            <input type="checkbox" id={setting.flagName} bind:checked={$spellEffect.flagData[setting.flagName]}/>
+                            <td>
+                                <input type="checkbox" id={setting.flagName} bind:checked={$spellEffect.flagData[setting.flagName]}/>
+                            </td>
                         {/if}
                         {#if setting.type == "dropdown"}
-                            <select id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}>
-                                {#each setting.options as {id, name}}
-                                    <option value={id}>{name}</option>
-                                {/each}
-                            </select>
+                            <td>
+                                <select id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}>
+                                    {#each setting.options as option}
+                                        <option value={Object.keys(option)[0]}>{Object.values(option)[0]}</option>
+                                    {/each}
+                                </select>
+                            </td>
                         {/if}
                         {#if setting.type == "textInput"}
-                            <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
+                            <td>
+                                <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
+                            </td>
                         {/if}
                         {#if setting.type == "rangeInput"}
-                            <input type="range" min="{setting.min}" max="{setting.max}"
-                                step="{setting.step}"
-                                oninput="this.nextElementSibling.value = this.value"
-                                id="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
-                            <output style="font-weight: bold;">{$spellEffect.flagData[setting.flagName]}</output>
+                            <td colspan="2">
+                                <output style="font-weight: bold;">{$spellEffect.flagData[setting.flagName]}</output>
+                                <input type="range" min="{setting.min}" max="{setting.max}"
+                                    step="{setting.step}"
+                                    oninput="this.previousElementSibling.value = this.value"
+                                    id="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
+                            </td>
                         {/if}
                         {#if setting.type == 'fileInput'}
-                            <input type="text" class="files" id="{setting.flagName}"
-                                bind:value={$spellEffect.flagData[setting.flagName]}>
+                            <td>
+                                <input type="text" class="files" id="{setting.flagName}"
+                                    bind:value={soundPaths[setting.flagName]}>
+                            </td>
+                            <td>
+                                <button class="file-picker" on:click|preventDefault={() => selectFile(setting)} title="Browse Files">
+                                    <i class="fas fa-music fa-sm"></i>
+                                </button>
+                            </td>
                         {/if}
-                    </td>
-                    {#if setting.type == 'fileInput'}
-                    <td>
-                        <button type="button" class="file-picker" data-type="audio"
-                            data-target="{setting.flagName}" tabindex="-1" title="Browse Files">
-                            <i class="fas fa-music fa-sm"></i>
-                        </button>
-                    </td>
-                    {/if}
                 </tr>
             {/each}
     </tbody>

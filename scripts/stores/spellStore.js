@@ -31,10 +31,6 @@ export class SpellStore extends ArrayObjectStore {
          flagData = {};
         //build flag data from spell settings
          let settings = await effect.getRequiredSettings();
-         //console.log(name);
-         if(name == "summonCreature"){
-            console.log(settings);
-         }
          for (const [settingType, setting] of Object.entries(settings)) {
             if(settingType == "summons"){
                flagData['summons'] = setting;
@@ -59,6 +55,7 @@ export class SpellStore extends ArrayObjectStore {
          });
       }
    }
+
 }
 
 class SpellEntryStore extends SpellStore.EntryStore {

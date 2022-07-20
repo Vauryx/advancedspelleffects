@@ -499,14 +499,14 @@ export class moonBeam {
         let animOptions = [];
         let soundOptions = [];
 
-        const dieOptions = {
-            'd4': 'd4',
-            'd6': 'd6',
-            'd8': 'd8',
-            'd10': 'd10',
-            'd12': 'd12',
-            'd20': 'd20',
-        };
+        const dieOptions = [
+            {'d4': 'd4'},
+            {'d6': 'd6'},
+            {'d8': 'd8'},
+            {'d10': 'd10'},
+            {'d12': 'd12'},
+            {'d20': 'd20'}
+        ];
 
         spellOptions.push({
             label: game.i18n.localize("ASE.ScaleWithLevelLabel"),
@@ -547,7 +547,7 @@ export class moonBeam {
             options: beamColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.moonbeamColor',
             flagName: 'moonbeamColor',
-            flagValue: currFlags.moonbeamColor,
+            flagValue: currFlags.moonbeamColor ?? 'blue',
         });
         soundOptions.push({
             label: game.i18n.localize("ASE.MoonbeamInitialSoundLabel"),
@@ -568,7 +568,7 @@ export class moonBeam {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamVolume',
             flagName: 'moonbeamVolume',
-            flagValue: currFlags.moonbeamVolume ?? 1,
+            flagValue: currFlags.moonbeamVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -593,7 +593,7 @@ export class moonBeam {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamLoopVolume',
             flagName: 'moonbeamLoopVolume',
-            flagValue: currFlags.moonbeamLoopVolume ?? 1,
+            flagValue: currFlags.moonbeamLoopVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -618,7 +618,7 @@ export class moonBeam {
             options: beamDamageOptions,
             name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgColor',
             flagName: 'moonbeamDmgColor',
-            flagValue: currFlags.moonbeamDmgColor,
+            flagValue: currFlags.moonbeamDmgColor ?? 'blue',
         });
         soundOptions.push({
             label: game.i18n.localize("ASE.DamageEffectSoundLabel"),
@@ -639,7 +639,7 @@ export class moonBeam {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.moonbeamDmgVolume',
             flagName: 'moonbeamDmgVolume',
-            flagValue: currFlags.moonbeamDmgVolume ?? 1,
+            flagValue: currFlags.moonbeamDmgVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,

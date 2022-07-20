@@ -533,12 +533,11 @@ export class detectStuff {
         let animOptions = [];
         let soundOptions = [];
 
-        const presetOptions = {
-            "magic": 'Detect Magic',
-            "goodAndEvil": 'Detect Good and Evil',
-            "poisonAndDisease": 'Detect Poison and Disease',
-            "custom": 'Custom'
-        };
+        const presetOptions = [
+            {"magic": 'Detect Magic'},
+            {"goodAndEvil": 'Detect Good and Evil'},
+            {"poisonAndDisease": 'Detect Poison and Disease'},
+            {"custom": 'Custom'}];
 
         spellOptions.push({
             label: game.i18n.localize("ASE.DetectPresetsLabel"),

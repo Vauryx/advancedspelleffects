@@ -209,7 +209,7 @@ export class vampiricTouch {
 
         let animOptions = [];
         let soundOptions = [];
-
+        let spellOptions = [];
         animOptions.push({
             label: game.i18n.localize('ASE.VTCasterEffectLabel'),
             tooltip: game.i18n.localize('ASE.VTCasterEffectTooltip'),
@@ -217,7 +217,7 @@ export class vampiricTouch {
             options: vampiricTouchCasterColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.vtCasterColor',
             flagName: 'vtCasterColor',
-            flagValue: currFlags.vtCasterColor ?? '',
+            flagValue: currFlags.vtCasterColor ?? 'blue',
         });
 
         soundOptions.push({
@@ -235,7 +235,7 @@ export class vampiricTouch {
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.vtCasterSoundDelay',
             flagName: 'vtCasterSoundDelay',
-            flagValue: currFlags.vtCasterSoundDelay ?? '',
+            flagValue: currFlags.vtCasterSoundDelay ?? 0,
         });
 
         soundOptions.push({
@@ -244,7 +244,7 @@ export class vampiricTouch {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.vtCasterVolume',
             flagName: 'vtCasterVolume',
-            flagValue: currFlags.vtCasterVolume ?? '',
+            flagValue: currFlags.vtCasterVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01
@@ -257,7 +257,7 @@ export class vampiricTouch {
             options: vampiricTouchStrandColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.vtStrandColor',
             flagName: 'vtStrandColor',
-            flagValue: currFlags.vtStrandColor ?? '',
+            flagValue: currFlags.vtStrandColor ?? 'blue',
         });
 
         soundOptions.push({
@@ -275,7 +275,7 @@ export class vampiricTouch {
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.vtSiphonSoundDelay',
             flagName: 'vtSiphonSoundDelay',
-            flagValue: currFlags.vtSiphonSoundDelay ?? '',
+            flagValue: currFlags.vtSiphonSoundDelay ?? 0,
         });
 
         soundOptions.push({
@@ -284,7 +284,7 @@ export class vampiricTouch {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.vtSiphonVolume',
             flagName: 'vtSiphonVolume',
-            flagValue: currFlags.vtSiphonVolume ?? '',
+            flagValue: currFlags.vtSiphonVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01
@@ -297,7 +297,7 @@ export class vampiricTouch {
             options: vampiricTouchImpactColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.vtImpactColor',
             flagName: 'vtImpactColor',
-            flagValue: currFlags.vtImpactColor ?? '',
+            flagValue: currFlags.vtImpactColor ?? 'blue',
         });
 
         soundOptions.push({
@@ -315,7 +315,7 @@ export class vampiricTouch {
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.vtImpactSoundDelay',
             flagName: 'vtImpactSoundDelay',
-            flagValue: currFlags.vtImpactSoundDelay ?? '',
+            flagValue: currFlags.vtImpactSoundDelay ?? 0,
         });
 
         soundOptions.push({
@@ -324,7 +324,7 @@ export class vampiricTouch {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.vtImpactVolume',
             flagName: 'vtImpactVolume',
-            flagValue: currFlags.vtImpactVolume ?? '',
+            flagValue: currFlags.vtImpactVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01
@@ -340,6 +340,7 @@ export class vampiricTouch {
         });
 
         return {
+            spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions
         }

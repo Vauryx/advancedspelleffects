@@ -279,25 +279,33 @@ export function isFirstGM() {
 }
 
 export function getDBOptions(rawSet) {
-    let options = {};
+    let returnData = [];
+    let tempObj = {};
     let setOptions = Sequencer.Database.getPathsUnder(rawSet);
+
     if (setOptions) {
         setOptions.forEach((elem) => {
-            options[elem] = capitalizeFirstLetter(elem);
+            tempObj = {};
+            tempObj[elem] = capitalizeFirstLetter(elem);
+            returnData.push(tempObj);
         });
-        //console.log(options);
     }
-    return options;
+
+    return returnData;
 }
 export function getDBOptionsIcons(rawSet) {
+    let returnData = [];
+    let tempObj = {};
     let options = {};
     const seqFiles = Sequencer.Database.getEntry(rawSet);
     if (seqFiles.length > 0) {
         seqFiles.forEach((elem) => {
-            options[elem.dbPath] = elem.dbPath.substring(10);
+            tempObj = {};
+            tempObj[elem.dbPath] = elem.dbPath.substring(10);
+            returnData.push(tempObj);
         });
     }
-    return options;
+    return returnData;
 }
 
 export function isMidiActive() {

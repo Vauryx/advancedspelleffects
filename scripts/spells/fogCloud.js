@@ -210,7 +210,7 @@ export class fogCloud {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.fogCloudVolume',
             flagName: 'fogCloudVolume',
-            flagValue: currFlags.fogCloudVolume ?? 1,
+            flagValue: currFlags.fogCloudVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,

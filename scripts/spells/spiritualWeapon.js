@@ -361,7 +361,7 @@ export class spiritualWeapon {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.summonVolume',
             flagName: 'summonVolume',
-            flagValue: currFlags.summonVolume ?? 1,
+            flagValue: currFlags.summonVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,

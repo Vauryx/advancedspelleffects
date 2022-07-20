@@ -297,14 +297,14 @@ export class chainLightning {
         let animOptions = [];
         let soundOptions = [];
 
-        const dieOptions = {
-            'd4': 'd4',
-            'd6': 'd6',
-            'd8': 'd8',
-            'd10': 'd10',
-            'd12': 'd12',
-            'd20': 'd20',
-        };
+        const dieOptions = [
+            {'d4': 'd4'},
+            {'d6': 'd6'},
+            {'d8': 'd8'},
+            {'d10': 'd10'},
+            {'d12': 'd12'},
+            {'d20': 'd20'}
+        ];
 
         spellOptions.push({
             label: game.i18n.localize("ASE.ScaleWithLevelLabel"),
@@ -353,7 +353,7 @@ export class chainLightning {
             options: primaryColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.primaryBoltColor',
             flagName: 'primaryBoltColor',
-            flagValue: currFlags.primaryBoltColor,
+            flagValue: currFlags.primaryBoltColor ?? 'blue',
         });
         soundOptions.push({
             label: game.i18n.localize("ASE.ChainLightningPrimarySoundLabel"),
@@ -374,7 +374,7 @@ export class chainLightning {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.primarySoundVolume',
             flagName: 'primarySoundVolume',
-            flagValue: currFlags.primarySoundVolume ?? 1,
+            flagValue: currFlags.primarySoundVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -387,7 +387,7 @@ export class chainLightning {
             options: secondaryColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.secondaryBoltColor',
             flagName: 'secondaryBoltColor',
-            flagValue: currFlags.secondaryBoltColor,
+            flagValue: currFlags.secondaryBoltColor ?? 'blue',
         });
         soundOptions.push({
             label: game.i18n.localize("ASE.ChainLightningSecondarySoundLabel"),
@@ -408,7 +408,7 @@ export class chainLightning {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.secondarySoundVolume',
             flagName: 'secondarySoundVolume',
-            flagValue: currFlags.secondarySoundVolume ?? 1,
+            flagValue: currFlags.secondarySoundVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -435,7 +435,7 @@ export class chainLightning {
             options: failSaveEffectColorOptions,
             name: 'flags.advancedspelleffects.effectOptions.saveFailEffectColor',
             flagName: 'saveFailEffectColor',
-            flagValue: currFlags.saveFailEffectColor,
+            flagValue: currFlags.saveFailEffectColor ?? 'blue',
         });
 
 

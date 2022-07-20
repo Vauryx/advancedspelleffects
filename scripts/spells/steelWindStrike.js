@@ -323,14 +323,14 @@ export class steelWindStrike {
         const SwordColors = `jb2a.sword.melee.01`;
         const swordColorOptions = utilFunctions.getDBOptions(SwordColors);
 
-        const dieOptions = {
-            'd4': 'd4',
-            'd6': 'd6',
-            'd8': 'd8',
-            'd10': 'd10',
-            'd12': 'd12',
-            'd20': 'd20',
-        };
+        const dieOptions = [
+            {'d4': 'd4'},
+            {'d6': 'd6'},
+            {'d8': 'd8'},
+            {'d10': 'd10'},
+            {'d12': 'd12'},
+            {'d20': 'd20'}
+        ];
 
         let spellOptions = [];
         let animOptions = [];
@@ -388,7 +388,7 @@ export class steelWindStrike {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.dashVolume',
             flagName: 'dashVolume',
-            flagValue: currFlags.dashVolume ?? 1,
+            flagValue: currFlags.dashVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
@@ -413,7 +413,7 @@ export class steelWindStrike {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.strikeVolume',
             flagName: 'strikeVolume',
-            flagValue: currFlags.strikeVolume ?? 1,
+            flagValue: currFlags.strikeVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,

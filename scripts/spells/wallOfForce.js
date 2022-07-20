@@ -611,7 +611,7 @@ export class wallOfForce {
             options: utilFunctions.getDBOptions('jb2a.wall_of_force.horizontal'),
             name: 'flags.advancedspelleffects.effectOptions.color',
             flagName: 'color',
-            flagValue: currFlags.color,
+            flagValue: currFlags.color ?? 'blue',
         });
 
         animOptions.push({
@@ -620,7 +620,7 @@ export class wallOfForce {
             type: 'checkbox',
             name: 'flags.advancedspelleffects.effectOptions.useWebP',
             flagName: 'useWebP',
-            flagValue: currFlags.useWebP,
+            flagValue: currFlags.useWebP ?? false,
         });
 
         return {

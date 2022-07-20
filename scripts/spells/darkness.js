@@ -174,7 +174,7 @@ export class darkness {
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.darknessVolume',
             flagName: 'darknessVolume',
-            flagValue: currFlags.darknessVolume ?? 1,
+            flagValue: currFlags.darknessVolume ?? 0.5,
             min: 0,
             max: 1,
             step: 0.01,
