@@ -313,7 +313,7 @@ export class summonCreature {
             summonActor.id = actor.id;
             summonOptions.push(summonActor);
         });
-        currentSummonTypes = currFlags.summons ?? [{ name: "", actor: "", qty: 1 }];
+        currentSummonTypes = currFlags.summons ?? [{ name: "", actor: summonOptions[0].id, qty: 1 }];
         console.log("currentSummonTypes: " ,currentSummonTypes);
         console.log("summonOptions: " ,summonOptions);
         

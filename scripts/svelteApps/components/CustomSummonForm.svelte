@@ -8,13 +8,13 @@
     let spellEffect = $spellStoreHost;
     $: spellEffect = $spellStoreHost; 
     let summonOptions = $spellEffect.settings.summonOptions;
-
+    console.log("Custom Summon Stuff Settings: summonOptions: ", summonOptions);
     console.log("Custom Summon Settings: spell Effect: ", $spellEffect);
     if(!$spellEffect.flagData.summons || $spellEffect.flagData.summons.length == 0){
         $spellEffect.flagData.summons = [{name: "", actor: summonOptions[0].id, qty: 1}];
     }
     let summons = $spellEffect.flagData.summons;
-    
+    console.log("Custom Summon Stuff Settings: summons: ", summons);
     let summonTypeLabel = localize("ASE.SummonTypeNameLabel");
     let associatedActorLabel = localize("ASE.AssociatedActorLabel");
     let summonQuantityLabel = localize("ASE.SummonQuantityLabel");

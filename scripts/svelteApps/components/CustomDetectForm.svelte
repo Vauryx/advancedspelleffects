@@ -14,7 +14,7 @@
         $spellEffect.flagData.tagOptions = [{tagEffect: "", tagLabel: ""}];
     }
     
-    let tags = $spellEffect.flagData.tagOptions;
+    let tags = $spellEffect.flagData.tagOptions ?? [{tagEffect: "", tagLabel: ""}];
     console.log("Custom Detect Stuff Settings: tags: ", tags);
 
     function addTag() {
