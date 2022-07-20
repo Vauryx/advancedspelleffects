@@ -1,12 +1,18 @@
 <script>
 
     import { spellStore } from "../../stores/spellStore.js";
-
-    export let spellEffectName;
+    import { getContext } from "svelte";
     export let itemName;
     console.log("----------------------ENTERING SHARED SETTINGS COMPONENT----------------------");
 
     //console.log("spellStore: ", spellStore);
+    const spellStoreHost = getContext("spellStoreHost");
+    let currentSpell = $spellStoreHost;
+
+    $: {
+        console.log("Shared Settings: currentSpell: ", $currentSpell);
+        $spellStoreHost = currentSpell;
+    }
 
     let ASESettingsLabel = game.i18n.localize("ASE.ASESettingsLabel");
 </script>
@@ -29,9 +35,9 @@
                     </td>
                     <td>
                         <!-- drop down input to select spellEffect-->
-                        <select id="spellEffect" bind:value={spellEffectName}>
+                        <select id="spellEffect" bind:value={currentSpell}>
                             {#each $spellStore as spell (spell.id)}
-                                <option value={spell.name}>{spell.name}</option>
+                                <option value={spell}>{spell.name}</option>
                             {/each}
                         </select>
                     </td>

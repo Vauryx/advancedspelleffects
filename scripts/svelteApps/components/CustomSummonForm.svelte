@@ -1,30 +1,33 @@
 <script>
     import { spellStore } from "../../stores/spellStore.js";
     import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
-
-    export let spellEffect;
+    import { getContext } from "svelte";
     console.log("----------------------ENTERING CUSTOM SUMMON SETTINGS COMPONENT----------------------");
+
+    const spellStoreHost = getContext("spellStoreHost");
+    let spellEffect = $spellStoreHost;
+    $: spellEffect = $spellStoreHost; 
     let summonOptions = $spellEffect.settings.summonOptions;
-    console.log("summon options: ", summonOptions);
-    console.log("spell Effect: ", $spellEffect);
 
-    if(!$spellEffect.flagData.summons.length){
-        $spellEffect.flagData.summons = [];
+    console.log("Custom Summon Settings: spell Effect: ", $spellEffect);
+    if(!$spellEffect.flagData.summons || $spellEffect.flagData.summons.length == 0){
+        $spellEffect.flagData.summons = [{name: "", actor: summonOptions[0].id, qty: 1}];
     }
-
-    $: summons = $spellEffect.flagData.summons;
-
-    $: console.log("Flag Data: ", $spellEffect.flagData);
+    let summons = $spellEffect.flagData.summons;
     
     let summonTypeLabel = localize("ASE.SummonTypeNameLabel");
     let associatedActorLabel = localize("ASE.AssociatedActorLabel");
     let summonQuantityLabel = localize("ASE.SummonQuantityLabel");
 
     function addSummon(){
-        summons.push({name: '', actor: '', qty: 1});
+        summons.push({name: '', actor: summonOptions[0].id, qty: 1});
         summons = summons;
     }
     function removeSummon(){
+        if(summons.length == 1){
+            ui.notifications.info("Cannot remove last summon");
+            return;
+        }
         summons.pop();
         summons = summons;
     }

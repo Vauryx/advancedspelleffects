@@ -4,7 +4,10 @@
     import { ApplicationShell } from "@typhonjs-fvtt/runtime/svelte/component/core";
     import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
     import { getContext } from "svelte";
+    import { setContext } from "svelte";
     import { spellStore } from "../stores/spellStore.js";
+    import { writable } from 'svelte/store';
+    import { onDestroy } from 'svelte';
 
     import EnableASE from "./components/EnableASE.svelte";
     import SharedSettings from "./components/SharedSettings.svelte";
@@ -17,41 +20,45 @@
     export let item;
     export let itemFlags;
 
-    const flags = itemFlags.advancedspelleffects || false;
+    const flags = {...itemFlags.advancedspelleffects} || false;
+    const { application } = getContext("external");
+    let form = void 0;
+
+    const spellStoreHost = writable(void 0);
+    setContext("spellStoreHost", spellStoreHost);
+
     let blankItem = true;
+    let enableASE = flags.enableASE ?? false;
+    let currentTab = SpellSettings;
+
     if (flags) {
         blankItem = false;
     }
+    $spellStoreHost = spellStore.findEntry(x => x.name === flags.spellEffect ?? '') ?? spellStore.first;
+    let currentSpell = $spellStoreHost;
+    $: currentSpell = $spellStoreHost;
 
-    console.log("App Shell: Entering Spell Settings...");
+    if(!blankItem && flags.spellEffect == $currentSpell.name && flags.effectOptions){
+        $currentSpell.flagData = flags.effectOptions;
+    }
+    if(flags.effectOptions?.summons?.length > 0){
+        $currentSpell.settings.summons = flags.effectOptions.summons;
+    }
+
+    console.log("App Shell: ------------------- Entering App Shell ---------------------");
     console.log("App Shell: Spell Store: ", spellStore);
     console.log("App Shell: item: ", item);
     console.log("App Shell: flags: ", flags);
     console.log("App Shell: blankItem: ", blankItem);
-    
-    const { application } = getContext("external");
-    let form = void 0;
-
-    let spellEffect = spellStore.findEntry(x => x.name === flags.spellEffect ?? '') ?? spellStore.first;
-    console.log("App Shell: spellEffect: ", $spellEffect);
-
-    if(!blankItem && flags.spellEffect == $spellEffect.name && flags.effectOptions){
-        $spellEffect.flagData = flags.effectOptions;
-    }
-
-    if(flags.effectOptions?.summons?.length > 0){
-        $spellEffect.settings.summons = flags.effectOptions.summons;
-    }
-
-    let enableASE = flags.enableASE ?? false;
-    let spellEffectName = flags.spellEffect ?? $spellEffect.name;
-    let currentTab = SpellSettings;
+    console.log("App Shell: currentSpell: ", $currentSpell);
+    $: console.log(`App Shell: ${enableASE ? "Enabled" : "Disabled"} ASE`);
+    $: console.log(`App Shell: Spell Store Host: `, $spellStoreHost);
 
     async function closeApp() {
         let flagData = {
             enableASE: enableASE,
-            spellEffect: $spellEffect.name,
-            effectOptions: $spellEffect.flagData,
+            spellEffect: $currentSpell.name,
+            effectOptions: $currentSpell.flagData,
         };
         console.log('App Shell: FlagData Updating: ', flagData);
         const updatedFlags = {
@@ -65,11 +72,10 @@
         await item.update(updatedFlags.data);
         application.close();
     }
-    $: console.log(`App Shell: ${enableASE ? "Enabled" : "Disabled"} ASE`);
-    $: {
-        spellEffect = spellStore.findEntry(x => x.name === spellEffectName) ?? spellStore.first;
-        console.log(`App Shell: Spell Effect for item ${item.name} changed to ${spellEffectName}`);
-    }
+    onDestroy(async () => {
+		console.log('the component is being destroyed...');
+	});
+    
 </script>
 <ApplicationShell
     bind:elementRoot>
@@ -86,24 +92,17 @@
     />
     {#if enableASE}
         <SharedSettings
-            bind:spellEffectName
             itemName={item.name}
         />
         <NavBar 
             bind:currentTab
         />
         {#if currentTab == SpellSettings}
-            <SpellSettings
-                spellEffect={spellEffect}
-            />
+            <SpellSettings/>
         {:else if currentTab == AnimSettings}
-            <AnimSettings
-                spellEffect={spellEffect}
-            />
+            <AnimSettings/>
         {:else if currentTab == SoundSettings}
-            <SoundSettings
-                spellEffect={spellEffect}
-            />
+            <SoundSettings/>
         {/if}
     {/if}
 </div>

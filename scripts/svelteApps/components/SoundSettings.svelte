@@ -1,7 +1,13 @@
 <script>
-    export let spellEffect;
+    import { getContext } from "svelte";
+    
+    //export let spellEffect;
+
 
     console.log("Sound Settings: -------ENTERING SOUND SETTINGS COMPONENT-----");
+    const spellStoreHost = getContext("spellStoreHost");
+    let spellEffect = $spellStoreHost;
+    $: spellEffect = $spellStoreHost; 
     console.log("Sound Settings: spellEffect: ", $spellEffect);
     let soundPaths = {};
     $spellEffect.settings.soundOptions.forEach(soundOption => {

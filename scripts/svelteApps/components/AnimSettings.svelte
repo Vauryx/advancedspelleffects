@@ -1,12 +1,15 @@
 <script>
     import { spellStore } from "../../stores/spellStore.js";
+    import { getContext } from "svelte";
 
-    export let spellEffect;
+    //export let spellEffect;
 
     console.log("Anim Settings: ---------ENTERING ANIM SETTINGS COMPONENT--------");
-    console.log("Anim Settings: spellEffect", $spellEffect);
 
-    let requiredSettings;
+    const spellStoreHost = getContext("spellStoreHost");
+    let spellEffect = $spellStoreHost;
+    $: spellEffect = $spellStoreHost; 
+    $: console.log("Anim Settings: spellEffect", spellEffect);
     
 
 </script>

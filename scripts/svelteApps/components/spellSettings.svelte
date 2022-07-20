@@ -1,9 +1,14 @@
 <script>
     import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
     import CustomSummonForm from "./CustomSummonForm.svelte";
-
-    export let spellEffect;
+    import CustomDetectForm from "./CustomDetectForm.svelte";
+    import { getContext } from "svelte";
     
+    //export let spellEffect;
+    const spellStoreHost = getContext("spellStoreHost");
+    let spellEffect = $spellStoreHost;
+    $: spellEffect = $spellStoreHost; 
+
     console.log("Spell Settings: --------ENTERING SPELL SETTINGS COMPONENT-------");
     console.log("Spell Settings: spellEffect: ", $spellEffect);
 
@@ -11,7 +16,6 @@
     let wallSpecificSettings = {};
     let wallType = $spellEffect.flagData.wallType ?? "fire";
 
-    $: console.log("Spell Settings: spellEffect.settings: ", $spellEffect.settings);
 
     $: {
         if($spellEffect.name.includes(localize("ASE.WallSpell"))){
@@ -72,9 +76,9 @@
     </tbody>
 </table>
 {#if $spellEffect.name.includes(localize("ASE.Summon"))}
-    <CustomSummonForm
-        summonOptions={summonOptions}
-        spellEffect={spellEffect}
-    />
+    <CustomSummonForm/>
+{/if}
+{#if $spellEffect.name.includes(localize("ASE.DetectStuff"))}
+    <CustomDetectForm/>
 {/if}
 
