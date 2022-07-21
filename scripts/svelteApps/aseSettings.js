@@ -1,5 +1,5 @@
 import { SvelteApplication } from '@typhonjs-fvtt/runtime/svelte/application';
-import aseSettingsAppShell from './aseSettingsAppShell_v2.svelte';
+import ASESettingsAppShell from './ASESettingsAppShell.svelte';
 export default class ASESettings extends SvelteApplication {
     constructor(item) {
         super({
@@ -7,7 +7,7 @@ export default class ASESettings extends SvelteApplication {
             id: `ase-item-settings`,
             zIndex: 102,
             svelte: {
-                class: aseSettingsAppShell,
+                class: ASESettingsAppShell,
                 target: document.body,
                 props: {
                     item: item,

@@ -1,4 +1,6 @@
 import { animateDeadDialog } from "../apps/animte-dead-dialog.js"
+import AnimateDeadDialog  from "../svelteApps/AnimateDeadDialog.js"
+
 import ASESettings from "../apps/aseSettings.js";
 import * as utilFunctions from "../utilityFunctions.js";
 
@@ -23,7 +25,7 @@ export class animateDead {
                 && target !== tokenD
         });
 
-        new animateDeadDialog(corpses, { raiseLimit: raiseLimit, effectSettings: aseSettings }).render(true);
+        new AnimateDeadDialog({corpses: corpses, raiseLimit: raiseLimit, effectSettings: aseSettings }, {}).render(true);
 
     }
 
@@ -115,7 +117,7 @@ export class animateDead {
             flagValue: currFlags.magicSchoolColor ?? 'blue',
         });
         soundOptions.push({
-            label: game.i18n.localize('ASE.MagicSchoolColorLabel'),
+            label: game.i18n.localize('ASE.MagicSchoolIntroSoundLabel'),
             type: 'fileInput',
             name: 'flags.advancedspelleffects.effectOptions.magicSchoolSound',
             flagName: 'magicSchoolSound',
