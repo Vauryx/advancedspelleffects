@@ -1,5 +1,5 @@
 // Magic Missile spell
-import { MissileDialog } from "../apps/missile-dialog.js";
+import  MissileDialog  from "../svelteApps/MissileDialog.js";
 import * as utilFunctions from "../utilityFunctions.js";
 export class magicMissile {
     static async registerHooks() {

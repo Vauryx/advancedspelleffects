@@ -58,7 +58,7 @@
         let flagData = {
             enableASE: enableASE,
             spellEffect: $currentSpell.name,
-            effectOptions: $currentSpell.flagData,
+            effectOptions: enableASE ? $currentSpell.flagData : {},
         };
         console.log('App Shell: FlagData Updating: ', flagData);
         const updatedFlags = {
@@ -77,45 +77,37 @@
 	});
     
 </script>
-<ApplicationShell
-    bind:elementRoot>
+<ApplicationShell bind:elementRoot>
     <form
-    bind:this={form}
-    on:submit|preventDefault
-    autocomplete="off"
-    id="ase-settings"
-    class="overview"
->
-<div class="ase-settings-section">
-    <EnableASE
-        bind:enableASE
-    />
-    {#if enableASE}
-        <SharedSettings
-            itemName={item.name}
-        />
-        <NavBar 
-            bind:currentTab
-        />
-        {#if currentTab == SpellSettings}
-            <SpellSettings/>
-        {:else if currentTab == AnimSettings}
-            <AnimSettings/>
-        {:else if currentTab == SoundSettings}
-            <SoundSettings/>
-        {/if}
-    {/if}
-</div>
-<div class="aseBottomSection" style="margin-bottom: 5px">
-    <div class="ase-submit">
-        <div class="flexcol" style="grid-row:1/2; grid-column:2/3">
-            <button
-                class="footer-button"
-                on:click|preventDefault={closeApp}
-                >{localize("ASE.SaveCloseButtonLabel")}</button
-            >
+        bind:this={form}
+        on:submit|preventDefault
+        autocomplete="off"
+        id="ase-settings"
+        class="overview">
+        <div class="ase-settings-section">
+            <EnableASE bind:enableASE />
+            {#if enableASE}
+                <SharedSettings itemName={item.name} />
+                <NavBar bind:currentTab />
+                {#if currentTab == SpellSettings}
+                    <SpellSettings />
+                {:else if currentTab == AnimSettings}
+                    <AnimSettings />
+                {:else if currentTab == SoundSettings}
+                    <SoundSettings />
+                {/if}
+            {/if}
         </div>
-    </div>
-</div>
-</form>
+        <div class="aseBottomSection" style="margin-bottom: 5px">
+            <div class="ase-submit">
+                <div class="flexcol" style="grid-row:1/2; grid-column:2/3">
+                    <button
+                        class="footer-button"
+                        on:click|preventDefault={closeApp}
+                        >{localize("ASE.SaveCloseButtonLabel")}</button
+                    >
+                </div>
+            </div>
+        </div>
+    </form>
 </ApplicationShell>

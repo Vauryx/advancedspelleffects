@@ -43,8 +43,13 @@
         if(!zombieTokenData || !skeletonTokenData){
             ui.notifications.error(game.i18n.localize("ASE.AssociatedActorNotFoundNotification"));
             console.log("Animate Dead App Shell: ERROR: Zombie or Skeleton Token Data not found!, Check spell Settings to ensure the actors are set up");
+            if(raisesLeft <= 0 || corpses.length == 0){
+                console.log("Animate Dead App Shell: All raises used up, closing app...");
+                application.close();
+            }
             return;
         }
+
         delete zombieTokenData.x;
         delete zombieTokenData.y;
         delete skeletonTokenData.x;
@@ -80,8 +85,7 @@
         id="animte-dead-shell"
         class="overview">
         <section class="content">
-            <p>{localize("ASE.AnimateDeadDialogRaiseMessage")}</p>
-            <p><input type="number" id="raiseLimit" style='width: 2em;' readonly value="{raisesLeft}" /></p>
+            <p>{localize("ASE.AnimateDeadDialogRaiseMessage")} {raisesLeft}</p>
                 <table width="100%">
                     <tbody>
                         <tr>
@@ -89,7 +93,7 @@
                             <th>{localize("ASE.AnimateDeadDialogHeaderRaise")}</th>
                         </tr>
                         {#each corpses as corpse (corpse.id)}
-                            <tr class='corpseToken' id={corpse.id}>
+                            <tr class='corpseToken' id={corpse.id} on:mouseenter="{corpse._onHoverIn()}" on:mouseleave="{corpse._onHoverOut()}">
                                 <td><img src="{corpse.data.img}" width="30" height="30" style="border:0px" alt="Token"> -
                                     {corpse.name}
                                 </td>
