@@ -9,6 +9,8 @@
     import { writable } from 'svelte/store';
     import { onDestroy } from 'svelte';
 
+    import {MissileMarkerSequence} from "../sequences/MissileMarkerSequence.js";
+
     export let elementRoot;
     export let data;
     const { application } = getContext("external");
@@ -48,7 +50,7 @@
             }
         }
     }
-    function addMissile(token, targetIndex, type = ''){
+    async function addMissile(token, targetIndex, type = ''){
         console.log("Missile Dialog App Shell: addMissile: ", token.name);
         if (missilesRemaining <= 0) {
             ui.notifications.info("Missile Limit Reached!");
@@ -57,6 +59,10 @@
         missilesRemaining--;
         attacks.push({token: token, type: type});
         attacks = attacks;
+        //find number of attacks for this token
+        let markerIndex = attacks.filter(attack => attack.token === token).length - 1;
+        let markerSequence = MissileMarkerSequence(data.effectOptions, token, markerIndex, type);
+        markerSequence.play();
         if(targetIndex == -1){
             targets.push({token: token, missilesAssigned: 1});
             targets = targets;
@@ -71,6 +77,8 @@
             console.log("Missile Dialog App Shell: removeMissile: token: ", token);
             let attackIndex = attacks.slice().reverse().findIndex(attack => attack.token === token);
             console.log("Missile Dialog App Shell: removeMissile: attackIndex: ", attackIndex);
+            let markerIndex = attacks.filter(attack => attack.token === token).length - 1;
+            Sequencer.EffectManager.endEffects({name: `missile-target-${token.id}-${markerIndex}`, object: token});
             attacks.splice((attacks.length-1)-attackIndex, 1);
             attacks = attacks;
             targets[targetIndex].missilesAssigned--;
