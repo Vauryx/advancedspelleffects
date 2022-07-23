@@ -6,7 +6,7 @@ import { concentrationHandler } from "./concentrationHandler.js";
 import { midiHandler } from "./midiHandler.js";
 import { noMidiHandler } from "./noMidiHandler.js";
 import { MissileDialog } from "./apps/missile-dialog.js";
-
+import { SpellStateMachine } from "./SpellStateMachine.js";
 import { spellStore } from "./stores/spellStore.js";
 //import { effectOptionsStore } from "./stores/effectOptionsStore.js";
 
@@ -20,6 +20,7 @@ const aseModules = {
 
 Hooks.once('init', async function () {
   console.log("Registering ASE game settings...");
+  game.ASESpellStateManager = new SpellStateMachine();
   const debouncedReload = foundry.utils.debounce(() => { window.location.reload(); }, 100);
   game.settings.register("advancedspelleffects", "overrideGridHighlight", {
     name: "Enable ASE Grid Highlight Override",

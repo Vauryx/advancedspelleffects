@@ -23,12 +23,14 @@
     let missilesRemaining = data.numMissiles;
     let targets = [];
     let attacks = [];
+    game.user.updateTokenTargets([]);
     $: console.log("Missile Dialog App Shell: Targets: ", targets);
     $: console.log("Missile Dialog App Shell: Attacks: ", attacks);
 
     onDestroy(async () => {
 		console.log('the component is being destroyed...');
         document.removeEventListener("mouseup", handleClick, false);
+        Sequencer.EffectManager.endEffects({name: `missile-target-*`});
 	});
 
     function handleClick(event){
@@ -88,6 +90,24 @@
             targets = targets;
         }
     }
+    function launchMissiles(){
+        console.log("Missile Dialog App Shell: launchMissiles: ");
+        //build array of targetUuids from attacks[i].token.document.uuid
+        let targetUuids = [];
+        attacks.forEach(attack => {
+            targetUuids.push(attack.token.document.uuid);
+        }
+        );
+        let returnData = {
+            targets: targetUuids,
+            casterId: data.casterId,
+            itemCardId: data.itemCardId,
+            itemUUID: data.item.uuid,
+            iterate: 'targets'
+        };
+        data.resolve(returnData);
+        application.close();
+    }
 </script>
 
 <ApplicationShell bind:elementRoot>
@@ -129,7 +149,7 @@
         </table>
     </section>
 <footer class="sheet-footer flexrow">
-    <button id="submitButton" type="submit" name="submit">
+    <button on:click={launchMissiles}>
         <i class="fa fa-check-square"></i> {localize("ASE.Done")}
     </button>
 </footer>

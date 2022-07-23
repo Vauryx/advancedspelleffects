@@ -14,7 +14,8 @@ export default class MissileDialog extends SvelteApplication {
                 props: {
                     data: data
                 }
-            }
+            },
+            close: () => {console.log("ASE: Missile Dialog Closed!");}
         });
         console.log("ASE: Launching Missile Dialog!", data);
     }
@@ -27,7 +28,7 @@ export default class MissileDialog extends SvelteApplication {
             height: "auto",
             left: game.user?.getFlag("advancedspelleffects", "missileDialogPos.left") ?? "auto",
             top: game.user?.getFlag("advancedspelleffects", "missileDialogPos.top") ?? "auto",
-            closeOnSubmit: true,
+            closeOnSubmit: true
         })
     }
 }

@@ -40,14 +40,21 @@ export class eldritchBlast {
             aseEffectOptions.dmgMod += casterActor?.data?.data?.abilities?.cha?.mod ?? 0;
         }
         //console.log('ASEEffectOptions: ', aseEffectOptions);
-        new MissileDialog({
-            casterId: casterToken.id,
-            numMissiles: numMissiles,
-            itemCardId: itemCardId,
-            effectOptions: aseEffectOptions,
-            item: spellItem,
-            actionType: "rsak",
-        }).render(true);
+        // create a new promise that resolves when the missile dialog is closed
+        const missileDialogPromise = new Promise((resolve, reject) => {
+                new MissileDialog({
+                casterId: casterToken.id,
+                numMissiles: numMissiles,
+                itemCardId: itemCardId,
+                effectOptions: aseEffectOptions,
+                item: spellItem,
+                actionType: "rsak",
+                resolve: resolve
+            }).render(true);
+        });
+        let returnData = await missileDialogPromise;
+        return returnData;
+        
     }
 
     static async getRequiredSettings(currFlags) {
