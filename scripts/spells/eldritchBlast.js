@@ -11,7 +11,7 @@ export class eldritchBlast {
         const casterToken = canvas.tokens.get(midiData.tokenId);
         //console.log("casterToken", casterToken);
         const characterLevel = casterActor.data?.data?.details?.level ?? casterActor.data?.data?.details?.spellLevel ?? 1;
-        //console.log(`Caster level: ${characterLevel}`);
+        console.log(`Caster level: ${characterLevel}`);
         let numMissiles = 1;
         if (characterLevel >= 5) {
             numMissiles += 1;
@@ -41,19 +41,15 @@ export class eldritchBlast {
         }
         //console.log('ASEEffectOptions: ', aseEffectOptions);
         // create a new promise that resolves when the missile dialog is closed
-        const missileDialogPromise = new Promise((resolve, reject) => {
-                new MissileDialog({
+        new MissileDialog({
                 casterId: casterToken.id,
                 numMissiles: numMissiles,
                 itemCardId: itemCardId,
                 effectOptions: aseEffectOptions,
                 item: spellItem,
                 actionType: "rsak",
-                resolve: resolve
             }).render(true);
-        });
-        let returnData = await missileDialogPromise;
-        return returnData;
+        return;
         
     }
 
@@ -227,7 +223,7 @@ export class eldritchBlast {
             label: game.i18n.localize("ASE.BeamImpactVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactVolume',
-            flagname: 'missileImpactVolume',
+            flagName: 'missileImpactVolume',
             flagValue: currFlags.missileImpactVolume ?? 0.5,
             min: 0,
             max: 1,

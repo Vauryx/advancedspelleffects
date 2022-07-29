@@ -43,7 +43,6 @@ export class SpellStore extends ArrayObjectStore {
             }
             else if(settingType != 'summonOptions') {
                setting.forEach(s => {
-                  //console.log("s", s);
                   flagData[s.flagName] = s.flagValue;
                });
             }
@@ -60,6 +59,7 @@ export class SpellStore extends ArrayObjectStore {
             settings: settings
          });
       }
+      console.log("ASE: SpellStore initialized: ", this);
    }
 
 }

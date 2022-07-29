@@ -8,9 +8,11 @@
     import { setContext } from "svelte";
     import { writable } from 'svelte/store';
     import { onDestroy } from 'svelte';
+    import { aseSocket } from "../aseSockets.js";
 
     import {MissileMarkerSequence} from "../sequences/MissileMarkerSequence.js";
-
+    import { MissileSequence } from "../sequences/MissileSequence.js";
+    import { MissileChatBuilder } from "../chat/MissileChatBuilder.js";
     export let elementRoot;
     export let data;
     const { application } = getContext("external");
@@ -24,18 +26,17 @@
     let targets = [];
     let attacks = [];
     game.user.updateTokenTargets([]);
-    $: console.log("Missile Dialog App Shell: Targets: ", targets);
-    $: console.log("Missile Dialog App Shell: Attacks: ", attacks);
 
     onDestroy(async () => {
-		console.log('the component is being destroyed...');
+		console.log('the component is being destroyed...', application);
         document.removeEventListener("mouseup", handleClick, false);
         Sequencer.EffectManager.endEffects({name: `missile-target-*`});
+        await aseSocket.executeAsGM("updateFlag", game.user.id, "missileDialogPos", { left: application.position.left, top: application.position.top });
 	});
 
     function handleClick(event){
         //console.log("Missile Dialog App Shell: handleClick: event: ", event);
-        let attackType = event.altKey ? 'kh' : (event.ctrlKey ? 'kl' : '');
+        let attackType = event.altKey ? 'advantage' : (event.ctrlKey ? 'disadvantage' : '');
         let token = canvas.tokens.placeables.filter(token => {
             const mouse = canvas.app.renderer.plugins.interaction.mouse;
             const mouseLocal = mouse.getLocalPosition(token);
@@ -53,7 +54,6 @@
         }
     }
     async function addMissile(token, targetIndex, type = ''){
-        console.log("Missile Dialog App Shell: addMissile: ", token.name);
         if (missilesRemaining <= 0) {
             ui.notifications.info("Missile Limit Reached!");
             return;
@@ -76,9 +76,7 @@
     function removeMissile(token, targetIndex){
         if(targetIndex > -1) {
             missilesRemaining++;
-            console.log("Missile Dialog App Shell: removeMissile: token: ", token);
             let attackIndex = attacks.slice().reverse().findIndex(attack => attack.token === token);
-            console.log("Missile Dialog App Shell: removeMissile: attackIndex: ", attackIndex);
             let markerIndex = attacks.filter(attack => attack.token === token).length - 1;
             Sequencer.EffectManager.endEffects({name: `missile-target-${token.id}-${markerIndex}`, object: token});
             attacks.splice((attacks.length-1)-attackIndex, 1);
@@ -91,21 +89,28 @@
         }
     }
     function launchMissiles(){
-        console.log("Missile Dialog App Shell: launchMissiles: ");
         //build array of targetUuids from attacks[i].token.document.uuid
-        let targetUuids = [];
-        attacks.forEach(attack => {
-            targetUuids.push(attack.token.document.uuid);
+        if(attacks.length > 0){
+            let targetUuids = [];
+            attacks.forEach(attack => {
+                    targetUuids.push(attack.token.document.uuid);
+                }
+            );
+            const  dialogData = {
+                targets: targetUuids,
+                attacks: attacks,
+                casterId: data.casterId,
+                itemCardId: data.itemCardId,
+                iterate: 'targets',
+                sequenceBuilder: MissileSequence,
+                sequences: [MissileSequence({intro: true, caster: data.casterId, effectOptions: data.effectOptions, targets: []})],
+                effectOptions: data.effectOptions,
+                chatBuilder: MissileChatBuilder,
+                rolls: []
+            };
+            const itemUUID = data.item.uuid;
+            game.ASESpellStateManager.addSpell(itemUUID, dialogData);
         }
-        );
-        let returnData = {
-            targets: targetUuids,
-            casterId: data.casterId,
-            itemCardId: data.itemCardId,
-            itemUUID: data.item.uuid,
-            iterate: 'targets'
-        };
-        data.resolve(returnData);
         application.close();
     }
 </script>

@@ -30,11 +30,11 @@ export function MissileMarkerSequence(effectOptions, target, index, type) {
             .persist()
             .animateProperty("sprite", "scale.x", { from: 0.01, to: baseScale, delay: 200, duration: 700, ease: "easeOutBounce" })
             .animateProperty("sprite", "scale.y", { from: 0.01, to: baseScale, duration: 900, ease: "easeOutBounce" })
-    if (type == 'kh') {
+    if (type == 'advantage') {
         markerSeq.loopProperty("sprite", "position.y", { from: 0, to: -10, duration: 1000, ease: "easeInOutSine", pingPong: true });
 
     }
-    else if (type == 'kl') {
+    else if (type == 'disadvantage') {
         markerSeq.loopProperty("sprite", "position.y", { from: 0, to: 10, duration: 1000, ease: "easeInOutSine", pingPong: true });
     }
     return markerSeq;

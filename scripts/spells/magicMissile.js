@@ -203,7 +203,7 @@ export class magicMissile {
             label: game.i18n.localize('ASE.DartImpactVolumeLabel'),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactVolume',
-            flagname: 'missileImpactVolume',
+            flagName: 'missileImpactVolume',
             flagValue: currFlags.missileImpactVolume ?? 0.5,
             min: 0,
             max: 1,

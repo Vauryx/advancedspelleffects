@@ -113,8 +113,8 @@ export class ASEHandler {
                 await scorchingRay.selectTargets(data);
                 return;
             case game.i18n.localize('ASE.EldritchBlast'):
-                let attacks = await eldritchBlast.selectTargets(data);
-                return attacks;
+                await eldritchBlast.selectTargets(data);
+                return;
             case game.i18n.localize('ASE.Moonbeam'):
                 if (!data.flavor?.includes("- Damage Roll")) {
                     await moonBeam.callBeam(data);

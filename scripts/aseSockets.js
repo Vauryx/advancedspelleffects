@@ -20,8 +20,16 @@ export function setupASESocket() {
         aseSocket.register("updateDocument", updateDocument);
         aseSocket.register("updateDocuments", updateDocuments);
         aseSocket.register("checkGMAlwaysAccept", checkGMAlwaysAccept);
+        aseSocket.register("createGMChat", createGMChat);
     }
 };
+
+async function createGMChat(data) {
+        let gm = utilFunctions.firstGM();
+        await ChatMessage.create({ content: data.content, whisper: ChatMessage.getWhisperRecipients(gm.name) });
+        await ui.chat.scrollBottom();
+        return;
+}
 
 async function checkGMAlwaysAccept() {
 

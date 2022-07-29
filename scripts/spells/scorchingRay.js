@@ -214,7 +214,7 @@ export class scorchingRay {
             label: game.i18n.localize("ASE.RayImpactVolumeLabel"),
             type: 'rangeInput',
             name: 'flags.advancedspelleffects.effectOptions.missileImpactVolume',
-            flagname: 'missileImpactVolume',
+            flagName: 'missileImpactVolume',
             flagValue: currFlags.missileImpactVolume ?? 0.5,
             min: 0,
             max: 1,

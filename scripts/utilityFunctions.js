@@ -270,7 +270,7 @@ export function getAllItemsNamed(name) {
     return itemsWithName;
 }
 
-function firstGM() {
+export function firstGM() {
     return game.users.find(u => u.isGM && u.active);
 }
 
@@ -486,3 +486,4 @@ export function isPointInCircle(circleCenter, checkPoint, insideRange, outsideRa
     //console.log('distance: ', distanceToPoint);
     return distanceToPoint > insideRange && distanceToPoint < outsideRange;
 }
+

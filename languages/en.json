@@ -91,6 +91,7 @@
   "ASE.AttackRoll": "Attack Roll",
   "ASE.SaveRoll": "Save Roll",
   "ASE.Damage": "Damage",
+  "ASE.DamageRoll": "Damage Roll",
   "ASE.NoOne": "No one",
   "ASE.NoSpellItem": "No spell named {spellName} found.",
 
