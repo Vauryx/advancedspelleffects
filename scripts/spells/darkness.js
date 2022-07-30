@@ -183,7 +183,8 @@ export class darkness {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: true
         }
 
     }

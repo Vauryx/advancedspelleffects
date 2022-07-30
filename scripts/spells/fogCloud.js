@@ -63,6 +63,7 @@ export class fogCloud {
             delay: soundDelay
         };
         const displayCrosshairs = async (crosshairs) => {
+            console.log("Warpgate Crosshairs...", crosshairs);
             new Sequence("Advanced Spell Effects")
                 .effect()
                 .file("jb2a.fog_cloud.1.white")
@@ -81,7 +82,7 @@ export class fogCloud {
             drawOutline: false,
             interval: 1
         }
-        let fogCloudTemplate = await warpgate.crosshairs.show(crosshairsConfig, { show: displayCrosshairs });
+        let fogCloudTemplate = await warpgate.crosshairs.show(crosshairsConfig);
 
         await placeCloudAsTile(fogCloudTemplate, casterActor.id, itemLevel, soundOptions);
 
@@ -219,7 +220,8 @@ export class fogCloud {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: true
         }
 
     }

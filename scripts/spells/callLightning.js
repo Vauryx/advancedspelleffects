@@ -626,6 +626,7 @@ export class callLightning {
             spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions,
+            allowInitialMidiCall: true
         }
     }
 

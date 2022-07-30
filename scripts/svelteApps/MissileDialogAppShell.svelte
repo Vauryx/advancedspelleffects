@@ -19,7 +19,7 @@
     let form = void 0;
 
     console.log("Missile Dialog App Shell: ------ Entering App Shell -------");
-    console.log("Missile Dialog App Shell: Data: ", data);
+    //console.log("Missile Dialog App Shell: Data: ", data);
     document.addEventListener("mouseup", handleClick, false);
 
     let missilesRemaining = data.numMissiles;
@@ -28,7 +28,7 @@
     game.user.updateTokenTargets([]);
 
     onDestroy(async () => {
-		console.log('the component is being destroyed...', application);
+		console.log('the missile dialog is being destroyed...', application);
         document.removeEventListener("mouseup", handleClick, false);
         Sequencer.EffectManager.endEffects({name: `missile-target-*`});
         await aseSocket.executeAsGM("updateFlag", game.user.id, "missileDialogPos", { left: application.position.left, top: application.position.top });
@@ -64,6 +64,7 @@
         //find number of attacks for this token
         let markerIndex = attacks.filter(attack => attack.token === token).length - 1;
         let markerSequence = MissileMarkerSequence(data.effectOptions, token, markerIndex, type);
+        //console.log("Missile Dialog App Shell: addMissile: markerSequence: ", markerSequence);
         markerSequence.play();
         if(targetIndex == -1){
             targets.push({token: token, missilesAssigned: 1});

@@ -19,14 +19,18 @@ export const versionMigration = {
         spellList[game.i18n.localize("ASE.ChainLightning")] = game.i18n.localize("ASE.ChainLightning");
         spellList[game.i18n.localize("ASE.MirrorImage")] = game.i18n.localize("ASE.MirrorImage");
         let flags = item?.data?.flags?.advancedspelleffects ?? false;
+        console.log("flags", flags);
         if (!flags) return;
-        if (!flags.enableASE || (flags.spellEffect && flags.spellEffect != "")) return;
-        console.log(`Migrating ${item.name} for ASE...`);
-        if (item.name.includes(game.i18n.localize("ASE.Summon"))) {
-            await item.setFlag("advancedspelleffects", "spellEffect", spellList[item.name] ? spellList[item.name] : game.i18n.localize("ASE.Summon"));
-        }
-        else {
-            await item.setFlag("advancedspelleffects", "spellEffect", spellList[item.name] ? spellList[item.name] : game.i18n.localize("ASE.AnimateDead"));
+        if (!flags.enableASE) return;
+        if(flags.effectOptions.tagOptions){
+            //if flags.tagOptions is not an array, convert to array of objects with key as index
+            if(!Array.isArray(flags.effectOptions.tagOptions)){
+                let newTagOptions = [];
+                for(let key in flags.effectOptions.tagOptions){
+                    newTagOptions.push({key: flags.effectOptions.tagOptions[key]});
+                }
+                await item.setFlag("advancedspelleffects", "effectOptions.tagOptions", newTagOptions);
+            }
         }
         console.log('Done migrating flags for old spell...');
     }

@@ -13,7 +13,7 @@ export async function MissileChatBuilder(data) {
         let currDamageRoll = rolls[i].damageRoll ?? {};
         let currTarget = rolls[i].target;
         let currTargetName = currTarget.name;
-        let hit = rolls[i].hit;
+        let hit = !currAttackRoll ? true : rolls[i].hit;
         let currAttackBreakDown = '';
         let currDamageBreakdown = '';
         let damageTotalText = '';
@@ -46,7 +46,7 @@ export async function MissileChatBuilder(data) {
             currDamageBreakdown = `NO ROLL`;
             damageTotalText = `NO ROLL`;
         }
-        content += `<tr><td><figure><img alt="Token" src="${currTarget.document.data.img}" height="40" style="border:0px"><figcaption style="white-space: nowrap;">${currTargetName}</figcaption></figure></td><td>${hit ? 'Hit' : 'Miss'}</td><td title = '${currAttackBreakDown}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${damageTotalText}</td></tr>`;
+        content += `<tr><td><figure><img alt="Token" src="${currTarget.data.img}" height="40" style="border:0px"><figcaption style="white-space: nowrap;">${currTargetName}</figcaption></figure></td><td>${hit ? 'Hit' : 'Miss'}</td><td title = '${currAttackBreakDown}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${damageTotalText}</td></tr>`;
     }
     
 

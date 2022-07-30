@@ -369,7 +369,7 @@ export class detectMagic {
             label: "Wave Sound Delay: ",
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.waveSoundDelay',
-            flagName: 'wakeSoundDelay',
+            flagName: 'waveSoundDelay',
             flagValue: currFlags.waveSoundDelay ?? 0,
         });
         soundOptions.push({

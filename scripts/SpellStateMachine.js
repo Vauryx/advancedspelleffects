@@ -60,16 +60,17 @@ export class SpellStateMachine {
                                             "autoFastDamage": true,
                                         }
                 };
-                console.log("ASE: SPELLSTATEMACHINE: midi options", options.targetUuids);
+                //console.log("ASE: SPELLSTATEMACHINE: midi options", options.targetUuids);
                 if(spell.options.attacks){
                     const attackType = spell.options.attacks[spell.state]?.type;
+                    //console.log("ASE: SPELLSTATEMACHINE: attack type: ", attackType);
                     if(attackType && attackType != ""){
                         options.workflowOptions[attackType] = attackType;
                     }
                 }
                 //console.log("ASE: MIDI HANDLER: STATE TRANSITION: MIDI SETTINGS", options);
-                await MidiQOL.completeItemRoll(item, options);
                 spell.state++;
+                await MidiQOL.completeItemRoll(item, options);
             } else {
                 spell.active = false;
                 spell.finished = true;
@@ -86,7 +87,7 @@ export class SpellStateMachine {
                 }
                 if(spell.options.chatBuilder){
                     let chatContent = await this.buildChatCard(uuid);
-                    console.log("ASE: MIDI HANDLER: CHAT CONTENT", chatContent);
+                    //console.log("ASE: MIDI HANDLER: CHAT CONTENT", chatContent);
                     await aseSocket.executeAsGM("createGMChat", {content: chatContent});
                 }
                 this.removeSpell(uuid);

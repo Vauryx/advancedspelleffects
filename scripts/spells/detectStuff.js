@@ -51,6 +51,7 @@ export class detectStuff {
         //console.log("Detection Spell: ", this);
     }
     static registerHooks() {
+        console.log("Registering Hooks for Detect Stuff");
         Hooks.on("updateToken", detectStuff._updateToken);
     }
     async cast() {
@@ -303,7 +304,7 @@ export class detectStuff {
     }
 
     static async _updateToken(tokenDocument, updateData) {
-
+        //console.log("update token");
         if ((!updateData.x && !updateData.y)) return;
 
 
@@ -318,14 +319,14 @@ export class detectStuff {
         let item = tokenDocument._actor?.items?.get(itemId) ?? game.items.get(itemId) ?? false;
         if (!item) return;
 
-
+        //console.log("update token: Item: ", item);
         if (tokenDocument.actor.effects.filter(async (effect) => {
             let effectItem = await fromUuid(effect.data.origin);
             return effectItem.name == item.name;
         }).length == 0) {
             return;
         }
-
+        //console.log("Found relevant effect");
         const effectOptions = item.getFlag('advancedspelleffects', 'effectOptions');
         let newPos = { x: 0, y: 0 };
         newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
@@ -442,6 +443,10 @@ export class detectStuff {
         let detectedObjectsOutOfRange = detectedObjects.filter(o => o.distance > effectOptions.range);
         let detectedObjectsInRange = detectedObjects.filter(o => o.distance <= effectOptions.range);
         let detectedObjectsIDs = tokenDocument.getFlag("advancedspelleffects", "objectsDetected");
+
+        //console.log("Detected Objects: ", detectedObjects);
+        //console.log("Detected Objects Out of Range: ", detectedObjectsOutOfRange);
+       // console.log("Detected Objects In Range: ", detectedObjectsInRange);
         //handle out of range objects
         for await (let detectedObj of detectedObjectsOutOfRange) {
             if (preset == 'magic') {
@@ -538,7 +543,7 @@ export class detectStuff {
             {"goodAndEvil": 'Detect Good and Evil'},
             {"poisonAndDisease": 'Detect Poison and Disease'},
             {"custom": 'Custom'}];
-
+            
         spellOptions.push({
             label: game.i18n.localize("ASE.DetectPresetsLabel"),
             type: 'dropdown',
@@ -649,7 +654,8 @@ export class detectStuff {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: true
         }
 
     }

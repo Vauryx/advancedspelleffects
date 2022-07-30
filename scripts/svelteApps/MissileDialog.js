@@ -17,7 +17,6 @@ export default class MissileDialog extends SvelteApplication {
             },
             close: () => {console.log("ASE: Missile Dialog Closed!");}
         });
-        console.log("ASE: Launching Missile Dialog!", data);
     }
 
     static get defaultOptions() {

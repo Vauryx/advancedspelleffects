@@ -57,7 +57,6 @@ export class animateDead {
         if (!summonActorsFolder || summonActorsList.length === 0) {
             summonActorsList = await utilFunctions.createFolderWithActors("ASE-Summons", ["Skeleton", "Zombie"]);
         }
-
         let summonOptions = [];
         let tempObj = {};
         summonActorsList.forEach((actor) => {
@@ -235,6 +234,7 @@ export class animateDead {
             animOptions: animOptions,
             spellOptions: spellOptions,
             soundOptions: soundOptions,
+            allowInitialMidiCall: true,
         }
 
     }

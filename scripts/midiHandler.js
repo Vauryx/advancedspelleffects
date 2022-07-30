@@ -1,4 +1,5 @@
 import { ASEHandler } from "./ASEHandler.js"
+import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
 export class midiHandler {
     static registerHooks() {
         if (game.modules.get("midi-qol")?.active) {
@@ -35,30 +36,42 @@ export class midiHandler {
         console.log(" --------  ASE: MIDI HANDLER: DAMAGE ROLL COMPLETE: WORKFLOW TARGETS -------- ", workflow.targets);
     }
     static async _handleASE(workflow) {
-        //console.log("ASE: MIDI HANDLER: HANDLE ASE", workflow);
+        console.log("ASE: MIDI HANDLER: HANDLE ASE", workflow);
         const itemUUID = workflow.itemUuid;
-        let dialogData;
-        let currentItemState = game.ASESpellStateManager.getState(itemUUID);
-        if (currentItemState) {
-            //console.log("ASE: MIDI HANDLER: Item State Found!", currentItemState);
-            if(currentItemState.active && !currentItemState.finished){
-                return true;
+        const item = await fromUuid(itemUUID);
+        const spellEffect = item.getFlag("advancedspelleffects", "spellEffect");
+        const aseEnabled = item.getFlag("advancedspelleffects", "enableASE");
+        const allowInitialMidiCall = item.getFlag("advancedspelleffects", "effectOptions.allowInitialMidiCall") ?? true;
+        if (spellEffect && aseEnabled) {
+            let currentItemState = game.ASESpellStateManager.getState(itemUUID);
+            if (currentItemState) {
+                //console.log("ASE: MIDI HANDLER: Item State Found!", currentItemState);
+                if(currentItemState.active && !currentItemState.finished){
+                    return true;
+                }
+                else{
+                    //console.log("ASE: MIDI HANDLER: Item State Not Active!", currentItemState);
+                    return false;
+                }
             }
-            else{
-                //console.log("ASE: MIDI HANDLER: Item State Not Active!", currentItemState);
+            else {
+                //console.log("ASE: MIDI HANDLER: Item State Not Found!");
+                ASEHandler.handleASE(workflow);
+                if(allowInitialMidiCall) {
+                    return true;
+                } else {
                 return false;
+                }
             }
-        }
-        else {
-            //console.log("ASE: MIDI HANDLER: Item State Not Found!");
-            ASEHandler.handleASE(workflow);
-            return false;
+        } else {
+            return true;
         }
     }
+        
 
     static async _handleStateTransition(workflow) {
         console.log("ASE: MIDI HANDLER: STATE TRANSITION: WORKFLOW", workflow);
-        console.log("ASE: MIDI HANDLER: STATE TRANSITION: WORKFLOW TARGETS", workflow.targets);
+        //console.log("ASE: MIDI HANDLER: STATE TRANSITION: WORKFLOW TARGETS", workflow.targets);
         //console.log("ASE: MIDI HANDLER: STATE TRANSITION: DAMAGE ROLL", workflow.damageRoll);
         //console.log("ASE: MIDI HANDLER: STATE TRANSITION: ATTACK ROLL", workflow.attackRoll);
         const itemUUID = workflow.itemUuid;
@@ -66,18 +79,29 @@ export class midiHandler {
         const hitTargets = Array.from(workflow.hitTargets)
         let stateOptions = {};
         const targets = Array.from(workflow.targets);
-        console.log("ASE: MIDI HANDLER: STATE TRANSITION: TARGETS", targets);
+        let targetUuid = "";
+        let target;
+        let iterateListKey = "";
+        let currStateIndex = 0;
+        //console.log("ASE: MIDI HANDLER: STATE TRANSITION: TARGETS", targets);
         let currentItemState = game.ASESpellStateManager.getState(itemUUID);
         //console.log("ASE: MIDI HANDLER: STATE TRANSITION: CURRENT ITEM STATE", currentItemState);
         if (!currentItemState) {return;}
         if(currentItemState.active && !currentItemState.finished){
+            if(!targets || targets.length == 0){
+                iterateListKey = currentItemState.options.iterate;
+                currStateIndex = currentItemState.state - 1;
+                targetUuid = currentItemState.options[iterateListKey][currStateIndex-1];
+                target = await fromUuid(targetUuid);
+            } else {
+                target = targets[0];
+            }
             if(currentItemState.options.sequenceBuilder){
-                game.ASESpellStateManager.continueSequence(itemUUID, {intro: false, caster: caster, targets: targets, hit: hitTargets.length>0, effectOptions: currentItemState.options.effectOptions, type: "missile"});
+                game.ASESpellStateManager.continueSequence(itemUUID, {intro: false, caster: caster, targets: [target], hit: !workflow.attackRoll ? true : hitTargets.length>0, effectOptions: currentItemState.options.effectOptions, type: "missile"});
             }
             if(currentItemState.options.rolls){
-                stateOptions.rolls = {attackRoll: workflow.attackRoll, damageRoll: workflow.damageRoll, target: targets[0], hit: hitTargets.length>0};
+                stateOptions.rolls = {attackRoll: workflow.attackRoll, damageRoll: workflow.damageRoll, target: target, hit: hitTargets.length>0};
             }
-            console.log("ASE: MIDI HANDLER: STATE TRANSITION: STATE OPTIONS", stateOptions);
             game.ASESpellStateManager.nextState(itemUUID, stateOptions);
             return;
         }

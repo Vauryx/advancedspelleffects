@@ -41,10 +41,13 @@ export class SpellStore extends ArrayObjectStore {
             if(settingType == "summons"){
                flagData['summons'] = setting;
             }
-            else if(settingType != 'summonOptions') {
+            else if(settingType != 'summonOptions' && settingType != 'allowInitialMidiCall') {
+               //console.log("ASE: SPELLSTORE INIT: SETTING: ", setting, "SETTINGTYPE: ", settingType);
                setting.forEach(s => {
                   flagData[s.flagName] = s.flagValue;
                });
+            } else if (settingType == 'allowInitialMidiCall'){
+               flagData['allowInitialMidiCall'] = setting;
             }
          }
 

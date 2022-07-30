@@ -12,7 +12,6 @@ export function MissileMarkerSequence(effectOptions, target, index, type) {
     let baseOffset = canvas.grid.size / 2;
     let offsetMod = (-(1 / 4) * index) + 1;
     let offset = { x: baseOffset * offsetMod, y: baseOffset };
-
     let markerSeq = new Sequence("Advanced Spell Effects")
             .sound()
             .file(markerSound)

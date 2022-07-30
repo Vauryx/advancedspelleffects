@@ -39,6 +39,13 @@
     $: currentSpell = $spellStoreHost;
 
     if(!blankItem && flags.spellEffect == $currentSpell.name && flags.effectOptions){
+        if(flags.effectOptions.allowInitialMidiCall == undefined){
+            if(currentSpell.settings.allowInitialMidiCall != undefined) {
+                flags.effectOptions.allowInitialMidiCall = currentSpell.settings.allowInitialMidiCall;
+            } else {
+                flags.effectOptions.allowInitialMidiCall = true;
+            }
+        }
         $currentSpell.flagData = flags.effectOptions;
     }
     if(flags.effectOptions?.summons?.length > 0){
