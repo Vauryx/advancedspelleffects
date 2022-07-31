@@ -61,10 +61,10 @@ export class ASEHandler {
                 await chaosBolt.cast(data);
                 return;
             case game.i18n.localize('ASE.ActivateCallLightning'):
-
-                await callLightning.callLightningBolt(aseFlags.effectOptions.stormTileId, data.itemCardId, data.item.id);
-
-                return;
+                //await callLightning.callLightningBolt(aseFlags.effectOptions.stormTileId, data.itemCardId, data.item.id);
+                let newTargets = await callLightning.getBoltTargets(aseFlags.effectOptions.stormTileId);
+                
+                return {targets: newTargets};
             case game.i18n.localize('ASE.FogCloud'):
                 await fogCloud.createFogCloud(data);
                 return;

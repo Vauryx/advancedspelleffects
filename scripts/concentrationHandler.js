@@ -23,7 +23,7 @@ export class concentrationHandler {
         console.log("Handling removal of Concentration: ", activeEffect);
         const isGM = utilFunctions.isFirstGM();
         //console.log("Is first GM: ", isGM);
-        if (!isGM) return;
+        //if (!isGM) return;
         if (activeEffect.data.label != 'Concentration' && activeEffect.data.label != game.i18n.localize("ASE.ConcentratingLabel")) return;
         let origin = activeEffect.data.origin?.split(".");
         //console.log("Origin: ", origin);

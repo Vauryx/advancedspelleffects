@@ -7,8 +7,11 @@ export class callLightning {
     }
 
     static async createStormCloud(midiData) {
+        console.log("Creating Storm Cloud...", midiData);
         const item = midiData.item;
+        const itemUuid = item.uuid;
         const caster = canvas.tokens.get(midiData.tokenId);
+        const casterActor = game.actors.get(caster.actor.id);
         const spellLevel = midiData.itemLevel;
         //console.log(midiData);
         let aseFlags = item.getFlag("advancedspelleffects", 'effectOptions');
@@ -23,9 +26,7 @@ export class callLightning {
         const stormCloudSound = aseFlags?.stormCloudSound ?? "";
         const stormCloudVolume = aseFlags?.stormCloudVolume ?? 1;
         const stormCloudSoundDelay = aseFlags?.stormCloudSoundDelay ?? 0;
-        const placeCrackAsTile = aseFlags?.placeCrackAsTile ?? true;
-
-
+        const placeCrackAsTile = aseFlags?.placeCrackAsTile ?? false;
 
         let weatherDialogData = {
             buttons: [{ label: game.i18n.localize('ASE.Yes'), value: true }, { label: game.i18n.localize('ASE.No'), value: false }],
@@ -34,21 +35,6 @@ export class callLightning {
 
         let stormyWeather = await warpgate.buttonDialog(weatherDialogData, 'row');
 
-        let boltDamageDieCount;
-        let boltDamageDieType;
-        let boltDamageDieMod;
-        if (aseFlags?.overrideDamage) {
-            boltDamageDieCount = Number(aseFlags?.dmgDieCount) || Number(spellLevel);
-            boltDamageDieType = aseFlags?.dmgDie ?? 'd10';
-            boltDamageDieMod = Number(aseFlags?.dmgMod) || 0;
-        } else {
-            boltDamageDieCount = Number(spellLevel);
-            boltDamageDieType = 'd10';
-            boltDamageDieMod = 0;
-        }
-        boltDamageDieCount = stormyWeather ? boltDamageDieCount + 1 : boltDamageDieCount;
-
-        const boltDamage = `${boltDamageDieCount}${boltDamageDieType}${boltDamageDieMod != 0 ? `+${boltDamageDieMod}` : ''}`;
         //console.log('boltDamage: ', boltDamage);
 
         const displayCrosshairs = async (crosshairs) => {
@@ -87,10 +73,10 @@ export class callLightning {
             boltVolume: boltVolume,
             boltSoundDelay: boltSoundDelay,
             boltStyle: boltStyle,
-            boltDamage: boltDamage,
             spellLevel: spellLevel,
             itemId: item.id,
-            placeCrackAsTile: placeCrackAsTile
+            placeCrackAsTile: placeCrackAsTile,
+            originalItemUuid: itemUuid
         };
         let stormTileId = await placeCloudAsTile(effectOptions);
         //console.log("StomeTileID: ", stormTileId);
@@ -100,15 +86,22 @@ export class callLightning {
             }
         };
         const activationItemName = game.i18n.localize('ASE.ActivateCallLightning');
+        let castItemDamage = item.data.data.damage;
+        //castItemDamage.parts[0] is the damage formula, grab the first number in string
+        let newDamageNum = Number(castItemDamage.parts[0][0][0]) + (spellLevel - 3) + (stormyWeather ? 1 : 0);
+        //replace the first number in castItemDamage.parts[0] with newDamageNum keeping the rest of the formula
+        castItemDamage.parts[0][0] = castItemDamage.parts[0][0].replace(/\d+/, newDamageNum);
         updates.embedded.Item[activationItemName] = {
             "type": "spell",
             "img": item.img,
             "data": {
                 "ability": "",
-                "actionType": "other",
+                "actionType": "save",
                 "activation": { "type": "action", "cost": 1, "condition": "" },
-                "damage": { "parts": [], "versatile": "" },
+                "damage": castItemDamage,
+                "scaling": item.data.data.scaling,
                 "level": spellLevel,
+                "save": item.data.data.save,
                 "preparation": { "mode": 'atwill', "prepared": true },
                 "range": { "value": null, "long": null, "units": "" },
                 "school": "con",
@@ -120,8 +113,11 @@ export class callLightning {
                 "advancedspelleffects": {
                     "enableASE": true,
                     "spellEffect": game.i18n.localize('ASE.ActivateCallLightning'),
+                    "castItem": true,
+                    "savesRequired": true,
                     'effectOptions': {
-                        'stormTileId': stormTileId
+                        'stormTileId': stormTileId,
+                        'allowInitialMidiCall': true
                     }
                 }
             }
@@ -131,9 +127,15 @@ export class callLightning {
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
         await ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage'), { name: caster.actor.name }}` });
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
-        await callLightning.callLightningBolt(stormTileId, midiData.itemCardId, midiData.item.id);
+        effectOptions.stormTileId = stormTileId;
+        effectOptions.concentration = true;
+        let castItem = casterActor.items.getName(activationItemName);
+        effectOptions.castItem = castItem.uuid;
+        game.ASESpellStateManager.addSpell(midiData.itemUuid, effectOptions);
+
 
         async function placeCloudAsTile(effectOptions) {
+            console.log("Placing Cloud as Tile...", effectOptions);
             const castTemplate = effectOptions.castTemplate;
             const casterId = effectOptions.casterId;
             const effectFilePath = effectOptions.effectFilePath;
@@ -147,8 +149,9 @@ export class callLightning {
             const boltStyle = effectOptions.boltStyle;
             const spellLevel = effectOptions.spellLevel;
             const itemId = effectOptions.itemId;
-            const boltDamage = effectOptions.boltDamage;
             const placeCrackAsTile = effectOptions.placeCrackAsTile;
+            const itemUuid = effectOptions.originalItemUuid;
+            console.log('itemUuid: ', itemUuid);
             let templateData = castTemplate;
             let tileWidth;
             let tileHeight;
@@ -181,9 +184,9 @@ export class callLightning {
                     advancedspelleffects: {
                         'stormCloudTile': casterId,
                         'boltStyle': boltStyle,
-                        'boltDamage': boltDamage,
                         'spellLevel': spellLevel,
                         'itemID': itemId,
+                        'itemUuid': itemUuid,
                         'stormDamage': isStorm,
                         'boltSound': boltSound,
                         'boltVolume': boltVolume,
@@ -206,9 +209,8 @@ export class callLightning {
         }
     }
 
-    static async callLightningBolt(stormTileId, itemCardId, itemId) {
+    static async getBoltTargets(stormTileId) {
         let stormCloudTile = canvas.scene.tiles.get(stormTileId);
-        let getGM = game.users.find(i => i.isGM);
         let crosshairsConfig = {
             size: 3,
             icon: "icons/magic/lightning/bolt-strike-blue.webp",
@@ -227,13 +229,6 @@ export class callLightning {
                 Sequencer.EffectManager.endEffects({ name: `ase-crosshairs-marker-${target.id}` });
             }
         }
-        //console.log("TargetsInCrosshairs: ", targetsInCrosshairs);
-        let casterID = stormCloudTile.getFlag("advancedspelleffects", "stormCloudTile");
-        //console.log("Call Lightning caster id: ", casterID);
-        let caster = canvas.tokens.get(casterID);
-        let casterActor = caster.document.actor;
-        const itemD = casterActor.items.get(itemId);
-        //console.log(caster);
         let dist = utilFunctions.measureDistance({ x: stormCloudTile.data.x + (stormCloudTile.data.width / 2), y: stormCloudTile.data.y + (stormCloudTile.data.width / 2) }, boltTemplate);
         //console.log("Distance to bolt: ", dist);
         if (dist > 60) {
@@ -241,12 +236,8 @@ export class callLightning {
                 buttons: [{ label: "Ok", value: true }],
                 title: `${game.i18n.localize('ASE.SpellFailed')} - ${game.i18n.localize('ASE.OutOfRange')}`
             }, 'row')
-            return;
+            return [];
         }
-
-        //console.log("Caster Actor: ", casterActor);
-        let saveDC = casterActor.data.data.attributes.spelldc;
-        //console.log("Save DC: ", saveDC);
         const boltOptions = {
             boltStyle: stormCloudTile.getFlag("advancedspelleffects", "boltStyle"),
             boltSound: stormCloudTile.getFlag("advancedspelleffects", "boltSound") ?? "",
@@ -257,79 +248,6 @@ export class callLightning {
         //console.log("Storm cloud tile:", stormCloudTile);
 
         playEffect(boltTemplate, stormCloudTile, boltOptions);
-
-        if (game.modules.get("midi-qol")?.active) {
-
-            //console.log("Tokens in range: ", tokens);
-
-            // console.log("ItemData: ", itemData);
-            // console.log("Item: ", item);
-            let damage = await new Roll(`${stormCloudTile.getFlag("advancedspelleffects", "boltDamage")}`).evaluate({ async: true });
-            if (game.modules.get("dice-so-nice")?.active) {
-                game.dice3d?.showForRoll(damage);
-            }
-
-            const chatMessage = await game.messages.get(itemCardId);
-            let chatMessageContent = await duplicate(chatMessage.data.content);
-            let targetTokens = new Set();
-            let saves = new Set();
-            let saveRolls = [];
-            let damageRolls = [];
-            let newChatmessageContent = $(chatMessageContent);
-
-            newChatmessageContent.find(".midi-qol-saves-display").empty();
-            for await (let targetToken of targetsInCrosshairs) {
-
-                let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.dex.save }).evaluate({ async: true });
-
-                let save = saveRoll.total;
-                targetTokens.add(targetToken)
-                if (save >= saveDC) {
-                    saves.add(targetToken);
-                    saveRolls.push({ saveRoll: saveRoll, damageRoll: damage, target: targetToken.name, save: true });
-                }
-                else {
-                    saveRolls.push({ saveRoll: saveRoll, damageRoll: damage, target: targetToken.name, save: false });
-                }
-                //console.log("Adding token to chat card...");
-                newChatmessageContent.find(".midi-qol-saves-display").append(
-                    $(addTokenToText(targetToken, save, saveDC, damage))
-                );
-
-            }
-            await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
-
-            let content = callLightning.buildChatData(saveRolls);
-            await ChatMessage.create({ content: content, user: game.user.id, whisper: ChatMessage.getWhisperRecipients(getGM.name) });
-
-            await ui.chat.scrollBottom();
-
-            MidiQOL.applyTokenDamage(
-                [{ damage: damage.total, type: "lightning" }],
-                damage.total,
-                targetTokens,
-                itemD,
-                saves
-            )
-
-            function addTokenToText(token, roll, dc, damageRoll) {
-                //console.log(damageRoll);
-                let saveResult = roll >= dc ? true : false;
-
-                return `<div class="midi-qol-flex-container">
-      <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
-      <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
-      <div>
-      ${saveResult ? game.i18n.format("ASE.SavePassMessage", { saveTotal: roll, damageTotal: Math.floor(damageRoll.total / 2) }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: roll, damageTotal: damageRoll.total })}
-      </div>
-      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
-    </div>`;
-
-            }
-
-        }
-
-
 
         async function playEffect(boltTemplate, cloud, boltOptions) {
             const boltStyle = boltOptions.boltStyle;
@@ -425,71 +343,29 @@ export class callLightning {
             await boltSeq.play();
         }
 
-    }
-
-    static buildChatData(saveRolls) {
-        let content = `<table id="callLightningChatTable"><tr><th>${game.i18n.localize("ASE.Target")}</th><th>${game.i18n.localize("ASE.SaveRoll")}</th><th>${game.i18n.localize("ASE.Damage")}</th>`
-
-        //console.log('Building chat data...');
-        console.log('ASE CALL LIGHTNING - Save Rolls: ', saveRolls);
-        //console.log('Damage Rolls: ', damageRolls);
-        //iterate through attackRolls using for in loop
-
-        for (let i = 0; i < saveRolls.length; i++) {
-            //console.log("Attack Roll Data: ", attackRolls[i]);
-            //console.log("Damage Roll Data: ", damageRolls[i]);
-            let currSaveData = saveRolls[i];
-            let currTarget = currSaveData.target;
-            let currSaveRoll = currSaveData.saveRoll;
-            let currDamageRoll = currSaveData.damageRoll;
-            let currDamageRollDieTerms = currDamageRoll.terms.filter(term => {
-                return term.values?.length > 0;
-            });
-            let currDamageRollNumericTerms = currDamageRoll.terms.filter(term => {
-                return (term.number != undefined) && !(term.values?.length > 0);
-            });
-            //console.log('Damage Roll Die Terms: ', currDamageRollDieTerms);
-            //console.log('Damage Roll Numeric Terms: ', currDamageRollNumericTerms);
-            // concatenate the die terms and numeric terms into a single string
-            let currDamageFormula = '';
-            let currDamageBreakdown = '';
-            for (let j = 0; j < currDamageRollDieTerms.length; j++) {
-                currDamageFormula += currDamageRollDieTerms[j].formula + (j < currDamageRollDieTerms.length - 1 ? ' + ' : '');
-                for (let k = 0; k < currDamageRollDieTerms[j].values.length; k++) {
-                    currDamageBreakdown += '[' + (currDamageRollDieTerms[j].values[k]) + ']' + (k < currDamageRollDieTerms[j].values.length - 1 ? ' + ' : '');
-                }
-            }
-            currDamageFormula += currSaveData.save ? '/2: ' : ': ';
-
-            for (let j = 0; j < currDamageRollNumericTerms.length; j++) {
-                currDamageBreakdown += ((j == 0) && currDamageRollDieTerms.length > 0 ? ' + ' : '') + currDamageRollNumericTerms[j].number + (j < currDamageRollNumericTerms.length - 1 ? ' + ' : '');
-            }
-            currDamageBreakdown = currDamageFormula + currDamageBreakdown;
-
-            let currSaveRollResult = currSaveRoll.result.split("+");
-            let currSaveBreakDown = '[';
-            for (let j = 0; j < currSaveRollResult.length; j++) {
-                currSaveBreakDown += `${j == 0 ? currSaveRollResult[j] + ']' : ' + ' + currSaveRollResult[j]}`;
-            }
-            //console.log("Save Roll Result: ", currSaveRollResult);
-
-            //console.log("Damage Roll: ", damageRoll);
-            content += `<tr><td>${currTarget}</td><td title = '${currSaveBreakDown}'>${currSaveRoll._total}</td><td title = '${currDamageBreakdown}'>${currSaveData.save ? Math.floor(currDamageRoll.total / 2) : currDamageRoll.total}</td></tr>`;
-        }
-
-        return content;
+        return targetsInCrosshairs;
     }
 
     static async handleConcentration(casterActor, casterToken, effectOptions) {
         let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == casterToken.id);
+        const isGM = utilFunctions.isFirstGM();
         //console.log(casterToken);
         //console.log("tiles to delete: ", [tiles[0].id]);
         if (stormCloudTiles.length > 0) {
             console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
-            await aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
-            await warpgate.revert(casterToken.document, `${casterActor.id}-call-lightning`);
-            ui.notifications.info(game.i18n.format("ASE.RemovedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
-            await ChatMessage.create({ content: game.i18n.localize('ASE.ActivateCallLightningDissipate') });
+            const itemUuid = stormCloudTiles[0].getFlag("advancedspelleffects", "itemUuid");
+            let spellState = game.ASESpellStateManager.getState(itemUuid);
+            console.log("Spell State: ", spellState);
+            if(spellState) {
+                game.ASESpellStateManager.removeSpell(itemUuid);
+            }
+            if(isGM) {
+                await aseSocket.executeAsGM("deleteTiles", [stormCloudTiles[0].id]);
+                await warpgate.revert(casterToken.document, `${casterActor.id}-call-lightning`);
+                ui.notifications.info(game.i18n.format("ASE.RemovedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
+                await ChatMessage.create({ content: game.i18n.localize('ASE.ActivateCallLightningDissipate') });
+            }
+            
         }
 
     }

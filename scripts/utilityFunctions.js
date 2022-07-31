@@ -334,7 +334,6 @@ export async function checkCrosshairs(crosshairs) {
     while (crosshairs.inFlight) {
         //wait for initial render
         await warpgate.wait(100);
-        /* set default tint */
         collected = warpgate.crosshairs.collect(crosshairs, ['Token'], getContainedCustom)['Token'];
         let tokensOutOfRange = canvas.tokens.placeables.filter(token => {
             return !collected.find(t => t.id === token.id);

@@ -41,56 +41,68 @@ export class SpellStateMachine {
         let getGM = game.users.find(i => i.isGM);
         if (spell) {
             //find how many times to iterate
-            let iterateListKey = spell.options.iterate;
-            if(spell.state < spell.options[iterateListKey].length){
-                const item = await fromUuid(spell.uuid);
-                if(spellOptions.rolls){
-                    if(spell.options.rolls){
-                        spell.options.rolls.push(spellOptions.rolls);
+            const item = await fromUuid(spell.uuid);
+            if(spell.options.iterate){
+                let iterateListKey = spell.options.iterate;
+                if(iterateListKey && spell.state < spell.options[iterateListKey].length){
+                    if(spellOptions.rolls){
+                        if(spell.options.rolls){
+                            spell.options.rolls.push(spellOptions.rolls);
+                        }
                     }
+                    game.user.updateTokenTargets([]);
+                    let options = {
+                        "targetUuids": [spell.options[iterateListKey][spell.state]],
+                        "configureDialog": false,
+                        "workflowOptions":  {
+                                                "autoRollAttack": true,
+                                                "autoFastAttack": true,
+                                                "autoRollDamage": "always",
+                                                "autoFastDamage": true,
+                                            }
+                    };
+                    //console.log("ASE: SPELLSTATEMACHINE: midi options", options.targetUuids);
+                    if(spell.options.attacks){
+                        const attackType = spell.options.attacks[spell.state]?.type;
+                        //console.log("ASE: SPELLSTATEMACHINE: attack type: ", attackType);
+                        if(attackType && attackType != ""){
+                            options.workflowOptions[attackType] = attackType;
+                        }
+                    }
+                    //console.log("ASE: MIDI HANDLER: STATE TRANSITION: MIDI SETTINGS", options);
+                    spell.state++;
+                    await MidiQOL.completeItemRoll(item, options);
+                } else if(iterateListKey && spell.state >= spell.options[iterateListKey].length) {
+                    spell.active = false;
+                    spell.finished = true;
+                    if(spell.options.sequences.length && spell.options.sequences.length > 0){
+                        for await (const sequence of spell.options.sequences) {
+                            sequence.play();
+                            await warpgate.wait(utilFunctions.getRandomInt(50, 150));
+                        }
+                    }
+                    if(spellOptions.rolls){
+                        if(spell.options.rolls){
+                            spell.options.rolls.push(spellOptions.rolls);
+                        }
+                    }
+                    if(spell.options.chatBuilder){
+                        let chatContent = await this.buildChatCard(uuid);
+                        //console.log("ASE: MIDI HANDLER: CHAT CONTENT", chatContent);
+                        await aseSocket.executeAsGM("createGMChat", {content: chatContent});
+                    }
+                    this.removeSpell(uuid);
                 }
+            } else if (spell.options.concentration){
                 game.user.updateTokenTargets([]);
-                let options = {
-                    "targetUuids": [spell.options[iterateListKey][spell.state]],
-                    "configureDialog": false,
-                    "workflowOptions":  {
-                                            "autoRollAttack": true,
-                                            "autoFastAttack": true,
-                                            "autoRollDamage": "always",
-                                            "autoFastDamage": true,
-                                        }
-                };
-                //console.log("ASE: SPELLSTATEMACHINE: midi options", options.targetUuids);
-                if(spell.options.attacks){
-                    const attackType = spell.options.attacks[spell.state]?.type;
-                    //console.log("ASE: SPELLSTATEMACHINE: attack type: ", attackType);
-                    if(attackType && attackType != ""){
-                        options.workflowOptions[attackType] = attackType;
-                    }
+                if(spell.options.castItem){
+                    let castItem = await fromUuid(spell.options.castItem);
+                    let options = {
+                        "targetUuids": spell.options.targets,
+                        "configureDialog": false
+                    };
+                    await MidiQOL.completeItemRoll(castItem, options);
                 }
-                //console.log("ASE: MIDI HANDLER: STATE TRANSITION: MIDI SETTINGS", options);
-                spell.state++;
-                await MidiQOL.completeItemRoll(item, options);
-            } else {
-                spell.active = false;
-                spell.finished = true;
-                if(spell.options.sequences.length && spell.options.sequences.length > 0){
-                    for await (const sequence of spell.options.sequences) {
-                        sequence.play();
-                        await warpgate.wait(utilFunctions.getRandomInt(50, 150));
-                    }
-                }
-                if(spellOptions.rolls){
-                    if(spell.options.rolls){
-                        spell.options.rolls.push(spellOptions.rolls);
-                    }
-                }
-                if(spell.options.chatBuilder){
-                    let chatContent = await this.buildChatCard(uuid);
-                    //console.log("ASE: MIDI HANDLER: CHAT CONTENT", chatContent);
-                    await aseSocket.executeAsGM("createGMChat", {content: chatContent});
-                }
-                this.removeSpell(uuid);
             }
         }
     }
