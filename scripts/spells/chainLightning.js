@@ -55,7 +55,9 @@ export class chainLightning {
                 targetted: true,
                 targets: targets,
                 sequenceBuilder: ChainLightningSequence,
-                firstTarget: this.firstTarget.document.uuid
+                firstTarget: this.firstTarget.document.uuid,
+                effectOptions: this.effectOptions,
+                caster: this.token.document.uuid
             };
             game.ASESpellStateManager.addSpell(this.item.uuid, spellOptions)
             return;
@@ -181,60 +183,6 @@ export class chainLightning {
     }
 
 
-    async playSequence() {
-
-        if (!game.modules.get('sequencer')?.active) return;
-        if (!game.modules.get('jb2a_patreon')?.active) return;
-
-        let sequence = new Sequence()
-            .wait(350)
-            .sound()
-            .file(this.effectOptions.primarySound)
-            .delay(this.effectOptions.primarySoundDelay)
-            .volume(this.effectOptions.primarySoundVolume)
-            .playIf(this.effectOptions.primarySound != "")
-            .effect()
-            .file(`jb2a.chain_lightning.primary.${this.effectOptions.primaryBoltColor}`)
-            .atLocation(this.token)
-            .stretchTo(this.firstTarget)
-            .randomizeMirrorY()
-            .effect()
-            .file(`jb2a.static_electricity.02.${this.effectOptions.saveFailEffectColor}`)
-            .atLocation(this.firstTarget)
-            .scaleToObject(1.3)
-            .randomRotation()
-            .duration(5000)
-            .delay(600)
-            .playIf(this.targetFailedSave)
-            .wait(750)
-
-        for (let target of this.targetData) {
-            let randomDelay = utilFunctions.getRandomInt(this.effectOptions.secondaryBoltDelayLower, this.effectOptions.secondaryBoltDelayUpper);
-            sequence.sound()
-                .file(this.effectOptions.secondarySound)
-                .delay(randomDelay + this.effectOptions.secondarySoundDelay)
-                .volume(this.effectOptions.secondarySoundVolume)
-                .playIf(this.effectOptions.secondarySound != "")
-                .effect()
-                .file(`jb2a.chain_lightning.secondary.${this.effectOptions.secondaryBoltColor}`)
-                .atLocation(this.firstTarget)
-                .stretchTo(target.token)
-                .randomizeMirrorY()
-                .delay(randomDelay)
-                .effect()
-                .file(`jb2a.static_electricity.02.${this.effectOptions.saveFailEffectColor}`)
-                .atLocation(target.token)
-                .scaleToObject(1.63)
-                .randomRotation()
-                .duration(5000)
-                .delay(randomDelay + 400)
-                .playIf(!target.saved)
-        }
-
-        sequence.play();
-
-    }
-
     static async getRequiredSettings(currFlags) {
         if (!currFlags) currFlags = {};
         const primaryColorOptions = utilFunctions.getDBOptions('jb2a.chain_lightning.primary');
@@ -244,56 +192,6 @@ export class chainLightning {
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
-
-        const dieOptions = [
-            {'d4': 'd4'},
-            {'d6': 'd6'},
-            {'d8': 'd8'},
-            {'d10': 'd10'},
-            {'d12': 'd12'},
-            {'d20': 'd20'}
-        ];
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.ScaleWithLevelLabel"),
-            type: 'checkbox',
-            name: 'flags.advancedspelleffects.effectOptions.levelScaling',
-            flagName: 'levelScaling',
-            flagValue: currFlags.levelScaling ?? true,
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.ChainLightningNumJumpsLabel"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.numJumps',
-            flagName: 'numJumps',
-            flagValue: currFlags.numJumps ?? 3,
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.DamageDieCountLabel"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
-            flagName: 'dmgDieCount',
-            flagValue: currFlags.dmgDieCount ?? 10,
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.DamageDieLabel"),
-            type: 'dropdown',
-            options: dieOptions,
-            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
-            flagName: 'dmgDie',
-            flagValue: currFlags.dmgDie ?? 'd8',
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.DamageBonusLabel"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
-            flagName: 'dmgMod',
-            flagValue: currFlags.dmgMod ?? 0,
-        });
 
         animOptions.push({
             label: game.i18n.localize("ASE.ChainLightningPrimaryColorLabel"),

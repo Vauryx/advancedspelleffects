@@ -24,6 +24,9 @@ export class SpellStateMachine {
     continueSequence(uuid, options){
         let spell = this.spells.find(spell => spell.uuid === uuid);
         if (spell.options.sequenceBuilder) {
+            if(!spell.options.sequences){
+                spell.options.sequences = [];
+            }
             spell.options.sequences.push(spell.options.sequenceBuilder(options));
         }
     }
@@ -116,6 +119,17 @@ export class SpellStateMachine {
                 } else if (spellOptions.finished){
                     spell.active = false;
                     spell.finished = true;
+                    if(spellOptions.failedSaves){
+                        spell.options.failedSaves = spellOptions.failedSaves;
+                    }
+                    this.continueSequence(uuid, spell.options);
+                    console.log("ASE: MIDI HANDLER: STATE TRANSITION: TARGETTED SPELL FINISHED", spell);
+                    if(spell.options.sequences.length && spell.options.sequences.length > 0){
+                        for await (const sequence of spell.options.sequences) {
+                            sequence.play();
+                        }
+                    }
+                    this.removeSpell(uuid);
                     console.log("ASE: MIDI HANDLER: STATE TRANSITION: FINISHED: ", spell);
                 }
             }

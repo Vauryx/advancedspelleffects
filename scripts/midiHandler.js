@@ -124,7 +124,7 @@ export class midiHandler {
             if(!targets || targets.length == 0){
                 iterateListKey = currentItemState.options.iterate;
                 currStateIndex = currentItemState.state - 1;
-                targetUuid = currentItemState.options[iterateListKey][currStateIndex-1];
+                targetUuid = currentItemState.options[iterateListKey][currStateIndex];
                 target = await fromUuid(targetUuid);
             } else {
                 target = targets[0];
@@ -139,7 +139,11 @@ export class midiHandler {
             return;
         } else if (currentItemState.active && !currentItemState.finished && currentItemState.options.targetted){
             stateOptions.finished = true;
-            stateOptions.failedSaves = workflow.failedSaves;
+            //move uuid of each token from workflow.failedSaves into stateOptions.failedSaves
+            stateOptions.failedSaves = [];
+            workflow.failedSaves.forEach(target => {
+                stateOptions.failedSaves.push(target.document.uuid);
+            });
             game.ASESpellStateManager.nextState(itemUUID, stateOptions);
         }
     }
