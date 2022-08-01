@@ -1,0 +1,47 @@
+import { aseSocket } from "../aseSockets.js";
+import * as utilFunctions from "../utilityFunctions.js";
+
+export function ChainLightningSequence(data) {
+    let sequence = new Sequence()
+            .wait(350)
+            .sound()
+            .file(this.effectOptions.primarySound)
+            .delay(this.effectOptions.primarySoundDelay)
+            .volume(this.effectOptions.primarySoundVolume)
+            .playIf(this.effectOptions.primarySound != "")
+            .effect()
+            .file(`jb2a.chain_lightning.primary.${this.effectOptions.primaryBoltColor}`)
+            .atLocation(this.token)
+            .stretchTo(this.firstTarget)
+            .randomizeMirrorY()
+            .effect()
+            .file(`jb2a.static_electricity.02.${this.effectOptions.saveFailEffectColor}`)
+            .atLocation(this.firstTarget)
+            .scaleToObject(1.3)
+            .randomRotation()
+            .duration(5000)
+            .delay(600)
+            .playIf(this.targetFailedSave)
+            .wait(750)
+            for (let target of this.targetData) {
+                let randomDelay = utilFunctions.getRandomInt(this.effectOptions.secondaryBoltDelayLower, this.effectOptions.secondaryBoltDelayUpper);
+                sequence.sound()
+                    .file(this.effectOptions.secondarySound)
+                    .delay(randomDelay + this.effectOptions.secondarySoundDelay)
+                    .volume(this.effectOptions.secondarySoundVolume)
+                    .playIf(this.effectOptions.secondarySound != "")
+                    .effect()
+                    .file(`jb2a.chain_lightning.secondary.${this.effectOptions.secondaryBoltColor}`)
+                    .atLocation(this.firstTarget)
+                    .stretchTo(target.token)
+                    .randomizeMirrorY()
+                    .delay(randomDelay)
+                    .effect()
+                    .file(`jb2a.static_electricity.02.${this.effectOptions.saveFailEffectColor}`)
+                    .atLocation(target.token)
+                    .scaleToObject(1.63)
+                    .randomRotation()
+                    .duration(5000)
+                    .delay(randomDelay + 400)
+            }
+}

@@ -422,40 +422,6 @@ export class callLightning {
             {'d20': 'd20'}
         ];
 
-        spellOptions.push({
-            label: game.i18n.localize("ASE.OverrideDamageLabel"),
-            tooltip: game.i18n.localize("ASE.OverrideDamageTooltip"),
-            type: 'checkbox',
-            name: 'flags.advancedspelleffects.effectOptions.overrideDamage',
-            flagName: 'overrideDamage',
-            flagValue: currFlags.overrideDamage ?? false,
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.DamageDieCountLabel"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
-            flagName: 'dmgDieCount',
-            flagValue: currFlags.dmgDieCount ?? 3,
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.DamageDieLabel"),
-            type: 'dropdown',
-            options: dieOptions,
-            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
-            flagName: 'dmgDie',
-            flagValue: currFlags.dmgDie ?? 'd10',
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.DamageBonusLabel"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
-            flagName: 'dmgMod',
-            flagValue: currFlags.dmgMod ?? 0,
-        });
-
 
         animOptions.push({
             label: game.i18n.localize('ASE.SelectBoltStyleLabel'),
@@ -471,7 +437,7 @@ export class callLightning {
             type: "checkbox",
             name: "flags.advancedspelleffects.effectOptions.placeCrackAsTile",
             flagName: "placeCrackAsTile",
-            flagValue: currFlags.placeCrackAsTile ?? true,
+            flagValue: currFlags.placeCrackAsTile ?? false,
         });
         soundOptions.push({
             label: game.i18n.localize('ASE.BoltSoundLabel'),

@@ -101,7 +101,22 @@ export class SpellStateMachine {
                         "targetUuids": spell.options.targets,
                         "configureDialog": false
                     };
+                    spell.state++;
                     await MidiQOL.completeItemRoll(castItem, options);
+                }
+            } else if (spell.options.targetted){
+                if(!spellOptions.finished){
+                    game.user.updateTokenTargets([]);
+                    let options = {
+                        "targetUuids": spell.options.targets,
+                        "configureDialog": false
+                    };
+                    spell.state++;
+                    await MidiQOL.completeItemRoll(item, options);
+                } else if (spellOptions.finished){
+                    spell.active = false;
+                    spell.finished = true;
+                    console.log("ASE: MIDI HANDLER: STATE TRANSITION: FINISHED: ", spell);
                 }
             }
         }

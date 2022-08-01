@@ -1,4 +1,5 @@
 import * as utilFunctions from "../utilityFunctions.js";
+import { ChainLightningSequence } from "../sequences/ChainLightningSequence.js";
 //Courtesy of Wasp - The Sequencer Guy
 export class chainLightning {
 
@@ -40,9 +41,26 @@ export class chainLightning {
     }
     async cast() {
         console.log("Running Chain Lightning...");
+        if(!this.firstTarget) {
+            ui.notifications.error("Target Required");
+            return;
+        }
         //await this.rollInitialDamage();
         await this.promptJumps();
-        if (!this.targetData) {
+        console.log(this);
+        if(this.targetData) {
+            let targets = this.targetData.map(target => target.token.document.uuid);
+            targets.push(this.firstTarget.document.uuid);
+            let spellOptions = {
+                targetted: true,
+                targets: targets,
+                sequenceBuilder: ChainLightningSequence,
+                firstTarget: this.firstTarget.document.uuid
+            };
+            game.ASESpellStateManager.addSpell(this.item.uuid, spellOptions)
+            return;
+        }
+        /*if (!this.targetData) {
             await this.playSequence();
             return;
         }
@@ -51,26 +69,7 @@ export class chainLightning {
         if (game.modules.get("midi-qol")?.active) {
             await this.applyDamage();
             await this.updateChatCards();
-        }
-    }
-
-    async rollInitialDamage() {
-        const target = this.firstTarget;
-        if (!target) return false;
-        const saveRoll = await new Roll("1d20+@mod", { mod: target.token.actor.data.data.abilities.dex.save }).evaluate({ async: true });
-
-        const damageDie = this.params.dmgDie ?? 'd8';
-        const damageDieCount = this.params.dmgDieCount ?? 10;
-        const damageDieBonus = this.params.dmgMod ?? 0;
-        let damageFormula = `${damageDieCount}${damageDie}+${damageDieBonus}`;
-
-        const damageRoll = await new Roll(damageFormula).evaluate({ async: true });
-        if (game.modules.get("dice-so-nice")?.active) {
-            game.dice3d?.showForRoll(saveRoll);
-            game.dice3d?.showForRoll(damageRoll);
-        }
-
-        this.targetFailedSave = roll < this.spellSaveDC;
+        }*/
     }
 
     async promptJumps() {
@@ -181,33 +180,6 @@ export class chainLightning {
 
     }
 
-    async rollSaves() {
-
-        for await (let target of this.targetData) {
-
-            const roll = await new Roll("1d20+@mod", { mod: target.token.actor.data.data.abilities.dex.save }).evaluate({ async: true });
-            target.rollTotal = roll.total;
-            target.roll = roll;
-            target.saved = roll.total >= this.spellSaveDC;
-
-        }
-
-    }
-
-    async applyDamage() {
-
-        const targetSet = new Set(this.targetData.map(target => target.token));
-        const saveSet = new Set(this.targetData.filter(target => target.saved).map(target => target.token));
-
-        MidiQOL.applyTokenDamage(
-            [{ damage: this.originalDamage, type: "lightning" }],
-            this.originalDamage,
-            targetSet,
-            this.item,
-            saveSet
-        )
-
-    }
 
     async playSequence() {
 
@@ -263,30 +235,6 @@ export class chainLightning {
 
     }
 
-    async updateChatCards() {
-
-        const chatMessage = await game.messages.get(this.params.itemCardId);
-        let chatMessageContent = $(await duplicate(chatMessage.data.content));
-        chatMessageContent.find(".midi-qol-nobox.midi-qol-saves-display").append(
-            this.targetData.map(target => {
-                console.log(target.roll);
-                return `
-                <div class="midi-qol-flex-container">
-                    <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${target.token.id}"> ${target.token.name}</div>
-                    <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${target.token.id}" style="display: none;"> ${target.token.name}</div>
-                    <div class="midi-qol-tooltip midi-qol-save-total">${target.saved ? "succeeds" : "fails"} : ${target.rollTotal}
-                    <div class="midi-qol-tooltiptext midi-qol-save-tooltip" style="text-align: left;">
-                    <div>${target.roll.formula}</div>
-                    <div>${target.roll.result}</div>
-                    </div></div>
-                    <div><img src="${target.token.data.img}" height="30" style="border:0px"></div>
-                </div>`;
-            })
-        );
-
-        await chatMessage.update({ content: chatMessageContent.prop('outerHTML') });
-
-    }
     static async getRequiredSettings(currFlags) {
         if (!currFlags) currFlags = {};
         const primaryColorOptions = utilFunctions.getDBOptions('jb2a.chain_lightning.primary');
@@ -442,7 +390,9 @@ export class chainLightning {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            targetted: true,
+            allowInitialMidiCall: false,
         }
 
     }

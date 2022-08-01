@@ -80,9 +80,6 @@ export class midiHandler {
             if (currentItemState) {
                 console.log("ASE: MIDI HANDLER: Item State Found!", currentItemState);
                 if(currentItemState.active && !currentItemState.finished){
-                    if(currentItemState.options.castItem){
-                        console.log("ASE: MIDI HANDLER: Cast Item Found!", currentItemState.options.castItem);
-                    }
                     return true;
                 }
                 else{
@@ -123,7 +120,7 @@ export class midiHandler {
         let currentItemState = game.ASESpellStateManager.getState(itemUUID);
         //console.log("ASE: MIDI HANDLER: STATE TRANSITION: CURRENT ITEM STATE", currentItemState);
         if (!currentItemState) {return;}
-        if(currentItemState.active && !currentItemState.finished){
+        if(currentItemState.active && !currentItemState.finished && !currentItemState.options.targetted){
             if(!targets || targets.length == 0){
                 iterateListKey = currentItemState.options.iterate;
                 currStateIndex = currentItemState.state - 1;
@@ -140,6 +137,10 @@ export class midiHandler {
             }
             game.ASESpellStateManager.nextState(itemUUID, stateOptions);
             return;
+        } else if (currentItemState.active && !currentItemState.finished && currentItemState.options.targetted){
+            stateOptions.finished = true;
+            stateOptions.failedSaves = workflow.failedSaves;
+            game.ASESpellStateManager.nextState(itemUUID, stateOptions);
         }
     }
 }
