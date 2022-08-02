@@ -20,8 +20,6 @@ export class mirrorImage {
         //console.log(this);
         await this.playSequence();
         await this.token.document.setFlag("advancedspelleffects", "mirrorImage", this.effectOptions);
-        if (utilFunctions.isMidiActive()) {
-        }
     }
 
     static async handlePreCheckHits(data) {
@@ -394,7 +392,8 @@ export class mirrorImage {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: true,
         }
 
     }

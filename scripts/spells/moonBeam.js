@@ -146,19 +146,16 @@ export class moonBeam {
         const beamLoopSoundEasing = aseEffectOptions.moonbeamLoopEasing ?? true;
         const beamLoopSoundRadius = aseEffectOptions.moonbeamLoopRadius ?? 20;
 
-        const levelScaling = aseEffectOptions.levelScaling ?? true;
-        const damageDie = aseEffectOptions.dmgDie ?? 'd10';
-        const damageDieCount = levelScaling ? spellLevel : aseEffectOptions.dmgDieCount ?? 2;
-        const damageDieBonus = aseEffectOptions.dmgMod ?? 0;
-        let damageFormula = `${damageDieCount}${damageDie}+${damageDieBonus}`;
+        let damage = data.item.data.data.damage;
 
         aseEffectOptions["rollInfo"] = {
             casterTokenId: casterToken.id,
-            itemUUID: data.item.uuid,
+            itemUUID: '',
             itemCardId: data.itemCardId,
             spellSaveDc: casterActor.data.data.attributes.spelldc,
-            damageFormula: damageFormula,
+            damageFormula: damage,
         };
+        aseEffectOptions['allowInitialMidiCall'] = false;
         const updates = {
             embedded: {
                 Item: {}
@@ -171,14 +168,15 @@ export class moonBeam {
             "img": spellItem.img,
             "data": {
                 "ability": "",
-                "actionType": "other",
+                "actionType": "save",
+                "save": spellItem.data.data.save,
                 "activation": { "type": 'action', "cost": 1 },
-                "damage": { "parts": [], "versatile": "" },
+                "damage": damage,
                 "level": data.itemLevel,
                 "preparation": { "mode": 'atwill', "prepared": true },
                 "range": { "value": null, "long": null, "units": "" },
                 "school": "evo",
-                "target": { "value": null, "width": null, "units": "", "type": "" },
+                "target": { "value": 1, "width": null, "units": "", "type": "creature" },
                 "description": {
                     "value": game.i18n.localize("ASE.MoveMoonbeamDescription")
                 }
@@ -187,6 +185,7 @@ export class moonBeam {
                 "advancedspelleffects": {
                     "enableASE": true,
                     "spellEffect": game.i18n.localize('ASE.MoveMoonbeam'),
+                    "castItem": true,
                     'effectOptions': aseEffectOptions
                 }
             }
@@ -196,6 +195,11 @@ export class moonBeam {
         let moonbeamLoc = await moonBeam.chooseBeamLocation(beamLoop);
 
         await warpgate.mutate(casterToken.document, updates, {}, { name: `${casterActor.id}-moonbeam` });
+        //get newly created item by actor.items.getName()
+        let moonbeamCastItem = casterActor.items.getName(activationItemName);
+        if(moonbeamCastItem){
+            aseEffectOptions['rollInfo']['itemUUID'] = moonbeamCastItem.uuid;
+        }
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.MoveMoonbeam") }));
 
         const moonbeamTile = await placeBeam(moonbeamLoc, casterToken.id, beamLoop, aseEffectOptions);
@@ -300,127 +304,17 @@ export class moonBeam {
 
     }
 
-    static async activateBeam(token, effectOptions) {
-
-        function addTokenToText(token, saveTotal, savePassed, damageTotal) {
-
-            return `<div class="midi-qol-flex-container">
-      <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
-      <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
-      <div>
-      ${savePassed ? game.i18n.format("ASE.SavePassMessage", { saveTotal: saveTotal, damageTotal: damageTotal }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: saveTotal, damageTotal: damageTotal })}
-        
-      </div>
-      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
-    </div>`;
-
-        }
-
-        function customHalfRollChatCard(roll) {
-            //console.log(roll);
-            const formula = roll.formula;
-            const dieFaces = roll.terms[0].faces;
-            const partTotal = roll.terms[0].total;
-            const diceResults = roll.terms[0].results;
-            let colorMod = "";
-            let toolTipHTML = "";
-
-            toolTipHTML += `<section class="tooltip-part"> <div class="dice">`;
-            toolTipHTML += `<header class="part-header flexrow">
-                        <span class="part-formula">${formula}</span>
-                        <span class="part-total">${partTotal}</span>
-                    </header>`;
-            toolTipHTML += `<ol class="dice-rolls">`;
-
-            for (let dieResult of diceResults) {
-                if (dieFaces == dieResult.result) {
-                    colorMod = "max";
-                }
-                else if (dieResult.result == 1) {
-                    colorMod = "min";
-                }
-                else {
-                    colorMod = "";
-                }
-                toolTipHTML += `<li class="roll die d${dieFaces} ${colorMod}">${dieResult.result}</li>`;
-            }
-            toolTipHTML += `</ol>
-                </div>
-            </section>`;
-
-            return toolTipHTML;
-        }
+    static async activateBeam(target, effectOptions) {
 
         const rollInfo = effectOptions.rollInfo;
-        //console.log('ROLL INFO: ', rollInfo);
-        const spellItem = await fromUuid(rollInfo.itemUUID);
-        const casterToken = canvas.tokens.get(rollInfo.casterTokenId);
-        const casterActor = casterToken.actor;
-        const spellSaveDC = rollInfo.spellSaveDc;
-
-        let itemData = spellItem.data;
-        itemData.data.components.concentration = false;
-
-        if (game.modules.get("midi-qol")?.active) {
-            const fullDamageRoll = await new Roll(rollInfo.damageFormula).evaluate({ async: true });
-            const halfdamageroll = await new Roll(`${Math.floor(fullDamageRoll.total / 2)}`).evaluate({ async: true });
-            const saveRoll = await new Roll(`1d20+@mod`, { mod: token.actor.data.data.abilities.con.save }).evaluate({ async: true });
-            console.log('Rolls: ');
-            console.log(fullDamageRoll);
-            //console.log(halfdamageroll);
-            console.log(saveRoll);
-            if (game.modules.get("dice-so-nice")?.active) {
-                game.dice3d?.showForRoll(fullDamageRoll);
-                game.dice3d?.showForRoll(saveRoll);
-            }
-            const saveTotal = saveRoll.total;
-            const passedSave = saveTotal >= spellSaveDC;
-            let savePassed;
-            let damageTotal;
-            let midiData;
-            if (passedSave) {
-                savePassed = true;
-                damageTotal = halfdamageroll.total;
-                midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, halfdamageroll.total, "radiant", [token],
-                    halfdamageroll, {
-                    flavor: `Moonbeam - Damage Roll (${rollInfo.damageFormula} Radiant)`,
-                    itemCardId: "new",
-                    itemData: spellItem.data
-                });
-            }
-            else {
-                savePassed = false;
-                damageTotal = fullDamageRoll.total;
-                midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, fullDamageRoll.total, "radiant", [token],
-                    fullDamageRoll, {
-                    flavor: `Moonbeam - Damage Roll (${rollInfo.damageFormula} Radiant)`,
-                    itemCardId: "new",
-                    itemData: spellItem.data
-                });
-            }
-            const chatMessage = await game.messages.get(midiData.itemCardId);
-            let chatMessageContent = await duplicate(chatMessage.data.content);
-            let newChatmessageContent = $(chatMessageContent);
-
-            newChatmessageContent.find(".midi-qol-hits-display").empty();
-            newChatmessageContent.find(".midi-qol-hits-display").append(
-                $(addTokenToText(token, saveTotal, savePassed, damageTotal))
-            );
-            if (passedSave) {
-                newChatmessageContent.find(".midi-qol-other-roll .dice-tooltip").empty();
-                newChatmessageContent.find(".midi-qol-other-roll .dice-tooltip").append(
-                    $(customHalfRollChatCard(fullDamageRoll))
-                );
-                newChatmessageContent.find(".midi-qol-other-roll .dice-formula").empty();
-                newChatmessageContent.find(".midi-qol-other-roll .dice-formula").append(fullDamageRoll.formula);
-
-                newChatmessageContent.find(".midi-qol-other-roll .dice-total").empty();
-                newChatmessageContent.find(".midi-qol-other-roll .dice-total").append(fullDamageRoll.total);
-            }
-            await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
-            await ui.chat.scrollBottom();
+        effectOptions['castItem'] = true;
+        const targetUuid = target.document?.uuid ?? target.uuid;
+        let state = game.ASESpellStateManager.getSpell(rollInfo.itemUUID);
+        if(state){
+            game.ASESpellStateManager.removeSpell(rollInfo.itemUUID);
         }
-
+        effectOptions.targets = [targetUuid];
+        game.ASESpellStateManager.addSpell(rollInfo.itemUUID, effectOptions);
 
         new Sequence("Advanced Spell Effects")
             .sound()
@@ -430,7 +324,7 @@ export class moonBeam {
             .playIf(effectOptions.moonbeamDmgSound && effectOptions.moonbeamDmgSound != "")
             .effect()
             .file(`jb2a.impact.004.${effectOptions.moonbeamDmgColor}`)
-            .attachTo(token)
+            .attachTo(target)
             .randomRotation()
             .scaleIn(0.5, 200)
             .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
@@ -498,48 +392,6 @@ export class moonBeam {
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
-
-        const dieOptions = [
-            {'d4': 'd4'},
-            {'d6': 'd6'},
-            {'d8': 'd8'},
-            {'d10': 'd10'},
-            {'d12': 'd12'},
-            {'d20': 'd20'}
-        ];
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.ScaleWithLevelLabel"),
-            type: 'checkbox',
-            name: 'flags.advancedspelleffects.effectOptions.levelScaling',
-            flagName: 'levelScaling',
-            flagValue: currFlags.levelScaling ?? true,
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.DamageDieCountLabel"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.dmgDieCount',
-            flagName: 'dmgDieCount',
-            flagValue: currFlags.dmgDieCount ?? 1,
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.DamageDieLabel"),
-            type: 'dropdown',
-            options: dieOptions,
-            name: 'flags.advancedspelleffects.effectOptions.dmgDie',
-            flagName: 'dmgDie',
-            flagValue: currFlags.dmgDie ?? 'd10',
-        });
-
-        spellOptions.push({
-            label: game.i18n.localize("ASE.DamageBonusLabel"),
-            type: 'numberInput',
-            name: 'flags.advancedspelleffects.effectOptions.dmgMod',
-            flagName: 'dmgMod',
-            flagValue: currFlags.dmgMod ?? 0,
-        });
 
         animOptions.push({
             label: game.i18n.localize("ASE.BeamColorLabel"),
@@ -647,7 +499,8 @@ export class moonBeam {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            'allowInitialMidiCall': true
         }
 
     }

@@ -116,7 +116,7 @@ export class SpellStateMachine {
                 if(spell.options.castItem){
                     let castItem = await fromUuid(spell.options.castItem);
                     let options = {
-                        "targetUuids": spell.options.targets,
+                        "targetUuids": spell.options?.targets,
                         "configureDialog": false
                     };
                     spell.state++;
@@ -160,6 +160,7 @@ export class SpellStateMachine {
                     game.user.updateTokenTargets([]);
                     let options = {
                         "configureDialog": false,
+                        "optionalTestField": {'test': 'value'},
                         "workflowOptions":  {
                             "autoRollDamage": "always"
                         }
@@ -171,6 +172,15 @@ export class SpellStateMachine {
                         options.targetUuids = spell.options.targets;
                     }
                     console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT: OPTIONS", options);
+                    spell.state++;
+                    await MidiQOL.completeItemRoll(item, options);
+                }
+            } else if (spell.options.castItem){
+                if(!spellOptions.finished) { 
+                    let options = {
+                        "targetUuids": spell.options.targets,
+                        "configureDialog": false
+                    };
                     spell.state++;
                     await MidiQOL.completeItemRoll(item, options);
                 }

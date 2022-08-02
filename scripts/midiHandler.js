@@ -72,10 +72,12 @@ export class midiHandler {
         const castItem = item.getFlag("advancedspelleffects", "castItem") ?? false;
         const savesRequired = item.getFlag("advancedspelleffects", "savesRequired") ?? false;
         const targets = Array.from(workflow.targets) ?? [];
-        if(spellEffect && aseEnabled && castItem) {
+        if(spellEffect && aseEnabled && castItem && savesRequired) {
             console.log("ASE: MIDI HANDLER: Cast Item Found!", item);
             let newMidiData = await ASEHandler.handleASE(workflow);
             console.log("ASE: MIDI HANDLER: Cast Item Found! New Midi Data", newMidiData);
+            //check if targets is an array
+            if(!Array.isArray(targets)) return true;
             if(targets.length == 0){
                 let newTargets = new Set();
                 newMidiData.targets.forEach(target => {
@@ -86,38 +88,59 @@ export class midiHandler {
                 workflow.hitTargets = newTargets;
                 workflow.failedSaves = newTargets;
                 console.log("ASE: MIDI HANDLER: Cast Item Found! New Workflow", workflow);
-                return true;
             }
+            return true;
         } else {
             return true;
         }
     }
     static async _handleASEPreamble(workflow) {
         console.log("ASE: MIDI HANDLER: PREAMBLE: ", workflow);
-        console.log(" --------  ASE: MIDI HANDLER: PREAMBLE: WORKFLOW TARGETS -------- ", workflow.targets);
+        console.log(" --------  ASE: MIDI HANDLER: PREAMBLE: WORKFLOW TARGETS -------- ", workflow.optionalTestField);
         const itemUUID = workflow.itemUuid;
         const item = await fromUuid(itemUUID);
         const spellEffect = item.getFlag("advancedspelleffects", "spellEffect");
         const aseEnabled = item.getFlag("advancedspelleffects", "enableASE") ?? false;
         const castItem = item.getFlag("advancedspelleffects", "castItem") ?? false;
+        const savesRequired = item.getFlag("advancedspelleffects", "savesRequired") ?? false;
         const allowInitialMidiCall = item.getFlag("advancedspelleffects", "effectOptions.allowInitialMidiCall") ?? true;
-        const targets = Array.from(workflow.targets) ?? [];
-        console.log("ASE: MIDI HANDLER: HANDLE ASE: TARGETS", targets);
-        if (spellEffect && aseEnabled && !castItem) {
+        console.log("ASE: MIDI HANDLER: PREAMBLE: Allow Initial Midi Call", allowInitialMidiCall);
+        console.log("ASE: MIDI HANDLER: PREAMBLE: Cast Item", castItem);
+        console.log("ASE: MIDI HANDLER: PREAMBLE: ASE Enabled", aseEnabled);
+        console.log("ASE: MIDI HANDLER: PREAMBLE: Spell Effect", spellEffect);
+        if (spellEffect && aseEnabled && !(castItem && savesRequired)) {
             let currentItemState = game.ASESpellStateManager.getSpell(itemUUID);
             if (currentItemState) {
                 console.log("ASE: MIDI HANDLER: Item State Found!", currentItemState.state);
                 console.log("ASE: MIDI HANDLER: STATE ACTIVE?", currentItemState.active);
                 console.log("ASE: MIDI HANDLER: STATE FINISHED?", currentItemState.finished);
-                if(currentItemState.active && !currentItemState.finished){
-                    return true;
+                if(!castItem){
+                    console.log("ASE: MIDI HANDLER: PREAMBLE: NOT CAST ITEM!");
+                    if(currentItemState.active && !currentItemState.finished){
+                        return true;
+                    }
+                    else{
+                        //console.log("ASE: MIDI HANDLER: Item State Not Active!", currentItemState);
+                        return false;
+                    }
+                } else {
+                    console.log("ASE: MIDI HANDLER: PREAMBLE: CAST ITEM!");
+                    if(currentItemState.active && !currentItemState.finished){
+                        console.log("ASE: MIDI HANDLER: PREAMBLE: CAST ITEM! STATE ACTIVE!");
+                        return true;
+                    }
+                    else{
+                        console.log("ASE: MIDI HANDLER: PREAMBLE: CAST ITEM! STATE NOT ACTIVE!");
+                        //console.log("ASE: MIDI HANDLER: Item State Not Active!", currentItemState);
+                        ASEHandler.handleASE(workflow);
+                        if(allowInitialMidiCall) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
                 }
-                else{
-                    //console.log("ASE: MIDI HANDLER: Item State Not Active!", currentItemState);
-                    return false;
-                }
-            }
-            else {
+            } else {
                 //console.log("ASE: MIDI HANDLER: Item State Not Found!");
                 ASEHandler.handleASE(workflow);
                 if(allowInitialMidiCall) {
@@ -182,6 +205,10 @@ export class midiHandler {
         } else if (currentItemState.active && !currentItemState.finished && currentItemState.options.repeat && currentItemState.options.nextTargets){
             console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT...");
             game.ASESpellStateManager.nextState(itemUUID, {targets: currentItemState.options.nextTargets});
+        } else if (currentItemState.active && !currentItemState.finished && currentItemState.options.castItem){
+            console.log("ASE: MIDI HANDLER: STATE TRANSITION: CAST ITEM...");
+            currentItemState.finished = true;
+            game.ASESpellStateManager.removeSpell(itemUUID);
         }
         console.log("ASE: MIDI HANDLER: STATE TRANSITION: FINISHED");
     }
