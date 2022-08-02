@@ -138,7 +138,11 @@ export class SpellStateMachine {
                 if(!spellOptions.finished){
                     game.user.updateTokenTargets([]);
                     let options = {
-                        "configureDialog": false
+                        "configureDialog": false,
+                        "workflowOptions":  {
+                            "autoRollDamage": "always"
+                        }
+
                     };
                     if(spellOptions.targets){
                         options.targetUuids = spellOptions.targets;

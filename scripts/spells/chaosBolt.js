@@ -440,6 +440,7 @@ export class chaosBolt extends baseSpellClass {
 
     static async damageInterrupt(data){
         console.log("ASE | CHAOS BOLT | Damage Interrupt Data: ", data);
+
         const elements = {
             "Acid": "icons/magic/acid/projectile-faceted-glob.webp",
             "Cold": "icons/magic/air/wind-tornado-wall-blue.webp",
@@ -450,19 +451,148 @@ export class chaosBolt extends baseSpellClass {
             "Psychic": "icons/magic/control/fear-fright-monster-grin-red-orange.webp",
             "Thunder": "icons/magic/sonic/explosion-shock-wave-teal.webp"
         };
+        const damageSequences = {
+            "acid": (sequence, attack, options) => {
+                sequence
+                    .sound()
+                    .file(options.acidSound ?? "")
+                    .delay(options.acidSoundDelay ?? 0)
+                    .volume(options.acidVolume ?? 0.5)
+                    .playIf(options.acidSound != "" && options.acidSound)
+                    .effect()
+                    .atLocation(attack.origin)
+                    .stretchTo(attack.target)
+                    .file(`jb2a.magic_missile.${options.acidColor ?? "green"}`)
+                    .missed(!attack.hits)
+                    .waitUntilFinished(-1000)
+            },
+            "cold": (sequence, attack, options) => {
+                sequence
+                    .sound()
+                    .file(options.coldSound ?? "")
+                    .delay(options.coldSoundDelay ?? 0)
+                    .volume(options.coldVolume ?? 0.5)
+                    .playIf(options.coldSound != "" && options.coldSound)
+                    .effect()
+                    .atLocation(attack.origin)
+                    .stretchTo(attack.target)
+                    .missed(!attack.hits)
+                    .file(`jb2a.ray_of_frost.${options.coldColor ?? "blue"}`)
+                    .waitUntilFinished(-1500)
+            },
+            "fire": (sequence, attack, options) => {
+                sequence
+                    .sound()
+                    .file(options.fireSound ?? "")
+                    .delay(options.fireSoundDelay ?? 0)
+                    .volume(options.fireVolume ?? 0.5)
+                    .playIf(options.fireSound != "" && options.fireSound)
+                    .effect()
+                    .atLocation(attack.origin)
+                    .stretchTo(attack.target)
+                    .file(`jb2a.fire_bolt.${options.fireColor ?? "orange"}`)
+                    .missed(!attack.hits)
+                    .waitUntilFinished(-1000)
+            },
+            "force": (sequence, attack, options) => {
+                sequence
+                    .sound()
+                    .file(options.forceSound ?? "")
+                    .delay(options.forceSoundDelay ?? 0)
+                    .volume(options.forceVolume ?? 0.5)
+                    .playIf(options.forceSound != "" && options.forceSound)
+                    .effect()
+                    .atLocation(attack.origin)
+                    .stretchTo(attack.target)
+                    .file(`jb2a.eldritch_blast.${options.forceColor ?? "purple"}`)
+                    .missed(!attack.hits)
+                    .waitUntilFinished(-3000)
+            },
+            "lightning": (sequence, attack, options) => {
+                sequence
+                    .sound()
+                    .file(options.lightningSound ?? "")
+                    .delay(options.lightningSoundDelay ?? 0)
+                    .volume(options.lightningVolume ?? 0.5)
+                    .playIf(options.lightningSound != "" && options.lightningSound)
+                    .effect()
+                    .atLocation(attack.origin)
+                    .stretchTo(attack.target)
+                    .file(`jb2a.chain_lightning.primary.${options.lightningColor ?? "blue"}`)
+                    .missed(!attack.hits)
+                    .waitUntilFinished(-1500)
+            },
+            "poison": (sequence, attack, options) => {
+                sequence
+                    .sound()
+                    .file(options.poisonSound ?? "")
+                    .delay(options.poisonSoundDelay ?? 0)
+                    .volume(options.poisonVolume ?? 0.5)
+                    .playIf(options.poisonSound != "")
+                    .effect()
+                    .atLocation(attack.origin)
+                    .stretchTo(attack.target)
+                    .file(`jb2a.spell_projectile.skull.${options.poisonColor ?? "pinkpurple"}`)
+                    .missed(!attack.hits)
+                    .waitUntilFinished(-1500)
+            },
+            "psychic": (sequence, attack, options) => {
+                sequence
+                    .sound()
+                    .file(options.psychicSound ?? "")
+                    .delay(options.psychicSoundDelay ?? 0)
+                    .volume(options.psychicVolume ?? 0.5)
+                    .playIf(options.psychicSound != "" && options.psychicSound)
+                    .effect()
+                    .atLocation(attack.origin)
+                    .stretchTo(attack.target)
+                    .file(`jb2a.disintegrate.${options.psychicColor ?? "dark_red"}`)
+                    .missed(!attack.hits)
+                    .waitUntilFinished(-1750)
+            },
+            "thunder": (sequence, attack, options) => {
+                sequence
+                    .sound()
+                    .file(options.thunderSound ?? "")
+                    .delay(options.thunderSoundDelay ?? 0)
+                    .volume(options.thunderVolume ?? 0.5)
+                    .playIf(options.thunderSound != "" && options.thunderSound)
+                    .effect()
+                    .atLocation(attack.origin)
+                    .stretchTo(attack.target)
+                    .file(`jb2a.bullet.01.${options.thunderColor ?? "blue"}`)
+                    .missed(!attack.hits)
+                    .name(`chaos-missile-thunder-${attack.origin.id}`)
+                    .waitUntilFinished(-1000)
+                    .sound()
+                    .file(options.thunderShatterSound ?? "")
+                    .delay(options.thunderShatterSoundDelay ?? 0)
+                    .volume(options.thunderShatterVolume ?? 0.5)
+                    .playIf(options.thunderShatterSound != "" && options.thunderShatterSound)
+                    .effect()
+                    .atLocation(`chaos-missile-thunder-${attack.origin.id}`)
+                    .file(`jb2a.shatter.${options.thunderShatterColor ?? "blue"}`)
+                    .waitUntilFinished(-1500)
+            },
+        };
+        
         const item = data.item;
+        const effectOptions = item.getFlag("advancedspelleffects", "effectOptions");
         const range = item.data.data.range.value;
-        const target = Array.from(data.hitTargets)[0];
+        const hitTarget = Array.from(data.hitTargets)[0];
+        const attackHit = Array.from(data.hitTargets).length > 0;
+        const target = Array.from(data.targets)[0];
         let returnObj = {};
         let spellState = game.ASESpellStateManager.getSpell(item.uuid);
         if (!spellState) return;
-        if(!target) {
+        if(!hitTarget) {
             spellState.finished = true;
             game.ASESpellStateManager.removeSpell(item.uuid);
-            return ''
         }
         console.log("ASE | CHAOS BOLT | Spell State: ", spellState);
-        spellState.options.targetsHit.push(target.document.uuid);
+        if(hitTarget){
+            spellState.options.targetsHit.push(hitTarget.document.uuid);
+        }
         if(spellState.options.nextTargets) {
             //remove nextTargets from object
             delete spellState.options.nextTargets;
@@ -481,12 +611,19 @@ export class chaosBolt extends baseSpellClass {
             {label: `Second D8 Result: ${die2} <img src="${elements[secondElement]}"/> ${secondElement.slice(0, 1).toUpperCase() + secondElement.slice(1)} damage`, value: secondElement}],
             title: 'Pick Damage Type...'
         }, 'row');
-        console.log("ASE | CHAOS BOLT | Damage Type: ", damageType);
+        if(!damageType) {
+            spellState.finished = true;
+            game.ASESpellStateManager.removeSpell(item.uuid);
+            ui.notifications.error("Spell Aborted: You must pick a damage type!");
+            return returnObj;
+        }
+        console.log("ASE | CHAOS BOLT | Damage Type: ", damageType.toLowerCase());
         returnObj['newDamageType'] = damageType;
+
         if(die1 != die2) {
             spellState.finished = true;
             game.ASESpellStateManager.removeSpell(item.uuid);
-        } else if (die1 == die2) {
+        } else if (die1 == die2 && attackHit) {
             const potentialTargets = canvas.tokens.placeables.filter(function (target) {
                 return target.actor?.data?.data?.attributes.hp.value > 0
                     && canvas.grid.measureDistance(spellState.options.caster, target) <= range
@@ -594,172 +731,14 @@ export class chaosBolt extends baseSpellClass {
             }
             
         }
+        let sequence = new Sequence();
+        damageSequences[damageType.toLowerCase()](sequence, {origin: spellState.options.caster, target: target, hits: attackHit}, effectOptions)
+        sequence.play();
         return returnObj;
+        
     }
 
 
-    async determineTarget() {
-
-        const attack = this.attackData[this.attackData.length - 1];
-
-        if (!this.targetsHitSoFar.length) {
-            this.targetsHitSoFar.push(attack.target.id);
-            return true;
-        }
-
-        this.targetsHitSoFar.push(attack.target.id);
-
-        const distance = 29.5;
-        const potentialTargets = canvas.tokens.placeables.filter(new_target => {
-            return canvas.grid.measureDistance(attack.target.center, new_target.center) <= distance
-                && this.targetsHitSoFar.indexOf(new_target.id) === -1
-                && attack.target.data.disposition === new_target.data.disposition
-                && new_target.actor.data.data.attributes.hp.value > 0
-                && new_target !== this.token;
-        });
-
-        if (potentialTargets.length === 0) {
-            return false;
-        }
-
-        potentialTargets.sort((a, b) => {
-            return canvas.grid.measureDistance(this.token.center, a.center) - canvas.grid.measureDistance(this.token.center, b.center);
-        });
-
-        const result = await warpgate.menu({
-            buttons: potentialTargets.map(target => {
-                const distance = Math.floor(canvas.grid.measureDistance(attack.target.center, target.center));
-                return {
-                    label: `<img width="100" style="border:0;" data-tokenid="${target.id}" src="${target.data.img}"/><br>${target.name} (${distance}ft away)`,
-                    value: {
-                        target
-                    }
-                };
-            })
-        }, { title: "Choose your target!", options: { height: "100%", width: "auto" } });
-
-        if (!result.buttons) {
-            return false;
-        }
-
-        this.attackData.push({
-            "origin": attack.target,
-            "target": result.buttons.target
-        })
-
-        return true;
-
-    }
-
-    async rollAttack() {
-
-        const attackBonus = `1d20 + ${this.rollProf} + ${this.rollMod}` + (this.attackBonus !== "" ? " + " + this.attackBonus : "")
-
-        const roll = (await new CONFIG.Dice.D20Roll(attackBonus).configureDialog({ title: "Chaos Bolt: Roll Attack" }))
-
-        const attackRoll = await roll.evaluate({ async: true });
-
-        const criticalHit = attackRoll.dice[0].results[0].result === 20;
-        const criticalMiss = attackRoll.dice[0].results[0].result === 1;
-
-        game.dice3d?.showForRoll(attackRoll);
-
-        let attackRollRender = await attackRoll.render();
-
-        if (criticalHit) {
-            attackRollRender = attackRollRender.replace('dice-total', 'dice-total critical');
-        }
-
-        if (criticalMiss) {
-            attackRollRender = attackRollRender.replace('dice-total', 'dice-total fumble');
-        }
-
-        const attack = this.attackData[this.attackData.length - 1];
-
-        this.attackData[this.attackData.length - 1] = {
-            ...attack,
-            roll: attackRoll,
-            attackRollRender: attackRollRender,
-            hits: attackRoll.total >= attack.target.actor.data.data.attributes.ac.value && !criticalMiss,
-            criticalHit: criticalHit,
-            criticalMiss: criticalMiss
-        }
-
-    }
-
-    async rollDamage() {
-
-        const attack = this.attackData[this.attackData.length - 1];
-
-        let damageRollFormula = `1d8 + 1d8 + ${this.spellLevel}d6`;
-
-        if (attack.criticalHit) {
-            damageRollFormula = damageRollFormula + " + " + damageRollFormula;
-        }
-
-        if (this.damageBonus !== "") {
-            damageRollFormula += " + " + this.damageBonus;
-        }
-
-        const damageRoll = await new Roll(damageRollFormula).evaluate({ async: true });
-
-        game.dice3d?.showForRoll(damageRoll);
-
-        const forcedRolls = Math.floor(Math.random() * 8);
-
-        const firstElementIndex = CONFIG.forcedRolls ? forcedRolls : damageRoll.dice[0].total - 1;
-        const secondElementIndex = CONFIG.forcedRolls ? forcedRolls : damageRoll.dice[1].total - 1;
-
-        let damageType = Object.keys(this.elements)[firstElementIndex].toLowerCase();
-
-        if (firstElementIndex !== secondElementIndex && attack.hits) {
-
-            const firstElement = Object.keys(this.elements)[firstElementIndex];
-            const secondElement = Object.keys(this.elements)[secondElementIndex];
-
-            const options = {
-                buttons: [{
-                    label: `<img src="${this.elements[firstElement]}"/> ${firstElement.slice(0, 1).toUpperCase() + firstElement.slice(1)} damage`,
-                    value: {
-                        element: firstElement
-                    }
-                }, {
-                    label: `<img src="${this.elements[secondElement]}"/> ${secondElement.slice(0, 1).toUpperCase() + secondElement.slice(1)} damage`,
-                    value: {
-                        element: secondElement
-                    }
-                }]
-            }
-
-            const result = await warpgate.menu(options, { title: "Choose your damage type!", options: { height: "100%" } });
-
-            if (!result.buttons) return false;
-
-            damageType = result.buttons.element.toLowerCase();
-
-        }
-
-        this.attackData[this.attackData.length - 1] = {
-            ...attack,
-            damage: damageRoll.total,
-            damageType: damageType,
-            damageRollRender: await damageRoll.render(),
-            bounce: firstElementIndex === secondElementIndex && attack.hits
-        }
-
-        if (!attack.hits) return false;
-
-        await MidiQOL.applyTokenDamage(
-            [{ damage: damageRoll.total, type: damageType }],
-            damageRoll.total,
-            new Set([attack.target]),
-            this.item,
-            new Set()
-        )
-
-        return true;
-
-    }
 
     async playSequence() {
 
@@ -773,177 +752,6 @@ export class chaosBolt extends baseSpellClass {
         }
 
         sequence.play();
-
-    }
-
-    async updateChatCards() {
-
-        await utilFunctions.wait(250);
-
-        const attack = this.attackData[this.attackData.length - 1];
-
-        const chatMessage = await game.messages.get(this.itemCardId);
-        const duplicatedContent = await duplicate(chatMessage.data.content);
-        const content = $(duplicatedContent);
-
-        const attackRolls = content.find('.midi-qol-attack-roll');
-        attackRolls.parent().parent().addClass('flexrow 2');
-        attackRolls.html(attackRolls.html() + `
-            <div style="text-align:center">Attack ${this.attackData.length}</div>
-            ${attack.attackRollRender}
-        `);
-
-        const damageRolls = content.find('.midi-qol-damage-roll');
-        damageRolls.html(damageRolls.html() + `
-            <div style="text-align:center">(${attack.damageType})${!attack.hits ? " - Missed" : ""}</div>
-            ${attack.damageRollRender}
-        `);
-
-        if (attack.hits) {
-            const hitsUI = content.find('.midi-qol-hits-display');
-            hitsUI.html(hitsUI.html() + `
-                <div>
-                    <div class="midi-qol-nobox">
-                        <div class="midi-qol-flex-container">
-                            <div class="midi-qol-target-npc midi-qol-target-name" id="${attack.target.id}">
-                                <img src="${attack.target.data.img}" width="30" height="30" style="border:0px">
-                            </div>
-                            <div> takes ${attack.damage} ${attack.damageType} damage.</div>
-                        </div>
-                    </div>
-                </div>
-            `)
-        }
-
-        await chatMessage.update({ content: content.prop('outerHTML') });
-
-        await ui.chat.scrollBottom();
-
     }
 
 }
-
-const damageSequences = {
-    "acid": (sequence, attack, options) => {
-        sequence
-            .sound()
-            .file(options.acidSound ?? "")
-            .delay(options.acidSoundDelay ?? 0)
-            .volume(options.acidVolume ?? 0.5)
-            .playIf(options.acidSound != "" && options.acidSound)
-            .effect()
-            .atLocation(attack.origin)
-            .stretchTo(attack.target)
-            .file(`jb2a.magic_missile.${options.acidColor ?? "green"}`)
-            .missed(!attack.hits)
-            .waitUntilFinished(-1000)
-    },
-    "cold": (sequence, attack, options) => {
-        sequence
-            .sound()
-            .file(options.coldSound ?? "")
-            .delay(options.coldSoundDelay ?? 0)
-            .volume(options.coldVolume ?? 0.5)
-            .playIf(options.coldSound != "" && options.coldSound)
-            .effect()
-            .atLocation(attack.origin)
-            .stretchTo(attack.target)
-            .missed(!attack.hits)
-            .file(`jb2a.ray_of_frost.${options.coldColor ?? "blue"}`)
-            .waitUntilFinished(-1500)
-    },
-    "fire": (sequence, attack, options) => {
-        sequence
-            .sound()
-            .file(options.fireSound ?? "")
-            .delay(options.fireSoundDelay ?? 0)
-            .volume(options.fireVolume ?? 0.5)
-            .playIf(options.fireSound != "" && options.fireSound)
-            .effect()
-            .atLocation(attack.origin)
-            .stretchTo(attack.target)
-            .file(`jb2a.fire_bolt.${options.fireColor ?? "orange"}`)
-            .missed(!attack.hits)
-            .waitUntilFinished(-1000)
-    },
-    "force": (sequence, attack, options) => {
-        sequence
-            .sound()
-            .file(options.forceSound ?? "")
-            .delay(options.forceSoundDelay ?? 0)
-            .volume(options.forceVolume ?? 0.5)
-            .playIf(options.forceSound != "" && options.forceSound)
-            .effect()
-            .atLocation(attack.origin)
-            .stretchTo(attack.target)
-            .file(`jb2a.eldritch_blast.${options.forceColor ?? "purple"}`)
-            .missed(!attack.hits)
-            .waitUntilFinished(-3000)
-    },
-    "lightning": (sequence, attack, options) => {
-        sequence
-            .sound()
-            .file(options.lightningSound ?? "")
-            .delay(options.lightningSoundDelay ?? 0)
-            .volume(options.lightningVolume ?? 0.5)
-            .playIf(options.lightningSound != "" && options.lightningSound)
-            .effect()
-            .atLocation(attack.origin)
-            .stretchTo(attack.target)
-            .file(`jb2a.chain_lightning.primary.${options.lightningColor ?? "blue"}`)
-            .missed(!attack.hits)
-            .waitUntilFinished(-1500)
-    },
-    "poison": (sequence, attack, options) => {
-        sequence
-            .sound()
-            .file(options.poisonSound ?? "")
-            .delay(options.poisonSoundDelay ?? 0)
-            .volume(options.poisonVolume ?? 0.5)
-            .playIf(options.poisonSound != "")
-            .effect()
-            .atLocation(attack.origin)
-            .stretchTo(attack.target)
-            .file(`jb2a.spell_projectile.skull.${options.poisonColor ?? "pinkpurple"}`)
-            .missed(!attack.hits)
-            .waitUntilFinished(-1500)
-    },
-    "psychic": (sequence, attack, options) => {
-        sequence
-            .sound()
-            .file(options.psychicSound ?? "")
-            .delay(options.psychicSoundDelay ?? 0)
-            .volume(options.psychicVolume ?? 0.5)
-            .playIf(options.psychicSound != "" && options.psychicSound)
-            .effect()
-            .atLocation(attack.origin)
-            .stretchTo(attack.target)
-            .file(`jb2a.disintegrate.${options.psychicColor ?? "dark_red"}`)
-            .missed(!attack.hits)
-            .waitUntilFinished(-1750)
-    },
-    "thunder": (sequence, attack, options) => {
-        sequence
-            .sound()
-            .file(options.thunderSound ?? "")
-            .delay(options.thunderSoundDelay ?? 0)
-            .volume(options.thunderVolume ?? 0.5)
-            .playIf(options.thunderSound != "" && options.thunderSound)
-            .effect()
-            .atLocation(attack.origin)
-            .stretchTo(attack.target)
-            .file(`jb2a.bullet.01.${options.thunderColor ?? "blue"}`)
-            .missed(!attack.hits)
-            .name(`chaos-missile-thunder-${attack.origin.id}`)
-            .waitUntilFinished(-1000)
-            .sound()
-            .file(options.thunderShatterSound ?? "")
-            .delay(options.thunderShatterSoundDelay ?? 0)
-            .volume(options.thunderShatterVolume ?? 0.5)
-            .playIf(options.thunderShatterSound != "" && options.thunderShatterSound)
-            .effect()
-            .atLocation(`chaos-missile-thunder-${attack.origin.id}`)
-            .file(`jb2a.shatter.${options.thunderShatterColor ?? "blue"}`)
-            .waitUntilFinished(-1500)
-    },
-};
