@@ -234,6 +234,8 @@ export class spiritualWeapon {
                     "enableASE": true,
                     "disableSettings": true,
                     "spellEffect": game.i18n.localize('ASE.SpiritAttackItemName'),
+                    'castItem': true,
+                    'castStage': 'preDamage',
                     'effectOptions': {
                         'attackAnimFile': spiritAttackAnim
                     }
@@ -278,7 +280,7 @@ export class spiritualWeapon {
     }
 
     static async spiritualWeaponAttack(data) {
-        //console.log("ASE Spiritual Weapon Attacking...", data);
+        console.log("ASE Spiritual Weapon Attacking...", data);
         const casterActor = data.actor;
         const casterToken = canvas.tokens.get(data.tokenId);
         const spellItem = data.item;
@@ -286,7 +288,10 @@ export class spiritualWeapon {
         const attackAnimFile = aseEffectOptions?.attackAnimFile;
 
         const target = Array.from(data.targets)[0];
-
+        let hitTargets = Array.from(data.hitTargets);
+        console.log("Hit Targets: ", hitTargets);
+        const missed = hitTargets.length == 0;
+        console.log("ASE Spiritual Weapon Attack Missed: ", missed);
         //console.log("Caster: ", casterActor);
         //console.log("Target: ", target);
         //console.log("Anim File: ", attackAnimFile);
@@ -302,7 +307,7 @@ export class spiritualWeapon {
             .startTime(500)
             .endTime(1250)
             .file(attackAnimFile)
-            .missed(game.modules.get("midi-qol")?.active && Array.from(data.hitTargets ?? []).length == 0)
+            .missed(missed)
             .atLocation(casterToken)
             .fadeOut(500)
             .stretchTo(target)
@@ -370,7 +375,8 @@ export class spiritualWeapon {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: false,
         }
 
     }

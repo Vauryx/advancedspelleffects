@@ -41,6 +41,7 @@ export class midiHandler {
         const spellEffect = item.getFlag("advancedspelleffects", "spellEffect");
         const aseEnabled = item.getFlag("advancedspelleffects", "enableASE") ?? false;
         const castItem = item.getFlag("advancedspelleffects", "castItem") ?? false;
+        const castStage = item.getFlag("advancedspelleffects", "castStage") ?? '';
         if (spellEffect && aseEnabled) {
             let currentItemState = game.ASESpellStateManager.getSpell(itemUUID);
             if (currentItemState) {
@@ -60,6 +61,8 @@ export class midiHandler {
                     }
                     return true;
                 }
+            } else if (castItem && castStage == "preDamage") {
+                ASEHandler.handleASE(workflow);
             }
         }
     }
@@ -102,6 +105,7 @@ export class midiHandler {
         const spellEffect = item.getFlag("advancedspelleffects", "spellEffect");
         const aseEnabled = item.getFlag("advancedspelleffects", "enableASE") ?? false;
         const castItem = item.getFlag("advancedspelleffects", "castItem") ?? false;
+        const castStage = item.getFlag("advancedspelleffects", "castStage") ?? '';
         const savesRequired = item.getFlag("advancedspelleffects", "savesRequired") ?? false;
         const allowInitialMidiCall = item.getFlag("advancedspelleffects", "effectOptions.allowInitialMidiCall") ?? true;
         console.log("ASE: MIDI HANDLER: PREAMBLE: Allow Initial Midi Call", allowInitialMidiCall);
@@ -141,8 +145,10 @@ export class midiHandler {
                     }
                 }
             } else {
-                //console.log("ASE: MIDI HANDLER: Item State Not Found!");
-                ASEHandler.handleASE(workflow);
+                console.log("ASE: MIDI HANDLER: Item State Not Found!");
+                if(castStage != "preDamage"){
+                    ASEHandler.handleASE(workflow);
+                }
                 if(allowInitialMidiCall) {
                     return true;
                 } else {
