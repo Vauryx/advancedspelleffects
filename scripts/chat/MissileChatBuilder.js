@@ -36,7 +36,7 @@ export async function MissileChatBuilder(data) {
             }
         } else {
             currAttackBreakDown = "NO ROLL";
-            currAttackRoll = {_total: "NO ROLL"};
+            currAttackRoll = {_total: " - "};
         }
         
         if(hit){
@@ -44,9 +44,9 @@ export async function MissileChatBuilder(data) {
             damageTotalText = currDamageRoll.total;
         } else {
             currDamageBreakdown = `NO ROLL`;
-            damageTotalText = `NO ROLL`;
+            damageTotalText = ` - `;
         }
-        content += `<tr><td><figure><img alt="Token" src="${currTarget.data.img}" height="40" style="border:0px"><figcaption style="white-space: nowrap;">${currTargetName}</figcaption></figure></td><td>${hit ? 'Hit' : 'Miss'}</td><td title = '${currAttackBreakDown}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${damageTotalText}</td></tr>`;
+        content += `<tr><td><figure style="overflow: auto;"><img style="float: left;" alt="Token" src="${currTarget.data.img}" height="40" style="border:0px"><figcaption style="white-space: nowrap;">${currTargetName}</figcaption></figure></td><td>${hit ? 'Hit' : 'Miss'}</td><td title = '${currAttackBreakDown}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${damageTotalText}</td></tr>`;
     }
     
 

@@ -25,7 +25,7 @@ import { viciousMockery } from "./spells/viciousMockery.js";
 import { wallSpell } from "./spells/wallSpell.js";
 
 export class ASEHandler {
-    static async handleASE(data) {
+    static async handleASE(data, optionals = {}) {
         // check if the spell being rolled is marked as an ASE spell
         let item = data.item;
         await versionMigration.handle(item);
@@ -58,7 +58,13 @@ export class ASEHandler {
                 }
                 return;
             case game.i18n.localize('ASE.ChaosBolt'):
-                await chaosBolt.cast(data);
+                if(!optionals.damInterrupt){
+                    await chaosBolt.cast(data);
+                } else if (optionals.damInterrupt){
+                    let newData = await chaosBolt.damageInterrupt(data);
+                    return newData;
+                }
+                
                 return;
             case game.i18n.localize('ASE.ActivateCallLightning'):
                 //await callLightning.callLightningBolt(aseFlags.effectOptions.stormTileId, data.itemCardId, data.item.id);

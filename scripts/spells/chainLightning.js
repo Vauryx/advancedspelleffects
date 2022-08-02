@@ -289,7 +289,6 @@ export class chainLightning {
             spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions,
-            targetted: true,
             allowInitialMidiCall: false,
         }
 

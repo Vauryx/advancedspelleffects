@@ -46,13 +46,6 @@
                 flags.effectOptions.allowInitialMidiCall = true;
             }
         }
-        if(flags.effectOptions.targetted == undefined){
-            if(currentSpell.settings.targetted != undefined) {
-                flags.effectOptions.targetted = currentSpell.settings.targetted;
-            } else {
-                flags.effectOptions.targetted = false;
-            }
-        }
         $currentSpell.flagData = flags.effectOptions;
     }
     if(flags.effectOptions?.summons?.length > 0){

@@ -3,15 +3,15 @@ import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
 export class midiHandler {
     static registerHooks() {
         if (game.modules.get("midi-qol")?.active) {
-            Hooks.on("midi-qol.preambleComplete", midiHandler._handleASE);
+            Hooks.on("midi-qol.preambleComplete", midiHandler._handleASEPreamble);
             Hooks.on("midi-qol.RollComplete", midiHandler._handleStateTransition);
             //Hooks.on("midi-qol.preItemRoll", midiHandler._getPreItemRollInfo);
             //Hooks.on("midi-qol.preAttackRoll", midiHandler._getPreAttackRollInfo);
             //Hooks.on("midi-qol.AttackRollComplete", midiHandler._getAttackRollCompleteInfo);
             //Hooks.on("midi-qol.preCheckHits", midiHandler._getPreCheckHitsInfo);
             //Hooks.on("midi-qol.preDamageRoll", midiHandler._getPreDamageRollInfo);
-           // Hooks.on("midi-qol.preDamageRollComplete", midiHandler._getPreDamageRollComplete);
-            //Hooks.on("midi-qol.damageRollComplete", midiHandler._getDamageRollComplete);
+            Hooks.on("midi-qol.preDamageRollComplete", midiHandler._damageRollComplete);
+            //Hooks.on("midi-qol.damageRollComplete", midiHandler._damageRollComplete);
             Hooks.on("midi-qol.preCheckSaves", midiHandler._preCheckSaves);
         }
     }
@@ -33,8 +33,35 @@ export class midiHandler {
     static async _getPreDamageRollComplete(workflow) {
         console.log(" --------  ASE: MIDI HANDLER: PRE DAMAGE ROLL COMPLETE: WORKFLOW TARGETS -------- ", workflow.targets);
     }
-    static async _getDamageRollComplete(workflow) {
-        console.log(" --------  ASE: MIDI HANDLER: DAMAGE ROLL COMPLETE: WORKFLOW TARGETS -------- ", workflow.targets);
+    static async _damageRollComplete(workflow) {
+        console.log(" --------  ASE: MIDI HANDLER: PRE DAMAGE ROLL COMPLETE: WORKFLOW -------- ", workflow);
+        console.log(" --------  ASE: MIDI HANDLER: PRE DAMAGE ROLL COMPLETE: WORKFLOW TARGETS -------- ", workflow.targets);
+        const itemUUID = workflow.itemUuid;
+        const item = await fromUuid(itemUUID);
+        const spellEffect = item.getFlag("advancedspelleffects", "spellEffect");
+        const aseEnabled = item.getFlag("advancedspelleffects", "enableASE") ?? false;
+        const castItem = item.getFlag("advancedspelleffects", "castItem") ?? false;
+        if (spellEffect && aseEnabled) {
+            let currentItemState = game.ASESpellStateManager.getSpell(itemUUID);
+            if (currentItemState) {
+                if(currentItemState.options.damInterrupt) {
+                    console.log("ASE: MIDI HANDLER: Interrupting Damage Roll");
+                    let newData = await ASEHandler.handleASE(workflow, {damInterrupt: true});
+                    console.log("ASE: MIDI HANDLER: Interrupting Damage Roll New Data", newData);
+                    if(newData) {
+                        if(newData.newDamageType){
+                            console.log("ASE: MIDI HANDLER: DAMAGE DETAIL: ", workflow.damageDetail);
+                            workflow.damageDetail[0].type = newData.newDamageType.toLowerCase();
+                            workflow.defaultDamageType = newData.newDamageType.toLowerCase();
+                        } 
+                        if(newData.newTargets){
+                            currentItemState.options.nextTargets = newData.newTargets;
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
     }
     static async _preCheckSaves(workflow) {
         console.log(" --------  ASE: MIDI HANDLER: PRE CHECK SAVES: WORKFLOW -------- ", workflow);
@@ -65,8 +92,9 @@ export class midiHandler {
             return true;
         }
     }
-    static async _handleASE(workflow) {
-        console.log("ASE: MIDI HANDLER: HANDLE ASE", workflow);
+    static async _handleASEPreamble(workflow) {
+        console.log("ASE: MIDI HANDLER: PREAMBLE: ", workflow);
+        console.log(" --------  ASE: MIDI HANDLER: PREAMBLE: WORKFLOW TARGETS -------- ", workflow.targets);
         const itemUUID = workflow.itemUuid;
         const item = await fromUuid(itemUUID);
         const spellEffect = item.getFlag("advancedspelleffects", "spellEffect");
@@ -76,9 +104,11 @@ export class midiHandler {
         const targets = Array.from(workflow.targets) ?? [];
         console.log("ASE: MIDI HANDLER: HANDLE ASE: TARGETS", targets);
         if (spellEffect && aseEnabled && !castItem) {
-            let currentItemState = game.ASESpellStateManager.getState(itemUUID);
+            let currentItemState = game.ASESpellStateManager.getSpell(itemUUID);
             if (currentItemState) {
-                console.log("ASE: MIDI HANDLER: Item State Found!", currentItemState);
+                console.log("ASE: MIDI HANDLER: Item State Found!", currentItemState.state);
+                console.log("ASE: MIDI HANDLER: STATE ACTIVE?", currentItemState.active);
+                console.log("ASE: MIDI HANDLER: STATE FINISHED?", currentItemState.finished);
                 if(currentItemState.active && !currentItemState.finished){
                     return true;
                 }
@@ -117,10 +147,11 @@ export class midiHandler {
         let iterateListKey = "";
         let currStateIndex = 0;
         //console.log("ASE: MIDI HANDLER: STATE TRANSITION: TARGETS", targets);
-        let currentItemState = game.ASESpellStateManager.getState(itemUUID);
-        //console.log("ASE: MIDI HANDLER: STATE TRANSITION: CURRENT ITEM STATE", currentItemState);
+        let currentItemState = game.ASESpellStateManager.getSpell(itemUUID);
+        console.log("ASE: MIDI HANDLER: STATE TRANSITION: CURRENT ITEM STATE", currentItemState);
         if (!currentItemState) {return;}
-        if(currentItemState.active && !currentItemState.finished && !currentItemState.options.targetted){
+        if(currentItemState.active && !currentItemState.finished && currentItemState.options.iterate){
+            console.log("ASE: MIDI HANDLER: STATE TRANSITION: ITERATE...");
             if(!targets || targets.length == 0){
                 iterateListKey = currentItemState.options.iterate;
                 currStateIndex = currentItemState.state - 1;
@@ -138,13 +169,20 @@ export class midiHandler {
             game.ASESpellStateManager.nextState(itemUUID, stateOptions);
             return;
         } else if (currentItemState.active && !currentItemState.finished && currentItemState.options.targetted){
-            stateOptions.finished = true;
+            console.log("ASE: MIDI HANDLER: STATE TRANSITION: TARGETTED...");
+            if(!currentItemState.options.repeat){
+                stateOptions.finished = true;
+            }
             //move uuid of each token from workflow.failedSaves into stateOptions.failedSaves
             stateOptions.failedSaves = [];
             workflow.failedSaves.forEach(target => {
                 stateOptions.failedSaves.push(target.document.uuid);
             });
             game.ASESpellStateManager.nextState(itemUUID, stateOptions);
+        } else if (currentItemState.active && !currentItemState.finished && currentItemState.options.repeat && currentItemState.options.nextTargets){
+            console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT...");
+            game.ASESpellStateManager.nextState(itemUUID, {targets: currentItemState.options.nextTargets});
         }
+        console.log("ASE: MIDI HANDLER: STATE TRANSITION: FINISHED");
     }
 }

@@ -25,22 +25,12 @@ export class chaosBolt extends baseSpellClass {
         this.token = canvas.tokens.get(this.params.tokenId);
         this.item = this.params.item;
         this.effectOptions = this.item.getFlag("advancedspelleffects", "effectOptions") ?? {};
-        this.rollProf = this.actor.data.data.attributes.prof;
-        const rollAbility = this.actor.data.data.attributes.spellcasting;
-        this.rollMod = this.actor.data.data.abilities[rollAbility].mod || 0;
-        this.attackBonus = this.actor.data.data.bonuses.rsak.attack;
-        this.damageBonus = this.actor.data.data.bonuses.rsak.damage;
 
         this.itemCardId = this.params.itemCardId;
 
         this.spellLevel = Number(this.params.itemLevel);
 
-        const target = Array.from(this.params.targets)[0];
-
-        this.attackData = [{
-            "origin": this.token,
-            "target": target
-        }];
+        this.target = Array.from(this.params.targets)[0];
 
         this.targetsHitSoFar = [];
 
@@ -417,13 +407,25 @@ export class chaosBolt extends baseSpellClass {
             animOptions: animOptions,
             spellOptions: spellOptions,
             soundOptions: soundOptions,
+            allowInitialMidiCall: false,
         }
     }
 
     static async cast(args) {
+        console.log("ASE | CHAOS BOLT | Cast Args: ", args);
         const workflow = new this(args);
-
-        let bouncing = true;
+        const spellStateOptions = {
+            repeat: true,
+            damInterrupt: true,
+            effectOptions: workflow.effectOptions,
+            item: workflow.item,
+            caster: workflow.token,
+            targets: [workflow.target.document.uuid],
+            targetsHit: []
+        };
+        console.log("ASE | CHAOS BOLT | spellStateOptions: ", spellStateOptions);
+        game.ASESpellStateManager.addSpell(workflow.item.uuid, spellStateOptions);
+        /*let bouncing = true;
         while (bouncing) {
             const validTarget = await workflow.determineTarget();
             if (!validTarget) break;
@@ -433,8 +435,168 @@ export class chaosBolt extends baseSpellClass {
             bouncing = workflow.attackData[workflow.attackData.length - 1].bounce && validDamage;
         }
 
-        await workflow.playSequence();
+        await workflow.playSequence();*/
     }
+
+    static async damageInterrupt(data){
+        console.log("ASE | CHAOS BOLT | Damage Interrupt Data: ", data);
+        const elements = {
+            "Acid": "icons/magic/acid/projectile-faceted-glob.webp",
+            "Cold": "icons/magic/air/wind-tornado-wall-blue.webp",
+            "Fire": "icons/magic/fire/beam-jet-stream-embers.webp",
+            "Force": "icons/magic/sonic/projectile-sound-rings-wave.webp",
+            "Lightning": "icons/magic/lightning/bolt-blue.webp",
+            "Poison": "icons/magic/death/skull-poison-green.webp",
+            "Psychic": "icons/magic/control/fear-fright-monster-grin-red-orange.webp",
+            "Thunder": "icons/magic/sonic/explosion-shock-wave-teal.webp"
+        };
+        const item = data.item;
+        const range = item.data.data.range.value;
+        const target = Array.from(data.hitTargets)[0];
+        let returnObj = {};
+        let spellState = game.ASESpellStateManager.getSpell(item.uuid);
+        if (!spellState) return;
+        if(!target) {
+            spellState.finished = true;
+            game.ASESpellStateManager.removeSpell(item.uuid);
+            return ''
+        }
+        console.log("ASE | CHAOS BOLT | Spell State: ", spellState);
+        spellState.options.targetsHit.push(target.document.uuid);
+        if(spellState.options.nextTargets) {
+            //remove nextTargets from object
+            delete spellState.options.nextTargets;
+        }
+        const damageRoll = data.damageRoll;
+        let die1;
+        let die2;
+        if(damageRoll.terms[0].faces == 8){
+            die1 = damageRoll.terms[0].results[0].result;
+            die2 = damageRoll.terms[0].results[1].result;
+        }
+        const firstElement = Object.keys(elements)[die1-1];
+        const secondElement = Object.keys(elements)[die2-1];
+        let damageType = await warpgate.buttonDialog({
+            buttons: [{label: `First D8 Result: ${die1} <img src="${elements[firstElement]}"/> ${firstElement.slice(0, 1).toUpperCase() + firstElement.slice(1)} damage`, value: firstElement},
+            {label: `Second D8 Result: ${die2} <img src="${elements[secondElement]}"/> ${secondElement.slice(0, 1).toUpperCase() + secondElement.slice(1)} damage`, value: secondElement}],
+            title: 'Pick Damage Type...'
+        }, 'row');
+        console.log("ASE | CHAOS BOLT | Damage Type: ", damageType);
+        returnObj['newDamageType'] = damageType;
+        if(die1 != die2) {
+            spellState.finished = true;
+            game.ASESpellStateManager.removeSpell(item.uuid);
+        } else if (die1 == die2) {
+            const potentialTargets = canvas.tokens.placeables.filter(function (target) {
+                return target.actor?.data?.data?.attributes.hp.value > 0
+                    && canvas.grid.measureDistance(spellState.options.caster, target) <= range
+                    /* target does not appear in spellState.targetsHit list */ && !spellState.options.targetsHit.includes(target.document.uuid)
+                    && target !== spellState.options.caster
+            });
+            console.log("ASE | CHAOS BOLT | Potential Targets: ", potentialTargets);
+            if (!potentialTargets.length) {
+                spellState.finished = true;
+                game.ASESpellStateManager.removeSpell(item.uuid);
+            } else {
+                const targetList = potentialTargets.map((target, index) => {
+                    return `
+                    <tr class="chaos-bolt-target" tokenId="${target.id}">
+                        <td class="chaos-bolt-flex">
+                            <img src="${target.data.img}" width="30" height="30" style="border:0px"> - ${target.name}
+                        </td>
+                        <td>
+                            <input type="checkbox" class='target' name="${index}">
+                        </td>
+                    </tr>
+                    `;
+                }).join('');
+        
+                const content = `
+                <style>
+                    .chaos-bolt-flex {
+                        display: inline-flex;
+                        align-items: center;
+                    }
+                    .chaos-bolt-flex img {
+                        margin-right: 0.5rem;
+                    }
+                </style>
+                <p>Choose next target: </p>
+                <form class="flexcol">
+                    <table width="100%">
+                        <tbody>
+                            <tr>
+                                <th>Potential Target</th>
+                                <th>Jump to</th>
+                            </tr>
+                            ${targetList}
+                        </tbody>
+                    </table>
+                </form>
+                `;
+        
+                let newTargets = await new Promise(async resolve => {
+                    let resolved = false;
+                    new Dialog({
+                        title: "Chaos Bolt: Choose New Target",
+                        content,
+                        buttons: {
+                            one: {
+                                icon: `<i class="fas fa-bolt"></i>`,
+                                label: "HURL!",
+                                callback: async (html) => {
+                                    let selected_targets = html.find('input:checkbox:checked');
+                                    let targetData = [];
+                                    for (let input of selected_targets) {
+                                        targetData.push(potentialTargets[Number(input.name)].document.uuid);
+                                    }
+                                    resolved = true;
+                                    resolve(targetData);
+                                }
+                            }
+                        },
+                        close: () => {
+                            if (!resolved) resolve(false);
+                        },
+                        render: (html) => {
+        
+                            const jumpCount = 1;
+        
+                            html.find(".chaos-bolt-target").on("mouseenter", function (e) {
+                                let token = canvas.tokens.get($(this).attr('tokenId'));
+                                token._onHoverIn(e);
+                            }).on("mouseleave", function (e) {
+                                let token = canvas.tokens.get($(this).attr('tokenId'));
+                                token._onHoverOut(e);
+                            });
+        
+                            let numJumps = 1;
+        
+                            html.find("input:checkbox").on('change', function () {
+                                let total = html.find('input:checkbox:checked').length;
+                                html.find('input:checkbox:not(:checked)').each(function () {
+                                    $(this).prop('disabled', total === numJumps);
+                                });
+                            });
+        
+                        }
+                    }).render(true);
+        
+                });
+                console.log("ASE | CHAOS BOLT | New Target: ", newTargets);
+                if(!newTargets) {
+                    spellState.finished = true;
+                    game.ASESpellStateManager.removeSpell(item.uuid);
+                }
+                if (newTargets.length > 0) {
+                    returnObj['newTargets'] = newTargets;
+                }
+            }
+            
+        }
+        return returnObj;
+    }
+
 
     async determineTarget() {
 

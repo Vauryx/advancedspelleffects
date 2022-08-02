@@ -6,7 +6,7 @@ export class SpellStateMachine {
         this.spells = [];
     }
     //get current state of spell
-    getState(uuid) {
+    getSpell(uuid) {
         //return state of spell with uuid
         return this.spells.find(spell => spell.uuid === uuid) ?? false;
     }
@@ -131,6 +131,23 @@ export class SpellStateMachine {
                     }
                     this.removeSpell(uuid);
                     console.log("ASE: MIDI HANDLER: STATE TRANSITION: FINISHED: ", spell);
+                }
+            } else if (spell.options.repeat){
+                console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT", spell);
+                console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT: STATE", spell.state);
+                if(!spellOptions.finished){
+                    game.user.updateTokenTargets([]);
+                    let options = {
+                        "configureDialog": false
+                    };
+                    if(spellOptions.targets){
+                        options.targetUuids = spellOptions.targets;
+                    } else {
+                        options.targetUuids = spell.options.targets;
+                    }
+                    console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT: OPTIONS", options);
+                    spell.state++;
+                    await MidiQOL.completeItemRoll(item, options);
                 }
             }
         }

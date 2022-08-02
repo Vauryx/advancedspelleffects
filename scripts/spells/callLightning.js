@@ -354,7 +354,7 @@ export class callLightning {
         if (stormCloudTiles.length > 0) {
             console.log("Removing Storm Cloud Tile...", stormCloudTiles[0].id);
             const itemUuid = stormCloudTiles[0].getFlag("advancedspelleffects", "itemUuid");
-            let spellState = game.ASESpellStateManager.getState(itemUuid);
+            let spellState = game.ASESpellStateManager.getSpell(itemUuid);
             console.log("Spell State: ", spellState);
             if(spellState) {
                 game.ASESpellStateManager.removeSpell(itemUuid);
