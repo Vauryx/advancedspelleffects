@@ -42,10 +42,22 @@ export class SpellStateMachine {
     async nextState(uuid, spellOptions = {}) {
         let spell = this.spells.find(spell => spell.uuid === uuid);
         let getGM = game.users.find(i => i.isGM);
+        let actor = undefined;
+        let actorId = '';
         if (spell) {
             //find how many times to iterate
             const item = await fromUuid(spell.uuid);
+            const level = item.data.data.level;
+            //actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value + 1});
+            //uuid is in the form 'actor.id.item.id', grab the actorid if elemen
+            if(spell.uuid.split('.')[0] == 'Actor'){
+                actorId = spell.uuid.split('.')[1];
+                actor = game.actors.get(actorId);
+            }
             if(spell.options.iterate){
+                if(actor){
+                    await actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value + 1});
+                }
                 let iterateListKey = spell.options.iterate;
                 if(iterateListKey && spell.state < spell.options[iterateListKey].length){
                     if(spellOptions.rolls){
@@ -93,6 +105,9 @@ export class SpellStateMachine {
                         let chatContent = await this.buildChatCard(uuid);
                         //console.log("ASE: MIDI HANDLER: CHAT CONTENT", chatContent);
                         await aseSocket.executeAsGM("createGMChat", {content: chatContent});
+                        if(actor){
+                            await actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value - 1});
+                        }
                     }
                     this.removeSpell(uuid);
                 }
@@ -109,6 +124,9 @@ export class SpellStateMachine {
                 }
             } else if (spell.options.targetted){
                 if(!spellOptions.finished){
+                    if(actor){
+                        await actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value + 1});
+                    }
                     game.user.updateTokenTargets([]);
                     let options = {
                         "targetUuids": spell.options.targets,
@@ -136,6 +154,9 @@ export class SpellStateMachine {
                 console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT", spell);
                 console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT: STATE", spell.state);
                 if(!spellOptions.finished){
+                    if(actor){
+                        await actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value + 1});
+                    }
                     game.user.updateTokenTargets([]);
                     let options = {
                         "configureDialog": false,
