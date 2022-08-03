@@ -34,6 +34,7 @@
     if (flags) {
         blankItem = false;
     }
+    
     $spellStoreHost = spellStore.findEntry(x => x.name === flags.spellEffect ?? '') ?? spellStore.first;
     let currentSpell = $spellStoreHost;
     $: currentSpell = $spellStoreHost;
@@ -62,25 +63,34 @@
     $: console.log(`App Shell: Spell Store Host: `, $spellStoreHost);
 
     async function closeApp() {
-        let flagData = {
-            enableASE: enableASE,
-            spellEffect: $currentSpell.name,
-            effectOptions: enableASE ? $currentSpell.flagData : {},
-        };
-        console.log('App Shell: FlagData Updating: ', flagData);
-        const updatedFlags = {
-            data: {
-                flags: {
-                    advancedspelleffects: flagData,
+        let flagData = {};
+        if(enableASE){
+            flagData = {
+                enableASE: enableASE,
+                spellEffect: $currentSpell.name,
+                effectOptions: $currentSpell.flagData,
+            };
+            console.log('App Shell: FlagData Updating: ', flagData);
+            const updatedFlags = {
+                data: {
+                    flags: {
+                        advancedspelleffects: flagData,
+                    },
                 },
-            },
-        };
-        await item.unsetFlag('advancedspelleffects', 'effectOptions');
-        await item.update(updatedFlags.data);
+            };
+            await item.unsetFlag('advancedspelleffects', 'effectOptions');
+            await item.update(updatedFlags.data);
+        } else {
+            for(let f in itemFlags.advancedspelleffects)
+            {
+                item.unsetFlag(`advancedspelleffects`,f);
+            }
+        }
         application.close();
     }
     onDestroy(async () => {
 		console.log('the component is being destroyed...');
+        spellStore.reInit();
 	});
     
 </script>

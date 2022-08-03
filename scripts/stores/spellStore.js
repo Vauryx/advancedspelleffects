@@ -41,19 +41,60 @@ export class SpellStore extends ArrayObjectStore {
             if(settingType == "summons"){
                flagData['summons'] = setting;
             }
-            else if(settingType != 'summonOptions' && settingType != 'allowInitialMidiCall') {
+            if(settingType != 'summonOptions' && settingType != 'allowInitialMidiCall') {
                //console.log("ASE: SPELLSTORE INIT: SETTING: ", setting, "SETTINGTYPE: ", settingType);
                setting.forEach(s => {
                   flagData[s.flagName] = s.flagValue;
                });
-            } else if (settingType == 'allowInitialMidiCall'){
+            }
+            if (settingType == 'allowInitialMidiCall'){
                flagData['allowInitialMidiCall'] = setting;
             }
          }
 
-         // If there is a static registerHooks; invoke it now.
          if (typeof effect.registerHooks === 'function') { effect.registerHooks(); }
+         // Add spell data to ArrayObjectStore.
+         this.createEntry({
+            name: localize(`ASE.${name[0].toUpperCase()}${name.substring(1)}`),
+            effect: effect, 
+            flagData: flagData, 
+            settings: settings
+         });
+      }
+      console.log("ASE: SpellStore initialized: ", this);
+   }
 
+   async reInit(){
+      while(this.length > 0){
+         this.deleteEntry(this._data[0].id);
+      }
+      let flagData = {};
+      if (this.length > 0) { throw new Error(`SpellStore has already been initialized.`); }
+
+      for (const [name, effect] of Object.entries(spells)) {
+         flagData = {};
+         let settings = {};
+        //build flag data from spell settings
+         if(name == localize("ASE.WallSpell")){
+            settings = effect.getRequiredSettings();
+         }
+         else {
+            settings = await effect.getRequiredSettings();
+         }
+         for (const [settingType, setting] of Object.entries(settings)) {
+            if(settingType == "summons"){
+               flagData['summons'] = setting;
+            }
+            if(settingType != 'summonOptions' && settingType != 'allowInitialMidiCall') {
+               //console.log("ASE: SPELLSTORE INIT: SETTING: ", setting, "SETTINGTYPE: ", settingType);
+               setting.forEach(s => {
+                  flagData[s.flagName] = s.flagValue;
+               });
+            }
+            if (settingType == 'allowInitialMidiCall'){
+               flagData['allowInitialMidiCall'] = setting;
+            }
+         }
          // Add spell data to ArrayObjectStore.
          this.createEntry({
             name: localize(`ASE.${name[0].toUpperCase()}${name.substring(1)}`),

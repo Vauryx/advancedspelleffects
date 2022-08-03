@@ -69,12 +69,7 @@ export class SpellStateMachine {
                     let options = {
                         "targetUuids": [spell.options[iterateListKey][spell.state]],
                         "configureDialog": false,
-                        "workflowOptions":  {
-                                                "autoRollAttack": true,
-                                                "autoFastAttack": true,
-                                                "autoRollDamage": "always",
-                                                "autoFastDamage": true,
-                                            }
+                        "workflowOptions": {}
                     };
                     //console.log("ASE: SPELLSTATEMACHINE: midi options", options.targetUuids);
                     if(spell.options.attacks){

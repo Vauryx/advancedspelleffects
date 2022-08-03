@@ -422,7 +422,8 @@ export class steelWindStrike {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: false,
         }
 
     }

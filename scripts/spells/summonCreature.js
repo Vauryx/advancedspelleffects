@@ -475,7 +475,8 @@ export class summonCreature {
             animOptions: animOptions,
             soundOptions: soundOptions,
             summons: currentSummonTypes,
-            summonOptions: summonOptions
+            summonOptions: summonOptions,
+            allowInitialMidiCall: true,
         }
 
     }
