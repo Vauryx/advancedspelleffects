@@ -5,14 +5,10 @@ export class vampiricTouch {
     static async cast(midiData) {
         const tokenD = canvas.tokens.get(midiData.tokenId);
         let tactor = midiData.actor;
-        let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
         const target = Array.from(midiData.targets)[0];
-        let missed = false;
-        let damageTotal = 4 * midiData.itemLevel;
-        let casterAnim = `jb2a.energy_strands.overlay.${effectOptions.vtCasterColor}.01`;
-        let strandAnim = `jb2a.energy_strands.range.standard.${effectOptions.vtStrandColor}`;
-        let impactAnim = `jb2a.impact.004.${effectOptions.vtImpactColor}`;
+        let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
 
+        let casterAnim = `jb2a.energy_strands.overlay.${effectOptions.vtCasterColor}.01`;
         const casterSound = effectOptions.vtCasterSound ?? "";
         const casterSoundDelay = Number(effectOptions.vtCasterSoundDelay) ?? 0;
         const casterSoundVolume = effectOptions.vtCasterVolume ?? 1;
@@ -20,6 +16,7 @@ export class vampiricTouch {
         const impactSound = effectOptions.vtImpactSound;
         const impactSoundDelay = Number(effectOptions.vtImpactSoundDelay) ?? 0;
         const impactVolume = effectOptions.vtImpactVolume ?? 1;
+
 
         const siphonSound = effectOptions.vtSiphonSound;
         const siphonSoundDelay = Number(effectOptions.vtSiphonSoundDelay) ?? 0;
@@ -29,7 +26,6 @@ export class vampiricTouch {
         console.log(itemData);
 
         const maxStrands = effectOptions.vtMaxStrands ?? 20;
-        let strandNum = 12;
         const updates = {
             embedded: {
                 Item: {}
@@ -58,6 +54,8 @@ export class vampiricTouch {
                 "advancedspelleffects": {
                     "enableASE": true,
                     "spellEffect": game.i18n.localize('ASE.VampiricTouchAttack'),
+                    "castItem": true,
+                    "castStage": "preDamage",
                     'effectOptions': {
                         'vtStrandColor': effectOptions.vtStrandColor,
                         'vtImpactColor': effectOptions.vtImpactColor,
@@ -67,13 +65,15 @@ export class vampiricTouch {
                         'vtImpactSound': impactSound,
                         'vtImpactSoundDelay': impactSoundDelay,
                         'vtImpactVolume': impactVolume,
-                        'vtMaxStrands': maxStrands
+                        'vtMaxStrands': maxStrands,
+                        'allowInitialMidiCall': true
                     }
                 }
             }
         }
 
-        if (game.modules.get("midi-qol")?.active) {
+        
+       /* if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
             damageTotal = midiData.damageRoll?.total ?? 12;
             if (Array.from(midiData.hitTargets).length > 0) {
@@ -84,31 +84,8 @@ export class vampiricTouch {
             }
             strandNum = Math.min(Math.floor(damageTotal), maxStrands);
         }
-
+        */
         new Sequence('Advanced Spell Effects')
-            .sound()
-            .file(impactSound)
-            .delay(impactSoundDelay + 100)
-            .volume(impactVolume)
-            .playIf(impactSound != "")
-            .effect()
-            .file(impactAnim)
-            .atLocation(target)
-            .scaleToObject()
-            .missed(missed)
-            .delay(100)
-            .sound()
-            .file(siphonSound)
-            .delay(siphonSoundDelay)
-            .volume(siphonVolume)
-            .playIf(siphonSound != "" && !missed)
-            .effect()
-            .file(strandAnim)
-            .atLocation(target)
-            .playIf(!missed)
-            .stretchTo(tokenD)
-            .repeats(Math.max(1, strandNum), 100, 200)
-            .randomizeMirrorY()
             .sound()
             .file(casterSound)
             .delay(casterSoundDelay)
@@ -121,14 +98,20 @@ export class vampiricTouch {
             .zIndex(1)
             .persist()
             .name(`${tokenD.id}-vampiric-touch`)
-            .scaleIn(0, damageTotal * 200, { ease: "easeInOutBack" })
+            .scaleIn(0, 12 * 200, { ease: "easeInOutBack" })
             .scaleOut(0, 1000, { ease: "easeInOutBack" })
             .fadeOut(1000)
             //.scale(0.4)
             .play()
+            
         await warpgate.mutate(tokenD.document, updates, {}, { name: `${tactor.id}-vampiric-touch` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.VampiricTouchAttack") }));
         await ChatMessage.create({ content: `${tactor.name}'s hands are wrapped in darkness...` });
+        effectOptions.concentration = true;
+        let castItem = tactor.items.getName(activationItemName);
+        effectOptions.castItem = castItem.uuid;
+        effectOptions.targets = [target.document.uuid];
+        game.ASESpellStateManager.addSpell(midiData.itemUuid, effectOptions);
 
     }
     static async handleConcentration(casterActor, casterToken, effectOptions) {
@@ -146,6 +129,7 @@ export class vampiricTouch {
         const tokenD = canvas.tokens.get(midiData.tokenId);
         let tactor = midiData.actor;
         const target = Array.from(midiData.targets)[0];
+        console.log("ASE: Vampiric Touch Activated: target:", target);
         let missed = false;
         let damageTotal = 4 * midiData.itemLevel;
         let effectOptions = midiData.item.getFlag("advancedspelleffects", 'effectOptions');
@@ -158,15 +142,13 @@ export class vampiricTouch {
         const impactSoundDelay = Number(effectOptions.vtImpactSoundDelay) ?? 0;
         const impactVolume = effectOptions.vtImpactVolume ?? 1;
         const maxStrands = Number(effectOptions.vtMaxStrands) ?? 20;
-        if (game.modules.get("midi-qol")?.active) {
-            missed = Array.from(midiData.hitTargets).length == 0;
-            damageTotal = midiData.damageRoll?.total ?? 12;
-            if (Array.from(midiData.hitTargets).length > 0) {
-                const updatedHP = tactor.data.data.attributes.hp.value + Math.floor(damageTotal / 2);
-                await tactor.update({
-                    "data.attributes.hp.value": Math.min(tactor.data.data.attributes.hp.max, updatedHP)
-                })
-            }
+        missed = Array.from(midiData.hitTargets).length == 0;
+        damageTotal = midiData.damageRoll?.total ?? 12;
+        if (Array.from(midiData.hitTargets).length > 0) {
+            const updatedHP = tactor.data.data.attributes.hp.value + Math.floor(damageTotal / 2);
+            await tactor.update({
+                "data.attributes.hp.value": Math.min(tactor.data.data.attributes.hp.max, updatedHP)
+            })
         }
         const strandNum = Math.min(Math.floor(damageTotal), maxStrands);
         new Sequence('Advanced Spell Effects')
@@ -342,7 +324,8 @@ export class vampiricTouch {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: true,
         }
 
     }
