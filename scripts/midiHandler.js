@@ -203,10 +203,13 @@ export class midiHandler {
                 stateOptions.finished = true;
             }
             //move uuid of each token from workflow.failedSaves into stateOptions.failedSaves
-            stateOptions.failedSaves = [];
-            workflow.failedSaves.forEach(target => {
-                stateOptions.failedSaves.push(target.document.uuid);
-            });
+
+            if(currentItemState.options.failedSaves){
+                stateOptions.failedSaves = [];
+                workflow.failedSaves.forEach(target => {
+                    stateOptions.failedSaves.push(target.document.uuid);
+                });
+            }
             game.ASESpellStateManager.nextState(itemUUID, stateOptions);
         } else if (currentItemState.active && !currentItemState.finished && currentItemState.options.repeat && currentItemState.options.nextTargets){
             console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT...");

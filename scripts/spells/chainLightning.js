@@ -9,12 +9,6 @@ export class chainLightning {
         this.token = canvas.tokens.get(this.params.tokenId);
         this.item = this.params.item;
         this.firstTarget = this.params.targets[0] ?? Array.from(this.params.targets)[0];
-        if (game.modules.get("midi-qol")?.active) {
-            this.targetFailedSave = this.params.failedSaves.length > 0;
-        }
-        else {
-            this.targetFailedSave = true;
-        }
         this.itemCardId = this.params.itemCardId;
 
         this.originalDamage = this.params.damageTotal;
@@ -57,7 +51,8 @@ export class chainLightning {
                 sequenceBuilder: ChainLightningSequence,
                 firstTarget: this.firstTarget.document.uuid,
                 effectOptions: this.effectOptions,
-                caster: this.token.document.uuid
+                caster: this.token.document.uuid,
+                failedSaves: []
             };
             game.ASESpellStateManager.addSpell(this.item.uuid, spellOptions)
             return;

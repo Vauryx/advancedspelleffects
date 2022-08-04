@@ -146,47 +146,13 @@ export class thunderStep {
             .delay(1400)
             .wait(1300)
             .thenDo(async () => {
-
-                if (targets.length) {
-                    if (game.modules.get("midi-qol")?.active) {
-                        let chatMessageContent = await duplicate(chatMessage.data.content);
-
-                        let targetTokens = new Set();
-                        let saves = new Set();
-
-                        let newChatmessageContent = $(chatMessageContent);
-
-                        newChatmessageContent.find(".midi-qol-saves-display").empty();
-                        let damage = await new Roll(`${spellLevel}d10`).evaluate({ async: true });
-                        for await (let targetToken of targets) {
-
-                            let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.con.save }).evaluate({ async: true });
-                            let save = saveRoll.total;
-                            targetTokens.add(targetToken)
-                            if (save >= spellSaveDC) {
-                                saves.add(targetToken)
-                            }
-                            console.log("Adding token to chat card...");
-                            newChatmessageContent.find(".midi-qol-saves-display").append(
-                                $(addTokenToText(targetToken, save, spellSaveDC, damage))
-                            );
-
-                        }
-
-                        await chatMessage.update({ content: newChatmessageContent.prop('outerHTML') });
-
-                        await ui.chat.scrollBottom();
-
-                        MidiQOL.applyTokenDamage(
-                            [{ damage: damage.total, type: "thunder" }],
-                            damage.total,
-                            targetTokens,
-                            itemD,
-                            saves
-                        )
-                    }
-                }
-
+                let targetUUIDs = targets.map(t => t.document.uuid);
+                console.log("ASE: Thunder Step: Targets: " + targetUUIDs);
+                let stateOptions = {
+                    targets: targetUUIDs,
+                    targetted: true,
+                };
+                game.ASESpellStateManager.addSpell(itemD.uuid, stateOptions);
                 for await (let passenger of passengers) {
                     const updateData = {
                         x: position.x - (canvas.grid.size / 2) + passenger.center.x - tokenD.center.x,
@@ -213,24 +179,8 @@ export class thunderStep {
             }, true)
             .play();
 
-
-        function addTokenToText(token, roll, dc, damageRoll) {
-            console.log(damageRoll);
-            let saveResult = roll >= dc ? true : false;
-
-            return `<div class="midi-qol-flex-container">
-      <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
-      <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
-      <div>
-      ${saveResult ? game.i18n.format("ASE.SavePassMessage", { saveTotal: roll, damageTotal: Math.floor(damageRoll.total / 2) }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: roll, damageTotal: damageRoll.total })}
-      </div>
-      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
-    </div>`;
-
-        }
-
     }
-    static async getRequiredSettings(currFlags) {
+    static async getRequiredSettings(currFlags) { 
         if (!currFlags) currFlags = {};
         let spellOptions = [];
         let animOptions = [];
@@ -288,7 +238,8 @@ export class thunderStep {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: false
         }
 
     }

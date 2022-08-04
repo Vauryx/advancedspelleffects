@@ -135,11 +135,15 @@ export class SpellStateMachine {
                     if(spellOptions.failedSaves){
                         spell.options.failedSaves = spellOptions.failedSaves;
                     }
-                    this.continueSequence(uuid, spell.options);
+                    if(spell.options.sequenceBuilder){
+                        this.continueSequence(uuid, spell.options);
+                    }
                     console.log("ASE: MIDI HANDLER: STATE TRANSITION: TARGETTED SPELL FINISHED", spell);
-                    if(spell.options.sequences.length && spell.options.sequences.length > 0){
-                        for await (const sequence of spell.options.sequences) {
-                            sequence.play();
+                    if(spell.options.sequences){
+                        if(spell.options.sequences.length && spell.options.sequences.length > 0){
+                            for await (const sequence of spell.options.sequences) {
+                                sequence.play();
+                            }
                         }
                     }
                     this.removeSpell(uuid);
