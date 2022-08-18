@@ -68,7 +68,7 @@ export class wallSpell extends baseSpellClass {
         //console.log("Dialog return type", type);
         if (type == "h-panels" || type == "v-panels") {
             let wallPanelDiag = new wallPanelDialog({ aseData: aseData, templateData: this.baseTemplateData, type: type }).render(true);
-            let wallSpellPanelData = await wallPanelDiag.getData();
+           // let wallSpellPanelData = await wallPanelDiag.getData();
             //console.log('wallSpellPanelData:', wallSpellPanelData);
             Hooks.once('createMeasuredTemplate', async (template) => {
                 await template.setFlag('advancedspelleffects', 'placed', true);
@@ -1480,7 +1480,9 @@ export class wallSpell extends baseSpellClass {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: true,
+            
         }
 
     }

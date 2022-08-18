@@ -626,7 +626,8 @@ export class wallOfForce {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            allowInitialMidiCall: true,
         }
 
     }
