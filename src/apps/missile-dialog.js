@@ -28,7 +28,7 @@ export class MissileDialog extends FormApplication {
     static get defaultOptions() {
         //console.log(this);
         return mergeObject(super.defaultOptions, {
-            template: './modules/advancedspelleffects/scripts/templates/missile-dialog.html',
+            template: './modules/advancedspelleffects/src/templates/missile-dialog.html',
             id: 'missile-dialog',
             title: game.i18n.localize("ASE.SelectTargetsDialogTitle"),
             resizable: true,

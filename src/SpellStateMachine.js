@@ -116,6 +116,8 @@ export class SpellStateMachine {
                     };
                     spell.state++;
                     await MidiQOL.completeItemRoll(castItem, options);
+                } else if (spell.options.noCastItem){
+                    
                 }
             } else if (spell.options.targetted){
                 if(!spellOptions.finished){

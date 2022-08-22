@@ -59,7 +59,7 @@ export class ASESettings extends FormApplication {
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            template: './modules/advancedspelleffects/scripts/templates/ase-settings-new.html',
+            template: './modules/advancedspelleffects/src/templates/ase-settings-new.html',
             id: 'ase-item-settings',
             title: game.i18n.localize("ASE.SettingsWindowTitle"),
             resizable: true,

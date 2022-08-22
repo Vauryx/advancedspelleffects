@@ -1,7 +1,7 @@
 import { aseSocket } from "../aseSockets.js";
 import * as utilFunctions from "../utilityFunctions.js";
 
-export class wofPanelDialog extends FormApplication {
+export class wallPanelDialog extends FormApplication {
     constructor(options = { aseData: {}, templateData: {}, type: '' }) {
         super(options);
         foundry.utils.mergeObject(this.options, options);
@@ -9,18 +9,18 @@ export class wofPanelDialog extends FormApplication {
         this.data.aseData = this.options.aseData;
         this.data.templateData = this.options.templateData;
         this.data.type = this.options.type;
-        //console.log('WOF Panel Dialog Data: ', this.data);
+        //console.log('Wall Panel Dialog Data: ', this.data);
     }
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            template: './modules/advancedspelleffects/scripts/templates/wof-panel-dialog.html',
-            id: 'wof-panel-dialog',
-            title: game.i18n.localize("ASE.WallOfForce"),
+            template: './modules/advancedspelleffects/src/templates/wall-panel-dialog.html',
+            id: 'wall-panel-dialog',
+            title: game.i18n.localize("ASE.WallPanelTitle"),
             resizable: true,
             width: "auto",
             height: "auto",
-            left: game.user?.getFlag("advancedspelleffects", "wofDialogPos.left") ?? "auto",
-            top: game.user?.getFlag("advancedspelleffects", "wofDialogPos.top") ?? "auto",
+            left: game.user?.getFlag("advancedspelleffects", "wallPanelDialogPos.left") ?? "auto",
+            top: game.user?.getFlag("advancedspelleffects", "wallPanelDialogPos.top") ?? "auto",
             submitOnClose: true,
             close: () => { ui.notify }
         });
@@ -29,7 +29,7 @@ export class wofPanelDialog extends FormApplication {
         return { data: this.data };
     }
     async _updateObject(event, formData) {
-        await aseSocket.executeAsGM("updateFlag", game.user.id, "wofDialogPos", { left: this.position.left, top: this.position.top });
+        await aseSocket.executeAsGM("updateFlag", game.user.id, "wallPanelDialogPos", { left: this.position.left, top: this.position.top });
     }
 }
-export default wofPanelDialog;
+export default wallPanelDialog;
