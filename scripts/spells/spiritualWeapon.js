@@ -17,7 +17,8 @@ export class spiritualWeapon {
         //console.log("Midi Data: ", midiData);
         const level = midiData.itemLevel;
         let summonType = "Spiritual Weapon";
-        const casterActorSpellcastingMod = casterActorRollData.abilities[casterActorRollData.attributes.spellcasting]?.mod ?? 0;
+
+        const casterActorSpellcastingMod = casterActorRollData.abilities[casterActorRollData.attributes.spellcasting].mod ?? 0;
         const summonerDc = casterActor.data.data.attributes.spelldc;
         const summonerAttack = (casterActorRollData.attributes.prof + casterActorSpellcastingMod) + Number(casterActorRollData.bonuses?.msak?.attack ?? 0);
 
@@ -60,17 +61,17 @@ export class spiritualWeapon {
 
             let effectFile;
             if (Sequencer.Database.entryExists(`jb2a.eldritch_blast.${color}`)) {
-                effectFile = `jb2a.eldritch_blast.${color}.05ft`
+                effectFile = `jb2a.eldritch_blast.${color}`
             }
             else {
-                effectFile = `jb2a.eldritch_blast.lightblue.05ft`
+                effectFile = `jb2a.eldritch_blast.yellow`
             }
             let effect = `jb2a.bless.400px.intro.${color}`;
             if (Sequencer.Database.entryExists(effect)) {
                 effect = effect;
             }
             else {
-                effect = `jb2a.bless.400px.intro.blue`;
+                effect = `jb2a.bless.400px.intro.yellow`;
             }
             new Sequence("Advanced Spell Effects")
                 .sound()
@@ -92,6 +93,7 @@ export class spiritualWeapon {
                 .file(effect)
                 .atLocation(template)
                 .center()
+                .scale(1.5)
                 .belowTokens()
                 .play()
         }
@@ -107,7 +109,7 @@ export class spiritualWeapon {
         let weaponData = [{
             type: "select",
             label: game.i18n.localize("ASE.WeaponDialogLabel"),
-            options: ["Mace", "Sword"]
+            options: ["Mace", "Maul", "Scythe", "Sword"]
         }]
         let weaponChoice = await warpgate.dialog(weaponData);
         weaponChoice = weaponChoice[0].toLowerCase();
@@ -139,8 +141,8 @@ export class spiritualWeapon {
         });
         let attackColors;
 
-        if (weaponChoice == "sword" || weaponChoice == "mace") {
-            attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee.01`);
+        if (weaponChoice == "mace" || weaponChoice == "maul" || weaponChoice == "scythe" || weaponChoice == "sword") {
+            attackColors = Sequencer.Database.getPathsUnder(`jb2a.spiritual_weapon.${weaponChoice}`)
         }
         else if (Sequencer.Database.entryExists(`jb2a.${weaponChoice}.melee`)) {
             attackColors = Sequencer.Database.getPathsUnder(`jb2a.${weaponChoice}.melee`);
@@ -158,44 +160,45 @@ export class spiritualWeapon {
             type: "select",
             label: game.i18n.localize("ASE.SpiritColorDialogLabel"),
             options: colorOptions
-        }, {
-            type: "select",
-            label: game.i18n.localize("ASE.SpiritAttackColorDialogLabel"),
-            options: attackColorOptions
         }];
 
         let colorChoices = await warpgate.dialog(colorData);
         let spiritColorChoice = colorChoices[0].toLowerCase();
-        let attackColorChoice = colorChoices[1].toLowerCase();
+	let attackColorChoice = spiritColorChoice;
 
         spiritWeapon = spiritWeapon + `.${spiritColorChoice}`;
-        //console.log("Spirit Weapon: " + spiritWeapon);
+        // console.log("Spirit Weapon: " + spiritWeapon);
         let spiritAttackAnim;
-        if (weaponChoice == "sword") {
-            spiritAttackAnim = `jb2a.sword.melee.01.${attackColorChoice}`;
+
+	if (weaponChoice != "scythe") {
+ 	    if (attackColorChoice == "white") {
+	        attackColorChoice = 'black';
+	   } else if (weaponChoice == "mace" || weaponChoice == "maul" && attackColorChoice == "purple") {
+		attackColorChoice = 'dark_purple';
+	   }
+	    spiritAttackAnim = `jb2a.${weaponChoice}.melee.fire.${attackColorChoice}`;
+
+	}
+	 else {
+	    spiritAttackAnim = spiritWeapon;
         }
-        else if (weaponChoice == "mace") {
-            spiritAttackAnim = `jb2a.mace.melee.01.${attackColorChoice}`;
-        }
-        else if (weaponChoice != "scythe") {
-            spiritAttackAnim = `jb2a.${weaponChoice}.melee.${attackColorChoice}`;
+
+       // console.log("Spirit Attack Anim: " + spiritAttackAnim);
+        let spiritualWeapon = Sequencer.Database.getEntry(spiritWeapon).file;
+       // console.log("Spiritual Weapon path: ", spiritualWeapon);
+        let spiritualWeaponAttackImg = Sequencer.Database.getEntry(spiritWeapon).file;
+       // console.log("Spiritual Weapon Attack path: ", spiritualWeaponAttackImg);
+        if (spiritualWeaponAttackImg.includes("Mace") || spiritualWeaponAttackImg.includes("Maul") || spiritualWeaponAttackImg.includes("Sword")){
+            spiritualWeaponAttackImg = spiritualWeaponAttackImg.replace("200x200.webm", "Thumb.webp");
         }
         else {
-            spiritAttackAnim = `jb2a.sword.melee.fire.${attackColorChoice}`;
+            spiritualWeaponAttackImg = spiritualWeaponAttackImg.replace("300x300.webm", "Thumb.webp");
         }
-        //console.log("Spirit Attack Anim: " + spiritAttackAnim);
-        let spiritualWeapon = Sequencer.Database.getEntry(spiritWeapon).file;
-        //console.log("Spiritual Weapon path: ", spiritualWeapon);
-        let spiritualWeaponAttackImg = Sequencer.Database.getEntry(spiritAttackAnim + '.0').file;
-        spiritualWeaponAttackImg = spiritualWeaponAttackImg.replace("800x600.webm", "Thumb.webp");
-        if (spiritualWeaponAttackImg.includes("Sword01") && spiritualWeaponAttackImg.includes("Dark_OrangePurple")) {
-            spiritualWeaponAttackImg = spiritualWeaponAttackImg.replace("Dark_OrangePurple", "Dark_PurpleOrange");
-        }
-        //console.log("Spiritual Weapon Attack path: ", spiritualWeaponAttackImg);
-        const spiritualWeaponActorImg = spiritualWeapon.replace("200x200.webm", "Thumb.webp");
-        //console.log("Level: ", level);
+        // console.log("Spiritual Weapon Attack path: ", spiritualWeaponAttackImg);
+        const spiritualWeaponActorImg = spiritualWeaponAttackImg;
+        // console.log("Level: ", level);
         if ((level - 3) > 0) {
-            damageScale = `+ ${Math.floor((level - 2) / 2)}d8`;
+            damageScale = `+ ${Math.floor((level - 2) / 2)}d8[upcast]`;
         }
         //console.log("Damage Scale: ", damageScale);
         const attackItemName = game.i18n.localize('ASE.SpiritAttackItemName');
@@ -305,7 +308,7 @@ export class spiritualWeapon {
             .effect()
             .fadeIn(750)
             .startTime(500)
-            .endTime(1250)
+            .endTime(650)
             .file(attackAnimFile)
             .missed(missed)
             .atLocation(casterToken)
