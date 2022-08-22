@@ -35,7 +35,7 @@
       "name": "betterrolls5e"
     }
   ],
-  "esmodules": ["module.js"],
+  "esmodules": ["setup.js"],
   "scripts": [],
   "styles": ["style.css"],
   "languages": [
