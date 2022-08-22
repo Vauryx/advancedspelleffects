@@ -10,6 +10,7 @@ import { witchBolt } from "./spells/witchBolt.js";
 import { vampiricTouch } from "./spells/vampiricTouch.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { wallOfForce } from "./spells/wallOfForce.js";
+import {wallOfFire } from "./spells/wallOfFire.js";
 import { detectStuff } from "./spells/detectStuff.js";
 import { wallSpell } from "./spells/wallSpell.js";
 
@@ -79,6 +80,10 @@ export class concentrationHandler {
                 return;
             case game.i18n.localize('ASE.WallSpell'):
                 await wallSpell.handleConcentration(casterActor, casterToken, effectOptions);
+                return;
+            case game.i18n.localize('ASE.WallOfFire'):
+                console.log(" REMOVING CONCENTRATION FOR Wall of Fire");
+                await wallOfFire.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }
         if (effectSource.includes(game.i18n.localize("ASE.Summon"))) {

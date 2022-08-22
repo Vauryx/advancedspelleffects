@@ -24,6 +24,7 @@ export class SpellStore extends ArrayObjectStore {
     * Loads and registers all hooks from spell classes defined in './spells'.
     */
    async initialize() {
+      console.log("ASE: SpellStore initialize: ", spells);
       let flagData = {};
       if (this.length > 0) { throw new Error(`SpellStore has already been initialized.`); }
 
@@ -31,12 +32,8 @@ export class SpellStore extends ArrayObjectStore {
          flagData = {};
          let settings = {};
         //build flag data from spell settings
-         if(name == localize("ASE.WallSpell")){
-            settings = effect.getRequiredSettings();
-         }
-         else {
-            settings = await effect.getRequiredSettings();
-         }
+         settings = await effect.getRequiredSettings();
+         
          for (const [settingType, setting] of Object.entries(settings)) {
             if(settingType == "summons"){
                flagData['summons'] = setting;
@@ -75,12 +72,9 @@ export class SpellStore extends ArrayObjectStore {
          flagData = {};
          let settings = {};
         //build flag data from spell settings
-         if(name == localize("ASE.WallSpell")){
-            settings = effect.getRequiredSettings();
-         }
-         else {
-            settings = await effect.getRequiredSettings();
-         }
+
+         settings = await effect.getRequiredSettings();
+         
          for (const [settingType, setting] of Object.entries(settings)) {
             if(settingType == "summons"){
                flagData['summons'] = setting;

@@ -18,5 +18,5 @@ export * from "./thunderStep.js";
 export * from "./vampiricTouch.js";
 export * from "./viciousMockery.js";
 export * from "./wallOfForce.js";
-export * from "./wallSpell.js";
+export * from "./wallOfFire.js";
 export * from "./witchBolt.js";

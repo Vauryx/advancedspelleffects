@@ -33,7 +33,7 @@ export class wallSpell extends baseSpellClass {
                     wallSpellWallNum: 12,
                     dimensions: {},
                     wallType: this.wallType,
-                    length: this.effectOptions.length,
+                    length: this.effectOptions.wallLength,
                     wallOperationalData: {},
                     wallEffectData: this.effectOptions,
                     wallName: this.item.name
