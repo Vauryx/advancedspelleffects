@@ -1,3 +1,4 @@
+import "../styles/module.css";
 import ASESettings from "./svelteApps/ASESettings.js";
 import { versionMigration } from "./versionMigration.js"
 import * as utilFunctions from "./utilityFunctions.js";
