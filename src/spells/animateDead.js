@@ -1,4 +1,3 @@
-import { animateDeadDialog } from "../apps/animte-dead-dialog.js"
 import AnimateDeadDialog  from "../svelteApps/AnimateDeadDialog.js"
 
 import ASESettings from "../apps/aseSettings.js";
