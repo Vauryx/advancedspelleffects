@@ -4,3 +4,4 @@ dist/*
 .vite-cache/*
 setup.js
 style.css
+setup.js.map
