@@ -628,6 +628,7 @@ export class wallOfFire extends baseSpellClass {
         const wallData = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData');
         if (!wallData) return;
         const wallEffectData = templateDocument.getFlag('advancedspelleffects', 'wallEffectData');
+        console.log("ASE WALL OF FIRE - handleDamage: wallEffectData: ", wallEffectData);
         const grid = canvas?.scene?.data.grid;
         if (!grid) return false;
         const damageOnCast = wallData.damageOnCast;
@@ -643,15 +644,14 @@ export class wallOfFire extends baseSpellClass {
         const casterActor = await game.actors.get(casterActorId);
         const wallItemId = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData.item');
         const wallItem = await casterActor.items.get(wallItemId);
-        //console.log(wallItem);
-        if (!chatMessage) {
-            ui.notifications.info(`No chat message found for wall spell, no damage will be applied`);
-            return;
+        const wallItemUUID = wallItem.uuid;
+        let spellState = game.ASESpellStateManager.getSpell(wallItemUUID);
+        if(!spellState) {
+            wallEffectData.concentration = true;
+            wallEffectData.noCastItem = true;
+            game.ASESpellStateManager.addSpell(wallItemUUID, wallEffectData);
         }
-
-        
-
-
+        //console.log(wallItem);
         if (savingThrowOnCast) {
             const saveType = wallData.savingThrow;
             const saveDC = wallData.savingThrowDC;
@@ -683,7 +683,37 @@ export class wallOfFire extends baseSpellClass {
             //console.log("targets: ", targets);
             //game.user.updateTokenTargets(targets);
             if (targets.length && targets.length > 0) {
-                //HAVE TARGETS HERE
+                const updates = {
+                    embedded: {
+                        Item: {}
+                    }
+                };
+                const damageRollItemName = game.i18n.localize('ASE.WallOfFireDamageItem');
+                let castItemDamage = wallItem.data.data.damage;
+                updates.embedded.Item[activationItemName] = {
+                    "type": "spell",
+                    "img": wallItem.img,
+                    "data": {
+                        "ability": "",
+                        "actionType": "save",
+                        "activation": { "type": "action", "cost": 1, "condition": "" },
+                        "damage": castItemDamage,
+                        "scaling": wallItem.data.data.scaling,
+                        "level": wallItem.data.data.level,
+                        "save": wallItem.data.data.save,
+                        "preparation": { "mode": 'atwill', "prepared": true },
+                        "range": { "value": null, "long": null, "units": "" },
+                        "school": "evo",
+                        "description": {
+                            "value": wallItem.data.data.description.value,
+                        }
+                    },
+                    "flags": {
+                        "advancedspelleffects": wallItem.data.flags.advancedspelleffects,
+                    }
+                }
+        
+                await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-call-lightning` });
             }
 
         }
