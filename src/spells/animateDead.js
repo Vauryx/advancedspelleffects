@@ -1,6 +1,5 @@
 import AnimateDeadDialog  from "../svelteApps/AnimateDeadDialog.js"
 
-import ASESettings from "../apps/aseSettings.js";
 import * as utilFunctions from "../utilityFunctions.js";
 
 export class animateDead {
