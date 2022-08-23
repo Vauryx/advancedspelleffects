@@ -1,4 +1,7 @@
 .idea/*
-.DS_Store
-dist/
-node_modules/
+node_modules/*
+dist/*
+.vite-cache/*
+setup.js
+style.css
+setup.js.map
