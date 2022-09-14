@@ -10,7 +10,7 @@ import { MissileDialog } from "./apps/missile-dialog.js";
 import { SpellStateMachine } from "./SpellStateMachine.js";
 import { spellStore } from "./stores/spellStore.js";
 //import { effectOptionsStore } from "./stores/effectOptionsStore.js";
-
+//test
 //Take care of Setup
 const aseModules = {
   concentrationHandler,
