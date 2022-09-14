@@ -1,8 +1,8 @@
 <script>
 
-import SpellSettings from "./SpellSettings.svelte";
-import AnimSettings from "./AnimSettings.svelte";
-import SoundSettings from "./SoundSettings.svelte";
+import SpellSettings from "./SpellSettingsAppShell.svelte";
+import AnimSettings from "./AnimSettingsAppShell.svelte";
+import SoundSettings from "./SoundSettingsAppShell.svelte";
 
 
     export let currentTab;

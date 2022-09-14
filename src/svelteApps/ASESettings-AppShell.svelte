@@ -10,11 +10,11 @@
     import { onDestroy } from 'svelte';
 
     import EnableASE from "./components/EnableASE.svelte";
-    import SharedSettings from "./components/SharedSettings.svelte";
+    import SharedSettings from "./components/SharedSettingsAppShell.svelte";
     import NavBar from "./components/NavBar.svelte";
-    import SpellSettings from "./components/SpellSettings.svelte";
-    import AnimSettings from "./components/AnimSettings.svelte";
-    import SoundSettings from "./components/SoundSettings.svelte";
+    import SpellSettings from "./components/SpellSettingsAppShell.svelte";
+    import AnimSettings from "./components/AnimSettingsAppShell.svelte";
+    import SoundSettings from "./components/SoundSettingsAppShell.svelte";
 
     export let elementRoot;
     export let item;
