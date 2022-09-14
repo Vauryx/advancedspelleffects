@@ -78,7 +78,7 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
           body: ${{ github.event.release.body }}
 
-      #update next branch
+      #update beta branch
       - name: Prepare repository
         if: "github.event.release.prerelease"
         run: |
@@ -88,8 +88,8 @@ jobs:
           git stash
           git clean -f
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
-          git fetch origin "next"
-          git switch -c "next" "origin/next"
+          git fetch origin "beta"
+          git switch -c "beta" "origin/beta"
           git checkout stash module.json
           git commit -m "${{github.event.release.tag_name}} manifest"
           git push -f
