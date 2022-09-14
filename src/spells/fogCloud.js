@@ -145,14 +145,16 @@ export class fogCloud {
                     walls.push({
                         c: [wallPoints[i].x, wallPoints[i].y, wallPoints[i + 1].x, wallPoints[i + 1].y],
                         flags: { tagger: { tags: [`FogCloudWall-${tileId}`] } },
-                        move: 0
+                        move: 0,
+                        dir: 2
                     })
                 }
                 else {
                     walls.push({
                         c: [wallPoints[i].x, wallPoints[i].y, wallPoints[0].x, wallPoints[0].y],
                         flags: { tagger: { tags: [`FogCloudWall-${tileId}`] } },
-                        move: 0
+                        move: 0,
+                        dir: 2
                     })
                 }
             }
