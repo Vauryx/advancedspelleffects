@@ -1,5 +1,5 @@
 import "./styles/module.css";
-import ASESettings from "./svelteApps/ASESettings.js";
+import ASESettings from "./svelteApps/ASESettingsApp.js";
 import { versionMigration } from "./versionMigration.js"
 import * as utilFunctions from "./utilityFunctions.js";
 import { setupASESocket } from "./aseSockets.js";
@@ -10,7 +10,7 @@ import { MissileDialog } from "./apps/missile-dialog.js";
 import { SpellStateMachine } from "./SpellStateMachine.js";
 import { spellStore } from "./stores/spellStore.js";
 //import { effectOptionsStore } from "./stores/effectOptionsStore.js";
-//test
+
 //Take care of Setup
 const aseModules = {
   concentrationHandler,
