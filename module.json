@@ -1,0 +1,69 @@
+{
+    "socket": true,
+    "name": "advancedspelleffects",
+    "title": "Advanced Spell Effects",
+    "description": "",
+    "version": "0.9.!9.85",
+    "library": "false",
+    "manifestPlusVersion": "1.0.0",
+    "minimumCoreVersion": "0.8.9",
+    "compatibleCoreVersion": "9.0",
+    "packs": [],
+    "authors": [
+        {
+            "name": "Vauryx",
+            "url": "https://github.com/Vauryx",
+            "discord": "Vauryx#4507"
+        }
+    ],
+    "dependencies": [
+        {
+            "name": "sequencer"
+        },
+        {
+            "name": "tagger"
+        },
+        {
+            "name": "socketlib"
+        },
+        {
+            "name": "warpgate"
+        }
+    ],
+    "conflicts": [
+        {
+            "name": "betterrolls5e"
+        }
+    ],
+    "esmodules": [
+        "setup.js"
+    ],
+    "scripts": [],
+    "styles": [
+        "style.css"
+    ],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "languages/en.json"
+        },
+        {
+            "lang": "fr",
+            "name": "Française",
+            "path": "languages/fr.json"
+        }
+    ],
+    "url": "https://github.com/Vauryx/advancedspelleffects",
+    "manifest": "https://raw.githubusercontent.com/Vauryx/advancedspelleffects/beta/module.json",
+    "download": "https://github.com/Vauryx/advancedspelleffects/releases/download/0.9.!9.85/module.zip",
+    "media": [
+        {
+            "type": "icon",
+            "url": "https://avatars2.githubusercontent.com/u/71292812?s=400&u=ccdb4eeb7abf551ca8f314e5a9bfd0479a4d3d41&v=4"
+        }
+    ],
+    "system": [
+        "dnd5e"
+    ]
+}
