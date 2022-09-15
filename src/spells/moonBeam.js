@@ -130,7 +130,9 @@ export class moonBeam {
         const casterToken = canvas.tokens.get(data.tokenId);
         const itemCardId = data.itemCardId;
         const spellItem = data.item;
+        const spellItemData = spellItem.data.data;
         const spellLevel = data.itemLevel;
+        const spellItemLevel = spellItemData.level;
         console.log("Cast level: ", spellLevel);
         const aseEffectOptions = spellItem?.getFlag("advancedspelleffects", "effectOptions");
         //console.log(aseEffectOptions);
@@ -146,9 +148,15 @@ export class moonBeam {
         const beamLoopSoundVolume = aseEffectOptions.moonbeamLoopVolume ?? 1;
         const beamLoopSoundEasing = aseEffectOptions.moonbeamLoopEasing ?? true;
         const beamLoopSoundRadius = aseEffectOptions.moonbeamLoopRadius ?? 20;
-
         let damage = data.item.data.data.damage;
-
+        if(spellItemData.scaling.mode == "level" && (spellLevel - spellItemLevel > 0)) {
+            const scalingDamageType = damage.parts[0][1];
+            const scalingDieValue = spellItemData.scaling.formula.split("d")[0];
+            const scalingDieType = spellItemData.scaling.formula.split("d")[1];
+            const newDieValue = scalingDieValue * (spellLevel - spellItemLevel);
+            const newFormula = `${newDieValue}d${scalingDieType}[${scalingDamageType}]`;
+            damage.parts[0][0] += ' + ' + newFormula;
+        }
         aseEffectOptions["rollInfo"] = {
             casterTokenId: casterToken.id,
             itemUUID: '',

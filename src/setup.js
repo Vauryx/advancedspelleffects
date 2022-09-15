@@ -8,6 +8,7 @@ import { noMidiHandler } from "./noMidiHandler.js";
 import { MissileDialog } from "./apps/missile-dialog.js";
 import { SpellStateMachine } from "./SpellStateMachine.js";
 import { spellStore } from "./stores/spellStore.js";
+import { versionMigration } from "./versionMigration.js";
 //import { effectOptionsStore } from "./stores/effectOptionsStore.js";
 
 //Take care of Setup
