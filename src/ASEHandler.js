@@ -1,5 +1,4 @@
 import * as utilFunctions from "./utilityFunctions.js";
-import { versionMigration } from "./versionMigration.js"
 // Importing spells
 import { darkness } from "./spells/darkness.js";
 import { detectMagic } from "./spells/detectMagic.js";
@@ -29,7 +28,7 @@ export class ASEHandler {
     static async handleASE(data, optionals = {}) {
         // check if the spell being rolled is marked as an ASE spell
         let item = data.item;
-        await versionMigration.handle(item);
+        //await versionMigration.handle(item);
         let aseFlags = item?.data?.flags?.advancedspelleffects ?? false;
         if (!aseFlags.enableASE) return;
 

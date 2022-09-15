@@ -131,6 +131,7 @@ export class moonBeam {
         const itemCardId = data.itemCardId;
         const spellItem = data.item;
         const spellLevel = data.itemLevel;
+        console.log("Cast level: ", spellLevel);
         const aseEffectOptions = spellItem?.getFlag("advancedspelleffects", "effectOptions");
         //console.log(aseEffectOptions);
         const beamIntro = `jb2a.moonbeam.01.intro.${aseEffectOptions.moonbeamColor}`;

@@ -1,6 +1,5 @@
 import "./styles/module.css";
 import ASESettings from "./svelteApps/ASESettingsApp.js";
-import { versionMigration } from "./versionMigration.js"
 import * as utilFunctions from "./utilityFunctions.js";
 import { setupASESocket } from "./aseSockets.js";
 import { concentrationHandler } from "./concentrationHandler.js";
@@ -46,6 +45,7 @@ Hooks.once('init', async function () {
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
   setupASESocket();
+  versionMigration.MigrateV1();
 });
 
 Hooks.once('ready', async function () {
@@ -109,7 +109,7 @@ Hooks.once('ready', async function () {
     }
     const aseBtn = $(`<a class="ase-item-settings" title="Advanced Spell Effects"><i class="fas fa-magic"></i>ASE</a>`);
     aseBtn.click(async ev => {
-      await versionMigration.handle(app.document);
+      //await versionMigration.handle(app.document);
       new ASESettings(app.document, {}).render(true);
     });
     html.closest('.app').find('.ase-item-settings').remove();
