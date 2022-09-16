@@ -422,7 +422,15 @@ export class callLightning {
             {'d20': 'd20'}
         ];
 
-
+        const spellDetails = {
+            actionType: "save",
+            target : {
+                type: "",
+                units: "",
+                value: null,
+                width: null,
+            }
+        };
         animOptions.push({
             label: game.i18n.localize('ASE.SelectBoltStyleLabel'),
             type: "dropdown",
@@ -468,7 +476,8 @@ export class callLightning {
             spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions,
-            allowInitialMidiCall: true
+            allowInitialMidiCall: true,
+            requireDetails: spellDetails
         }
     }
 

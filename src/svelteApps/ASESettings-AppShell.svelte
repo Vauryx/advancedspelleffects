@@ -104,7 +104,8 @@
         <div class="ase-settings-section">
             <EnableASE bind:enableASE />
             {#if enableASE}
-                <SharedSettings itemName={item.name} />
+                <SharedSettings itemName={item.name}
+                                itemUuid={item.uuid} />
                 <NavBar bind:currentTab />
                 {#if currentTab == SpellSettings}
                     <SpellSettings />

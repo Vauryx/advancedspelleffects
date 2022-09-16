@@ -315,6 +315,16 @@ export class summonCreature {
         });
         currentSummonTypes = currFlags.summons ?? [{ name: "", actor: summonOptions[0].id, qty: 1 }];
         
+        const spellDetails = {
+            actionType: "other",
+            target : {
+                type: "",
+                units: "",
+                value: null,
+                width: null,
+            }
+        };
+
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -477,6 +487,7 @@ export class summonCreature {
             summons: currentSummonTypes,
             summonOptions: summonOptions,
             allowInitialMidiCall: true,
+            requireDetails: spellDetails
         }
 
     }

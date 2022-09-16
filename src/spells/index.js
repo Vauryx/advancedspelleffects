@@ -3,7 +3,7 @@ export * from "./callLightning.js";
 export * from "./chainLightning.js";
 export * from "./chaosBolt.js";
 export * from "./darkness.js";
-export * from "./detectMagic.js";
+//export * from "./detectMagic.js";
 export * from "./detectStuff.js";
 export * from "./eldritchBlast.js";
 export * from "./fogCloud.js";

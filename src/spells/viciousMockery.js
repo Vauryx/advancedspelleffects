@@ -130,7 +130,15 @@ export class viciousMockery {
              max: 2,
              step: 0.1,
          });*/
-
+         const spellDetails = {
+            actionType: "save",
+            target : {
+                type: "creature",
+                units: "",
+                value: 1,
+                width: null,
+            }
+        };
         animOptions.push({
             label: game.i18n.localize("ASE.EffectFontLabel"),
             tooltip: game.i18n.localize("ASE.EffectFontTooltip"),
@@ -244,7 +252,8 @@ export class viciousMockery {
         return {
             spellOptions: spellOptions,
             animOptions: animOptions,
-            soundOptions: soundOptions
+            soundOptions: soundOptions,
+            requireDetails: spellDetails
         }
 
     }

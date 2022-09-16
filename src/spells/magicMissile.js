@@ -66,6 +66,16 @@ export class magicMissile {
             {'indiv': 'Individual'},
             {'group': 'Group'}];
 
+
+            const spellDetails = {
+                actionType: "other",
+                target : {
+                    type: "",
+                    units: "",
+                    value: null,
+                    width: null,
+                }
+            };
         spellOptions.push({
             label: game.i18n.localize('ASE.DamageDieCountLabel'),
             type: 'numberInput',
@@ -224,7 +234,8 @@ export class magicMissile {
             spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions,
-            allowInitialMidiCall: false
+            allowInitialMidiCall: false,
+            requireDetails: spellDetails
         }
 
     }

@@ -72,6 +72,16 @@ export class eldritchBlast {
             {'indiv': 'Individual'},
             {'group': 'Group'}];
 
+            const spellDetails = {
+                actionType: "rsak",
+                target : {
+                    type: "",
+                    units: "",
+                    value: null,
+                    width: null,
+                }
+            };
+
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -244,7 +254,8 @@ export class eldritchBlast {
             spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions,
-            allowInitialMidiCall: false
+            allowInitialMidiCall: false,
+            requireDetails: spellDetails
         }
 
     }

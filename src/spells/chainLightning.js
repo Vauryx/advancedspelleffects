@@ -188,6 +188,16 @@ export class chainLightning {
         let animOptions = [];
         let soundOptions = [];
 
+        const spellDetails = {
+            actionType: "save",
+            target : {
+                type: "creature",
+                units: "",
+                value: 1,
+                width: null,
+            }
+        };
+
         animOptions.push({
             label: game.i18n.localize("ASE.ChainLightningPrimaryColorLabel"),
             type: 'dropdown',
@@ -285,6 +295,7 @@ export class chainLightning {
             animOptions: animOptions,
             soundOptions: soundOptions,
             allowInitialMidiCall: false,
+            requireDetails: spellDetails
         }
 
     }

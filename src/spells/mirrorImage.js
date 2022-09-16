@@ -260,7 +260,15 @@ export class mirrorImage {
             {"0xFFFFFF": "White"},
             {"0x000000": "Black"}
         ];
-
+        const spellDetails = {
+            actionType: "other",
+            target : {
+                type: "",
+                units: "",
+                value: null,
+                width: null,
+            }
+        };
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -394,6 +402,7 @@ export class mirrorImage {
             animOptions: animOptions,
             soundOptions: soundOptions,
             allowInitialMidiCall: true,
+            requireDetails: spellDetails
         }
 
     }

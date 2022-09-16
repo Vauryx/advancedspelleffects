@@ -68,6 +68,17 @@ export class animateDead {
             summonOptions.push({"": "No Summonable Actors"});
         }
 
+
+        const spellDetails = {
+            actionType: "other",
+            target : {
+                type: "",
+                units: "",
+                value: null,
+                width: null,
+            }
+        };
+        
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -233,6 +244,7 @@ export class animateDead {
             spellOptions: spellOptions,
             soundOptions: soundOptions,
             allowInitialMidiCall: true,
+            requireDetails: spellDetails
         }
 
     }

@@ -398,6 +398,16 @@ export class moonBeam {
         const beamColorOptions = utilFunctions.getDBOptions('jb2a.moonbeam.01.no_pulse');
         const beamDamageOptions = utilFunctions.getDBOptions('jb2a.impact.004');
 
+        const spellDetails = {
+            actionType: "save",
+            target : {
+                type: "",
+                units: "",
+                value: null,
+                width: null,
+            }
+        };
+
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -509,7 +519,8 @@ export class moonBeam {
             spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions,
-            'allowInitialMidiCall': true
+            'allowInitialMidiCall': true,
+            requireDetails: spellDetails
         }
 
     }

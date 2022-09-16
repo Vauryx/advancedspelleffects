@@ -151,6 +151,17 @@ export class darkness {
 
     static async getRequiredSettings(currFlags) {
         if (!currFlags) currFlags = {};
+
+        const spellDetails = {
+            actionType: "other",
+            target : {
+                type: "",
+                units: "",
+                value: null,
+                width: null,
+            }
+        };
+
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -184,7 +195,8 @@ export class darkness {
             spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions,
-            allowInitialMidiCall: true
+            allowInitialMidiCall: true,
+            requireDetails: spellDetails
         }
 
     }

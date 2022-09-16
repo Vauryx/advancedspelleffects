@@ -189,6 +189,16 @@ export class vampiricTouch {
         const vampiricTouchStrandColorOptions = utilFunctions.getDBOptions(vampiricTouchStrandAnim);
         const vampiricTouchImpactColorOptions = utilFunctions.getDBOptions(vampiricTouchImpactAnim);
 
+        const spellDetails = {
+            actionType: "msak",
+            target : {
+                type: "creature",
+                units: "",
+                value: 1,
+                width: null,
+            }
+        };
+
         let animOptions = [];
         let soundOptions = [];
         let spellOptions = [];
@@ -326,6 +336,7 @@ export class vampiricTouch {
             animOptions: animOptions,
             soundOptions: soundOptions,
             allowInitialMidiCall: true,
+            requireDetails: spellDetails
         }
 
     }

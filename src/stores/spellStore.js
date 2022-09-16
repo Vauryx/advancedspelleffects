@@ -38,7 +38,7 @@ export class SpellStore extends ArrayObjectStore {
             if(settingType == "summons"){
                flagData['summons'] = setting;
             }
-            if(settingType != 'summonOptions' && settingType != 'allowInitialMidiCall') {
+            if(settingType != 'summonOptions' && (settingType != 'allowInitialMidiCall' && settingType != 'requireDetails')) {
                //console.log("ASE: SPELLSTORE INIT: SETTING: ", setting, "SETTINGTYPE: ", settingType);
                setting.forEach(s => {
                   flagData[s.flagName] = s.flagValue;
@@ -46,7 +46,7 @@ export class SpellStore extends ArrayObjectStore {
             }
             if (settingType == 'allowInitialMidiCall'){
                flagData['allowInitialMidiCall'] = setting;
-            }
+            } 
          }
 
          if (typeof effect.registerHooks === 'function') { effect.registerHooks(); }
@@ -79,7 +79,7 @@ export class SpellStore extends ArrayObjectStore {
             if(settingType == "summons"){
                flagData['summons'] = setting;
             }
-            if(settingType != 'summonOptions' && settingType != 'allowInitialMidiCall') {
+            if(settingType != 'summonOptions' && (settingType != 'allowInitialMidiCall' && settingType != 'requireDetails')) {
                //console.log("ASE: SPELLSTORE INIT: SETTING: ", setting, "SETTINGTYPE: ", settingType);
                setting.forEach(s => {
                   flagData[s.flagName] = s.flagValue;

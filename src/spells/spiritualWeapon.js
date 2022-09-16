@@ -325,6 +325,17 @@ export class spiritualWeapon {
 
     static async getRequiredSettings(currFlags) {
         if (!currFlags) currFlags = {};
+
+        const spellDetails = {
+            actionType: "other",
+            target : {
+                type: "",
+                units: "",
+                value: null,
+                width: null,
+            }
+        };
+
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -380,6 +391,7 @@ export class spiritualWeapon {
             animOptions: animOptions,
             soundOptions: soundOptions,
             allowInitialMidiCall: false,
+            requireDetails: spellDetails
         }
 
     }

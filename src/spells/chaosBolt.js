@@ -66,6 +66,16 @@ export class chaosBolt extends baseSpellClass {
         const thunderShatterEffects = 'jb2a.shatter';
         const thunderShatterEffectColorOptions = utilFunctions.getDBOptions(thunderShatterEffects);
 
+        const spellDetails = {
+            actionType: "rsak",
+            target : {
+                type: "creature",
+                units: "",
+                value: 1,
+                width: null,
+            }
+        };
+
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -408,6 +418,7 @@ export class chaosBolt extends baseSpellClass {
             spellOptions: spellOptions,
             soundOptions: soundOptions,
             allowInitialMidiCall: false,
+            requireDetails: spellDetails
         }
     }
 

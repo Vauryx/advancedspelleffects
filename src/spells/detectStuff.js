@@ -543,7 +543,15 @@ export class detectStuff {
             {"goodAndEvil": 'Detect Good and Evil'},
             {"poisonAndDisease": 'Detect Poison and Disease'},
             {"custom": 'Custom'}];
-            
+            const spellDetails = {
+                actionType: "other",
+                target : {
+                    type: "",
+                    units: "",
+                    value: null,
+                    width: null,
+                }
+            };
         spellOptions.push({
             label: game.i18n.localize("ASE.DetectPresetsLabel"),
             type: 'dropdown',
@@ -655,7 +663,8 @@ export class detectStuff {
             spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions,
-            allowInitialMidiCall: true
+            allowInitialMidiCall: true,
+            requireDetails: spellDetails
         }
 
     }

@@ -182,6 +182,17 @@ export class thunderStep {
     }
     static async getRequiredSettings(currFlags) { 
         if (!currFlags) currFlags = {};
+
+        const spellDetails = {
+            actionType: "save",
+            target : {
+                type: "",
+                units: "",
+                value: null,
+                width: null,
+            }
+        };
+        
         let spellOptions = [];
         let animOptions = [];
         let soundOptions = [];
@@ -239,7 +250,8 @@ export class thunderStep {
             spellOptions: spellOptions,
             animOptions: animOptions,
             soundOptions: soundOptions,
-            allowInitialMidiCall: false
+            allowInitialMidiCall: false,
+            requireDetails: spellDetails
         }
 
     }
