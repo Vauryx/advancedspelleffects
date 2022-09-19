@@ -279,6 +279,8 @@
   "ASE.PortalCloseSoundDelayLabel": "Portal Closing Sound Delay: ",
   "ASE.PortalCloseVolumeLabel": "Portal Closing Volume: ",
   "ASE.UseTashasScalingLabel": "Use Tasha's Scaling: ",
+  "ASE.DisableSpriteRotationLabel": "Disable Sprite Rotation: ",
+  "ASE.DisableSpriteRotationTooltip": "Disable the rotation of the sprite during cast",
 
   "ASE.ThunderStepPassengerPrompt": "Select a friend to bring with you! Warning, you will damage everyone in the red circle!",
   "ASE.TeleportSoundLabel": "Teleport Sound: ",

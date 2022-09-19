@@ -164,15 +164,18 @@ export class summonCreature {
             let summonTokenData = (await game.actors.getName(chosenSummon[0]).getTokenData());
             loadImage(summonTokenData.img).then(async (image) => {
                 const summonImageScale = (summonTokenData.width * canvas.grid.size) / image.width;
-                new Sequence("Advanced Spell Effects")
+                let cursorSeq = new Sequence("Advanced Spell Effects")
                     .effect()
                     .file(image.src)
                     .attachTo(crosshairs)
                     .persist()
                     .scale(summonImageScale)
-                    .loopProperty("sprite", "rotation", { duration: 10000, from: 0, to: 360 })
-                    .opacity(0.5)
-                    .play()
+                    .opacity(0.5);
+                if(!effectInfo.disableSpriteRotation) {
+                    cursorSeq.loopProperty("sprite", "rotation", { duration: 10000, from: 0, to: 360 })
+                }
+                cursorSeq.play()
+                    
             });
         };
         let summonEffectCallbacks = {
@@ -477,6 +480,15 @@ export class summonCreature {
             name: 'flags.advancedspelleffects.effectOptions.isTashas',
             flagName: 'isTashas',
             flagValue: currFlags.isTashas ?? false,
+        });
+
+        spellOptions.push({
+            label: game.i18n.localize("ASE.DisableSpriteRotationLabel"),
+            tooltip: game.i18n.localize("ASE.DisableSpriteRotationTooltip"),
+            type: 'checkbox',
+            name: 'flags.advancedspelleffects.effectOptions.disableSpriteRotation',
+            flagName: 'disableSpriteRotation',
+            flagValue: currFlags.disableSpriteRotation ?? false,
         });
 
 
