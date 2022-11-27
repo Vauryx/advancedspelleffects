@@ -30,13 +30,13 @@ export class moonBeam {
         if ((!updateData.x && !updateData.y)) return;
 
         const moonbeamTiles = await Tagger.getByTag(`*-moonbeam`);
-        if (moonbeamTiles.length == 0) return;
+        if (moonbeamTiles.length === 0) return;
 
         const token = canvas.tokens.get(tokenDocument.id);
         let newTokenPosition = { x: 0, y: 0 };
-        newTokenPosition.x = (updateData.x) ? updateData.x : token.data.x;
-        newTokenPosition.y = (updateData.y) ? updateData.y : token.data.y;
-        newTokenPosition = utilFunctions.getCenter(newTokenPosition, tokenDocument.data.width);
+        newTokenPosition.x = (updateData.x) ? updateData.x : token.x;
+        newTokenPosition.y = (updateData.y) ? updateData.y : token.y;
+        newTokenPosition = utilFunctions.getCenter(newTokenPosition, tokenDocument.width);
 
         let inTiles = token.document.getFlag("advancedspelleffects", "moonbeam.inTiles") ?? [];
         //console.log('inTiles: ', inTiles);
@@ -46,12 +46,12 @@ export class moonBeam {
         //iterate over every moonbeam tile
         for (let i = 0; i < moonbeamTiles.length; i++) {
             let moonbeamTile = moonbeamTiles[i];
-            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile.data);
+            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile);
             //console.log('Moonbeam tile center: ', moonbeamTileCenter);
             let targetToBeamDist = utilFunctions.getDistanceClassic(newTokenPosition, moonbeamTileCenter);
             //console.log('target to beam dist: ', targetToBeamDist);
-            //console.log('Required Distance: ', (((tokenDocument.data.width * canvas.grid.size) / 2) + (moonbeamTile.data.width / 2)));
-            if (targetToBeamDist < (((tokenDocument.data.width * canvas.grid.size) / 2) + (moonbeamTile.data.width / 2))) {
+            //console.log('Required Distance: ', (((tokenDocument.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2)));
+            if (targetToBeamDist < (((tokenDocument.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
                 //check if tile exists in inTiles which is an array of tiles
                 if (inTiles.includes(moonbeamTile.id)) {
 
@@ -77,13 +77,13 @@ export class moonBeam {
         //console.log("Is first GM: ", isGM);
         if (!isGM) return;
         const moonbeamTiles = await Tagger.getByTag(`*-moonbeam`);
-        if (moonbeamTiles.length == 0) return;
+        if (moonbeamTiles.length === 0) return;
 
         //console.log("Updating Combat for ASE Moonbeam...");
         //console.log(combat);
         const combatantToken = canvas.tokens.get(combat.current.tokenId);
         const combatantActor = combatantToken.actor;
-        const combatantPosition = utilFunctions.getCenter(combatantToken.data, combatantToken.data.width);
+        const combatantPosition = utilFunctions.getCenter(combatantToken, combatantToken.width);
 
         let inTiles = [];
         //iterate over every moonbeam tile
@@ -92,10 +92,10 @@ export class moonBeam {
             //console.log('Moonbeam tile found: ', moonbeamTile);
             let effectOptions = moonbeamTile.getFlag("advancedspelleffects", "effectOptions") ?? {};
             //check if token has entered the tile
-            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile.data);
+            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile);
             let targetToBeamDist = utilFunctions.getDistanceClassic(combatantPosition, moonbeamTileCenter);
             //console.log('target to beam dist: ', targetToBeamDist);
-            if (targetToBeamDist < (((combatantToken.data.width * canvas.grid.size) / 2) + (moonbeamTile.data.width / 2))) {
+            if (targetToBeamDist < (((combatantToken.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
                 //check if tile exists in inTiles which is an array of tiles
                 console.log(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
                 ui.notifications.info(game.i18n.format("ASE.StartingTurnInMoonbeam", { name: combatantToken.name }));
@@ -118,7 +118,7 @@ export class moonBeam {
 
         const tokens = canvas.tokens.placeables;
         for await (let token of tokens) {
-            if (token.document.getFlag("advancedspelleffects", "moonbeam") != undefined) {
+            if (token.document.getFlag("advancedspelleffects", "moonbeam") !== undefined) {
                 await token.document.unsetFlag("advancedspelleffects", "moonbeam");
             }
         }
@@ -130,7 +130,7 @@ export class moonBeam {
         const casterToken = canvas.tokens.get(data.tokenId);
         const itemCardId = data.itemCardId;
         const spellItem = data.item;
-        const spellItemData = spellItem.data.data;
+        const spellItemData = spellItem.system;
         const spellLevel = data.itemLevel;
         const spellItemLevel = spellItemData.level;
         console.log("Cast level: ", spellLevel);
@@ -148,8 +148,8 @@ export class moonBeam {
         const beamLoopSoundVolume = aseEffectOptions.moonbeamLoopVolume ?? 1;
         const beamLoopSoundEasing = aseEffectOptions.moonbeamLoopEasing ?? true;
         const beamLoopSoundRadius = aseEffectOptions.moonbeamLoopRadius ?? 20;
-        let damage = data.item.data.data.damage;
-        if(spellItemData.scaling.mode == "level" && (spellLevel - spellItemLevel > 0)) {
+        let damage = data.item.system.damage;
+        if(spellItemData.scaling.mode === "level" && (spellLevel - spellItemLevel > 0)) {
             const scalingDamageType = damage.parts[0][1];
             const scalingDieValue = spellItemData.scaling.formula.split("d")[0];
             const scalingDieType = spellItemData.scaling.formula.split("d")[1];
@@ -161,7 +161,7 @@ export class moonBeam {
             casterTokenId: casterToken.id,
             itemUUID: '',
             itemCardId: data.itemCardId,
-            spellSaveDc: casterActor.data.data.attributes.spelldc,
+            spellSaveDc: casterActor.system.attributes.spelldc,
             damageFormula: damage,
         };
         aseEffectOptions['allowInitialMidiCall'] = false;
@@ -175,10 +175,10 @@ export class moonBeam {
         updates.embedded.Item[activationItemName] = {
             "type": "spell",
             "img": spellItem.img,
-            "data": {
+            "system": {
                 "ability": "",
                 "actionType": "save",
-                "save": spellItem.data.data.save,
+                "save": spellItem.system.save,
                 "activation": { "type": 'action', "cost": 1 },
                 "damage": damage,
                 "level": data.itemLevel,
@@ -219,7 +219,7 @@ export class moonBeam {
             .file(beamInitialSound)
             .delay(beamInitialSoundDelay)
             .volume(beamInitialSoundVolume)
-            .playIf(beamInitialSound != "")
+            .playIf(beamInitialSound !== "")
             .effect()
             .file(beamIntro)
             .atLocation(moonbeamLoc)
@@ -237,7 +237,7 @@ export class moonBeam {
             easing: beamLoopSoundEasing,
             radius: beamLoopSoundRadius,
         };
-        if (beamLoopSound != "") {
+        if (beamLoopSound !== "") {
             const sourceSound = await placeSound(moonbeamLoc, soundOptions, moonbeamTileId);
             console.log('Sound Created...', sourceSound);
         }
@@ -330,14 +330,13 @@ export class moonBeam {
             .file(effectOptions.moonbeamDmgSound)
             .delay(Number(effectOptions.moonbeamDmgSoundDelay) ?? 0)
             .volume(effectOptions.moonbeamDmgVolume ?? 1)
-            .playIf(effectOptions.moonbeamDmgSound && effectOptions.moonbeamDmgSound != "")
+            .playIf(effectOptions.moonbeamDmgSound && effectOptions.moonbeamDmgSound !== "")
             .effect()
             .file(`jb2a.impact.004.${effectOptions.moonbeamDmgColor}`)
-            .attachTo(target)
+            .attachTo(target, { randomOffset: 0.65 })
             .randomRotation()
             .scaleIn(0.5, 200)
             .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
-            .randomOffset(0.5)
             .repeats(4, 100, 250)
             .play()
     }
@@ -351,7 +350,7 @@ export class moonBeam {
         const beamLoop = `jb2a.moonbeam.01.loop.${aseEffectOptions.moonbeamColor}`;
 
         let moonbeamTiles = await Tagger.getByTag(`${casterToken.id}-moonbeam`);
-        if (moonbeamTiles?.length == 0) {
+        if (moonbeamTiles?.length === 0) {
             console.log("Moonbeam not found");
             ui.notifications.error(`Moonbeam not found.`);
             return;
@@ -363,7 +362,7 @@ export class moonBeam {
         //console.log(moonbeamTile);
         //console.log("ASE EFFECT OPTIONS: ", aseEffectOptions);
         await aseSocket.executeAsGM("moveTile", moonbeamLoc, moonbeamTile.id);
-        if (aseEffectOptions.moonbeamLoopSound && aseEffectOptions.moonbeamLoopSound != "") {
+        if (aseEffectOptions.moonbeamLoopSound && aseEffectOptions.moonbeamLoopSound !== "") {
             await aseSocket.executeAsGM("moveSound", moonbeamTile.id, moonbeamLoc);
         }
 

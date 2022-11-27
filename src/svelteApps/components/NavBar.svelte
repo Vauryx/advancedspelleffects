@@ -23,7 +23,7 @@ import SoundSettings from "./SoundSettingsAppShell.svelte";
         currentTab = tab.id;
         navTabs.forEach(function(navTab){
             let button = document.getElementById(navTab.name);
-            if((navTab.name == tab.name) && (navTab.selected == false)){
+            if((navTab.name === tab.name) && (navTab.selected === false)){
                 navTab.selected = true;
                 button.classList.add("selected");
             } else {

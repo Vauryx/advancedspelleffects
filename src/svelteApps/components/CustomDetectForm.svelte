@@ -10,7 +10,7 @@
     $: spellEffect = $spellStoreHost; 
     console.log("Custom Detect Stuff Settings: spell Effect: ", $spellEffect);
 
-    if(!$spellEffect.flagData.tagOptions || $spellEffect.flagData.tagOptions.length == 0){
+    if(!$spellEffect.flagData.tagOptions || $spellEffect.flagData.tagOptions.length === 0){
         $spellEffect.flagData.tagOptions = [{tagEffect: "", tagLabel: ""}];
     }
     
@@ -22,7 +22,7 @@
         tags = tags;
     }
     function removeTag() {
-        if(tags.length == 1){
+        if(tags.length === 1){
             ui.notifications.info("Cannot remove last tag");
             return;
         }

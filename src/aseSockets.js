@@ -55,7 +55,7 @@ async function updateDocument(objectId, updateData) {
 }
 async function updateDocuments(objectType = '', updateData) {
 
-    if (updateData.length > 0 && objectType != '') {
+    if (updateData.length > 0 && objectType !== '') {
         await canvas.scene.updateEmbeddedDocuments(objectType, updateData);
     }
 
@@ -101,7 +101,7 @@ async function deleteTemplates(tileIds) {
 
 async function moveTile(newLocation, tileId) {
     let tile = canvas.scene.tiles.get(tileId);
-    const distance = utilFunctions.getDistanceClassic({ x: tile.data.x + canvas.grid.size, y: tile.data.y + canvas.grid.size }, { x: newLocation.x, y: newLocation.y });
+    const distance = utilFunctions.getDistanceClassic({ x: tile.x + canvas.grid.size, y: tile.y + canvas.grid.size }, { x: newLocation.x, y: newLocation.y });
     //console.log('Distance: ', distance);
 
     const moveSpeed = Math.floor(distance / 50);
@@ -128,10 +128,10 @@ async function fadeTile(fade, tileId) {
     let fadeTileSeq = new Sequence("Advanced Spell Effects")
         .animation()
         .on(tile);
-    if (fade.type == "fadeIn") {
+    if (fade.type === "fadeIn") {
         fadeTileSeq.fadeIn(fade.duration);
     }
-    else if (fade.type == "fadeOut") {
+    else if (fade.type === "fadeOut") {
         fadeTileSeq.fadeOut(fade.duration);
     }
 
@@ -145,9 +145,9 @@ async function placeWalls(wallData) {
 
 async function moveWalls(tileId, wallType, numWalls) {
     let tileD = canvas.scene.tiles.get(tileId) ?? canvas.scene.templates.get(tileId);
-    let placedX = tileD.data.x + (tileD.data.width / 2);
-    let placedY = tileD.data.y + (tileD.data.height / 2);
-    let outerCircleRadius = tileD.data.width / 2.2;
+    let placedX = tileD.x + (tileD.width / 2);
+    let placedY = tileD.y + (tileD.height / 2);
+    let outerCircleRadius = tileD.width / 2.2;
     let wall_angles = 2 * Math.PI / numWalls;
     let walls = [];
     let wallDocuments = [];
@@ -206,10 +206,8 @@ async function moveSound(sourceId, newLoc) {
         ui.notifications.error(game.i18n.localize("ASE.SoundNotFound"));
         return;
     }
-    const oldSoundData = attachedSounds[0].data;
+    const oldSoundData = attachedSounds[0];
     //console.log('Old Sound Data: ', oldSoundData);
-    const sourceWidth = source.data.hitArea?.width || source.data.width;
-    const sourceHeight = source.data.hitArea?.height || source.data.height;
     const newSoundData = [{
         easing: oldSoundData.easing,
         path: oldSoundData.path,
@@ -221,7 +219,7 @@ async function moveSound(sourceId, newLoc) {
         flags: oldSoundData.flags
     }];
     //console.log('New Sound Data: ', newSoundData);
-    if (oldSoundData.x != newSoundData[0].x || oldSoundData.y != newSoundData[0].y) {
+    if (oldSoundData.x !== newSoundData[0].x || oldSoundData.y !== newSoundData[0].y) {
         await canvas.scene.createEmbeddedDocuments("AmbientSound", newSoundData);
         if (canvas.scene.getEmbeddedDocument("AmbientSound", attachedSounds[0].id)) {
             await canvas.scene.deleteEmbeddedDocuments("AmbientSound", attachedSounds.map(s => s.id));

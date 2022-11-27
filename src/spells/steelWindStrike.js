@@ -18,7 +18,7 @@ export class steelWindStrike {
         let targets = Array.from(game.user.targets);
         let rollDataForDisplay = [];
         let dagger = "";
-        if (weapon == "dagger") dagger = ".02"
+        if (weapon === "dagger") dagger = ".02"
 
         let swordAnim;
         let gustAnim = "jb2a.gust_of_wind.veryfast";
@@ -63,7 +63,7 @@ export class steelWindStrike {
             let attackRoll = await new Roll(`1d20 + @mod + @prof`, rollData).evaluate({ async: true });
             console.log("ASE SWS ttack roll: ", attackRoll);
             // game.dice3d?.showForRoll(attackRoll);
-            if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
+            if (attackRoll.total < target.actor.system.attributes.ac.value) {
                 onMiss(target, attackRoll);
             }
             else {
@@ -78,7 +78,7 @@ export class steelWindStrike {
             //console.log("Current damage dice roll total: ", currentRoll.total);
             //game.dice3d?.showForRoll(currentRoll);
             if (game.modules.get("midi-qol")?.active) {
-                new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item.data });
+                new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item.system });
             }
             //console.log("damage data: ", damageData);
             rollDataForDisplay.push({
@@ -162,7 +162,7 @@ export class steelWindStrike {
         }
         function isFree(position) {
             for (let token of canvas.tokens.placeables) {
-                const hitBox = new PIXI.Rectangle(token.x, token.y, token.w, token.h);
+                const hitBox = new PIXI.Rectangle(token.document.x, token.document.y, token.document.w, token.document.h);
                 //console.log(`Checking hitbox for ${token.name}`, hitBox);
                 if (hitBox.contains(position.x, position.y)) {
                     //console.log("Not free...Checking next position");
@@ -196,7 +196,7 @@ export class steelWindStrike {
             let swingStartDelay = -600;
             //console.log(targets);
             for (let i = 0; i < targets.length; i++) {
-                if (i == targets.length - 1) {
+                if (i === targets.length - 1) {
                     swingType = 5;
                     swingStartDelay = -250;
                     strikeSoundDelay += 750;
@@ -223,7 +223,7 @@ export class steelWindStrike {
                     .file(dashSound)
                     .volume(dashVolume)
                     .delay(dashSoundDelay)
-                    .playIf(dashSound != "")
+                    .playIf(dashSound !== "")
                     .effect()
                     .atLocation({ x: caster.x + (canvas.grid.size / 2), y: caster.y + (canvas.grid.size / 2) })
                     .file(gustAnim)
@@ -244,7 +244,7 @@ export class steelWindStrike {
                     .file(strikeSound)
                     .volume(strikeVolume)
                     .delay(strikeSoundDelay)
-                    .playIf(strikeSound != "")
+                    .playIf(strikeSound !== "")
                     .effect()
                     .atLocation(caster, { cacheLocation: false })
                     .file(swordAnim)
@@ -281,7 +281,7 @@ export class steelWindStrike {
             async function chooseFinalLocation() {
                 let crosshairsConfig = {
                     size: 1,
-                    icon: caster.data.img,
+                    icon: caster.texture.src,
                     label: game.i18n.localize("ASE.SWSFinalLocationCrosshairsLabel"),
                     tag: 'end-at-crosshairs',
                     drawIcon: true,

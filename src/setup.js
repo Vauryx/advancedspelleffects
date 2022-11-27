@@ -82,18 +82,15 @@ Hooks.once('ready', async function () {
 
   function _ASERemoveTemplateBorder(wrapped, ...args) {
     wrapped(...args);
-    if (this.data?.flags?.advancedspelleffects) {
-      if (this.data?.flags?.advancedspelleffects?.placed) {
-        this.template.alpha = 0;
-      } else {
-        return;
-      }
+    if (this?.flags?.advancedspelleffects) {
+      if (!this?.flags?.advancedspelleffects?.placed) return;
+      this.template.alpha = 0;
     }
   }
 
   function _ASEGridHighlightWrapper(wrapped, ...args) {
     wrapped(...args);
-    if (!this.data?.flags?.advancedspelleffects) return;
+    if (!this?.flags?.advancedspelleffects) return;
     const highlight = canvas.grid.getHighlightLayer(`Template.${this.id}`);
     if (highlight) {
       highlight.clear();

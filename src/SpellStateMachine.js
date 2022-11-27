@@ -47,16 +47,16 @@ export class SpellStateMachine {
         if (spell) {
             //find how many times to iterate
             const item = await fromUuid(spell.uuid);
-            const level = item.data.data.level;
-            //actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value + 1});
+            const level = item.system.level;
+            //actor.update({[`data.spells.spell${level}.value`]: actor.system.spells[`spell${level}`].value + 1});
             //uuid is in the form 'actor.id.item.id', grab the actorid if elemen
-            if(spell.uuid.split('.')[0] == 'Actor'){
+            if(spell.uuid.split('.')[0] === 'Actor'){
                 actorId = spell.uuid.split('.')[1];
                 actor = game.actors.get(actorId);
             }
             if(spell.options.iterate){
                 if(actor){
-                    await actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value + 1});
+                    await actor.update({[`data.spells.spell${level}.value`]: actor.system.spells[`spell${level}`].value + 1});
                 }
                 let iterateListKey = spell.options.iterate;
                 if(iterateListKey && spell.state < spell.options[iterateListKey].length){
@@ -75,7 +75,7 @@ export class SpellStateMachine {
                     if(spell.options.attacks){
                         const attackType = spell.options.attacks[spell.state]?.type;
                         //console.log("ASE: SPELLSTATEMACHINE: attack type: ", attackType);
-                        if(attackType && attackType != ""){
+                        if(attackType && attackType !== ""){
                             options.workflowOptions[attackType] = attackType;
                         }
                     }
@@ -101,7 +101,7 @@ export class SpellStateMachine {
                         //console.log("ASE: MIDI HANDLER: CHAT CONTENT", chatContent);
                         await aseSocket.executeAsGM("createGMChat", {content: chatContent});
                         if(actor){
-                            await actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value - 1});
+                            await actor.update({[`data.spells.spell${level}.value`]: actor.system.spells[`spell${level}`].value - 1});
                         }
                     }
                     this.removeSpell(uuid);
@@ -122,7 +122,7 @@ export class SpellStateMachine {
             } else if (spell.options.targetted){
                 if(!spellOptions.finished){
                     if(actor){
-                        await actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value + 1});
+                        await actor.update({[`data.spells.spell${level}.value`]: actor.system.spells[`spell${level}`].value + 1});
                     }
                     game.user.updateTokenTargets([]);
                     let options = {
@@ -156,7 +156,7 @@ export class SpellStateMachine {
                 console.log("ASE: MIDI HANDLER: STATE TRANSITION: REPEAT: STATE", spell.state);
                 if(!spellOptions.finished){
                     if(actor){
-                        await actor.update({[`data.spells.spell${level}.value`]: actor.data.data.spells[`spell${level}`].value + 1});
+                        await actor.update({[`data.spells.spell${level}.value`]: actor.system.spells[`spell${level}`].value + 1});
                     }
                     game.user.updateTokenTargets([]);
                     let options = {

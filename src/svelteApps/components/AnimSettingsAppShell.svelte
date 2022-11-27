@@ -21,17 +21,17 @@
             <td>
                 <label for="{setting.flagName}">{setting.label}</label>
             </td>
-                {#if setting.type == "numberInput"}
+                {#if setting.type === "numberInput"}
                     <td>
                         <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
                     </td>
                 {/if}
-                {#if setting.type == "checkbox"}
+                {#if setting.type === "checkbox"}
                     <td>
                         <input type="checkbox" id={setting.flagName} bind:checked={$spellEffect.flagData[setting.flagName]}/>
                     </td>
                 {/if}
-                {#if setting.type == "dropdown"}
+                {#if setting.type === "dropdown"}
                     <td>
                         <select id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}>
                             {#each setting.options as option}
@@ -40,12 +40,12 @@
                         </select>
                     </td>
                 {/if}
-                {#if setting.type == "textInput"}
+                {#if setting.type === "textInput"}
                     <td>
                         <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
                     </td>
                 {/if}
-                {#if setting.type == "rangeInput"}
+                {#if setting.type === "rangeInput"}
                     <td colspan="2">
                         <output style="font-weight: bold;">{$spellEffect.flagData[setting.flagName]}</output>
                         <input type="range" min="{setting.min}" max="{setting.max}"
@@ -54,7 +54,7 @@
                             id="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
                     </td>
                 {/if}
-                {#if setting.type == "colorPicker"}
+                {#if setting.type === "colorPicker"}
                 <td>
                     <input type="color" id="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
                 </td>

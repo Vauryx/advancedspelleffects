@@ -30,7 +30,7 @@ export class mirrorImage {
         if (!target) return;
 
         const mirrorImages = Sequencer.EffectManager.getEffects().filter(effect => effect.data.name && effect.data.name.startsWith(`MirrorImage-${target.id}`));
-        if (mirrorImages.length == 0) return;
+        if (mirrorImages.length === 0) return;
 
         const effectOptions = target.document.getFlag("advancedspelleffects", "mirrorImage");
         if (!effectOptions) return;
@@ -39,24 +39,24 @@ export class mirrorImage {
 
         const attackRoll = data.attackRoll;
         //console.log("Arrack Roll: ", attackRoll.total);
-        const targetAC = target.document.actor.data.data.attributes.ac.value;
+        const targetAC = target.document.actor.system.attributes.ac.value;
         //console.log("Target AC: ", targetAC);
 
         const imagesRemaining = mirrorImages.length;
-        const imageAC = 10 + target.actor.data.data.abilities.dex.mod;
+        const imageAC = 10 + target.actor.system.abilities.dex.mod;
 
         const roll = new Roll(`1d20`).evaluate({ async: false });
         //console.log("Mirror Image Roll: ", roll.total);
 
         let dc;
-        if (imagesRemaining == 3) {
+        if (imagesRemaining === 3) {
             dc = 6;
 
         }
-        else if (imagesRemaining == 2) {
+        else if (imagesRemaining === 2) {
             dc = 8;
         }
-        else if (imagesRemaining == 1) {
+        else if (imagesRemaining === 1) {
             dc = 11;
         }
         else {
@@ -124,14 +124,14 @@ export class mirrorImage {
             .file(imageDestroySound)
             .volume(imageDestroyVolume)
             .delay(imageDestroySoundDelay)
-            .playIf(imageDestroySound != "")
+            .playIf(imageDestroySound !== "")
             .play()
     }
 
     static async updateChatCardFailed(itemCardId, target, attackRoll) {
         const chatMessage = await game.messages.get(itemCardId, target);
         // console.log(chatMessage);
-        let chatMessageContent = $(await duplicate(chatMessage.data.content));
+        let chatMessageContent = $(await duplicate(chatMessage.content));
         // console.log(chatMessageContent);
         //chatMessageContent.find(".midi-qol-hits-display").empty();
         chatMessageContent.find(".midi-qol-hits-display").append(`<div class="midi-qol-flex-container">
@@ -146,7 +146,7 @@ export class mirrorImage {
 
         const chatMessage = await game.messages.get(itemCardId, target);
         // console.log(chatMessage);
-        let chatMessageContent = $(await duplicate(chatMessage.data.content));
+        let chatMessageContent = $(await duplicate(chatMessage.content));
         // console.log(chatMessageContent);
         chatMessageContent.find(".midi-qol-hits-display").empty();
         chatMessageContent.find(".midi-qol-hits-display").append(`<div class="midi-qol-flex-container">
@@ -156,7 +156,7 @@ export class mirrorImage {
                     <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${target.id}"> ${target.name}'s Mirror Image!</div>
                     <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${target.id}"> ${target.name}'s Mirror Image!
                     </div>
-                    <div><img src="${target.data.img}" width="30" height="30" style="border:0px">
+                    <div><img src="${target.document.texture.src}" width="30" height="30" style="border:0px">
                     </div>
                 </div>`);
         await chatMessage.update({ content: chatMessageContent.prop('outerHTML') });
@@ -167,7 +167,7 @@ export class mirrorImage {
         const casterToken = this.token;
         const numberOfImages = 3;
 
-        let casterTokenImg = casterToken.data.img;
+        let casterTokenImg = casterToken.document.texture.src;
 
 
         const positions = [];
@@ -200,7 +200,7 @@ export class mirrorImage {
             .file(castEffectSound)
             .volume(castEffectVolume)
             .delay(castEffectSoundDelay)
-            .playIf(castEffectSound != "")
+            .playIf(castEffectSound !== "")
             .effect()
             .file(castEffect)
             .atLocation(casterToken)

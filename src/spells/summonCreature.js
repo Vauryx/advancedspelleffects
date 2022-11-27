@@ -46,18 +46,16 @@ export class summonCreature {
                 .file(circleSound)
                 .delay(circleSoundDelay)
                 .volume(circleSoundVolume)
-                .playIf(circleSound != "")
+                .playIf(circleSound !== "")
                 .effect()
                 .file(magicSignIntro)
-                .offset({ x: 0, y: canvas.grid.size })
-                .atLocation(template)
+                .atLocation(template, { offset: { x: 0, y: -canvas.grid.size }})
                 .belowTokens()
                 .scale(0.25)
                 .waitUntilFinished(-2000)
                 .effect()
                 .file(magicSignLoop)
-                .offset({ x: 0, y: canvas.grid.size })
-                .atLocation(template)
+                .atLocation(template, { offset: { x: 0, y: -canvas.grid.size }})
                 .belowTokens()
                 .scale(0.25)
                 .persist()
@@ -67,11 +65,10 @@ export class summonCreature {
                 .file(effectASound)
                 .delay(effectASoundDelay)
                 .volume(effectASoundVolume)
-                .playIf(effectASound != "")
+                .playIf(effectASound !== "")
                 .effect()
                 .file(effectAAnim)
-                .offset({ x: 0, y: canvas.grid.size })
-                .atLocation(template)
+                .atLocation(template, { offset: { x: 0, y: -canvas.grid.size }})
                 .waitUntilFinished(-1000)
                 .endTime(3300)
                 .playbackRate(0.7)
@@ -84,14 +81,13 @@ export class summonCreature {
                 .file(portalSound)
                 .delay(portalSoundDelay)
                 .volume(portalSoundVolume)
-                .playIf(portalSound != "")
+                .playIf(portalSound !== "")
                 .effect()
                 .belowTokens()
                 .zIndex(2)
-                .atLocation(template)
+                .atLocation(template, { offset: { x: 0, y: -canvas.grid.size }})
                 .file(portalAnim)
                 .fadeIn(500)
-                .offset({ x: 0, y: canvas.grid.size })
                 .scale(0)
                 .animateProperty("sprite", "scale.x", { from: 0, to: baseScale, delay: 200, duration: 500, ease: "easeInOutCubic" })
                 .animateProperty("sprite", "scale.y", { from: 0, to: baseScale, delay: 200, duration: 700, ease: "easeInOutCubic" })
@@ -102,11 +98,10 @@ export class summonCreature {
                 .file(portalCloseSound)
                 .delay(portalCloseSoundDelay)
                 .volume(portalCloseSoundVolume)
-                .playIf(portalCloseSound != "")
+                .playIf(portalCloseSound !== "")
                 .effect()
                 .file(portalCloseAnim)
-                .atLocation(template)
-                .offset({ x: 0, y: canvas.grid.size })
+                .atLocation(template, { offset: { x: 0, y: -canvas.grid.size }})
                 .play()
         }
 
@@ -115,8 +110,7 @@ export class summonCreature {
             new Sequence("Advanced Spell Effects")
                 .effect()
                 .file(magicSignOutro)
-                .offset({ x: 0, y: canvas.grid.size })
-                .atLocation(template)
+                .atLocation(template, { offset: { x: 0, y: -canvas.grid.size }})
                 .belowTokens()
                 .scale(0.25)
                 .thenDo(async () => {
@@ -124,18 +118,15 @@ export class summonCreature {
                 })
                 .wait(1500)
                 .effect()
-                .atLocation(token)
-                .scaleToObject()
-                .file(token.data.img)
+                .from(token, { offset: { x: 0, y: -canvas.grid.size }})
                 .fadeIn(400)
-                .offset({ x: 0, y: canvas.grid.size })
                 .animateProperty("sprite", "position.y", { from: 0, to: canvas.grid.size, duration: 400, ease: "easeInOutCubic" })
                 .duration(500)
                 .fadeOut(50)
                 .wait(400)
                 .animation()
                 .on(token)
-                .fadeIn(100, { ease: "easeInQuint" })
+                .opacity(1)
                 .play()
         }
         //console.log("MIDI Data: ", midiData);
@@ -161,7 +152,7 @@ export class summonCreature {
                     img.onerror = reject;
                     img.src = src;
                 });
-            let summonTokenData = (await game.actors.getName(chosenSummon[0]).getTokenData());
+            let summonTokenData = (await game.actors.getName(chosenSummon[0]).getTokenDocument()).toObject();
             loadImage(summonTokenData.img).then(async (image) => {
                 const summonImageScale = (summonTokenData.width * canvas.grid.size) / image.width;
                 let cursorSeq = new Sequence("Advanced Spell Effects")
@@ -189,7 +180,7 @@ export class summonCreature {
             },
             show: displayCrosshairs
         };
-        let summonData = await game.actors.getName(chosenSummon[0]).getTokenData();
+        let summonData = await game.actors.getName(chosenSummon[0]).getTokenDocument();
         let crosshairsConfig = {
             size: summonData.width,
             label: chosenSummon[0],
@@ -215,10 +206,10 @@ export class summonCreature {
             let multiAttack = Math.floor(spellLevel / 2);
             let damageBonus = spellLevel;
             //let summonActor = game.actors.getName(chosenSummon[0]);
-            let attackBonus = casterActor.data.data.attributes.spelldc - 8;
+            let attackBonus = casterActor.system.attributes.spelldc - 8;
             let summonActor = game.actors.getName(chosenSummon[0]);
             //console.log(summonActor);
-            //let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
+            //let damageItems = summonActor.items.filter((item) => { return item.system.damage.parts.length > 0 });
             //console.log(damageItems);
             switch (item.name) {
                 case game.i18n.localize("ASE.SummonAberration"):
@@ -257,11 +248,11 @@ export class summonCreature {
             }
 
             updates.actor = {
-                'data.attributes.hp': { value: summonActor.data.data.attributes.hp.max + hpBonus, max: summonActor.data.data.attributes.hp.max + hpBonus },
-                'data.bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
-                'data.bonuses.mwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
-                'data.bonuses.rsak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
-                'data.bonuses.rwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` }
+                'system.attributes.hp': { value: summonActor.system.attributes.hp.max + hpBonus, max: summonActor.system.attributes.hp.max + hpBonus },
+                'system.bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'system.bonuses.mwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'system.bonuses.rsak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'system.bonuses.rwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` }
             }
             updates.embedded = {
                 ActiveEffect: {
@@ -283,7 +274,7 @@ export class summonCreature {
     }
     static async handleConcentration(casterActor, casterToken, effectOptions) {
         console.log("Detected summon concentration removal...");
-        let summonedTokens = canvas.tokens.placeables.filter((token) => { return token.document.getFlag("advancedspelleffects", "summoner") == casterActor.id });
+        let summonedTokens = canvas.tokens.placeables.filter((token) => { return token.document.getFlag("advancedspelleffects", "summoner") === casterActor.id });
         for (const summonedToken of summonedTokens) {
             await warpgate.dismiss(summonedToken.id);
         }

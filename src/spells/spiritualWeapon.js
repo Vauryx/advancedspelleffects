@@ -2,9 +2,7 @@ import * as utilFunctions from "../utilityFunctions.js";
 
 export class spiritualWeapon {
 
-    static registerHooks() {
-        return;
-    }
+    static registerHooks() { }
 
     static async createSpiritualWeapon(midiData) {
         const casterActor = midiData.actor;
@@ -19,7 +17,7 @@ export class spiritualWeapon {
         let summonType = "Spiritual Weapon";
 
         const casterActorSpellcastingMod = casterActorRollData.abilities[casterActorRollData.attributes.spellcasting].mod ?? 0;
-        const summonerDc = casterActor.data.data.attributes.spelldc;
+        const summonerDc = casterActor.system.attributes.spelldc;
         const summonerAttack = (casterActorRollData.attributes.prof + casterActorSpellcastingMod) + Number(casterActorRollData.bonuses?.msak?.attack ?? 0);
 
         //console.log("Caster Actor Roll Data: ", casterActorRollData);
@@ -59,18 +57,13 @@ export class spiritualWeapon {
                     glowColor = utilFunctions.rgbToHex(153, 204, 255)
             }
 
-            let effectFile;
-            if (Sequencer.Database.entryExists(`jb2a.eldritch_blast.${color}`)) {
-                effectFile = `jb2a.eldritch_blast.${color}`
-            }
-            else {
+            let effectFile = `jb2a.eldritch_blast.${color}`;
+            if (!Sequencer.Database.entryExists(effectFile)) {
                 effectFile = `jb2a.eldritch_blast.yellow`
             }
+
             let effect = `jb2a.bless.400px.intro.${color}`;
-            if (Sequencer.Database.entryExists(effect)) {
-                effect = effect;
-            }
-            else {
+            if (!Sequencer.Database.entryExists(effect)) {
                 effect = `jb2a.bless.400px.intro.yellow`;
             }
             new Sequence("Advanced Spell Effects")
@@ -141,7 +134,7 @@ export class spiritualWeapon {
         });
         let attackColors;
 
-        if (weaponChoice == "mace" || weaponChoice == "maul" || weaponChoice == "scythe" || weaponChoice == "sword") {
+        if (weaponChoice === "mace" || weaponChoice === "maul" || weaponChoice === "scythe" || weaponChoice === "sword") {
             attackColors = Sequencer.Database.getPathsUnder(`jb2a.spiritual_weapon.${weaponChoice}`)
         }
         else if (Sequencer.Database.entryExists(`jb2a.${weaponChoice}.melee`)) {
@@ -170,10 +163,10 @@ export class spiritualWeapon {
         // console.log("Spirit Weapon: " + spiritWeapon);
         let spiritAttackAnim;
 
-	if (weaponChoice != "scythe") {
- 	    if (attackColorChoice == "white") {
+	if (weaponChoice !== "scythe") {
+ 	    if (attackColorChoice === "white") {
 	        attackColorChoice = 'black';
-	   } else if (weaponChoice == "mace" || weaponChoice == "maul" && attackColorChoice == "purple") {
+	   } else if (weaponChoice === "mace" || weaponChoice === "maul" && attackColorChoice === "purple") {
 		attackColorChoice = 'dark_purple';
 	   }
 	    spiritAttackAnim = `jb2a.${weaponChoice}.melee.fire.${attackColorChoice}`;
@@ -221,7 +214,7 @@ export class spiritualWeapon {
         updates.embedded.Item[attackItemName] = {
             'type': 'weapon',
             img: spiritualWeaponAttackImg,
-            "data": {
+            "system": {
                 "ability": "",
                 "actionType": "mwak",
                 "activation": { "type": "action", "cost": 1, "condition": "" },
@@ -293,7 +286,7 @@ export class spiritualWeapon {
         const target = Array.from(data.targets)[0];
         let hitTargets = Array.from(data.hitTargets);
         console.log("Hit Targets: ", hitTargets);
-        const missed = hitTargets.length == 0;
+        const missed = hitTargets.length === 0;
         console.log("ASE Spiritual Weapon Attack Missed: ", missed);
         //console.log("Caster: ", casterActor);
         //console.log("Target: ", target);

@@ -14,12 +14,12 @@ export class animateDead {
         const itemD = actorD.items.getName(midiData.item.name);
         let aseSettings = itemD.getFlag("advancedspelleffects", "effectOptions");
         const spellLevel = midiData.itemLevel ? Number(midiData.itemLevel) : 3;
-        const spellSaveDC = midiData.actor?.data?.data?.attributes?.spelldc ?? 10;
+        const spellSaveDC = midiData.actor?.system?.attributes?.spelldc ?? 10;
         const raiseLimit = (2 * spellLevel) - 5;
         const detectRange = aseSettings.range ?? 10;
         let corpses = canvas.tokens.placeables.filter(function (target) {
-            return target?.actor?.data?.data?.attributes?.hp?.value == 0
-                && utilFunctions.measureDistance(utilFunctions.getCenter(tokenD.data), utilFunctions.getCenter(target.data)) <= detectRange
+            return target?.actor?.system?.attributes?.hp?.value === 0
+                && utilFunctions.measureDistance(utilFunctions.getCenter(tokenD), utilFunctions.getCenter(target)) <= detectRange
                 && target !== tokenD
         });
 

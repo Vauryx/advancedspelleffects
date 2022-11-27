@@ -25,15 +25,15 @@ export class concentrationHandler {
         const isGM = utilFunctions.isFirstGM();
         //console.log("Is first GM: ", isGM);
         //if (!isGM) return;
-        if (activeEffect.data.label != 'Concentration' && activeEffect.data.label != game.i18n.localize("ASE.ConcentratingLabel")) return;
-        let origin = activeEffect.data.origin?.split(".");
+        if (activeEffect.label !== 'Concentration' && activeEffect.label !== game.i18n.localize("ASE.ConcentratingLabel")) return;
+        let origin = activeEffect.origin?.split(".");
         //console.log("Origin: ", origin);
         if (!origin || origin?.length < 4) return false;
         let itemId = origin[5] ?? origin[3];
         let casterActor;
         let casterToken;
         let effectSource;
-        if (origin[0] == "Actor") {
+        if (origin[0] === "Actor") {
             casterActor = game.actors.get(origin[1]);
             casterToken = await casterActor.getActiveTokens()[0];
         }
@@ -43,7 +43,7 @@ export class concentrationHandler {
         }
         effectSource = casterActor.items.get(itemId).name;
         //console.log("ASE Concentration removed - Effect Source: ", effectSource);
-        let item = casterActor.items.filter((item) => item.name == effectSource)[0] ?? undefined;
+        let item = casterActor.items.filter((item) => item.name === effectSource)[0] ?? undefined;
         if (!item) return;
         let aseEnabled = item.getFlag("advancedspelleffects", 'enableASE') ?? false;
         let effectOptions = item.getFlag("advancedspelleffects", 'effectOptions') ?? {};
@@ -110,7 +110,7 @@ export class concentrationHandler {
             duration: {},
             flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
         };
-        const convertedDuration = utilFunctions.convertDuration(item.data.data.duration, inCombat);
+        const convertedDuration = utilFunctions.convertDuration(item.system.duration, inCombat);
         if (convertedDuration?.type === "seconds") {
             effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
         }

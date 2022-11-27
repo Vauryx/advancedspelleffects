@@ -53,7 +53,7 @@ export class MissileDialog extends FormApplication {
         let baseScale = this.data.effectOptions.baseScale;
         let currMissile = this.data.targets.map(targetData => {
             return { id: targetData.id, missilesAssigned: targetData.missilesAssigned };
-        }).filter(t => t.id == target.id)[0]?.missilesAssigned ?? 0;//target.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 0;
+        }).filter(t => t.id === target.id)[0]?.missilesAssigned ?? 0;//target.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 0;
         //console.log("Current missile number: ", currMissile);
         //console.log("Missiles currently assigned to target...", currMissile);
         let baseOffset = canvas.grid.size / 2;
@@ -65,24 +65,23 @@ export class MissileDialog extends FormApplication {
             .file(markerSound)
             .delay(markerSoundDelay)
             .volume(markerSoundVolume)
-            .playIf(markerSound != "")
+            .playIf(markerSound !== "")
             .effect()
-            .attachTo(target, { followRotation: false })
+            .attachTo(target, { followRotation: false, offset })
             .filter("ColorMatrix", { hue: markerAnimHue, saturate: markerAnimSaturation })
             .locally()
             .file(markerAnim)
             .scale(0.01)
             .name(`missile-target-${target.id}-${currMissile}`)
-            .offset(offset)
             .duration(300000)
             .animateProperty("sprite", "scale.x", { from: 0.01, to: baseScale, delay: 200, duration: 700, ease: "easeOutBounce" })
             .animateProperty("sprite", "scale.y", { from: 0.01, to: baseScale, duration: 900, ease: "easeOutBounce" })
 
-        if (type == 'kh') {
+        if (type === 'kh') {
             markerSeq.loopProperty("sprite", "position.y", { from: 0, to: -10, duration: 1000, ease: "easeInOutSine", pingPong: true });
 
         }
-        else if (type == 'kl') {
+        else if (type === 'kl') {
             markerSeq.loopProperty("sprite", "position.y", { from: 0, to: 10, duration: 1000, ease: "easeInOutSine", pingPong: true });
         }
         markerSeq.play();
@@ -94,7 +93,7 @@ export class MissileDialog extends FormApplication {
         }
         //await aseSocket.executeAsGM("updateFlag", target.document.id, "missileSpell.missileNum", currMissile + 1);
         //console.log("Total Missiles assigned: ", currMissile + 1);
-        let inTargetList = this.data.targets.find(t => t.id == target.id);
+        let inTargetList = this.data.targets.find(t => t.id === target.id);
         if (!inTargetList) {
             this.data.targets.push({ id: target.id, missilesAssigned: 1 });
         } else {
@@ -121,10 +120,10 @@ export class MissileDialog extends FormApplication {
         })[0];
         if (token) {
             //console.log('Target: ', token.name);
-            if (parsedEventData.button == 0) {
+            if (parsedEventData.button === 0) {
                 let numMissiles = this.data.numMissiles;
                 //console.log('Missiles passed to target hook: ', numMissiles);
-                if (numMissiles == 0) {
+                if (numMissiles === 0) {
                     ui.notifications.info("Missile Limit Reached!");
                 }
                 if (numMissiles > 0) {
@@ -137,7 +136,7 @@ export class MissileDialog extends FormApplication {
                     this.data.numMissiles--;
                 }
             }
-            else if (parsedEventData.button == 2) {
+            else if (parsedEventData.button === 2) {
                 this._removeMissile(token);
             }
             //console.log(this);
@@ -148,7 +147,7 @@ export class MissileDialog extends FormApplication {
     async _addTargetToList(target) {
         //console.log(`Adding ${target.document.data.name} to target list...`, target);
         //let missilesAssigned = target.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 1;
-        let missilesAssigned = this.data.targets.find(t => t.id == target.id)?.missilesAssigned ?? 1;
+        let missilesAssigned = this.data.targets.find(t => t.id === target.id)?.missilesAssigned ?? 1;
         //console.log("Missles assigned: ", missilesAssigned);
         let targetsTable = document.getElementById("targetsTable").getElementsByTagName('tbody')[0];
         let targetAssignedMissiles = document.getElementById(`${target.document.id}-missiles`);
@@ -158,8 +157,8 @@ export class MissileDialog extends FormApplication {
             let newLabel1 = newTargetRow.insertCell(0);
             let newMissilesAssignedInput = newTargetRow.insertCell(1);
             let newRemoveMissileButton = newTargetRow.insertCell(2);
-            newLabel1.innerHTML = `<img src="${target.document.data.img}" width="30" height="30" style="border:0px"> - ${target.document.data.name}`;
-            newMissilesAssignedInput.innerHTML = `<input style='width: 2em;' type="number" id="${target.document.id}-missiles" readonly value="${missilesAssigned}"></input>`;
+            newLabel1.innerHTML = `<img src="${target.document.texture.src}" width="30" height="30" style="border:0px"> - ${target.document.name}`;
+            newMissilesAssignedInput.innerHTML = `<input style='width: 2em;' type="number" id="${target.document.id}-missiles" readonly value="${missilesAssigned}"/>`;
             newRemoveMissileButton.innerHTML = `<button id="${target.document.id}-removeMissile" class="btnRemoveMissile" type="button"><i class="fas fa-minus"></i></button>`;
             let btnRemoveMissile = document.getElementById(`${target.document.id}-removeMissile`);
             //console.log(btnRemoveMissile);
@@ -184,9 +183,9 @@ export class MissileDialog extends FormApplication {
     async _removeMarker(target) {
         /*let missilesAssigned = this.data.targets.map(targetData => {
             return { id: targetData.id, missilesAssigned: targetData.missilesAssigned };
-        }).filter(t => t.id == target.id)[0].missilesAssigned;//Number(target.document.getFlag("advancedspelleffects", "missileSpell.missileNum")) ?? 0;
+        }).filter(t => t.id === target.id)[0].missilesAssigned;//Number(target.document.getFlag("advancedspelleffects", "missileSpell.missileNum")) ?? 0;
         console.log("Removing assigned missile...", missilesAssigned, target);*/
-        const targetData = this.data.targets.find(t => t.id == target.id);
+        const targetData = this.data.targets.find(t => t.id === target.id);
         const missilesAssigned = targetData.missilesAssigned;
         //console.log("Removing assigned missile...", missilesAssigned, target);
         await Sequencer.EffectManager.endEffects({ name: `missile-target-${target.id}-${missilesAssigned - 1}` });
@@ -203,7 +202,7 @@ export class MissileDialog extends FormApplication {
         //console.log("Target: ", target);
         if (target) {
             //let missilesAssigned = target.document.getFlag("advancedspelleffects", "missileSpell.missileNum");
-            let missilesAssigned = this.data.targets.find(t => t.id == target.id)?.missilesAssigned ?? 0;
+            let missilesAssigned = this.data.targets.find(t => t.id === target.id)?.missilesAssigned ?? 0;
             //console.log("Missles assigned: ", missilesAssigned);
             let targetAssignedMissiles = document.getElementById(`${target.document.id}-missiles`);
             if (targetAssignedMissiles) {
@@ -214,10 +213,10 @@ export class MissileDialog extends FormApplication {
                 await this._removeMarker(target);
                 this.data.attackMods[target.id].pop();
             }
-            if (missilesAssigned == 1) {
+            if (missilesAssigned === 1) {
                 let targetRow = document.getElementById(`${target.document.id}-removeMissile`).closest('tr');
                 targetRow.remove();
-                let inTargetList = this.data.targets.find(t => t.id == target.id);
+                let inTargetList = this.data.targets.find(t => t.id === target.id);
                 if (inTargetList) {
                     this.data.targets.splice(this.data.targets.indexOf(inTargetList), 1);
                 }
@@ -248,21 +247,20 @@ export class MissileDialog extends FormApplication {
             .file(missileIntroSound)
             .delay(missileIntroSoundDelay)
             .volume(missileIntroVolume)
-            .playIf(missileIntroSound != "" && missleIntroPlayback == "indiv")
+            .playIf(missileIntroSound !== "" && missleIntroPlayback === "indiv")
             .effect()
             .file(missileAnim)
             .atLocation(caster)
             .randomizeMirrorY()
             .missed(!hit)
-            .stretchTo(target)
-            .randomOffset(0.65)
+            .stretchTo(target, { randomOffset: 0.65 })
             //.playbackRate(utilFunctions.getRandomNumber(0.7, 1.3))
             .waitUntilFinished(impactDelay)
             .sound()
             .file(missileImpactSound)
             .delay(missileImpactSoundDelay)
             .volume(missileImpactVolume)
-            .playIf(missileImpactSound != "" && missleImpactPlayback == "indiv")
+            .playIf(missileImpactSound !== "" && missleImpactPlayback === "indiv")
             .play();
     }
 
@@ -290,17 +288,17 @@ export class MissileDialog extends FormApplication {
         //console.log("Evalute attack target: ", target);
         let attackBonus = rollData.bonuses[this.data.actionType]?.attack || '';
         //console.log("Roll Data: ", rollData);
-        let attackRoll = await new Roll(`${mod == '' ? 1 : 2}d20${mod} + @mod + @prof + ${attackBonus}`, rollData).evaluate({ async: true });
+        let attackRoll = await new Roll(`${mod === '' ? 1 : 2}d20${mod} + @mod + @prof + ${attackBonus}`, rollData).evaluate({ async: true });
         //console.log("Attack roll: ", attackRoll);
-        let crit = attackRoll.terms[0].total == 20;
+        let crit = attackRoll.terms[0].total === 20;
         let hit;
         game.dice3d?.showForRoll(attackRoll);
-        if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
-            console.log(`${caster.name} missed ${target.name} with roll ${attackRoll.total}${mod == '' ? '' : (mod == 'kh' ? ', with advantage!' : ', with dis-advantage!')}`);
+        if (attackRoll.total < target.actor.system.attributes.ac.value) {
+            console.log(`${caster.name} missed ${target.name} with roll ${attackRoll.total}${mod === '' ? '' : (mod === 'kh' ? ', with advantage!' : ', with dis-advantage!')}`);
             hit = false;
         }
         else {
-            console.log(`${caster.name} hits ${target.name} with roll ${attackRoll.total}${mod == '' ? '' : (mod == 'kh' ? ', with advantage!' : ', with dis-advantage!')}`);
+            console.log(`${caster.name} hits ${target.name} with roll ${attackRoll.total}${mod === '' ? '' : (mod === 'kh' ? ', with advantage!' : ', with dis-advantage!')}`);
             hit = true;
         }
         this.data.allAttackRolls.push({ roll: attackRoll, target: target.name, hit: hit, crit: crit });
@@ -349,12 +347,12 @@ export class MissileDialog extends FormApplication {
                 .file(missileIntroSound)
                 .delay(missileIntroSoundDelay)
                 .volume(missileIntroVolume)
-                .playIf(missileIntroSound != "" && missleIntroPlayback == "group" && this.data.targets.length > 0)
+                .playIf(missileIntroSound !== "" && missleIntroPlayback === "group" && this.data.targets.length > 0)
                 .sound()
                 .file(missileImpactSound)
                 .delay(missileImpactSoundDelay)
                 .volume(missileImpactVolume)
-                .playIf(missileImpactSound != "" && missleImpactPlayback == "group" && this.data.targets.length > 0)
+                .playIf(missileImpactSound !== "" && missleImpactPlayback === "group" && this.data.targets.length > 0)
                 .play();
             //console.log("Finished set up...");
             for await (let target of this.data.targets) {
@@ -362,8 +360,8 @@ export class MissileDialog extends FormApplication {
                 let targetToken = canvas.tokens.get(target.id);
                 //console.log("Target: ", targetToken);
                 //let missileNum = targetToken.document.getFlag("advancedspelleffects", "missileSpell.missileNum") ?? 0;
-                const missileNum = this.data.targets.find(t => t.id == target.id)?.missilesAssigned ?? 0;
-                if (missileNum == 0) {
+                const missileNum = this.data.targets.find(t => t.id === target.id)?.missilesAssigned ?? 0;
+                if (missileNum === 0) {
                     return;
                 }
                 //let damageRoll = await new Roll(`${missileNum*this.data.effectOptions.dmgDieCount}${this.data.effectOptions.dmgDie} +${missileNum*this.data.effectOptions.dmgMod}`).evaluate({ async: true });
@@ -383,7 +381,7 @@ export class MissileDialog extends FormApplication {
 
                 for (let i = 0; i < missileNum; i++) {
                     //console.log("Inside missile loop...");
-                    if (this.data.effectOptions.missileType == 'dart') {
+                    if (this.data.effectOptions.missileType === 'dart') {
                         attackData['hit'] = true;
                         missileDelay = utilFunctions.getRandomInt(75, 150);
                     }
@@ -446,7 +444,7 @@ export class MissileDialog extends FormApplication {
                             let effectOptionsdmgType = this.data.effectOptions.dmgType;
                             let itemCardId = this.data.itemCardId;
                             //copy this.data.item.data to a new object without reference
-                            let itemData = JSON.parse(JSON.stringify(this.data.item.data));
+                            let itemData = this.data.item.toObject().system;
                             //new MidiQOL.DamageOnlyWorkflow(caster.actor, caster, damageRoll.total, effectOptionsdmgType, [targetToken], damageRoll, { itemCardId: itemCardId, itemData: itemData });
                             //convert [targetToken] to a set 
                             let targetSet = new Set();
@@ -460,7 +458,7 @@ export class MissileDialog extends FormApplication {
                             damageTotal += damageRoll.total;
                             for (let i = 0; i < damageRoll.terms.length; i++) {
                                 //console.log("Term: ", damageRoll.terms[i]);
-                                if (i == 0) {
+                                if (i === 0) {
                                     totalDamageFormula.dieCount += damageRoll.terms[i].number;
                                 }
                                 else if (!damageRoll.terms[i].operator) {
@@ -468,7 +466,7 @@ export class MissileDialog extends FormApplication {
                                 }
                             }
                         }
-                        if ((!attackData.hit) && this.data.effectOptions.missileType != 'dart') {
+                        if ((!attackData.hit) && this.data.effectOptions.missileType !== 'dart') {
                             attacksHit.pop();
                         }
                     }
@@ -528,7 +526,7 @@ export class MissileDialog extends FormApplication {
         //console.log('Attack Rolls: ', attackRolls);
         //console.log('Damage Rolls: ', damageRolls);
         //iterate through attackRolls using for in loop
-        if (this.data.effectOptions.missileType == 'dart') {
+        if (this.data.effectOptions.missileType === 'dart') {
             //console.log("Magic Missile fired!");
             for (let i = 0; i < damageRolls.length; i++) {
                 let currDamageData = damageRolls[i];
@@ -558,7 +556,7 @@ export class MissileDialog extends FormApplication {
                     return term.values?.length > 0;
                 });
                 let currDamageRollNumericTerms = currDamageRoll.terms.filter(term => {
-                    return (term.number != undefined) && !(term.values?.length > 0);
+                    return (term.number !== undefined) && !(term.values?.length > 0);
                 });
                 //console.log('Damage Roll Die Terms: ', currDamageRollDieTerms);
                 //console.log('Damage Roll Numeric Terms: ', currDamageRollNumericTerms);
@@ -575,7 +573,7 @@ export class MissileDialog extends FormApplication {
                 currDamageFormula += ': ';
 
                 for (let j = 0; j < currDamageRollNumericTerms.length; j++) {
-                    currDamageBreakdown += ((j == 0) && currDamageRollDieTerms.length > 0 ? ' + ' : '') + currDamageRollNumericTerms[j].number + (j < currDamageRollNumericTerms.length - 1 ? ' + ' : '');
+                    currDamageBreakdown += ((j === 0) && currDamageRollDieTerms.length > 0 ? ' + ' : '') + currDamageRollNumericTerms[j].number + (j < currDamageRollNumericTerms.length - 1 ? ' + ' : '');
                 }
                 currDamageBreakdown = currDamageFormula + currDamageBreakdown;
                 //console.log("Damage Breakdown: ", currDamageBreakdown);
@@ -607,7 +605,7 @@ export class MissileDialog extends FormApplication {
                     currAttackRollResult[0] = `Dis: ${lowerRoll}, ${higherRoll} `;
                 }
                 for (let j = 0; j < currAttackRollResult.length; j++) {
-                    currAttackBreakDown += `${j == 0 ? currAttackRollResult[j] + ']' : ' + ' + currAttackRollResult[j]}`;
+                    currAttackBreakDown += `${j === 0 ? currAttackRollResult[j] + ']' : ' + ' + currAttackRollResult[j]}`;
                 }
                 //console.log("Attack Roll Result: ", currAttackRollResult);
 

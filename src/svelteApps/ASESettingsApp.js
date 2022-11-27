@@ -11,12 +11,12 @@ export default class ASESettings extends SvelteApplication {
                 target: document.body,
                 props: {
                     item: item,
-                    itemFlags: item.data.flags,
+                    itemFlags: item.flags,
                 }
             }
         });
         console.log("ASE: Caught item sheet render hook!", item);
-        console.log("Item Flags: ", item.data.flags);
+        console.log("Item Flags: ", item.flags);
         
     }
 

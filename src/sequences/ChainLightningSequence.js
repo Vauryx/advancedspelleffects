@@ -8,7 +8,7 @@ export function ChainLightningSequence(data) {
     let firstTargetFailedSave = false;
     if(data.failedSaves){
         for(let i = 0; i < data.failedSaves.length; i++){
-            if(data.failedSaves[i] == firstTarget){
+            if(data.failedSaves[i] === firstTarget){
                 firstTargetFailedSave = true;
             }
         }
@@ -20,13 +20,13 @@ export function ChainLightningSequence(data) {
         let failedSave = false;
         if(data.failedSaves){
             for(let j = 0; j < data.failedSaves.length; j++){
-                if(data.failedSaves[j] == target){
+                if(data.failedSaves[j] === target){
                     failedSave = true;
                 }
             }
         }
         //push to targets if not firstTarget
-        if(target != firstTarget){
+        if(target !== firstTarget){
             targets.push({token: target, failedSave: failedSave});
         }
     }
@@ -38,7 +38,7 @@ export function ChainLightningSequence(data) {
             .file(data.effectOptions.primarySound)
             .delay(data.effectOptions.primarySoundDelay)
             .volume(data.effectOptions.primarySoundVolume)
-            .playIf(data.effectOptions.primarySound != "")
+            .playIf(data.effectOptions.primarySound !== "")
             .effect()
             .file(`jb2a.chain_lightning.primary.${data.effectOptions.primaryBoltColor}`)
             .atLocation(data.caster)
@@ -59,7 +59,7 @@ export function ChainLightningSequence(data) {
                     .file(data.effectOptions.secondarySound)
                     .delay(randomDelay + data.effectOptions.secondarySoundDelay)
                     .volume(data.effectOptions.secondarySoundVolume)
-                    .playIf(data.effectOptions.secondarySound != "")
+                    .playIf(data.effectOptions.secondarySound !== "")
                     .effect()
                     .file(`jb2a.chain_lightning.secondary.${data.effectOptions.secondaryBoltColor}`)
                     .atLocation(data.firstTarget)

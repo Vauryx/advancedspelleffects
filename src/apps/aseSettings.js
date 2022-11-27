@@ -90,7 +90,7 @@ export class ASESettings extends FormApplication {
         let damageDieCount;
         let damageDie;
         let damageMod;
-        let effectOptions = this.object.data.flags?.advancedspelleffects?.effectOptions ?? {};
+        let effectOptions = this.object.flags?.advancedspelleffects?.effectOptions ?? {};
         switch (item.name) {
             case game.i18n.localize("ASE.DetectMagic"):
                 data.duration = { "value": 10, "units": "minute" };
@@ -142,7 +142,7 @@ export class ASESettings extends FormApplication {
                 damageDieCount = effectOptions.dmgDieCount ?? 10;
                 damageDie = effectOptions.dmgDie ?? "d8";
                 damageMod = effectOptions.dmgMod ?? 0;
-                damageFormula = `${damageDieCount}${damageDie}${(damageMod != 0) ? ((damageMod > 0 ? ' + ' : '') + damageMod) : ''}`;
+                damageFormula = `${damageDieCount}${damageDie}${(damageMod !== 0) ? ((damageMod > 0 ? ' + ' : '') + damageMod) : ''}`;
                 data.damage.parts.push([damageFormula, "lightning"]);
                 data.save = { ability: "dex", dc: null, scaling: "spell" };
                 data.target = { value: 1, width: null, units: "", type: "creature" };
@@ -162,7 +162,7 @@ export class ASESettings extends FormApplication {
 
     async setEffectData(item, itemName) {
         //console.log(item);
-        let flags = this.object.data.flags;
+        let flags = this.object.flags;
         //let itemName = item.name;
         let returnOBJ = {};
         //console.log("Detected item name: ", itemName);
@@ -213,7 +213,7 @@ export class ASESettings extends FormApplication {
                 returnOBJ["casterId"] = "";
             }
         } else {
-            if (this.spellList[game.i18n.localize(itemName)] != undefined) {
+            if (this.spellList[game.i18n.localize(itemName)] !== undefined) {
                 requiredSettings = await this.spellList[game.i18n.localize(itemName)].getRequiredSettings(flags.advancedspelleffects.effectOptions);
             }
             else {
@@ -239,13 +239,13 @@ export class ASESettings extends FormApplication {
     }
 
     async getData() {
-        let flags = this.object.data.flags;
+        let flags = this.object.flags;
         //console.log("flag: ", flags.advancedspelleffects.spellEffect);
         let item = this.object;
         //console.log("item: ", item);
         let itemName = flags.advancedspelleffects?.spellEffect ?? item.name;
         //console.log("Pre change item name: ", itemName);
-        if (itemName == "") {
+        if (itemName === "") {
             itemName = item.name;
             let spellListKeys = Object.keys(this.spellList);
             if (spellListKeys.includes(itemName)) {
@@ -266,7 +266,7 @@ export class ASESettings extends FormApplication {
             await this.setItemDetails(this.object);
         }
         return {
-            flags: this.object.data.flags,
+            flags: this.object.flags,
             itemName: itemName,
             effectData: effectData,
             spellOptions: spellOptions,
@@ -346,7 +346,7 @@ export class ASESettings extends FormApplication {
         let itemId = document.getElementById("hdnItemId").value;
         let actorId = document.getElementById("hdnSummonerId").value;
         let item;
-        if (actorId != "") {
+        if (actorId !== "") {
             let summoner = game.actors.get(actorId);
             item = summoner.items.get(itemId);
             //console.log(summoner, item);
@@ -419,7 +419,7 @@ export class ASESettings extends FormApplication {
         let itemId = document.getElementById("hdnItemId").value;
         let actorId = document.getElementById("hdnCasterId").value;
         let item;
-        if (actorId != "") {
+        if (actorId !== "") {
             let caster = game.actors.get(actorId);
             item = caster.items.get(itemId);
             //console.log(summoner, item);
@@ -460,11 +460,11 @@ export default ASESettings;
 Handlebars.registerHelper('ifCondASE', function (v1, operator, v2, options) {
     switch (operator) {
         case '==':
-            return (v1 == v2) ? options.fn(this) : options.inverse(this);
+            return (v1 === v2) ? options.fn(this) : options.inverse(this);
         case '===':
             return (v1 === v2) ? options.fn(this) : options.inverse(this);
         case '!=':
-            return (v1 != v2) ? options.fn(this) : options.inverse(this);
+            return (v1 !== v2) ? options.fn(this) : options.inverse(this);
         case '!==':
             return (v1 !== v2) ? options.fn(this) : options.inverse(this);
         case '<':

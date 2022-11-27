@@ -22,8 +22,7 @@ export class vampiricTouch {
         const siphonSoundDelay = Number(effectOptions.vtSiphonSoundDelay) ?? 0;
         const siphonVolume = effectOptions.vtSiphonVolume ?? 1;
 
-        const itemData = midiData.item.data.data;
-        console.log(itemData);
+        const itemData = midiData.item.system;
 
         const maxStrands = effectOptions.vtMaxStrands ?? 20;
         const updates = {
@@ -36,7 +35,7 @@ export class vampiricTouch {
         updates.embedded.Item[activationItemName] = {
             "type": "spell",
             "img": midiData.item.img,
-            "data": {
+            "system": {
                 "ability": "",
                 "actionType": itemData.actionType,
                 "activation": { "type": 'action', "cost": 1 },
@@ -74,12 +73,12 @@ export class vampiricTouch {
 
         
        /* if (game.modules.get("midi-qol")?.active) {
-            missed = Array.from(midiData.hitTargets).length == 0;
+            missed = Array.from(midiData.hitTargets).length === 0;
             damageTotal = midiData.damageRoll?.total ?? 12;
             if (Array.from(midiData.hitTargets).length > 0) {
-                const updatedHP = tactor.data.data.attributes.hp.value + Math.floor(damageTotal / 2);
+                const updatedHP = tactor.system.attributes.hp.value + Math.floor(damageTotal / 2);
                 await tactor.update({
-                    "data.attributes.hp.value": Math.min(tactor.data.data.attributes.hp.max, updatedHP)
+                    "system.attributes.hp.value": Math.min(tactor.system.attributes.hp.max, updatedHP)
                 });
             }
             strandNum = Math.min(Math.floor(damageTotal), maxStrands);
@@ -90,7 +89,7 @@ export class vampiricTouch {
             .file(casterSound)
             .delay(casterSoundDelay)
             .volume(casterSoundVolume)
-            .playIf(casterSound != "")
+            .playIf(casterSound !== "")
             .effect()
             .file(casterAnim)
             .attachTo(tokenD)
@@ -142,12 +141,12 @@ export class vampiricTouch {
         const impactSoundDelay = Number(effectOptions.vtImpactSoundDelay) ?? 0;
         const impactVolume = effectOptions.vtImpactVolume ?? 1;
         const maxStrands = Number(effectOptions.vtMaxStrands) ?? 20;
-        missed = Array.from(midiData.hitTargets).length == 0;
+        missed = Array.from(midiData.hitTargets).length === 0;
         damageTotal = midiData.damageRoll?.total ?? 12;
         if (Array.from(midiData.hitTargets).length > 0) {
-            const updatedHP = tactor.data.data.attributes.hp.value + Math.floor(damageTotal / 2);
+            const updatedHP = tactor.system.attributes.hp.value + Math.floor(damageTotal / 2);
             await tactor.update({
-                "data.attributes.hp.value": Math.min(tactor.data.data.attributes.hp.max, updatedHP)
+                "system.attributes.hp.value": Math.min(tactor.system.attributes.hp.max, updatedHP)
             })
         }
         const strandNum = Math.min(Math.floor(damageTotal), maxStrands);
@@ -156,7 +155,7 @@ export class vampiricTouch {
             .file(impactSound)
             .delay(impactSoundDelay + 100)
             .volume(impactVolume)
-            .playIf(impactSound != "")
+            .playIf(impactSound !== "")
             .effect()
             .file(impactAnim)
             .atLocation(target)
@@ -167,7 +166,7 @@ export class vampiricTouch {
             .file(siphonSound)
             .delay(siphonSoundDelay)
             .volume(siphonVolume)
-            .playIf(siphonSound != "" && !missed)
+            .playIf(siphonSound !== "" && !missed)
             .effect()
             .file(strandAnim)
             .atLocation(target)

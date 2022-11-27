@@ -46,7 +46,7 @@ export async function MissileChatBuilder(data) {
             currDamageBreakdown = `NO ROLL`;
             damageTotalText = ` - `;
         }
-        content += `<tr><td><figure style="overflow: auto;"><img style="float: left;" alt="Token" src="${currTarget.data.img}" height="40" style="border:0px"><figcaption style="white-space: nowrap;">${currTargetName}</figcaption></figure></td><td>${hit ? 'Hit' : 'Miss'}</td><td title = '${currAttackBreakDown}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${damageTotalText}</td></tr>`;
+        content += `<tr><td><figure style="overflow: auto;"><img style="float: left; border:0;" alt="Token" src="${currTarget.document.texture.src}" height="40"><figcaption style="white-space: nowrap;">${currTargetName}</figcaption></figure></td><td>${hit ? 'Hit' : 'Miss'}</td><td title = '${currAttackBreakDown}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${damageTotalText}</td></tr>`;
     }
     
 
