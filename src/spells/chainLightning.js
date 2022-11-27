@@ -23,7 +23,7 @@ export class chainLightning {
         }
 
 
-        this.spellSaveDC = this.actor.data.data.attributes.spelldc;
+        this.spellSaveDC = this.actor.system.attributes.spelldc;
 
         this.targetData = [];
 
@@ -76,7 +76,7 @@ export class chainLightning {
         //console.log("firstTarget", firstTarget);
         //console.log("tokenD", tokenD);
         const potentialTargets = canvas.tokens.placeables.filter(function (target) {
-            return target.actor?.data?.data?.attributes.hp.value > 0
+            return target.actor?.system?.attributes.hp.value > 0
                 && canvas.grid.measureDistance(firstTarget, target) <= 32.5
                 && target !== firstTarget
                 && target !== tokenD
@@ -88,7 +88,7 @@ export class chainLightning {
             return `
             <tr class="chain-lightning-target" tokenId="${target.id}">
                 <td class="chain-lightning-flex">
-                    <img src="${target.data.img}" width="30" height="30" style="border:0px"> - ${target.name}
+                    <img src="${target.document.texture.src}" width="30" height="30" style="border:0px"> - ${target.name}
                 </td>
                 <td>
                     <input type="checkbox" class='target' name="${index}">

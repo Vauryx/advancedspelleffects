@@ -10,7 +10,7 @@
     let summonOptions = $spellEffect.settings.summonOptions;
     console.log("Custom Summon Stuff Settings: summonOptions: ", summonOptions);
     console.log("Custom Summon Settings: spell Effect: ", $spellEffect);
-    if(!$spellEffect.flagData.summons || $spellEffect.flagData.summons.length == 0){
+    if(!$spellEffect.flagData.summons || $spellEffect.flagData.summons.length === 0){
         $spellEffect.flagData.summons = [{name: "", actor: summonOptions[0].id, qty: 1}];
     }
     let summons = $spellEffect.flagData.summons;
@@ -24,7 +24,7 @@
         summons = summons;
     }
     function removeSummon(){
-        if(summons.length == 1){
+        if(summons.length === 1){
             ui.notifications.info("Cannot remove last summon");
             return;
         }

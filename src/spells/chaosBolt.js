@@ -469,7 +469,7 @@ export class chaosBolt extends baseSpellClass {
                     .file(options.acidSound ?? "")
                     .delay(options.acidSoundDelay ?? 0)
                     .volume(options.acidVolume ?? 0.5)
-                    .playIf(options.acidSound != "" && options.acidSound)
+                    .playIf(options.acidSound !== "" && options.acidSound)
                     .effect()
                     .atLocation(attack.origin)
                     .stretchTo(attack.target)
@@ -483,7 +483,7 @@ export class chaosBolt extends baseSpellClass {
                     .file(options.coldSound ?? "")
                     .delay(options.coldSoundDelay ?? 0)
                     .volume(options.coldVolume ?? 0.5)
-                    .playIf(options.coldSound != "" && options.coldSound)
+                    .playIf(options.coldSound !== "" && options.coldSound)
                     .effect()
                     .atLocation(attack.origin)
                     .stretchTo(attack.target)
@@ -497,7 +497,7 @@ export class chaosBolt extends baseSpellClass {
                     .file(options.fireSound ?? "")
                     .delay(options.fireSoundDelay ?? 0)
                     .volume(options.fireVolume ?? 0.5)
-                    .playIf(options.fireSound != "" && options.fireSound)
+                    .playIf(options.fireSound !== "" && options.fireSound)
                     .effect()
                     .atLocation(attack.origin)
                     .stretchTo(attack.target)
@@ -511,7 +511,7 @@ export class chaosBolt extends baseSpellClass {
                     .file(options.forceSound ?? "")
                     .delay(options.forceSoundDelay ?? 0)
                     .volume(options.forceVolume ?? 0.5)
-                    .playIf(options.forceSound != "" && options.forceSound)
+                    .playIf(options.forceSound !== "" && options.forceSound)
                     .effect()
                     .atLocation(attack.origin)
                     .stretchTo(attack.target)
@@ -525,7 +525,7 @@ export class chaosBolt extends baseSpellClass {
                     .file(options.lightningSound ?? "")
                     .delay(options.lightningSoundDelay ?? 0)
                     .volume(options.lightningVolume ?? 0.5)
-                    .playIf(options.lightningSound != "" && options.lightningSound)
+                    .playIf(options.lightningSound !== "" && options.lightningSound)
                     .effect()
                     .atLocation(attack.origin)
                     .stretchTo(attack.target)
@@ -539,7 +539,7 @@ export class chaosBolt extends baseSpellClass {
                     .file(options.poisonSound ?? "")
                     .delay(options.poisonSoundDelay ?? 0)
                     .volume(options.poisonVolume ?? 0.5)
-                    .playIf(options.poisonSound != "")
+                    .playIf(options.poisonSound !== "")
                     .effect()
                     .atLocation(attack.origin)
                     .stretchTo(attack.target)
@@ -553,7 +553,7 @@ export class chaosBolt extends baseSpellClass {
                     .file(options.psychicSound ?? "")
                     .delay(options.psychicSoundDelay ?? 0)
                     .volume(options.psychicVolume ?? 0.5)
-                    .playIf(options.psychicSound != "" && options.psychicSound)
+                    .playIf(options.psychicSound !== "" && options.psychicSound)
                     .effect()
                     .atLocation(attack.origin)
                     .stretchTo(attack.target)
@@ -567,7 +567,7 @@ export class chaosBolt extends baseSpellClass {
                     .file(options.thunderSound ?? "")
                     .delay(options.thunderSoundDelay ?? 0)
                     .volume(options.thunderVolume ?? 0.5)
-                    .playIf(options.thunderSound != "" && options.thunderSound)
+                    .playIf(options.thunderSound !== "" && options.thunderSound)
                     .effect()
                     .atLocation(attack.origin)
                     .stretchTo(attack.target)
@@ -579,7 +579,7 @@ export class chaosBolt extends baseSpellClass {
                     .file(options.thunderShatterSound ?? "")
                     .delay(options.thunderShatterSoundDelay ?? 0)
                     .volume(options.thunderShatterVolume ?? 0.5)
-                    .playIf(options.thunderShatterSound != "" && options.thunderShatterSound)
+                    .playIf(options.thunderShatterSound !== "" && options.thunderShatterSound)
                     .effect()
                     .atLocation(`chaos-missile-thunder-${attack.origin.id}`)
                     .file(`jb2a.shatter.${options.thunderShatterColor ?? "blue"}`)
@@ -589,7 +589,7 @@ export class chaosBolt extends baseSpellClass {
         
         const item = data.item;
         const effectOptions = item.getFlag("advancedspelleffects", "effectOptions");
-        const range = item.data.data.range.value;
+        const range = item.system.range.value;
         const hitTarget = Array.from(data.hitTargets)[0];
         const attackHit = Array.from(data.hitTargets).length > 0;
         const target = Array.from(data.targets)[0];
@@ -611,7 +611,7 @@ export class chaosBolt extends baseSpellClass {
         const damageRoll = data.damageRoll;
         let die1;
         let die2;
-        if(damageRoll.terms[0].faces == 8){
+        if(damageRoll.terms[0].faces === 8){
             die1 = damageRoll.terms[0].results[0].result;
             die2 = damageRoll.terms[0].results[1].result;
         }
@@ -631,12 +631,12 @@ export class chaosBolt extends baseSpellClass {
         console.log("ASE | CHAOS BOLT | Damage Type: ", damageType.toLowerCase());
         returnObj['newDamageType'] = damageType;
 
-        if(die1 != die2) {
+        if(die1 !== die2) {
             spellState.finished = true;
             game.ASESpellStateManager.removeSpell(item.uuid);
-        } else if (die1 == die2 && attackHit) {
+        } else if (die1 === die2 && attackHit) {
             const potentialTargets = canvas.tokens.placeables.filter(function (target) {
-                return target.actor?.data?.data?.attributes.hp.value > 0
+                return target.actor?.system?.attributes.hp.value > 0
                     && canvas.grid.measureDistance(spellState.options.caster, target) <= range
                     /* target does not appear in spellState.targetsHit list */ && !spellState.options.targetsHit.includes(target.document.uuid)
                     && target !== spellState.options.caster
@@ -650,7 +650,7 @@ export class chaosBolt extends baseSpellClass {
                     return `
                     <tr class="chaos-bolt-target" tokenId="${target.id}">
                         <td class="chaos-bolt-flex">
-                            <img src="${target.data.img}" width="30" height="30" style="border:0px"> - ${target.name}
+                            <img src="${target.document.texture.src}" width="30" height="30" style="border:0px"> - ${target.name}
                         </td>
                         <td>
                             <input type="checkbox" class='target' name="${index}">

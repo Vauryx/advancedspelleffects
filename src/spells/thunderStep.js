@@ -14,7 +14,7 @@ export class thunderStep {
         const itemD = actorD.items.getName(midiData.item.name);
         const chatMessage = await game.messages.get(midiData.itemCardId);
         const spellLevel = midiData.itemLevel ? Number(midiData.itemLevel) : 3;
-        const spellSaveDC = actorD.data.data.attributes.spelldc;
+        const spellSaveDC = actorD.system.attributes.spelldc;
 
         const effectOptions = itemD.getFlag('advancedspelleffects', 'effectOptions') ?? {};
         const teleportSound = effectOptions.teleportSound ?? "";
@@ -50,7 +50,7 @@ export class thunderStep {
             if (passenger) passengers.push(passenger);
         } else {
             let potentialPassengers = canvas.tokens.placeables.filter(function (target) {
-                return canvas.grid.measureDistance(tokenD, target) <= 7.5 && target.data.disposition === tokenD.data.disposition && target !== tokenD;
+                return canvas.grid.measureDistance(tokenD, target) <= 7.5 && target.document.disposition === tokenD.document.disposition && target !== tokenD;
             });
 
             let passenger = potentialPassengers.length ? await new Promise((resolve) => {
@@ -124,7 +124,7 @@ export class thunderStep {
         teleport_range[0].delete();
 
         let targets = canvas.tokens.placeables.filter(function (target) {
-            return target?.actor?.data?.data?.attributes?.hp?.value > 0
+            return target?.actor?.system?.attributes?.hp?.value > 0
                 && canvas.grid.measureDistance(tokenD, target) <= 12.5
                 && passengers.indexOf(target) === -1;
         });

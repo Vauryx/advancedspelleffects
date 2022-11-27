@@ -1,5 +1,4 @@
 import { ASEHandler } from "./ASEHandler.js"
-import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
 export class midiHandler {
     static registerHooks() {
         if (game.modules.get("midi-qol")?.active) {
@@ -61,7 +60,7 @@ export class midiHandler {
                     }
                     return true;
                 }
-            } else if (castItem && castStage == "preDamage") {
+            } else if (castItem && castStage === "preDamage") {
                 ASEHandler.handleASE(workflow);
             }
         }
@@ -81,7 +80,7 @@ export class midiHandler {
             console.log("ASE: MIDI HANDLER: Cast Item Found! New Midi Data", newMidiData);
             //check if targets is an array
             if(!Array.isArray(targets)) return true;
-            if(targets.length == 0){
+            if(targets.length === 0){
                 let newTargets = new Set();
                 newMidiData.targets.forEach(target => {
                     newTargets.add(target);
@@ -146,7 +145,7 @@ export class midiHandler {
                 }
             } else {
                 console.log("ASE: MIDI HANDLER: Item State Not Found!");
-                if(castStage != "preDamage"){
+                if(castStage !== "preDamage"){
                     ASEHandler.handleASE(workflow);
                 }
                 if(allowInitialMidiCall) {
@@ -181,7 +180,7 @@ export class midiHandler {
         if (!currentItemState) {return;}
         if(currentItemState.active && !currentItemState.finished && currentItemState.options.iterate){
             console.log("ASE: MIDI HANDLER: STATE TRANSITION: ITERATE...");
-            if(!targets || targets.length == 0){
+            if(!targets || targets.length === 0){
                 iterateListKey = currentItemState.options.iterate;
                 currStateIndex = currentItemState.state - 1;
                 targetUuid = currentItemState.options[iterateListKey][currStateIndex];

@@ -23,9 +23,9 @@
             $spellEffect.flagData.wallType = wallType;
             wallSpecificSettings = $spellEffect.effect.getRequiredSettings($spellEffect.flagData);
             $spellEffect.settings = wallSpecificSettings;
-            $spellEffect.flagData.panelCount = wallSpecificSettings.spellOptions.find((x) => x.flagName == 'panelCount')?.flagValue ?? 10;
-            $spellEffect.flagData.wallSegmentSize = wallSpecificSettings.spellOptions.find((x) => x.flagName == 'wallSegmentSize')?.flagValue ?? 10;
-            $spellEffect.flagData.forceColor = wallSpecificSettings.animOptions.find((x) => x.flagName == 'forceColor')?.flagValue ?? 'blue';
+            $spellEffect.flagData.panelCount = wallSpecificSettings.spellOptions.find((x) => x.flagName === 'panelCount')?.flagValue ?? 10;
+            $spellEffect.flagData.wallSegmentSize = wallSpecificSettings.spellOptions.find((x) => x.flagName === 'wallSegmentSize')?.flagValue ?? 10;
+            $spellEffect.flagData.forceColor = wallSpecificSettings.animOptions.find((x) => x.flagName === 'forceColor')?.flagValue ?? 'blue';
 
         }
     };
@@ -40,30 +40,30 @@
                         <label for="{setting.flagName}">{setting.label}</label>
                     </td>
                     <td>
-                        {#if setting.type == "numberInput"}
+                        {#if setting.type === "numberInput"}
                             <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
                         {/if}
-                        {#if setting.type == "checkbox"}
+                        {#if setting.type === "checkbox"}
                             <input type="checkbox" id={setting.flagName} bind:checked={$spellEffect.flagData[setting.flagName]}/>
                         {/if}
-                        {#if setting.type == "dropdown" && setting.flagName.includes("wallType")}
+                        {#if setting.type === "dropdown" && setting.flagName.includes("wallType")}
                             <select id={setting.flagName} bind:value={wallType}>
                                 {#each setting.options as option}
                                     <option value={Object.keys(option)[0]}>{Object.values(option)[0]}</option>
                                 {/each}
                             </select>
                         {/if}
-                        {#if setting.type == "dropdown" && !setting.flagName.includes("wallType")}
+                        {#if setting.type === "dropdown" && !setting.flagName.includes("wallType")}
                             <select id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}>
                                 {#each setting.options as option}
                                     <option value={Object.keys(option)[0]}>{Object.values(option)[0]}</option>
                                 {/each}
                             </select>
                         {/if}
-                        {#if setting.type == "textInput"}
+                        {#if setting.type === "textInput"}
                             <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
                         {/if}
-                        {#if setting.type == "rangeInput"}
+                        {#if setting.type === "rangeInput"}
                             <input type="range" min="{setting.min}" max="{setting.max}"
                                 step="{setting.step}"
                                 oninput="this.nextElementSibling.value = this.value"

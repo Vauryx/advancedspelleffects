@@ -84,8 +84,8 @@ export class detectMagic {
             "transmutation"
         ];
 
-        for (const user in actor.data.permission) {
-            if (user == "default") continue;
+        for (const user in Object.keys(actor.permission)) {
+            if (user === "default") continue;
             if (game.users.get(user)) {
                 users.push(user);
             }
@@ -96,8 +96,8 @@ export class detectMagic {
 
         let objects = await Tagger.getByTag("magical", { ignore: [caster] });
         magicalObjects = objects.map(o => {
-            let pointA = { x: caster.data.x + (canvas.grid.size / 2), y: caster.data.y + (canvas.grid.size / 2) };
-            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) }
+            let pointA = { x: caster.x + (canvas.grid.size / 2), y: caster.y + (canvas.grid.size / 2) };
+            let pointB = { x: o.x + (canvas.grid.size / 2), y: o.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
 
             return {
@@ -114,7 +114,7 @@ export class detectMagic {
             .file(waveSound)
             .volume(waveVolume)
             .delay(waveSoundDelay)
-            .playIf(waveSound != "")
+            .playIf(waveSound !== "")
             .effect(`jb2a.detect_magic.circle.${waveColor}`)
             .attachTo(caster)
             .belowTiles()
@@ -172,8 +172,8 @@ export class detectMagic {
 
     static async handleConcentration(casterActor, casterToken, effectOptions) {
         let users = [];
-        for (const user in casterActor.data.permission) {
-            if (user == "default") continue;
+        for (const user in casterActor.permission) {
+            if (user === "default") continue;
             if (game.users.get(user)) {
                 users.push(user);
             }
@@ -193,16 +193,16 @@ export class detectMagic {
         let magicalColors = ["blue", "green", "pink", "purple", "red", "yellow"];
         let magicalObjects = [];
 
-        magicalObjects = objects.map(o => {
-            let pointA = { x: casterToken.data.x + (canvas.grid.size / 2), y: casterToken.data.y + (canvas.grid.size / 2) };
-            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) }
+        magicalObjects = objects.map(obj => {
+            let pointA = { x: casterToken.x + (canvas.grid.size / 2), y: casterToken.y + (canvas.grid.size / 2) };
+            let pointB = { x: obj.x + (canvas.grid.size / 2), y: obj.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
             return {
                 delay: 0,
                 distance: distance,
-                obj: o,
-                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                obj,
+                school: Tagger.getTags(obj).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                color: Tagger.getTags(obj).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
             }
         })
         for await (let magical of magicalObjects) {
@@ -239,20 +239,20 @@ export class detectMagic {
         const isGM = utilFunctions.isFirstGM();
 
         if (!isGM) return;
-        if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length == 0) {
+        if (tokenDocument.actor.effects.filter((effect) => effect.document.sourceName === "Detect Magic").length === 0) {
             return;
         }
         //console.log("Is first GM: ", isGM);
         let users = [];
-        for (const user in tokenDocument.actor.data.permission) {
-            if (user == "default") continue;
+        for (const user in tokenDocument.actor.permission) {
+            if (user === "default") continue;
             if (game.users.get(user)) {
                 users.push(user);
             }
         }
         let newPos = { x: 0, y: 0 };
-        newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
-        newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
+        newPos.x = (updateData.x) ? updateData.x : tokenDocument.x;
+        newPos.y = (updateData.y) ? updateData.y : tokenDocument.y;
         let magicalObjectsOutOfRange = [];
         let magicalObjectsInRange = [];
         const magicalSchoolsEng = [
@@ -270,16 +270,16 @@ export class detectMagic {
 
         let objects = await Tagger.getByTag("magical", { ignore: [tokenDocument] });
 
-        const magicalObjects = objects.map(o => {
+        const magicalObjects = objects.map(obj => {
             let pointA = { x: newPos.x + (canvas.grid.size / 2), y: newPos.y + (canvas.grid.size / 2) };
-            let pointB = { x: o.data.x + (canvas.grid.size / 2), y: o.data.y + (canvas.grid.size / 2) };
+            let pointB = { x: obj.x + (canvas.grid.size / 2), y: obj.y + (canvas.grid.size / 2) };
             let distance = utilFunctions.measureDistance(pointA, pointB);
             return {
                 delay: 0,
                 distance: distance,
-                obj: o,
-                school: Tagger.getTags(o).find(t => magicalSchools.includes(t.toLowerCase())) || false,
-                color: Tagger.getTags(o).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
+                obj,
+                school: Tagger.getTags(obj).find(t => magicalSchools.includes(t.toLowerCase())) || false,
+                color: Tagger.getTags(obj).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
             }
         });
 

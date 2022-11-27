@@ -7,8 +7,8 @@ export class detectStuff {
         this.actor = game.actors.get(this.data.actor.id);
         this.caster = canvas.tokens.get(this.data.tokenId);
         this.users = [];
-        for (const user in this.actor.data.permission) {
-            if (user == "default") continue;
+        for (const user in this.actor.permission) {
+            if (user === "default") continue;
             if (game.users.get(user)) {
                 this.users.push(user);
             }
@@ -61,44 +61,44 @@ export class detectStuff {
     getObjectsInRange(objects) {
         return objects.map(obj => {
             let returnObj = {};
-            let pointA = { x: this.caster.data.x + (canvas.grid.size / 2), y: this.caster.data.y + (canvas.grid.size / 2) };
-            let pointB = { x: obj.data.x + (canvas.grid.size / 2), y: obj.data.y + (canvas.grid.size / 2) }
+            let pointA = { x: this.caster.x + (canvas.grid.size / 2), y: this.caster.y + (canvas.grid.size / 2) };
+            let pointB = { x: obj.x + (canvas.grid.size / 2), y: obj.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
             returnObj["delay"] = distance * 55;
             returnObj["distance"] = distance;
             returnObj["obj"] = obj;
             let tag;
-            if (this.preset == 'magic') {
+            if (this.preset === 'magic') {
                 let magicSchool = Tagger.getTags(obj).find(t => this.tags.includes(t.toLowerCase())) || false
                 let magicColor = Tagger.getTags(obj).find(t => this.magicalColors.includes(t.toLowerCase())) || "blue"
                 returnObj["introAnimPath"] = `jb2a.magic_signs.rune.${magicSchool}.intro.${magicColor}`;
                 returnObj["loopAnimPath"] = `jb2a.magic_signs.rune.${magicSchool}.loop.${magicColor}`;
                 returnObj["outroAnimPath"] = `jb2a.magic_signs.rune.${magicSchool}.outro.${magicColor}`;
                 tag = magicSchool;
-            } else if (this.preset == 'goodAndEvil') {
+            } else if (this.preset === 'goodAndEvil') {
                 tag = Tagger.getTags(obj).find(t => this.tags.includes(t.toLowerCase())) || false;
                 if (tag) {
-                    if (tag == "good") {
+                    if (tag === "good") {
                         returnObj["animPath"] = this.effectOptions.goodAnim;
-                    } else if (tag == "evil") {
+                    } else if (tag === "evil") {
                         returnObj["animPath"] = this.effectOptions.evilAnim;
                     }
                 } else {
                     returnObj["animPath"] = false;
                 }
-            } else if (this.preset == 'poisonAndDisease') {
+            } else if (this.preset === 'poisonAndDisease') {
                 tag = Tagger.getTags(obj).find(t => this.tags.includes(t.toLowerCase())) || false;
                 if (tag) {
-                    if (tag == "poison") {
+                    if (tag === "poison") {
                         returnObj["animPath"] = this.effectOptions.poisonAnim;
-                    } else if (tag == "disease") {
+                    } else if (tag === "disease") {
                         returnObj["animPath"] = this.effectOptions.diseaseAnim;
                     }
                 }
                 else {
                     returnObj["animPath"] = false;
                 }
-            } else if (this.preset == 'custom') {
+            } else if (this.preset === 'custom') {
                 let objectTags = Tagger.getTags(obj);
                 //console.log("Object Tags: ", objectTags);
                 //console.log("Custom Tags: ", this.customTags);
@@ -167,7 +167,7 @@ export class detectStuff {
             .name(`${this.caster.id}-detectMagicAura`)
             .belowTokens();
         for (let obj of objects) {
-            if (this.preset == 'magic') {
+            if (this.preset === 'magic') {
                 this.playMagicalObjectAnim(obj);
             } else {
                 this.playObjectAnim(obj);
@@ -219,7 +219,7 @@ export class detectStuff {
         await aseSocket.executeAsGM("removeFlag", casterToken.id, "detectItemId");
         let users = [];
         for (const user in casterActor.data.permission) {
-            if (user == "default") continue;
+            if (user === "default") continue;
             if (game.users.get(user)) {
                 users.push(user);
             }
@@ -283,7 +283,7 @@ export class detectStuff {
             let pointB = { x: object.data.x + (canvas.grid.size / 2), y: object.data.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
             if (object) {
-                if (preset == 'magic') {
+                if (preset === 'magic') {
                     let magicSchool = Tagger.getTags(object).find(t => tags.includes(t.toLowerCase())) || false;
                     let magicColor = Tagger.getTags(object).find(t => magicalColors.includes(t.toLowerCase())) || "blue";
                     await Sequencer.EffectManager.endEffects({ name: `${id}-magicRune` });
@@ -322,8 +322,8 @@ export class detectStuff {
         //console.log("update token: Item: ", item);
         if (tokenDocument.actor.effects.filter(async (effect) => {
             let effectItem = await fromUuid(effect.data.origin);
-            return effectItem.name == item.name;
-        }).length == 0) {
+            return effectItem.name === item.name;
+        }).length === 0) {
             return;
         }
         //console.log("Found relevant effect");
@@ -333,7 +333,7 @@ export class detectStuff {
         newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
         let users = [];
         for (const user in tokenDocument.actor.data.permission) {
-            if (user == "default") continue;
+            if (user === "default") continue;
             if (game.users.get(user)) {
                 users.push(user);
             }
@@ -387,37 +387,37 @@ export class detectStuff {
             returnObj["distance"] = distance;
             returnObj["obj"] = obj;
             let tag;
-            if (preset == 'magic') {
+            if (preset === 'magic') {
                 let magicSchool = Tagger.getTags(obj).find(t => tags.includes(t.toLowerCase())) || false
                 let magicColor = Tagger.getTags(obj).find(t => magicalColors.includes(t.toLowerCase())) || "blue"
                 returnObj["introAnimPath"] = `jb2a.magic_signs.rune.${magicSchool}.intro.${magicColor}`;
                 returnObj["loopAnimPath"] = `jb2a.magic_signs.rune.${magicSchool}.loop.${magicColor}`;
                 returnObj["outroAnimPath"] = `jb2a.magic_signs.rune.${magicSchool}.outro.${magicColor}`;
                 tag = magicSchool;
-            } else if (preset == 'goodAndEvil') {
+            } else if (preset === 'goodAndEvil') {
                 tag = Tagger.getTags(obj).find(t => tags.includes(t.toLowerCase())) || false;
                 if (tag) {
-                    if (tag == "good") {
+                    if (tag === "good") {
                         returnObj["animPath"] = effectOptions.goodAnim;
-                    } else if (tag == "evil") {
+                    } else if (tag === "evil") {
                         returnObj["animPath"] = effectOptions.evilAnim;
                     }
                 } else {
                     returnObj["animPath"] = false;
                 }
-            } else if (preset == 'poisonAndDisease') {
+            } else if (preset === 'poisonAndDisease') {
                 tag = Tagger.getTags(obj).find(t => tags.includes(t.toLowerCase())) || false;
                 if (tag) {
-                    if (tag == "poison") {
+                    if (tag === "poison") {
                         returnObj["animPath"] = effectOptions.poisonAnim;
-                    } else if (tag == "disease") {
+                    } else if (tag === "disease") {
                         returnObj["animPath"] = effectOptions.diseaseAnim;
                     }
                 }
                 else {
                     returnObj["animPath"] = false;
                 }
-            } else if (preset == 'custom') {
+            } else if (preset === 'custom') {
                 let objectTags = Tagger.getTags(obj);
                 //console.log("Object Tags: ", objectTags);
                 //console.log("Custom Tags: ", customTags);
@@ -449,7 +449,7 @@ export class detectStuff {
        // console.log("Detected Objects In Range: ", detectedObjectsInRange);
         //handle out of range objects
         for await (let detectedObj of detectedObjectsOutOfRange) {
-            if (preset == 'magic') {
+            if (preset === 'magic') {
                 await Sequencer.EffectManager.endEffects({ name: `${detectedObj.obj.id}-magicRune` });
                 new Sequence("Advanced Spell Effects")
                     .effect(detectedObj.outroAnimPath)
@@ -466,7 +466,7 @@ export class detectStuff {
         //remove id of each detectedObjectOutOfRange from detectedObjectsIDs
         if (detectedObjectsIDs?.length > 0) {
             for (let detectedObj of detectedObjectsOutOfRange) {
-                detectedObjectsIDs = detectedObjectsIDs?.filter(id => id != detectedObj.obj.id) ?? [];
+                detectedObjectsIDs = detectedObjectsIDs?.filter(id => id !== detectedObj.obj.id) ?? [];
             }
             await aseSocket.executeAsGM("updateFlag", tokenDocument.id, "objectsDetected", detectedObjectsIDs);
         }
@@ -475,7 +475,7 @@ export class detectStuff {
             if (detectedObjectsIDs?.includes(detectedObj.obj.id)) {
                 continue;
             }
-            if (preset == 'magic') {
+            if (preset === 'magic') {
                 new Sequence("Advanced Spell Effects")
                     .effect(detectedObj.introAnimPath)
                     .forUsers(users)

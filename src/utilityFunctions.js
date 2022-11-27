@@ -92,7 +92,7 @@ export function getRandomInt(min, max) {
 
 export function componentToHex(c) {
     let hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
+    return hex.length === 1 ? "0" + hex : hex;
 }
 
 export function rgbToHex(r, g, b) {
@@ -101,9 +101,9 @@ export function rgbToHex(r, g, b) {
 
 export function getRandomColor(type) {
     let color = rgbToHex(getRandomInt(0, 155), getRandomInt(0, 155), getRandomInt(0, 155));
-    if (type == "0x") {
+    if (type === "0x") {
         return color;
-    } else if (type == "#") {
+    } else if (type === "#") {
         return "#" + color.substring(2);
     }
     return color;
@@ -204,7 +204,7 @@ export function getSelfTarget(actor) {
     const speaker = ChatMessage.getSpeaker({ actor });
     if (speaker.token)
         return canvas.tokens?.get(speaker.token);
-    return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
+    return new CONFIG.Token.documentClass(actor.getTokenDocument(), { actor });
 }
 
 export function getAssetFilePaths(assetDBPaths) {
@@ -253,7 +253,7 @@ export function getAllItemsNamed(name) {
     let scenes = game.scenes.contents;
     let itemsWithName = [];
     for (let actor of actors) {
-        let items = actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects?.enableASE);
+        let items = actor.items.filter(item => item.name === name && item.flags.advancedspelleffects?.enableASE);
         items.forEach(item => {
             itemsWithName.push(item);
         });
@@ -261,7 +261,7 @@ export function getAllItemsNamed(name) {
     for (let scene of scenes) {
         let tokensInScene = Array.from(scene.tokens);
         tokensInScene.forEach(token => {
-            let items = token.actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects?.enableASE);
+            let items = token.actor.items.filter(item => item.name === name && item.flags.advancedspelleffects?.enableASE);
             items.forEach(item => {
                 itemsWithName.push(item);
             });
@@ -316,11 +316,11 @@ export function isMidiActive() {
 }
 
 export function getContainedCustom(tokenD, crosshairs) {
-    let tokenCenter = getCenter(tokenD.data, tokenD.data.width);
+    let tokenCenter = getCenter(tokenD, tokenD.width);
     let tokenCrosshairsDist = canvas.grid.measureDistance(tokenCenter, crosshairs);
     let crosshairsDistance = crosshairs.data?.distance ?? crosshairs.distance;
     //console.log(`Crosshairs distance: ${crosshairsDistance}`);
-    let distanceRequired = (crosshairsDistance - 2.5) + (2.5 * tokenD.data.width);
+    let distanceRequired = (crosshairsDistance - 2.5) + (2.5 * tokenD.width);
     if ((tokenCrosshairsDist) < distanceRequired) {
         return true;
     }
@@ -344,13 +344,12 @@ export async function checkCrosshairs(crosshairs) {
             //console.log(token);
             let markerEffect = 'jb2a.ui.indicator.red.01.01';
             let markerApplied = Sequencer.EffectManager.getEffects({ name: `ase-crosshairs-marker-${token.id}` });
-            if (markerApplied.length == 0) {
+            if (markerApplied.length === 0) {
                 new Sequence()
                     .effect()
                     .file(markerEffect)
-                    .atLocation(token)
+                    .atLocation(token, { offset: { y: 100 }})
                     .scale(0.5)
-                    .offset({ y: 100 })
                     .mirrorY()
                     .persist()
                     .name(`ase-crosshairs-marker-${token.id}`)
@@ -403,7 +402,7 @@ export function lineCrossesCircle(pointA, pointB, circleCenter, radius) {
     let dot = A * C + B * D;
     let len_sq = C * C + D * D;
     let param = -1;
-    if (len_sq != 0)
+    if (len_sq !== 0)
         param = dot / len_sq;
 
     let xx, yy;
@@ -449,7 +448,7 @@ export function isPointNearLine(linePointA, linePointB, checkPoint, range) {
     let dot = A * C + B * D;
     let len_sq = C * C + D * D;
     let param = -1;
-    if (len_sq != 0)
+    if (len_sq !== 0)
         param = dot / len_sq;
 
     let xx, yy;

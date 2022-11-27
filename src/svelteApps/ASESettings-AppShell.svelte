@@ -39,9 +39,9 @@
     let currentSpell = $spellStoreHost;
     $: currentSpell = $spellStoreHost;
 
-    if(!blankItem && flags.spellEffect == $currentSpell.name && flags.effectOptions){
-        if(flags.effectOptions.allowInitialMidiCall == undefined){
-            if(currentSpell.settings.allowInitialMidiCall != undefined) {
+    if(!blankItem && flags.spellEffect === $currentSpell.name && flags.effectOptions){
+        if(flags.effectOptions.allowInitialMidiCall === undefined){
+            if(currentSpell.settings.allowInitialMidiCall !== undefined) {
                 flags.effectOptions.allowInitialMidiCall = currentSpell.settings.allowInitialMidiCall;
             } else {
                 flags.effectOptions.allowInitialMidiCall = true;
@@ -107,11 +107,11 @@
                 <SharedSettings itemName={item.name}
                                 itemUuid={item.uuid} />
                 <NavBar bind:currentTab />
-                {#if currentTab == SpellSettings}
+                {#if currentTab === SpellSettings}
                     <SpellSettings />
-                {:else if currentTab == AnimSettings}
+                {:else if currentTab === AnimSettings}
                     <AnimSettings />
-                {:else if currentTab == SoundSettings}
+                {:else if currentTab === SoundSettings}
                     <SoundSettings />
                 {/if}
             {/if}

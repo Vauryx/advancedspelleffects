@@ -66,10 +66,10 @@ export class wallOfFire extends baseSpellClass {
         //console.log("Dialog return type", type);
         Hooks.once('createMeasuredTemplate', async (template) => {
 
-            const direction = template.data.direction;
+            const direction = template.direction;
             const templateDimensions = template.getFlag('advancedspelleffects', 'dimensions') ?? {};
             const templateLength = templateDimensions?.length ?? 0;
-            if ((direction == 0 || direction == 180 || direction == 90 || direction == 270) && templateLength > 0) {
+            if ((direction === 0 || direction === 180 || direction === 90 || direction === 270) && templateLength > 0) {
                 await template.update({ distance: templateLength, flags: { advancedspelleffects: { placed: true } } });
             } else {
                 await template.setFlag('advancedspelleffects', 'placed', true);
@@ -145,10 +145,10 @@ export class wallOfFire extends baseSpellClass {
     _setBaseTemplateData(dimensions, type) {
         this.baseTemplateData.flags.advancedspelleffects.dimensions = dimensions;
         this.baseTemplateData.flags.tagger.tags.push('0');
-        if (type == "circle") {
+        if (type === "circle") {
             this.baseTemplateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.CIRCLE;
             this.baseTemplateData["distance"] = dimensions.radius;
-        } else if (type == "ray") {
+        } else if (type === "ray") {
             this.baseTemplateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RAY;
             this.baseTemplateData["distance"] = Math.sqrt(Math.pow(dimensions.length, 2) + Math.pow(dimensions.width, 2));
             //this.baseTemplateData["direction"] = 180 * Math.atan2(dimensions.length, dimensions.width) / Math.PI;
@@ -176,7 +176,7 @@ export class wallOfFire extends baseSpellClass {
             damageInArea: true,
             damageArea: {},
             damageOnCast: true,
-            savingThrowDC: this.actor.data.data.attributes.spelldc ?? 0,
+            savingThrowDC: this.actor.system.attributes.spelldc ?? 0,
             chatMessage: this.chatMessage,
             item: this.item.id,
             casterActor: this.actor.id,
@@ -189,13 +189,13 @@ export class wallOfFire extends baseSpellClass {
     _getTexture(options, wallType, useWebP = false) {
         let texture = "";
         //console.log('options:', options);
-        if (options.type == "circle") {
+        if (options.type === "circle") {
             if (useWebP) {
-                texture = `modules/jb2a_patreon/Library/Generic/Fire/FireRing_01_Circle_${options.effectData.fireColor == "yellow" ? "red" : options.effectData.fireColor}_Thumb.webp`;
+                texture = `modules/jb2a_patreon/Library/Generic/Fire/FireRing_01_Circle_${options.effectData.fireColor === "yellow" ? "red" : options.effectData.fireColor}_Thumb.webp`;
             } else {
-                texture = `jb2a.fire_ring.900px.${options.effectData.fireColor == "yellow" ? "red" : options.effectData.fireColor}`;
+                texture = `jb2a.fire_ring.900px.${options.effectData.fireColor === "yellow" ? "red" : options.effectData.fireColor}`;
             }
-        } else if (options.type == "wall") {
+        } else if (options.type === "wall") {
             if (useWebP) {
                 texture = `modules/jb2a_patreon/Library/4th_Level/Wall_Of_Fire/WallOfFire_01_${options.effectData.fireColor}_Thumb.webp`;
             } else {
@@ -219,20 +219,20 @@ export class wallOfFire extends baseSpellClass {
         //console.log("Updating combat: ", combat);
         const token = canvas.tokens.get(combat.previous.tokenId);
         if (!token) return;
-        const grid = canvas?.scene?.data.grid;
+        const grid = canvas?.scene?.grid?.size;
         if (!grid) return false;
-        const tokenPos = { x: token.data.x, y: token.data.y };
+        const tokenPos = { x: token.x, y: token.y };
         await token.document.unsetFlag("advancedspelleffects", "wallTouchedData.wallsTouched");
         const wallTemplates = canvas.templates.placeables.filter(template =>
-        (template.document.getFlag('advancedspelleffects', 'wallOperationalData.damageOnTouch') == true
-            || template.document.getFlag('advancedspelleffects', 'wallOperationalData.savingThrowOnTouch') == true));
+        (template.document.getFlag('advancedspelleffects', 'wallOperationalData.damageOnTouch') === true
+            || template.document.getFlag('advancedspelleffects', 'wallOperationalData.savingThrowOnTouch') === true));
         //console.log("wall templates: ", wallTemplates);
         if (wallTemplates.length && wallTemplates.length > 0) {
             for await (let wallTemplate of wallTemplates) {
                 const templateDocument = wallTemplate.document;
                 if (!templateDocument) return;
                 //console.log(templateDocument.data);
-                const templateData = templateDocument.data;
+                const templateData = templateDocument.toObject();
                 if (!templateData) return;
                 const aseData = templateDocument.getFlag("advancedspelleffects", 'wallOperationalData');
                 const aseEffectData = templateDocument.getFlag("advancedspelleffects", 'wallEffectData');
@@ -247,28 +247,28 @@ export class wallOfFire extends baseSpellClass {
                 }
                 const wallName = templateDocument.getFlag("advancedspelleffects", "wallName") ?? "";
                 const mTemplate = templateDocument.object;
-                const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: templateData.t, distance: mTemplate.data.distance };
+                const templateDetails = { x: templateDocument.x, y: templateDocument.y, shape: templateData.t, distance: mTemplate.distance };
                 //console.log("Wall template details: ", templateDetails);
-                if (templateDetails.shape == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                if (templateDetails.shape === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
                     //console.log("Circle template detected...");
                     let templateCenter = { x: templateDetails.x, y: templateDetails.y };
                     let templateRadius = (templateDetails.distance / 5) * grid;
                     const sideToCheck = templateDocument.getFlag("advancedspelleffects", "wallOperationalData.damageSide");
                     //console.log("Side to check: ", sideToCheck);
 
-                    const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
-                    const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
+                    const startX = token.width >= 1 ? 0.5 : (token.width / 2);
+                    const startY = token.height >= 1 ? 0.5 : (token.height / 2);
 
-                    widthLoop: for (let x = startX; x < token.data.width; x++) {
-                        for (let y = startY; y < token.data.height; y++) {
+                    widthLoop: for (let x = startX; x < token.width; x++) {
+                        for (let y = startY; y < token.height; y++) {
                             const currGrid = {
                                 x: tokenPos.x + x * grid,
                                 y: tokenPos.y + y * grid,
                             };
                             let inRange = false;
-                            if (sideToCheck == "inside") {
+                            if (sideToCheck === "inside") {
                                 inRange = utilFunctions.isPointInCircle(templateCenter, currGrid, 0, templateRadius);
-                            } else if (sideToCheck == "outside") {
+                            } else if (sideToCheck === "outside") {
                                 const outerRadius = templateRadius + ((aseData.range / 5) * grid);
                                 inRange = utilFunctions.isPointInCircle(templateCenter, currGrid, templateRadius, outerRadius);
                             }
@@ -298,13 +298,13 @@ export class wallOfFire extends baseSpellClass {
                         const temp = templatePointA;
                         templatePointA = templatePointB;
                         templatePointB = temp;
-                    } else if (templatePointA.x == templatePointB.x) {
+                    } else if (templatePointA.x === templatePointB.x) {
                         if (templatePointA.y > templatePointB.y) {
                             const temp = templatePointA;
                             templatePointA = templatePointB;
                             templatePointB = temp;
                         }
-                    } else if (templatePointA.y == templatePointB.y) {
+                    } else if (templatePointA.y === templatePointB.y) {
                         if (templatePointA.x > templatePointB.x) {
                             const temp = templatePointA;
                             templatePointA = templatePointB;
@@ -327,9 +327,9 @@ export class wallOfFire extends baseSpellClass {
                             const inRange = utilFunctions.isPointNearLine(templatePointA, templatePointB, currGrid, (aseData.range / 5) * grid);
                             if (inRange) {
                                 let isOnSide = false;
-                                if (sideToCheck == 'bottom' || sideToCheck == 'left') {
+                                if (sideToCheck === 'bottom' || sideToCheck === 'left') {
                                     isOnSide = utilFunctions.isPointOnLeft(templatePointA, templatePointB, currGrid);
-                                } else if (sideToCheck == 'top' || sideToCheck == 'right') {
+                                } else if (sideToCheck === 'top' || sideToCheck === 'right') {
                                     isOnSide = utilFunctions.isPointOnLeft(templatePointB, templatePointA, currGrid);
                                 }
                                 if (isOnSide) {
@@ -362,7 +362,7 @@ export class wallOfFire extends baseSpellClass {
 
         if ((!updateData.x && !updateData.y)) return;
         const token = tokenDocument;
-        const grid = canvas?.scene?.data.grid;
+        const grid = canvas?.scene?.grid?.size;
         if (!grid) return false;
 
         const oldPos = { x: tokenDocument.data.x, y: tokenDocument.data.y };
@@ -372,7 +372,7 @@ export class wallOfFire extends baseSpellClass {
         const movementRay = new Ray(oldPos, newPos);
 
         const templates = Array.from(canvas?.scene?.templates ?? {});
-        if (templates.length == 0) return;
+        if (templates.length === 0) return;
         let templateDocument = {};
 
         let wallsTouched = token.getFlag("advancedspelleffects", "wallTouchedData.wallsTouched") ?? [];
@@ -411,7 +411,7 @@ export class wallOfFire extends baseSpellClass {
                     }
                     let previousContains = templateDetails.shape?.contains(oldCurrGrid.x, oldCurrGrid.y);
                     let contains = templateDetails.shape?.contains(currGrid.x, currGrid.y);
-                    if (templateData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                    if (templateData.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
                         previousContains = false;
                         contains = false;
                     }
@@ -427,7 +427,7 @@ export class wallOfFire extends baseSpellClass {
                         };
                         //console.log("Drag Coord Old: ", dragCoordOld);
                         //console.log("Drag Coord New: ", dragCoordNew);
-                        if (templateData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                        if (templateData.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
                             crossed = utilFunctions.lineCrossesCircle(dragCoordOld, dragCoordNew, templatePointA, (templateDetails.distance / 5) * grid);
                         } else {
@@ -530,7 +530,7 @@ export class wallOfFire extends baseSpellClass {
             .file(wallEffectData.wallSpellDmgSound)
             .delay(Number(wallEffectData.wallSpellDmgSoundDelay) ?? 0)
             .volume(wallEffectData.wallSpellDmgVolume ?? 0.5)
-            .playIf(wallEffectData.wallSpellDmgSound && wallEffectData.wallSpellDmgSound != "")
+            .playIf(wallEffectData.wallSpellDmgSound && wallEffectData.wallSpellDmgSound !== "")
             .effect()
             .file(`jb2a.impact.004.${wallEffectData?.fireImpactColor ?? 'orange'}`)
             .attachTo(token)
@@ -561,7 +561,7 @@ export class wallOfFire extends baseSpellClass {
         for (let i = 0; i < tokens.length; i++) {
             tokenDocument = tokens[i].document;
             wallsTouched = tokenDocument.getFlag("advancedspelleffects", "wallTouchedData.wallsTouched");
-            if (!wallsTouched || wallsTouched.length == 0) continue;
+            if (!wallsTouched || wallsTouched.length === 0) continue;
             wallsTouched = wallsTouched.filter(wallId => !wsTemplateIds.includes(wallId));
             await tokenDocument.setFlag("advancedspelleffects", "wallTouchedData.wallsTouched", wallsTouched);
         }
@@ -571,7 +571,7 @@ export class wallOfFire extends baseSpellClass {
         const wallData = templateDocument?.data;
         if (!wallData) return;
         let buttonDialogData;
-        if (wallData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+        if (wallData.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
             buttonDialogData = {
                 title: "Pick dome/ring/sphere damaging side",
                 buttons: [
@@ -587,7 +587,7 @@ export class wallOfFire extends baseSpellClass {
             };
         } else {
             const direction = wallData.direction;
-            if ((direction == 0 || direction == 180)) {
+            if ((direction === 0 || direction === 180)) {
                 buttonDialogData = {
                     title: "Pick wall damaging side",
                     buttons: [
@@ -629,7 +629,7 @@ export class wallOfFire extends baseSpellClass {
         if (!wallData) return;
         const wallEffectData = templateDocument.getFlag('advancedspelleffects', 'wallEffectData');
         console.log("ASE WALL OF FIRE - handleDamage: wallEffectData: ", wallEffectData);
-        const grid = canvas?.scene?.data.grid;
+        const grid = canvas?.scene?.grid?.size;
         if (!grid) return false;
         const damageOnCast = wallData.damageOnCast;
         const damageType = wallData.damageType;
@@ -689,23 +689,23 @@ export class wallOfFire extends baseSpellClass {
                     }
                 };
                 const damageRollItemName = game.i18n.localize('ASE.WallOfFireDamageItem');
-                let castItemDamage = wallItem.data.data.damage;
+                let castItemDamage = wallItem.system.damage;
                 updates.embedded.Item[activationItemName] = {
                     "type": "spell",
                     "img": wallItem.img,
-                    "data": {
+                    "system": {
                         "ability": "",
                         "actionType": "save",
                         "activation": { "type": "action", "cost": 1, "condition": "" },
                         "damage": castItemDamage,
-                        "scaling": wallItem.data.data.scaling,
-                        "level": wallItem.data.data.level,
-                        "save": wallItem.data.data.save,
+                        "scaling": wallItem.system.scaling,
+                        "level": wallItem.system.level,
+                        "save": wallItem.system.save,
                         "preparation": { "mode": 'atwill', "prepared": true },
                         "range": { "value": null, "long": null, "units": "" },
                         "school": "evo",
                         "description": {
-                            "value": wallItem.data.data.description.value,
+                            "value": wallItem.system.description.value,
                         }
                     },
                     "flags": {
@@ -731,7 +731,7 @@ export class wallOfFire extends baseSpellClass {
                 .file(aseData.flags.wallSpellSound)
                 .delay(Number(aseData.flags.wallSpellSoundDelay) ?? 0)
                 .volume(aseData.flags.wallSpellVolume ?? 0.5)
-                .playIf(aseData.flags.wallSpellSound && aseData.flags.wallSpellSound != "")
+                .playIf(aseData.flags.wallSpellSound && aseData.flags.wallSpellSound !== "")
                 .effect(aseData.texture)
                 .attachTo(template)
                 .scaleToObject()
@@ -748,7 +748,7 @@ export class wallOfFire extends baseSpellClass {
                 .file(aseData.flags.wallSpellSound)
                 .delay(Number(aseData.flags.wallSpellSoundDelay) ?? 0)
                 .volume(aseData.flags.wallSpellVolume ?? 0.5)
-                .playIf(aseData.flags.wallSpellSound && aseData.flags.wallSpellSound != "")
+                .playIf(aseData.flags.wallSpellSound && aseData.flags.wallSpellSound !== "")
                 .effect(aseData.texture)
                 .attachTo(template)
                 .scaleToObject()
@@ -770,7 +770,7 @@ export class wallOfFire extends baseSpellClass {
                 .file(aseData.flags.wallSpellSound)
                 .delay(Number(aseData.flags.wallSpellSoundDelay) ?? 0)
                 .volume(aseData.flags.wallSpellVolume ?? 0.5)
-                .playIf(aseData.flags.wallSpellSound && aseData.flags.wallSpellSound != "")
+                .playIf(aseData.flags.wallSpellSound && aseData.flags.wallSpellSound !== "")
                 .effect(aseData.texture)
                 .attachTo(template)
                 .stretchTo(template, { attachTo: true, onlyX: true })

@@ -13,12 +13,7 @@ export class darkness {
     }
 
     static async _deleteTile(tileD) {
-        let walls = [];
-        let wallDocuments = [];
-        walls = await Tagger.getByTag([`DarknessWall-${tileD.id}`]);
-        walls.forEach((wall) => {
-            wallDocuments.push(wall.id);
-        });
+        let wallDocuments = Tagger.getByTag(`DarknessWall-${tileD.id}`).map(w => w.id);
         //console.log("Deleting walls: " + wallDocuments);
         if (canvas.scene.getEmbeddedDocument("Wall", wallDocuments[0])) {
             await canvas.scene.deleteEmbeddedDocuments("Wall", wallDocuments);
@@ -82,8 +77,8 @@ export class darkness {
             let placedY = templateData.y;
             let wallPoints = [];
             let walls = [];
-            tileWidth = (templateData.width * canvas.grid.size);
-            tileHeight = (templateData.width * canvas.grid.size);
+            tileWidth = (templateData.radius);
+            tileHeight = (templateData.radius);
 
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);

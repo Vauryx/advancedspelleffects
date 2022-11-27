@@ -11,7 +11,7 @@
     console.log("Sound Settings: spellEffect: ", $spellEffect);
     let soundPaths = {};
     $spellEffect.settings.soundOptions.forEach(soundOption => {
-        if(soundOption.type == 'fileInput'){
+        if(soundOption.type === 'fileInput'){
             soundPaths[soundOption.flagName] = $spellEffect.flagData[soundOption.flagName];
         }
     });
@@ -40,17 +40,17 @@
                     <td>
                         <label for="{setting.flagName}">{setting.label}</label>
                     </td>
-                        {#if setting.type == "numberInput"}
+                        {#if setting.type === "numberInput"}
                             <td>
                                 <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
                             </td>
                         {/if}
-                        {#if setting.type == "checkbox"}
+                        {#if setting.type === "checkbox"}
                             <td>
                                 <input type="checkbox" id={setting.flagName} bind:checked={$spellEffect.flagData[setting.flagName]}/>
                             </td>
                         {/if}
-                        {#if setting.type == "dropdown"}
+                        {#if setting.type === "dropdown"}
                             <td>
                                 <select id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}>
                                     {#each setting.options as option}
@@ -59,12 +59,12 @@
                                 </select>
                             </td>
                         {/if}
-                        {#if setting.type == "textInput"}
+                        {#if setting.type === "textInput"}
                             <td>
                                 <input type="text" id={setting.flagName} bind:value={$spellEffect.flagData[setting.flagName]}/>
                             </td>
                         {/if}
-                        {#if setting.type == "rangeInput"}
+                        {#if setting.type === "rangeInput"}
                             <td colspan="2">
                                 <output style="font-weight: bold;">{$spellEffect.flagData[setting.flagName]}</output>
                                 <input type="range" min="{setting.min}" max="{setting.max}"
@@ -73,7 +73,7 @@
                                     id="{setting.flagName}" bind:value={$spellEffect.flagData[setting.flagName]}>
                             </td>
                         {/if}
-                        {#if setting.type == 'fileInput'}
+                        {#if setting.type === 'fileInput'}
                             <td>
                                 <input type="text" class="files" id="{setting.flagName}"
                                     bind:value={soundPaths[setting.flagName]}>

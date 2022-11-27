@@ -45,7 +45,7 @@ export class fogCloud {
         let caster = await canvas.tokens.get(midiData.tokenId);
         let casterActor = caster.actor;
         let cloudSize;
-        if (aseFlags.scaleWithLevel == undefined || aseFlags.scaleWithLevel) {
+        if (aseFlags.scaleWithLevel === undefined || aseFlags.scaleWithLevel) {
             cloudSize = ((Number(aseFlags.fogCloudRadius ?? 20) / 2.5) * itemLevel);
         }
         else {

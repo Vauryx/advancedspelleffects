@@ -7,22 +7,22 @@ export async function AnimateDeadSequence(effectSettings, token, summonTokenData
     const colorA = effectSettings.effectAColor ?? 'green';
     const soundA = effectSettings.effectASound ?? "";
     const soundADelay = Number(effectSettings.effectASoundDelay) ?? 0;
-    const soundAVolume = effectSettings.effectASoundVolume == "" ? 1 : Number(effectSettings.effectASoundVolume);
+    const soundAVolume = effectSettings.effectASoundVolume === "" ? 1 : Number(effectSettings.effectASoundVolume);
 
     const colorB = effectSettings.effectBColor;
     const soundB = effectSettings.effectBSound ?? "";
     const soundBDelay = Number(effectSettings.effectBSoundDelay) ?? 0;
-    const soundBVolume = effectSettings.effectBSoundVolume == "" ? 1 : Number(effectSettings.effectBSoundVolume);
+    const soundBVolume = effectSettings.effectBSoundVolume === "" ? 1 : Number(effectSettings.effectBSoundVolume);
 
     const schoolName = effectSettings.magicSchool;
     const schoolColor = effectSettings.magicSchoolColor;
     const schoolSound = effectSettings.magicSchoolSound ?? "";
     const SchoolSoundDelay = Number(effectSettings.magicSchoolSoundDelay) ?? 0;
-    const schoolVolume = effectSettings.magicSchoolVolume == "" ? 1 : Number(effectSettings.magicSchoolVolume);
+    const schoolVolume = effectSettings.magicSchoolVolume === "" ? 1 : Number(effectSettings.magicSchoolVolume);
 
     const schoolSoundOutro = effectSettings.magicSchoolSoundOutro ?? "";
     const schoolSoundDelayOutro = Number(effectSettings.magicSchoolSoundDelayOutro) ?? 0;
-    const schoolVolumeOutro = effectSettings.magicSchoolVolumeOutro == "" ? 1 : Number(effectSettings.magicSchoolVolumeOutro);
+    const schoolVolumeOutro = effectSettings.magicSchoolVolumeOutro === "" ? 1 : Number(effectSettings.magicSchoolVolumeOutro);
 
 
     // console.log("Corpse to Mutate: ", corpseDoc);
@@ -38,7 +38,7 @@ export async function AnimateDeadSequence(effectSettings, token, summonTokenData
                         .file(schoolSound)
                         .delay(SchoolSoundDelay)
                         .volume(schoolVolume)
-                        .playIf(schoolSound != "")
+                        .playIf(schoolSound !== "")
                         .effect()
                         .file(portalAnimIntro)
                         .atLocation(animLoc)
@@ -57,7 +57,7 @@ export async function AnimateDeadSequence(effectSettings, token, summonTokenData
                         .file(soundA)
                         .delay(soundADelay)
                         .volume(soundAVolume)
-                        .playIf(soundA != "")
+                        .playIf(soundA !== "")
                         .effect()
                         .file(effectAAnim)
                         .atLocation(animLoc)
@@ -72,7 +72,7 @@ export async function AnimateDeadSequence(effectSettings, token, summonTokenData
                         .file(soundB)
                         .delay(soundBDelay)
                         .volume(soundBVolume)
-                        .playIf(soundB != "")
+                        .playIf(soundB !== "")
                         .effect()
                         .file(effectBAnim)
                         .atLocation(animLoc)
@@ -84,7 +84,7 @@ export async function AnimateDeadSequence(effectSettings, token, summonTokenData
                         .thenDo(async () => {
                             try {
                                 let corpseDoc = token.document;
-                                let summonActorData = game.actors.get(summonTokenData.actorId).data.toObject();
+                                let summonActorData = game.actors.get(summonTokenData.actorId).toObject();
                                 //delete summonActorData.items;
                                 //delete summonActorData.effects;
                                 delete summonActorData._id;
@@ -104,7 +104,7 @@ export async function AnimateDeadSequence(effectSettings, token, summonTokenData
                         .file(schoolSoundOutro)
                         .delay(schoolSoundDelayOutro)
                         .volume(schoolVolumeOutro)
-                        .playIf(schoolSoundOutro != "")
+                        .playIf(schoolSoundOutro !== "")
                         .effect()
                         .file(portalAnimOutro)
                         .atLocation(animLoc)

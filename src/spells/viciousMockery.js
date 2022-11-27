@@ -1,4 +1,3 @@
-import { aseSocket } from "../aseSockets.js";
 import * as utilFunctions from "../utilityFunctions.js";
 
 export class viciousMockery {
@@ -60,16 +59,14 @@ export class viciousMockery {
 
         for (let i = 0; i < utilFunctions.getRandomInt(5, 8); i++) {
             viciousMockerySeq.effect()
-                .moveTowards(target, { ease: "easeInOutElastic" })
+                .moveTowards(target, { ease: "easeInOutElastic", randomOffset: true })
                 .moveSpeed(distance / 2.5)
                 .atLocation(caster)
                 .text(this.makeCussWord(), textOptions)
+                .scale(0.5)
+                .scaleIn(0, 1200, { ease: "easeInOutCubic" })
+                .scaleOut(0, 600, { ease: "easeInOutCubic" })
                 .animateProperty("sprite", "rotation", { from: 0, to: 720, duration: 1200, ease: "easeInOutCubic" })
-                .animateProperty("sprite", "scale.x", { from: 0, to: 1, duration: 1200, ease: "easeInOutCubic" })
-                .animateProperty("sprite", "scale.y", { from: 0, to: 1, duration: 1200, ease: "easeInOutCubic" })
-                .randomOffset()
-                .animateProperty("sprite", "scale.x", { from: 1, to: 0, delay: 1250, duration: 600, ease: "easeInOutCubic" })
-                .animateProperty("sprite", "scale.y", { from: 1, to: 0, delay: 1250, duration: 600, ease: "easeInOutCubic" })
                 .filter("Glow", { color: glowColor, distance: glowDistance, outerStrength: glowOuterStrength, innerStrength: glowInnerStrength })
                 .wait(utilFunctions.getRandomInt(50, 75))
         }
@@ -77,12 +74,11 @@ export class viciousMockery {
     }
 
     makeCussWord() {
-        let cussWordList = [];
+        const cussWordList = [];
         for (let i = 0; i < utilFunctions.getRandomInt(4, 10); i++) {
             cussWordList.push(this.cussVault[utilFunctions.getRandomInt(0, this.cussVault.length - 1)]);
         }
-        let cussWord = cussWordList.join("");
-        return cussWord;
+        return cussWordList.join("");
     }
 
     static async getRequiredSettings(currFlags) {

@@ -29,7 +29,7 @@ export class ASEHandler {
         // check if the spell being rolled is marked as an ASE spell
         let item = data.item;
         //await versionMigration.handle(item);
-        let aseFlags = item?.data?.flags?.advancedspelleffects ?? false;
+        let aseFlags = item?.flags?.advancedspelleffects ?? false;
         if (!aseFlags.enableASE) return;
 
         // check for required modules
@@ -92,7 +92,7 @@ export class ASEHandler {
                 await animateDead.rise(data);
                 return;
             case game.i18n.localize('ASE.WitchBolt'):
-                if (data.flavor != game.i18n.localize("ASE.WitchBoltDamageFlavor") || !data.flavor) {
+                if (data.flavor !== game.i18n.localize("ASE.WitchBoltDamageFlavor") || !data.flavor) {
                     console.log('Casting Witch Bolt!', data.flavor);
                     await witchBolt.cast(data);
                 }
@@ -102,7 +102,7 @@ export class ASEHandler {
                 }
                 return;
             case game.i18n.localize('ASE.ActivateWitchBolt'):
-                if (data.flavor != game.i18n.localize("ASE.WitchBoltDamageFlavor") || !data.flavor) {
+                if (data.flavor !== game.i18n.localize("ASE.WitchBoltDamageFlavor") || !data.flavor) {
                     await witchBolt.activateBolt(data);
                 }
                 return;

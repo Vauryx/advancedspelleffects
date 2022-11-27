@@ -159,23 +159,23 @@ export class wallOfForce {
             }
         }
 
-        if (type == "sphere") {
+        if (type === "sphere") {
             templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.CIRCLE;
             templateData["distance"] = dimensions.radius;
-        } else if (type == "vertical") {
+        } else if (type === "vertical") {
             templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RAY;
             templateData["distance"] = dimensions.length;
-        } else if (type == "horizontal") {
+        } else if (type === "horizontal") {
             templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE;
             templateData["distance"] = Math.sqrt(Math.pow(dimensions.length, 2) + Math.pow(dimensions.width, 2));
             templateData["direction"] = 180 * Math.atan2(dimensions.length, dimensions.width) / Math.PI;
         }
-        if (type == "h-panels" || type == "v-panels") {
-            if (type == "h-panels") {
+        if (type === "h-panels" || type === "v-panels") {
+            if (type === "h-panels") {
                 templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE;
                 templateData["distance"] = Math.sqrt(Math.pow(dimensions.length, 2) + Math.pow(dimensions.width, 2));
                 templateData["direction"] = 180 * Math.atan2(dimensions.length, dimensions.width) / Math.PI;
-            } else if (type == "v-panels") {
+            } else if (type === "v-panels") {
                 templateData["t"] = CONST.MEASURED_TEMPLATE_TYPES.RAY;
                 templateData["distance"] = dimensions.length;
             }
@@ -289,7 +289,7 @@ export class wallOfForce {
         console.log("template: ", template);*/
 
         const gridSize = canvas.grid.h;
-        const previousTemplateData = template.data;
+        const previousTemplateData = template;
         let panelsRemaining = panelDiag.data.aseData.flags.wallOfForcePanelCount;
         //console.log("Panels Remaining: ", panelsRemaining);
 
@@ -312,18 +312,18 @@ export class wallOfForce {
 
         let updateTemplateLocation;
 
-        if (type == "h-panels") {
-            if (previousTemplateData.direction == 45) {
+        if (type === "h-panels") {
+            if (previousTemplateData.direction === 45) {
                 previousTemplateCenter = {
                     x: previousTemplateData.x + (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
                     y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
                 };
-            } else if (previousTemplateData.direction == 135) {
+            } else if (previousTemplateData.direction === 135) {
                 previousTemplateCenter = {
                     x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
                     y: previousTemplateData.y + (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
                 };
-            } else if (previousTemplateData.direction == 225) {
+            } else if (previousTemplateData.direction === 225) {
                 previousTemplateCenter = {
                     x: previousTemplateData.x - (((previousTemplateData.flags.advancedspelleffects.dimensions.length / 5) * canvas.grid.size)) / 2,
                     y: previousTemplateData.y - (((previousTemplateData.flags.advancedspelleffects.dimensions.width / 5) * canvas.grid.size)) / 2
@@ -336,7 +336,7 @@ export class wallOfForce {
 
 
 
-        } else if (type == "v-panels") {
+        } else if (type === "v-panels") {
 
             square = wallOfForce.sourceSquareV({ x: previousTemplateData.x, y: previousTemplateData.y },
                 previousTemplateData.distance, previousTemplateData.direction);
@@ -358,7 +358,7 @@ export class wallOfForce {
                 await warpgate.wait(100);
                 //console.log(displayTemplate);
                 if (!displayTemplate) return;
-                const verticalTemplate = displayTemplate.data.t == CONST.MEASURED_TEMPLATE_TYPES.RAY;
+                const verticalTemplate = displayTemplate.t === CONST.MEASURED_TEMPLATE_TYPES.RAY;
                 //console.log("Vertical Template:", verticalTemplate);
                 let ray;
                 let angle;
@@ -394,7 +394,7 @@ export class wallOfForce {
                     ray = new Ray(square, crosshairs);
                     angle = (ray.angle * 180 / Math.PI);
 
-                    if (angle == displayTemplate.data.direction) {
+                    if (angle === displayTemplate.direction) {
                         continue;
                     }
                     if (!displayTemplate) return;
@@ -428,7 +428,7 @@ export class wallOfForce {
                 }
             }
         }
-        if (type == "v-panels") {
+        if (type === "v-panels") {
             newFlags.flags.advancedspelleffects["wallOfForceWallNum"] = nextTemplateData.flags.advancedspelleffects["wallOfForceWallNum"]
         }
 
@@ -446,7 +446,7 @@ export class wallOfForce {
 
     static async _placeWalls(templateDocument, deleteOldWalls = false) {
 
-        if (templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) return;
+        if (templateDocument.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) return;
 
         if (deleteOldWalls) {
             const walls = Tagger.getByTag([`WallOfForce-Wall${templateDocument.id}`]).map(wall => wall.id);
@@ -459,7 +459,7 @@ export class wallOfForce {
 
         const walls = [];
 
-        if (templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+        if (templateDocument.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
             const placedX = template.x;
             const placedY = template.y;
@@ -527,7 +527,7 @@ export class wallOfForce {
 
     static _playEffects(aseData, template) {
 
-        if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+        if (template.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
             new Sequence()
                 .effect(aseData.texture)
@@ -539,7 +539,7 @@ export class wallOfForce {
                 .persist()
                 .play()
 
-        } else if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) {
+        } else if (template.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) {
 
             new Sequence()
                 .effect(aseData.texture)

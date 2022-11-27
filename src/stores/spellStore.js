@@ -35,16 +35,16 @@ export class SpellStore extends ArrayObjectStore {
          settings = await effect.getRequiredSettings();
          
          for (const [settingType, setting] of Object.entries(settings)) {
-            if(settingType == "summons"){
+            if(settingType === "summons"){
                flagData['summons'] = setting;
             }
-            if(settingType != 'summonOptions' && (settingType != 'allowInitialMidiCall' && settingType != 'requireDetails')) {
+            if(settingType !== 'summonOptions' && (settingType !== 'allowInitialMidiCall' && settingType !== 'requireDetails')) {
                //console.log("ASE: SPELLSTORE INIT: SETTING: ", setting, "SETTINGTYPE: ", settingType);
                setting.forEach(s => {
                   flagData[s.flagName] = s.flagValue;
                });
             }
-            if (settingType == 'allowInitialMidiCall'){
+            if (settingType === 'allowInitialMidiCall'){
                flagData['allowInitialMidiCall'] = setting;
             } 
          }
@@ -76,16 +76,16 @@ export class SpellStore extends ArrayObjectStore {
          settings = await effect.getRequiredSettings();
          
          for (const [settingType, setting] of Object.entries(settings)) {
-            if(settingType == "summons"){
+            if(settingType === "summons"){
                flagData['summons'] = setting;
             }
-            if(settingType != 'summonOptions' && (settingType != 'allowInitialMidiCall' && settingType != 'requireDetails')) {
+            if(settingType !== 'summonOptions' && (settingType !== 'allowInitialMidiCall' && settingType !== 'requireDetails')) {
                //console.log("ASE: SPELLSTORE INIT: SETTING: ", setting, "SETTINGTYPE: ", settingType);
                setting.forEach(s => {
                   flagData[s.flagName] = s.flagValue;
                });
             }
-            if (settingType == 'allowInitialMidiCall'){
+            if (settingType === 'allowInitialMidiCall'){
                flagData['allowInitialMidiCall'] = setting;
             }
          }
