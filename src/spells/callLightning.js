@@ -154,8 +154,8 @@ export class callLightning {
             console.log('itemUuid: ', itemUuid);
             let templateData = castTemplate;
 
-            const tileWidth = (templateData.width * canvas.grid.size);
-            const tileHeight = (templateData.width * canvas.grid.size);
+            const tileWidth = (templateData.size * canvas.grid.size);
+            const tileHeight = (templateData.size * canvas.grid.size);
             const tileX = templateData.x - (tileWidth / 2);
             const tileY = templateData.y - (tileHeight / 2);
 
@@ -209,7 +209,9 @@ export class callLightning {
     }
 
     static async getBoltTargets(stormTileId) {
+        //console.log("Getting Bolt Targets...", stormTileId);
         let stormCloudTile = canvas.scene.tiles.get(stormTileId);
+        //console.log("StormCloudTile: ", stormCloudTile);
         let crosshairsConfig = {
             size: 3,
             icon: "icons/magic/lightning/bolt-strike-blue.webp",
@@ -371,7 +373,7 @@ export class callLightning {
         let caster = canvas.tokens.get(currentCombatantId);
         if (!caster) return;
         if (!caster.actor.isOwner || (game.user.isGM && caster.actor.hasPlayerOwner)) return;
-        let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile === currentCombatantId);
+        let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.flags.advancedspelleffects?.stormCloudTile === currentCombatantId);
         //console.log("update hook fired...", stormCloudTiles);
         if (stormCloudTiles.length > 0) {
             //console.log("Detected Storm Cloud! Prompting for Bolt...");

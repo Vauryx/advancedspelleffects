@@ -315,13 +315,22 @@ export function isMidiActive() {
     return false;
 }
 
-export function getContainedCustom(tokenD, crosshairs) {
+export function getContainedCustom(token, crosshairs) {
+    //console.log("Token Name: ", token.document.name);
+    const tokenD = token.document;
     let tokenCenter = getCenter(tokenD, tokenD.width);
     let tokenCrosshairsDist = canvas.grid.measureDistance(tokenCenter, crosshairs);
-    let crosshairsDistance = crosshairs.data?.distance ?? crosshairs.distance;
-    //console.log(`Crosshairs distance: ${crosshairsDistance}`);
-    let distanceRequired = (crosshairsDistance - 2.5) + (2.5 * tokenD.width);
+    let crosshairsRadius = crosshairs.radius/canvas.grid.size;
+    let distanceRequired = (crosshairsRadius*2.5) + (tokenD.width*2.5);
+
+   /* if(tokenD.name === "Myrithok Auro") {
+        console.log("TokenD: ", tokenD);
+        console.log("Token Center: ", tokenCenter);
+        console.log("Token Crosshairs Distance: ", tokenCrosshairsDist);
+        console.log("Distance Required: ", distanceRequired);
+    }*/
     if ((tokenCrosshairsDist) < distanceRequired) {
+        console.log(`Token ${tokenD.name} is within range of crosshairs`);
         return true;
     }
     else {
@@ -348,7 +357,7 @@ export async function checkCrosshairs(crosshairs) {
                 new Sequence()
                     .effect()
                     .file(markerEffect)
-                    .atLocation(token, { offset: { y: 100 }})
+                    .atLocation(token, { offset: { y: -100 }})
                     .scale(0.5)
                     .mirrorY()
                     .persist()
@@ -366,7 +375,7 @@ export async function checkCrosshairs(crosshairs) {
 }
 
 export function cleanUpTemplateGridHighlights() {
-    const ASETemplates = canvas.scene?.templates.filter((template) => { return template.data.flags.advancedspelleffects }) ?? [];
+    const ASETemplates = canvas.scene?.templates.filter((template) => { return template.flags.advancedspelleffects }) ?? [];
     for (let template of ASETemplates) {
         const highlight = canvas.grid.getHighlightLayer(`Template.${template.id}`);
         if (highlight) {
