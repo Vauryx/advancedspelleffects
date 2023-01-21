@@ -67,6 +67,7 @@ export class midiHandler {
     }
     static async _preCheckSaves(workflow) {
         console.log(" --------  ASE: MIDI HANDLER: PRE CHECK SAVES: WORKFLOW -------- ", workflow);
+        console.log("WORKFLOW TARGETS PRE UPDATE: ", workflow.targets);
         const itemUUID = workflow.itemUuid;
         const item = await fromUuid(itemUUID);
         const spellEffect = item.getFlag("advancedspelleffects", "spellEffect");
@@ -83,13 +84,14 @@ export class midiHandler {
             if(targets.length === 0){
                 let newTargets = new Set();
                 newMidiData.targets.forEach(target => {
-                    newTargets.add(target);
+                    newTargets.add(target.object);
                 });
                 console.log("ASE: MIDI HANDLER: Cast Item Found! New Targets", newTargets);
                 workflow.targets = newTargets;
                 workflow.hitTargets = newTargets;
                 workflow.failedSaves = newTargets;
                 console.log("ASE: MIDI HANDLER: Cast Item Found! New Workflow", workflow);
+                console.log("WORKFLOW TARGETS POST UPDATE: ", workflow.targets);
             }
             return true;
         } else {
@@ -184,7 +186,7 @@ export class midiHandler {
                 iterateListKey = currentItemState.options.iterate;
                 currStateIndex = currentItemState.state - 1;
                 targetUuid = currentItemState.options[iterateListKey][currStateIndex];
-                target = await fromUuid(targetUuid);
+                target = await fromUuid(targetUuid).object;
             } else {
                 target = targets[0];
             }
