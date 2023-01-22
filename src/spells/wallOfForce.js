@@ -552,6 +552,7 @@ export class wallOfForce {
                     y: aseData.flags.wallOfForceSegmentSize / 10
                 })
                 .belowTokens()
+                .rotate(template.direction*-1)
                 .zIndex(-1000)
                 .persist()
                 .play()
