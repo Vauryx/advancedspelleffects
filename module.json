@@ -3,7 +3,7 @@
     "name": "advancedspelleffects",
     "title": "Advanced Spell Effects",
     "description": "",
-    "version": "0.9.!9.89",
+    "version": "0.9.!9.90",
     "library": "false",
     "manifestPlusVersion": "1.0.0",
     "minimumCoreVersion": "0.8.9",
@@ -39,9 +39,7 @@
         "setup.js"
     ],
     "scripts": [],
-    "styles": [
-        "style.css"
-    ],
+    "styles": [],
     "languages": [
         {
             "lang": "en",
@@ -56,7 +54,7 @@
     ],
     "url": "https://github.com/Vauryx/advancedspelleffects",
     "manifest": "https://raw.githubusercontent.com/Vauryx/advancedspelleffects/beta/module.json",
-    "download": "https://github.com/Vauryx/advancedspelleffects/releases/download/0.9.!9.89/module.zip",
+    "download": "https://github.com/Vauryx/advancedspelleffects/releases/download/0.9.!9.90/module.zip",
     "media": [
         {
             "type": "icon",
