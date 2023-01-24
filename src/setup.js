@@ -22,25 +22,6 @@ const aseModules = {
 Hooks.once('init', async function () {
   console.log("Registering ASE game settings...");
   game.ASESpellStateManager = new SpellStateMachine();
-  const debouncedReload = foundry.utils.debounce(() => { window.location.reload(); }, 100);
-  game.settings.register("advancedspelleffects", "overrideGridHighlight", {
-    name: "Enable ASE Grid Highlight Override",
-    hint: "This overrides the foundry default template behaviour and removes the grid highlighting for templates specifically placed by ASE spells. Other templates should function as normal.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true,
-    onChange: debouncedReload
-  });
-  game.settings.register("advancedspelleffects", "overrideTemplateBorder", {
-    name: "Enable ASE Template Border Override",
-    hint: "This overrides the foundry default template behaviour and removes the border for templates specifically placed by ASE spells. Other templates should function as normal.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true,
-    onChange: debouncedReload
-  });
 });
 
 //Setting up socketlib Functions to be run as GM
@@ -68,34 +49,9 @@ Hooks.once('ready', async function () {
     }
     Sequencer.registerEase("easeOutElasticCustom", easeOutElasticCustom);
   });
-  if (game.settings.get("advancedspelleffects", "overrideGridHighlight")) {
-    libWrapper.register('advancedspelleffects', "MeasuredTemplate.prototype.highlightGrid", _ASEGridHighlightWrapper, "WRAPPER");
-    utilFunctions.cleanUpTemplateGridHighlights();
-  }
-  if (game.settings.get("advancedspelleffects", "overrideTemplateBorder")) {
-    if (!game.modules.get("tokenmagic")?.active) {
-      libWrapper.register("advancedspelleffects", "MeasuredTemplate.prototype.render", _ASERemoveTemplateBorder, "WRAPPER");
-    } else {
-      ui.notifications.info("ASE Template Border Override disabled due to conflict with TokenMagicFX Module");
-    }
-  }
 
-  function _ASERemoveTemplateBorder(wrapped, ...args) {
-    wrapped(...args);
-    if (this?.flags?.advancedspelleffects) {
-      if (!this?.flags?.advancedspelleffects?.placed) return;
-      this.template.alpha = 0;
-    }
-  }
 
-  function _ASEGridHighlightWrapper(wrapped, ...args) {
-    wrapped(...args);
-    if (!this?.flags?.advancedspelleffects) return;
-    const highlight = canvas.grid.getHighlightLayer(`Template.${this.id}`);
-    if (highlight) {
-      highlight.clear();
-    }
-  }
+
 
   if (!game.user.isGM) return;
 

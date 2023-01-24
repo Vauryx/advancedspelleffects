@@ -63,6 +63,7 @@ export function checkModules() {
 }
 
 export function getDistanceClassic(pointA, pointB) {
+    console.log("getDistanceClassic: ", "pointA: ", pointA, "pointB: ", pointB);
     return Math.sqrt(Math.pow((pointA.x - pointB.x), 2) + Math.pow((pointA.y - pointB.y), 2));
 }
 
@@ -122,6 +123,7 @@ export function capitalizeFirstLetter(string) {
 }
 
 export function getCenter(pos, width = 1) {
+    console.log(`getCenter: pos.x: ${pos.x}, pos.y: ${pos.y}, width: ${width}`);
     return ({ x: pos.x + ((canvas.grid.size / 2) * width), y: pos.y + ((canvas.grid.size / 2) * width) });
 }
 

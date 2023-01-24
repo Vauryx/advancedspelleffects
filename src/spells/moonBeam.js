@@ -46,11 +46,12 @@ export class moonBeam {
         //iterate over every moonbeam tile
         for (let i = 0; i < moonbeamTiles.length; i++) {
             let moonbeamTile = moonbeamTiles[i];
+            console.log('moonbeamTile: ', moonbeamTile);
             let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile);
-            //console.log('Moonbeam tile center: ', moonbeamTileCenter);
+            console.log('Moonbeam tile center: ', moonbeamTileCenter);
             let targetToBeamDist = utilFunctions.getDistanceClassic(newTokenPosition, moonbeamTileCenter);
-            //console.log('target to beam dist: ', targetToBeamDist);
-            //console.log('Required Distance: ', (((tokenDocument.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2)));
+            console.log('target to beam dist: ', targetToBeamDist);
+            console.log('Required Distance: ', (((tokenDocument.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2)));
             if (targetToBeamDist < (((tokenDocument.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
                 //check if tile exists in inTiles which is an array of tiles
                 if (inTiles.includes(moonbeamTile.id)) {
@@ -82,8 +83,10 @@ export class moonBeam {
         //console.log("Updating Combat for ASE Moonbeam...");
         //console.log(combat);
         const combatantToken = canvas.tokens.get(combat.current.tokenId);
+        console.log('Combatant Token: ', combatantToken);
         const combatantActor = combatantToken.actor;
-        const combatantPosition = utilFunctions.getCenter(combatantToken, combatantToken.width);
+        const combatantWidth = combatantToken.document ? combatantToken.document.width : combatantToken.width;
+        const combatantPosition = utilFunctions.getCenter(combatantToken, combatantWidth);
 
         let inTiles = [];
         //iterate over every moonbeam tile
@@ -95,7 +98,10 @@ export class moonBeam {
             let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile);
             let targetToBeamDist = utilFunctions.getDistanceClassic(combatantPosition, moonbeamTileCenter);
             //console.log('target to beam dist: ', targetToBeamDist);
-            if (targetToBeamDist < (((combatantToken.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
+            console.log("Combatant Token: ", combatantToken.name);
+            console.log('target to beam dist UPDATE TOKEN: ', targetToBeamDist);
+            console.log('Required Distance UPDATE TOKEN: ', (((combatantWidth * canvas.grid.size) / 2) + (moonbeamTile.width / 2)));
+            if (targetToBeamDist < (((combatantWidth * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
                 //check if tile exists in inTiles which is an array of tiles
                 console.log(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
                 ui.notifications.info(game.i18n.format("ASE.StartingTurnInMoonbeam", { name: combatantToken.name }));
@@ -227,6 +233,7 @@ export class moonBeam {
             .scale(0.5)
             .waitUntilFinished(-500)
             .thenDo(async () => {
+                console.log('Fading In Tile...');
                 await aseSocket.executeAsGM("fadeTile", { type: "fadeIn", duration: 500 }, moonbeamTileId);
             })
         await beamSeq.play();
@@ -248,8 +255,12 @@ export class moonBeam {
             let tileX;
             let tileY;
 
-            tileWidth = (templateData.width * canvas.grid.size);
-            tileHeight = (templateData.width * canvas.grid.size);
+            tileWidth = (templateData.radius);
+            tileHeight = (templateData.radius);
+
+            console.log('Template Data: ', templateData)
+            console.log('Tile Width: ', tileWidth);
+            console.log('Tile Height: ', tileHeight);
 
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
