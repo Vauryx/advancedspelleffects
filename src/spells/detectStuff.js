@@ -218,7 +218,7 @@ export class detectStuff {
     static async handleConcentration(casterActor, casterToken, effectOptions) {
         await aseSocket.executeAsGM("removeFlag", casterToken.id, "detectItemId");
         let users = [];
-        for (const user in casterActor.data.permission) {
+        for (const user in casterActor.permission) {
             if (user === "default") continue;
             if (game.users.get(user)) {
                 users.push(user);
@@ -263,6 +263,7 @@ export class detectStuff {
         const taggedObjects = Tagger.getByTag("ASE-detect", { ignore: [casterToken], caseInsensitive: true });
 
         let detectedObjectsIDs = casterToken.document.getFlag("advancedspelleffects", "objectsDetected");
+        console.log("detectedObjectsIDs", detectedObjectsIDs);
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-detectMagicAura`, object: casterToken });
         new Sequence("Advanced Spell Effects")
             .effect()
@@ -279,8 +280,8 @@ export class detectStuff {
                 || canvas.scene.lights.get(id)
                 || game.scenes.get(id)
                 || game.users.get(id);
-            let pointA = { x: casterToken.data.x + (canvas.grid.size / 2), y: casterToken.data.y + (canvas.grid.size / 2) };
-            let pointB = { x: object.data.x + (canvas.grid.size / 2), y: object.data.y + (canvas.grid.size / 2) }
+            let pointA = { x: casterToken.x + (canvas.grid.size / 2), y: casterToken.y + (canvas.grid.size / 2) };
+            let pointB = { x: object.x + (canvas.grid.size / 2), y: object.y + (canvas.grid.size / 2) }
             let distance = utilFunctions.measureDistance(pointA, pointB);
             if (object) {
                 if (preset === 'magic') {
@@ -321,7 +322,7 @@ export class detectStuff {
 
         //console.log("update token: Item: ", item);
         if (tokenDocument.actor.effects.filter(async (effect) => {
-            let effectItem = await fromUuid(effect.data.origin);
+            let effectItem = await fromUuid(effect.origin);
             return effectItem.name === item.name;
         }).length === 0) {
             return;
@@ -329,10 +330,10 @@ export class detectStuff {
         //console.log("Found relevant effect");
         const effectOptions = item.getFlag('advancedspelleffects', 'effectOptions');
         let newPos = { x: 0, y: 0 };
-        newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
-        newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
+        newPos.x = (updateData.x) ? updateData.x : tokenDocument.x;
+        newPos.y = (updateData.y) ? updateData.y : tokenDocument.y;
         let users = [];
-        for (const user in tokenDocument.actor.data.permission) {
+        for (const user in tokenDocument.actor.permission) {
             if (user === "default") continue;
             if (game.users.get(user)) {
                 users.push(user);
@@ -381,7 +382,7 @@ export class detectStuff {
         let detectedObjects = taggedObjects.map(obj => {
             let returnObj = {};
             let pointA = { x: newPos.x + (canvas.grid.size / 2), y: newPos.y + (canvas.grid.size / 2) };
-            let pointB = { x: obj.data.x + (canvas.grid.size / 2), y: obj.data.y + (canvas.grid.size / 2) };
+            let pointB = { x: obj.x + (canvas.grid.size / 2), y: obj.y + (canvas.grid.size / 2) };
             let distance = utilFunctions.measureDistance(pointA, pointB);
             returnObj["delay"] = 0;
             returnObj["distance"] = distance;
@@ -444,9 +445,10 @@ export class detectStuff {
         let detectedObjectsInRange = detectedObjects.filter(o => o.distance <= effectOptions.range);
         let detectedObjectsIDs = tokenDocument.getFlag("advancedspelleffects", "objectsDetected");
 
-        //console.log("Detected Objects: ", detectedObjects);
-        //console.log("Detected Objects Out of Range: ", detectedObjectsOutOfRange);
-       // console.log("Detected Objects In Range: ", detectedObjectsInRange);
+        console.log("Detected Objects: ", detectedObjects);
+        console.log("Detected Objects Out of Range: ", detectedObjectsOutOfRange);
+        console.log("Detected Objects In Range: ", detectedObjectsInRange);
+        console.log("Detected Objects IDs: ", detectedObjectsIDs);
         //handle out of range objects
         for await (let detectedObj of detectedObjectsOutOfRange) {
             if (preset === 'magic') {
@@ -512,11 +514,14 @@ export class detectStuff {
         }
         //add id of each detectedObjectInRange to detectedObjectsIDs if not already in it
         for (let detectedObj of detectedObjectsInRange) {
-            if (detectedObjectsIDs?.length > 0) {
-                if (!detectedObjectsIDs.includes(detectedObj.obj.id)) {
-                    detectedObjectsIDs.push(detectedObj.obj.id);
-                }
+            //check if detectObjectIDs is an array
+            if (!Array.isArray(detectedObjectsIDs)) {
+                detectedObjectsIDs = [];
             }
+            if (!detectedObjectsIDs.includes(detectedObj.obj.id)) {
+                detectedObjectsIDs.push(detectedObj.obj.id);
+            }
+            
         }
         await aseSocket.executeAsGM("updateFlag", tokenDocument.id, "objectsDetected", detectedObjectsIDs);
 
