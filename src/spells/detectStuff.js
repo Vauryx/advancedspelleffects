@@ -148,7 +148,7 @@ export class detectStuff {
             .playIf(waveSound)
             .effect(`jb2a.detect_magic.circle.${waveColor}`)
             .attachTo(this.caster)
-            .belowTiles()
+            .belowTokens()
             .effect()
             .file(`jb2a.magic_signs.circle.02.divination.intro.${auraColor}`)
             .attachTo(this.caster)
