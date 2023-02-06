@@ -191,9 +191,9 @@ export class chainLightning {
         const spellDetails = {
             actionType: "save",
             target : {
-                type: "creature",
+                type: "",
                 units: "",
-                value: 1,
+                value: null,
                 width: null,
             }
         };

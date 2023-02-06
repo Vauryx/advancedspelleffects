@@ -100,10 +100,10 @@ export class fogCloud {
 
             let wall_number = aseFlags.wallNumber * spellLevel;
             let wall_angles = 2 * Math.PI / wall_number
-            tileWidth = (templateData.width * canvas.grid.size) + (canvas.grid.size / 2);
-            tileHeight = (templateData.width * canvas.grid.size) + (canvas.grid.size / 2);
+            tileWidth = (templateData.distance * canvas.grid.size) + (canvas.grid.size / 2);
+            tileHeight =tileWidth;
 
-            let outerCircleRadius = (templateData.width * canvas.grid.size) / 2;
+            let outerCircleRadius = (templateData.distance * canvas.grid.size) / 2;
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
             let data = [{
@@ -126,6 +126,7 @@ export class fogCloud {
                 z: 100,
                 flags: { tagger: { tags: [`FogCloudTile-${casterId}`] }, advancedspelleffects: { fogCloudWallNum: wall_number } }
             }]
+            console.log("Tile Data: ", data);
             let createdTiles = await aseSocket.executeAsGM("placeTiles", data);
             let tileId = createdTiles[0].id ?? createdTiles[0]._id;
             new Sequence("Advanced Spell Effects")
@@ -158,7 +159,7 @@ export class fogCloud {
                     })
                 }
             }
-
+            console.log("Walls: ", walls);
             await aseSocket.executeAsGM("placeWalls", walls);
         }
     }

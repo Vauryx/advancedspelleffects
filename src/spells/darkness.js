@@ -68,7 +68,7 @@ export class darkness {
         //await changeSelfItemMacro();
 
         async function placeCloudAsTile(templateData, casterId, soundOptions) {
-            // console.log("Template given: ", template);
+             console.log("Template Data: ", templateData);
             let tileWidth;
             let tileHeight;
             let tileX;
@@ -77,8 +77,8 @@ export class darkness {
             let placedY = templateData.y;
             let wallPoints = [];
             let walls = [];
-            tileWidth = (templateData.radius);
-            tileHeight = (templateData.radius);
+            tileWidth = (templateData.distance * canvas.grid.size) + (canvas.grid.size / 2);
+            tileHeight = tileWidth;
 
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);

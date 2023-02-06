@@ -88,6 +88,8 @@ async function removeFlag(objectId, flag) {
 }
 
 async function placeTiles(tileData) {
+    console.log("Placing Tiles...");
+    console.log(tileData);
     return (await canvas.scene.createEmbeddedDocuments("Tile", tileData));
 }
 
