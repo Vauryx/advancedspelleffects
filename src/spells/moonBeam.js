@@ -216,7 +216,7 @@ export class moonBeam {
             aseEffectOptions['rollInfo']['itemUUID'] = moonbeamCastItem.uuid;
         }
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.MoveMoonbeam") }));
-
+        
         const moonbeamTile = await placeBeam(moonbeamLoc, casterToken.id, beamLoop, aseEffectOptions);
         //console.log(moonbeamTile);
         const moonbeamTileId = moonbeamTile.id ?? moonbeamTile._id;
@@ -250,13 +250,14 @@ export class moonBeam {
         }
 
         async function placeBeam(templateData, tokenId, beamAnim, effectOptions) {
+            //console.log('Placing Beam...', templateData, tokenId, beamAnim, effectOptions);
             let tileWidth;
             let tileHeight;
             let tileX;
             let tileY;
 
-            tileWidth = (templateData.radius);
-            tileHeight = (templateData.radius);
+            tileWidth = (templateData.distance * canvas.grid.size);
+            tileHeight = tileWidth;
 
             console.log('Template Data: ', templateData)
             console.log('Tile Width: ', tileWidth);
