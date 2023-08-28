@@ -67,13 +67,12 @@ export class MissileDialog extends FormApplication {
             .volume(markerSoundVolume)
             .playIf(markerSound != "")
             .effect()
-            .attachTo(target, { followRotation: false })
+            .attachTo(target, { followRotation: false, offset: offset })
             .filter("ColorMatrix", { hue: markerAnimHue, saturate: markerAnimSaturation })
             .locally()
             .file(markerAnim)
             .scale(0.01)
             .name(`missile-target-${target.id}-${currMissile}`)
-            .offset(offset)
             .duration(300000)
             .animateProperty("sprite", "scale.x", { from: 0.01, to: baseScale, delay: 200, duration: 700, ease: "easeOutBounce" })
             .animateProperty("sprite", "scale.y", { from: 0.01, to: baseScale, duration: 900, ease: "easeOutBounce" })
@@ -113,7 +112,7 @@ export class MissileDialog extends FormApplication {
         let attackType = parsedEventData.altKey ? 'kh' : (parsedEventData.ctrlKey ? 'kl' : '');
         //console.log('Mouse Click Data: ', parsedEventData);
         let token = canvas.tokens.placeables.filter(token => {
-            const mouse = canvas.app.renderer.plugins.interaction.mouse;
+            const mouse = utilFunctions.getCanvasMouse();
             const mouseLocal = mouse.getLocalPosition(token);
             //console.log('Mouse Local: ', mouseLocal);
             return mouseLocal.x >= 0 && mouseLocal.x <= token.hitArea.width
