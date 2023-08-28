@@ -14,7 +14,7 @@ export class thunderStep {
         const itemD = actorD.items.getName(midiData.item.name);
         const chatMessage = await game.messages.get(midiData.itemCardId);
         const spellLevel = midiData.itemLevel ? Number(midiData.itemLevel) : 3;
-        const spellSaveDC = actorD.data.data.attributes.spelldc;
+        const spellSaveDC = actorD.system.attributes.spelldc;
 
         const effectOptions = itemD.getFlag('advancedspelleffects', 'effectOptions') ?? {};
         const teleportSound = effectOptions.teleportSound ?? "";
@@ -160,7 +160,7 @@ export class thunderStep {
                         let damage = await new Roll(`${spellLevel}d10`).evaluate({ async: true });
                         for await (let targetToken of targets) {
 
-                            let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.con.save }).evaluate({ async: true });
+                            let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.system.abilities.con.save }).evaluate({ async: true });
                             let save = saveRoll.total;
                             targetTokens.add(targetToken)
                             if (save >= spellSaveDC) {

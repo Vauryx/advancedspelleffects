@@ -26,7 +26,7 @@ import { wallSpell } from "../spells/wallSpell.js";
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
-        this.flags = this.object.data.flags.advancedspelleffects;
+        this.flags = this.object.flags.advancedspelleffects;
         if (this.flags) {
             if (!this.flags.effectOptions) {
                 this.flags.effectOptions = {};
@@ -90,7 +90,7 @@ export class ASESettings extends FormApplication {
         let damageDieCount;
         let damageDie;
         let damageMod;
-        let effectOptions = this.object.data.flags?.advancedspelleffects?.effectOptions ?? {};
+        let effectOptions = this.object.flags?.advancedspelleffects?.effectOptions ?? {};
         switch (item.name) {
             case game.i18n.localize("ASE.DetectMagic"):
                 data.duration = { "value": 10, "units": "minute" };
@@ -162,7 +162,7 @@ export class ASESettings extends FormApplication {
 
     async setEffectData(item, itemName) {
         //console.log(item);
-        let flags = this.object.data.flags;
+        let flags = this.object.flags;
         //let itemName = item.name;
         let returnOBJ = {};
         //console.log("Detected item name: ", itemName);
@@ -239,7 +239,7 @@ export class ASESettings extends FormApplication {
     }
 
     async getData() {
-        let flags = this.object.data.flags;
+        let flags = this.object.flags;
         //console.log("flag: ", flags.advancedspelleffects.spellEffect);
         let item = this.object;
         //console.log("item: ", item);
@@ -266,7 +266,7 @@ export class ASESettings extends FormApplication {
             await this.setItemDetails(this.object);
         }
         return {
-            flags: this.object.data.flags,
+            flags: this.object.flags,
             itemName: itemName,
             effectData: effectData,
             spellOptions: spellOptions,

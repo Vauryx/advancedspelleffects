@@ -279,7 +279,7 @@ export class wallSpell extends baseSpellClass {
                     damageInArea: true,
                     damageArea: {},
                     damageOnCast: true,
-                    savingThrowDC: this.actor.data.data.attributes.spelldc ?? 0,
+                    savingThrowDC: this.actor.system.attributes.spelldc ?? 0,
                     chatMessage: this.chatMessage,
                     item: this.item.id,
                     casterActor: this.actor.id,

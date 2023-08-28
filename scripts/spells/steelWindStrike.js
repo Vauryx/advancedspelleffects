@@ -63,7 +63,7 @@ export class steelWindStrike {
             let attackRoll = await new Roll(`1d20 + @mod + @prof`, rollData).evaluate({ async: true });
             console.log("ASE SWS ttack roll: ", attackRoll);
             // game.dice3d?.showForRoll(attackRoll);
-            if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
+            if (attackRoll.total < target.actor.system.attributes.ac.value) {
                 onMiss(target, attackRoll);
             }
             else {

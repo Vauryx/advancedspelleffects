@@ -10,7 +10,7 @@ export class eldritchBlast {
         //console.log("casterActor", casterActor);
         const casterToken = canvas.tokens.get(midiData.tokenId);
         //console.log("casterToken", casterToken);
-        const characterLevel = casterActor.data?.data?.details?.level ?? casterActor.data?.data?.details?.spellLevel ?? 1;
+        const characterLevel = casterActor.system?.details?.level ?? casterActor.system?.details?.spellLevel ?? 1;
         //console.log(`Caster level: ${characterLevel}`);
         let numMissiles = 1;
         if (characterLevel >= 5) {
@@ -37,7 +37,7 @@ export class eldritchBlast {
         let invocations = aseEffectOptions.invocations;
         //console.log('ASEEffectOptions.dmgMod: ', aseEffectOptions.dmgMod);
         if (invocations.agonizingBlast) {
-            aseEffectOptions.dmgMod += casterActor?.data?.data?.abilities?.cha?.mod ?? 0;
+            aseEffectOptions.dmgMod += casterActor?.system?.abilities?.cha?.mod ?? 0;
         }
         //console.log('ASEEffectOptions: ', aseEffectOptions);
         new MissileDialog({

@@ -105,7 +105,7 @@ export class concentrationHandler {
             duration: {},
             flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
         };
-        const convertedDuration = utilFunctions.convertDuration(item.data.data.duration, inCombat);
+        const convertedDuration = utilFunctions.convertDuration(item.system.duration, inCombat);
         if (convertedDuration?.type === "seconds") {
             effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
         }

@@ -245,7 +245,7 @@ export class callLightning {
         }
 
         //console.log("Caster Actor: ", casterActor);
-        let saveDC = casterActor.data.data.attributes.spelldc;
+        let saveDC = casterActor.system.attributes.spelldc;
         //console.log("Save DC: ", saveDC);
         const boltOptions = {
             boltStyle: stormCloudTile.getFlag("advancedspelleffects", "boltStyle"),
@@ -280,7 +280,7 @@ export class callLightning {
             newChatmessageContent.find(".midi-qol-saves-display").empty();
             for await (let targetToken of targetsInCrosshairs) {
 
-                let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.dex.save }).evaluate({ async: true });
+                let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.system.abilities.dex.save }).evaluate({ async: true });
 
                 let save = saveRoll.total;
                 targetTokens.add(targetToken)

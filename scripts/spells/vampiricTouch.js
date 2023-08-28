@@ -77,9 +77,9 @@ export class vampiricTouch {
             missed = Array.from(midiData.hitTargets).length == 0;
             damageTotal = midiData.damageRoll?.total ?? 12;
             if (Array.from(midiData.hitTargets).length > 0) {
-                const updatedHP = tactor.data.data.attributes.hp.value + Math.floor(damageTotal / 2);
+                const updatedHP = tactor.system.attributes.hp.value + Math.floor(damageTotal / 2);
                 await tactor.update({
-                    "data.attributes.hp.value": Math.min(tactor.data.data.attributes.hp.max, updatedHP)
+                    "data.attributes.hp.value": Math.min(tactor.system.attributes.hp.max, updatedHP)
                 });
             }
             strandNum = Math.min(Math.floor(damageTotal), maxStrands);
@@ -162,9 +162,9 @@ export class vampiricTouch {
             missed = Array.from(midiData.hitTargets).length == 0;
             damageTotal = midiData.damageRoll?.total ?? 12;
             if (Array.from(midiData.hitTargets).length > 0) {
-                const updatedHP = tactor.data.data.attributes.hp.value + Math.floor(damageTotal / 2);
+                const updatedHP = tactor.system.attributes.hp.value + Math.floor(damageTotal / 2);
                 await tactor.update({
-                    "data.attributes.hp.value": Math.min(tactor.data.data.attributes.hp.max, updatedHP)
+                    "data.attributes.hp.value": Math.min(tactor.system.attributes.hp.max, updatedHP)
                 })
             }
         }

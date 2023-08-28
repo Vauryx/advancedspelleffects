@@ -212,10 +212,10 @@ export class summonCreature {
             let multiAttack = Math.floor(spellLevel / 2);
             let damageBonus = spellLevel;
             //let summonActor = game.actors.getName(chosenSummon[0]);
-            let attackBonus = casterActor.data.data.attributes.spelldc - 8;
+            let attackBonus = casterActor.system.attributes.spelldc - 8;
             let summonActor = game.actors.getName(chosenSummon[0]);
             //console.log(summonActor);
-            //let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
+            //let damageItems = summonActor.data.items.filter((item) => { return item.system.damage.parts.length > 0 });
             //console.log(damageItems);
             switch (item.name) {
                 case game.i18n.localize("ASE.SummonAberration"):
@@ -254,7 +254,7 @@ export class summonCreature {
             }
 
             updates.actor = {
-                'data.attributes.hp': { value: summonActor.data.data.attributes.hp.max + hpBonus, max: summonActor.data.data.attributes.hp.max + hpBonus },
+                'data.attributes.hp': { value: summonActor.system.attributes.hp.max + hpBonus, max: summonActor.system.attributes.hp.max + hpBonus },
                 'data.bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
                 'data.bonuses.mwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
                 'data.bonuses.rsak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },

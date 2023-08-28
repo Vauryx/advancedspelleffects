@@ -28,7 +28,7 @@ export class chainLightning {
         }
 
 
-        this.spellSaveDC = this.actor.data.data.attributes.spelldc;
+        this.spellSaveDC = this.actor.system.attributes.spelldc;
 
         this.targetData = [];
 
@@ -57,7 +57,7 @@ export class chainLightning {
     async rollInitialDamage() {
         const target = this.firstTarget;
         if (!target) return false;
-        const saveRoll = await new Roll("1d20+@mod", { mod: target.token.actor.data.data.abilities.dex.save }).evaluate({ async: true });
+        const saveRoll = await new Roll("1d20+@mod", { mod: target.token.actor.system.abilities.dex.save }).evaluate({ async: true });
 
         const damageDie = this.params.dmgDie ?? 'd8';
         const damageDieCount = this.params.dmgDieCount ?? 10;
@@ -185,7 +185,7 @@ export class chainLightning {
 
         for await (let target of this.targetData) {
 
-            const roll = await new Roll("1d20+@mod", { mod: target.token.actor.data.data.abilities.dex.save }).evaluate({ async: true });
+            const roll = await new Roll("1d20+@mod", { mod: target.token.actor.system.abilities.dex.save }).evaluate({ async: true });
             target.rollTotal = roll.total;
             target.roll = roll;
             target.saved = roll.total >= this.spellSaveDC;

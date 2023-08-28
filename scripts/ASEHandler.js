@@ -29,7 +29,7 @@ export class ASEHandler {
         // check if the spell being rolled is marked as an ASE spell
         let item = data.item;
         await versionMigration.handle(item);
-        let aseFlags = item?.data?.flags?.advancedspelleffects ?? false;
+        let aseFlags = item?.flags?.advancedspelleffects ?? false;
         if (!aseFlags.enableASE) return;
 
         // check for required modules

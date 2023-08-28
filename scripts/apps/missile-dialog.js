@@ -158,7 +158,7 @@ export class MissileDialog extends FormApplication {
             let newLabel1 = newTargetRow.insertCell(0);
             let newMissilesAssignedInput = newTargetRow.insertCell(1);
             let newRemoveMissileButton = newTargetRow.insertCell(2);
-            newLabel1.innerHTML = `<img src="${target.document.data.img}" width="30" height="30" style="border:0px"> - ${target.document.data.name}`;
+            newLabel1.innerHTML = `<img src="${target.document.texture.src}" width="30" height="30" style="border:0px"> - ${target.document.name}`;
             newMissilesAssignedInput.innerHTML = `<input style='width: 2em;' type="number" id="${target.document.id}-missiles" readonly value="${missilesAssigned}"></input>`;
             newRemoveMissileButton.innerHTML = `<button id="${target.document.id}-removeMissile" class="btnRemoveMissile" type="button"><i class="fas fa-minus"></i></button>`;
             let btnRemoveMissile = document.getElementById(`${target.document.id}-removeMissile`);
@@ -254,8 +254,7 @@ export class MissileDialog extends FormApplication {
             .atLocation(caster)
             .randomizeMirrorY()
             .missed(!hit)
-            .stretchTo(target)
-            .randomOffset(0.65)
+            .stretchTo(target,{randomOffset:0.65})
             //.playbackRate(utilFunctions.getRandomNumber(0.7, 1.3))
             .waitUntilFinished(impactDelay)
             .sound()
@@ -295,7 +294,7 @@ export class MissileDialog extends FormApplication {
         let crit = attackRoll.terms[0].total == 20;
         let hit;
         game.dice3d?.showForRoll(attackRoll);
-        if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
+        if (attackRoll.total < target.actor.system.attributes.ac.value) {
             console.log(`${caster.name} missed ${target.name} with roll ${attackRoll.total}${mod == '' ? '' : (mod == 'kh' ? ', with advantage!' : ', with dis-advantage!')}`);
             hit = false;
         }
@@ -324,7 +323,7 @@ export class MissileDialog extends FormApplication {
             }
             //console.log("Inside update object if statement...");
             let caster = canvas.tokens.get(this.data.caster);
-            const casterActor = game.actors.get(caster.data.actorId);
+            const casterActor = game.actors.get(caster.document.actorId);
             const item = this.data.item;
             let rollData = item.getRollData();
             const rollMod = rollData.mod;

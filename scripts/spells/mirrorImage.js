@@ -41,11 +41,11 @@ export class mirrorImage {
 
         const attackRoll = data.attackRoll;
         //console.log("Arrack Roll: ", attackRoll.total);
-        const targetAC = target.document.actor.data.data.attributes.ac.value;
+        const targetAC = target.document.actor.system.attributes.ac.value;
         //console.log("Target AC: ", targetAC);
 
         const imagesRemaining = mirrorImages.length;
-        const imageAC = 10 + target.actor.data.data.abilities.dex.mod;
+        const imageAC = 10 + target.actor.system.abilities.dex.mod;
 
         const roll = new Roll(`1d20`).evaluate({ async: false });
         //console.log("Mirror Image Roll: ", roll.total);

@@ -156,7 +156,7 @@ export class moonBeam {
             casterTokenId: casterToken.id,
             itemUUID: data.item.uuid,
             itemCardId: data.itemCardId,
-            spellSaveDc: casterActor.data.data.attributes.spelldc,
+            spellSaveDc: casterActor.system.attributes.spelldc,
             damageFormula: damageFormula,
         };
         const updates = {
@@ -364,7 +364,7 @@ export class moonBeam {
         if (game.modules.get("midi-qol")?.active) {
             const fullDamageRoll = await new Roll(rollInfo.damageFormula).evaluate({ async: true });
             const halfdamageroll = await new Roll(`${Math.floor(fullDamageRoll.total / 2)}`).evaluate({ async: true });
-            const saveRoll = await new Roll(`1d20+@mod`, { mod: token.actor.data.data.abilities.con.save }).evaluate({ async: true });
+            const saveRoll = await new Roll(`1d20+@mod`, { mod: token.actor.system.abilities.con.save }).evaluate({ async: true });
             console.log('Rolls: ');
             console.log(fullDamageRoll);
             //console.log(halfdamageroll);

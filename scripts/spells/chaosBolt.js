@@ -25,11 +25,11 @@ export class chaosBolt extends baseSpellClass {
         this.token = canvas.tokens.get(this.params.tokenId);
         this.item = this.params.item;
         this.effectOptions = this.item.getFlag("advancedspelleffects", "effectOptions") ?? {};
-        this.rollProf = this.actor.data.data.attributes.prof;
-        const rollAbility = this.actor.data.data.attributes.spellcasting;
-        this.rollMod = this.actor.data.data.abilities[rollAbility].mod || 0;
-        this.attackBonus = this.actor.data.data.bonuses.rsak.attack;
-        this.damageBonus = this.actor.data.data.bonuses.rsak.damage;
+        this.rollProf = this.actor.system.attributes.prof;
+        const rollAbility = this.actor.system.attributes.spellcasting;
+        this.rollMod = this.actor.system.abilities[rollAbility].mod || 0;
+        this.attackBonus = this.actor.system.bonuses.rsak.attack;
+        this.damageBonus = this.actor.system.bonuses.rsak.damage;
 
         this.itemCardId = this.params.itemCardId;
 
@@ -452,7 +452,7 @@ export class chaosBolt extends baseSpellClass {
             return canvas.grid.measureDistance(attack.target.center, new_target.center) <= distance
                 && this.targetsHitSoFar.indexOf(new_target.id) === -1
                 && attack.target.data.disposition === new_target.data.disposition
-                && new_target.actor.data.data.attributes.hp.value > 0
+                && new_target.actor.system.attributes.hp.value > 0
                 && new_target !== this.token;
         });
 
@@ -518,7 +518,7 @@ export class chaosBolt extends baseSpellClass {
             ...attack,
             roll: attackRoll,
             attackRollRender: attackRollRender,
-            hits: attackRoll.total >= attack.target.actor.data.data.attributes.ac.value && !criticalMiss,
+            hits: attackRoll.total >= attack.target.actor.system.attributes.ac.value && !criticalMiss,
             criticalHit: criticalHit,
             criticalMiss: criticalMiss
         }
