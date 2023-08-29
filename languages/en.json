@@ -365,6 +365,7 @@
   "ASE.SaveFailMessage": "<b>fails</b> with <b>{saveTotal}</b> and takes <b>{damageTotal}</b> damage",
 
   "ASE.ChainLightningNumJumpsLabel": "Number of targets to jump to: ",
+  "ASE.ChainLightningNoTargetSelected": "You must select a target to use this spell.",
   "ASE.ChainLightningSecondaryDelayLowerLabel": "Secondary bolt delay min: ",
   "ASE.ChainLightningSecondaryDelayUpperLabel": "Secondary bolt delay max: ",
   "ASE.ChainLightningPrimaryColorLabel": "Primary Bolt Color: ",

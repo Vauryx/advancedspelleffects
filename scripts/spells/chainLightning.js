@@ -8,6 +8,10 @@ export class chainLightning {
         this.token = canvas.tokens.get(this.params.tokenId);
         this.item = this.params.item;
         this.firstTarget = this.params.targets[0] ?? Array.from(this.params.targets)[0];
+        if(this.firstTarget == null)
+        {
+            return;
+        }       
         if (game.modules.get("midi-qol")?.active) {
             this.targetFailedSave = this.params.failedSaves.length > 0;
         }
@@ -40,6 +44,11 @@ export class chainLightning {
     }
     async cast() {
         console.log("Running Chain Lightning...");
+        if(this.firstTarget == null)
+        {
+            ui.notifications.warn(game.i18n.localize("ASE.ChainLightningNoTargetSelected"));
+            return;
+        }  
         //await this.rollInitialDamage();
         await this.promptJumps();
         if (!this.targetData) {
