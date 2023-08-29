@@ -169,7 +169,7 @@ export class mirrorImage {
         const casterToken = this.token;
         const numberOfImages = 3;
 
-        let casterTokenImg = casterToken.data.img;
+        let casterTokenImg = casterToken.document.texture.src;
 
 
         const positions = [];

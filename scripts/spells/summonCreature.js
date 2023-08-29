@@ -126,7 +126,7 @@ export class summonCreature {
                 .effect()
                 .atLocation(token)
                 .scaleToObject()
-                .file(token.data.img)
+                .file(token.document.texture.src)
                 .fadeIn(400)
                 .offset({ x: 0, y: canvas.grid.size })
                 .animateProperty("sprite", "position.y", { from: 0, to: canvas.grid.size, duration: 400, ease: "easeInOutCubic" })
@@ -161,7 +161,7 @@ export class summonCreature {
                     img.onerror = reject;
                     img.src = src;
                 });
-            let summonTokenData = (await game.actors.getName(chosenSummon[0]).getTokenData());
+            let summonTokenData = (await game.actors.getName(chosenSummon[0]).getTokenDocument());
             loadImage(summonTokenData.img).then(async (image) => {
                 const summonImageScale = (summonTokenData.width * canvas.grid.size) / image.width;
                 new Sequence("Advanced Spell Effects")
@@ -186,7 +186,7 @@ export class summonCreature {
             },
             show: displayCrosshairs
         };
-        let summonData = await game.actors.getName(chosenSummon[0]).getTokenData();
+        let summonData = await game.actors.getName(chosenSummon[0]).getTokenDocument();
         let crosshairsConfig = {
             size: summonData.width,
             label: chosenSummon[0],
@@ -254,11 +254,11 @@ export class summonCreature {
             }
 
             updates.actor = {
-                'data.attributes.hp': { value: summonActor.system.attributes.hp.max + hpBonus, max: summonActor.system.attributes.hp.max + hpBonus },
-                'data.bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
-                'data.bonuses.mwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
-                'data.bonuses.rsak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
-                'data.bonuses.rwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` }
+                'attributes.hp': { value: summonActor.system.attributes.hp.max + hpBonus, max: summonActor.system.attributes.hp.max + hpBonus },
+                'bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'bonuses.mwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'bonuses.rsak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'bonuses.rwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` }
             }
             updates.embedded = {
                 ActiveEffect: {
@@ -266,7 +266,7 @@ export class summonCreature {
                         icon: 'icons/magic/defensive/shield-barrier-blue.webp',
                         label: game.i18n.localize("ASE.SpellLevelBonusACEffectLabel"),
                         changes: [{
-                            "key": "data.attributes.ac.bonus",
+                            "key": "attributes.ac.bonus",
                             "mode": 2,
                             "value": acBonus,
                             "priority": 0
