@@ -492,13 +492,13 @@ export class wallSpell extends baseSpellClass {
 
         if ((!updateData.x && !updateData.y)) return;
         const token = tokenDocument;
-        const grid = canvas?.scene?.data.grid;
+        const grid = canvas?.scene?.grid;
         if (!grid) return false;
 
-        const oldPos = { x: tokenDocument.data.x, y: tokenDocument.data.y };
+        const oldPos = { x: tokenDocument.x, y: tokenDocument.y };
         let newPos = { x: 0, y: 0 };
-        newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
-        newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
+        newPos.x = (updateData.x) ? updateData.x : tokenDocument.x;
+        newPos.y = (updateData.y) ? updateData.y : tokenDocument.y;
         const movementRay = new Ray(oldPos, newPos);
 
         const templates = Array.from(canvas?.scene?.templates ?? {});
@@ -518,7 +518,7 @@ export class wallSpell extends baseSpellClass {
             if (!aseData.checkForTouch) return;
             wallName = templateDocument.getFlag("advancedspelleffects", "wallName") ?? "";
             const mTemplate = templateDocument.object;
-            const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: mTemplate.shape, distance: mTemplate.data.distance };
+            const templateDetails = { x: templateDocument.x, y: templateDocument.y, shape: mTemplate.shape, distance: mTemplate.distance };
             const templatePointA = { x: templateDetails.x, y: templateDetails.y };
             const templateAngle = (templateData.direction) * (Math.PI / 180.0);
             const templateLength = ((templateData.distance) * grid) / 5.0;
@@ -526,11 +526,11 @@ export class wallSpell extends baseSpellClass {
             const templatePointBY = templatePointA.y + (templateLength * Math.sin(templateAngle));
             const templatePointB = { x: templatePointBX, y: templatePointBY };
 
-            const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
-            const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
+            const startX = token.width >= 1 ? 0.5 : (token.width / 2);
+            const startY = token.height >= 1 ? 0.5 : (token.height / 2);
 
-            widthLoop: for (let x = startX; x < token.data.width; x++) {
-                for (let y = startY; y < token.data.height; y++) {
+            widthLoop: for (let x = startX; x < token.width; x++) {
+                for (let y = startY; y < token.height; y++) {
 
                     const currGrid = {
                         x: newPos.x + x * grid - templatePointA.x,
@@ -981,7 +981,7 @@ export class wallSpell extends baseSpellClass {
                 if (halfDamOnSave) {
                     let damage = await new Roll(wallDamage).evaluate({ async: true });
                     for await (let targetToken of targets) {
-                        let targetTokenAbilities = targetToken?.actor?.data?.data?.abilities ?? {};
+                        let targetTokenAbilities = targetToken?.actor?.system?.abilities ?? {};
                         let targetTokenSaveMod = targetTokenAbilities[saveType]?.save ?? 0;
                         let saveRoll = await new Roll("1d20+@mod", { mod: targetTokenSaveMod }).evaluate({ async: true });
                         let save = saveRoll.total;

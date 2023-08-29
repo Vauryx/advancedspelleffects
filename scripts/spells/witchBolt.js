@@ -29,7 +29,7 @@ export class witchBolt {
             delay: streamSoundDelay
         };
 
-        const itemData = midiData.item.data.data;
+        const itemData = midiData.item.system;
         console.log(itemData);
 
         let missed = false;
@@ -188,7 +188,7 @@ export class witchBolt {
             //console.log('Scanning Token: ',token.name);
             return (token.actor?.effects.filter((effect) => {
                 //console.log('Active Effect: ', effect);
-                let origin = effect.data.origin?.split(".");
+                let origin = effect.origin?.split(".");
                 if (!origin || origin?.length < 4) return false;
                 let itemId = origin[5] ?? origin[3];
                 //console.log("scanning item id: ", itemId);

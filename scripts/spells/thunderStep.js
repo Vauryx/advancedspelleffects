@@ -124,7 +124,7 @@ export class thunderStep {
         teleport_range[0].delete();
 
         let targets = canvas.tokens.placeables.filter(function (target) {
-            return target?.actor?.data?.data?.attributes?.hp?.value > 0
+            return target?.actor?.system?.attributes?.hp?.value > 0
                 && canvas.grid.measureDistance(tokenD, target) <= 12.5
                 && passengers.indexOf(target) === -1;
         });

@@ -24,8 +24,8 @@ export class concentrationHandler {
         const isGM = utilFunctions.isFirstGM();
         //console.log("Is first GM: ", isGM);
         if (!isGM) return;
-        if (activeEffect.data.label != 'Concentration' && activeEffect.data.label != game.i18n.localize("ASE.ConcentratingLabel")) return;
-        let origin = activeEffect.data.origin?.split(".");
+        if (activeEffect.label != 'Concentration' && activeEffect.label != game.i18n.localize("ASE.ConcentratingLabel")) return;
+        let origin = activeEffect.origin?.split(".");
         //console.log("Origin: ", origin);
         if (!origin || origin?.length < 4) return false;
         let itemId = origin[5] ?? origin[3];

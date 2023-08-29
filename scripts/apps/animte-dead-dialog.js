@@ -93,14 +93,14 @@ export class animateDeadDialog extends FormApplication {
         let zombieTokenData;
         let skeletonTokenData;
         if (zombieActorId && skeletonActorId) {
-            zombieTokenData = (await game.actors.get(zombieActorId).getTokenData()).toObject();
-            skeletonTokenData = (await game.actors.get(skeletonActorId).getTokenData()).toObject();
+            zombieTokenData = (await game.actors.get(zombieActorId).getTokenDocument()).toObject();
+            skeletonTokenData = (await game.actors.get(skeletonActorId).getTokenDocument()).toObject();
             delete zombieTokenData.x;
             delete zombieTokenData.y;
             delete skeletonTokenData.x;
             delete skeletonTokenData.y;
-            zombieTokenData = mergeObject(corpseToken.data.toObject(), zombieTokenData, { inplace: false });
-            skeletonTokenData = mergeObject(corpseToken.data.toObject(), skeletonTokenData, { inplace: false });
+            zombieTokenData = mergeObject(corpseToken.document.toObject(), zombieTokenData, { inplace: false });
+            skeletonTokenData = mergeObject(corpseToken.document.toObject(), skeletonTokenData, { inplace: false });
         }
         else {
             ui.notifications.error(game.i18n.localize("ASE.AssociatedActorNotFoundNotification"));
@@ -208,7 +208,7 @@ export class animateDeadDialog extends FormApplication {
                 .thenDo(async () => {
                     try {
                         let corpseDoc = token.document;
-                        let summonActorData = game.actors.get(summonTokenData.actorId).data.toObject();
+                        let summonActorData = game.actors.get(summonTokenData.actorId).toObject();
                         delete summonActorData.items;
                         delete summonActorData.effects;
                         delete summonActorData._id;
