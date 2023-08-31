@@ -35,7 +35,9 @@ export class ASESettings extends FormApplication {
         this.spellList = {};
         this.spellList[game.i18n.localize("ASE.AnimateDead")] = animateDead;
         this.spellList[game.i18n.localize("ASE.CallLightning")] = callLightning;
-        this.spellList[game.i18n.localize("ASE.ChaosBolt")] = chaosBolt;
+        if (game.modules.get("midi-qol")?.active) {
+            this.spellList[game.i18n.localize("ASE.ChaosBolt")] = chaosBolt;
+        }
         this.spellList[game.i18n.localize("ASE.DetectMagic")] = detectMagic;
         this.spellList[game.i18n.localize("ASE.FogCloud")] = fogCloud;
         this.spellList[game.i18n.localize("ASE.Darkness")] = darkness;
