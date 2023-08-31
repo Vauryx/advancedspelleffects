@@ -510,8 +510,6 @@ export class wallSpell extends baseSpellClass {
         for (let i = 0; i < templates.length; i++) {
 
             templateDocument = templates[i];
-            const templateData = templateDocument.data;
-            if (!templateData) return;
             const aseData = templateDocument.getFlag("advancedspelleffects", 'wallOperationalData');
             const aseEffectData = templateDocument.getFlag("advancedspelleffects", 'wallEffectData');
             if (!aseData || !aseData.damageOnTouch) return;
@@ -520,8 +518,8 @@ export class wallSpell extends baseSpellClass {
             const mTemplate = templateDocument.object;
             const templateDetails = { x: templateDocument.x, y: templateDocument.y, shape: mTemplate.shape, distance: mTemplate.distance };
             const templatePointA = { x: templateDetails.x, y: templateDetails.y };
-            const templateAngle = (templateData.direction) * (Math.PI / 180.0);
-            const templateLength = ((templateData.distance) * grid) / 5.0;
+            const templateAngle = (templateDocument.direction) * (Math.PI / 180.0);
+            const templateLength = ((templateDocument.distance) * grid) / 5.0;
             const templatePointBX = templatePointA.x + (templateLength * Math.cos(templateAngle));
             const templatePointBY = templatePointA.y + (templateLength * Math.sin(templateAngle));
             const templatePointB = { x: templatePointBX, y: templatePointBY };
@@ -542,7 +540,7 @@ export class wallSpell extends baseSpellClass {
                     }
                     let previousContains = templateDetails.shape?.contains(oldCurrGrid.x, oldCurrGrid.y);
                     let contains = templateDetails.shape?.contains(currGrid.x, currGrid.y);
-                    if (templateData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                    if (templateDocument.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
                         previousContains = false;
                         contains = false;
                     }
@@ -556,9 +554,9 @@ export class wallSpell extends baseSpellClass {
                             x: movementRay.B.x + x * grid,
                             y: movementRay.B.y + y * grid,
                         };
-                        //console.log("Drag Coord Old: ", dragCoordOld);
-                        //console.log("Drag Coord New: ", dragCoordNew);
-                        if (templateData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                        console.log("Drag Coord Old: ", dragCoordOld);
+                        console.log("Drag Coord New: ", dragCoordNew);
+                        if (templateDocument.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
                             crossed = utilFunctions.lineCrossesCircle(dragCoordOld, dragCoordNew, templatePointA, (templateDetails.distance / 5) * grid);
                         } else {
@@ -567,7 +565,7 @@ export class wallSpell extends baseSpellClass {
                     }
 
                     if (((previousContains && contains) || (!previousContains)) && (crossed || contains)) {
-                        //console.log("Token touched wall!");
+                        console.log("Token touched wall!");
                         if (wallsTouched.includes(templateDocument.id)) {
                             console.log(`${token.name} has already been effected by this ${wallName} this turn - ${templateDocument.id}`);
                             ui.notifications.info(game.i18n.format("ASE.WallSpellAlreadyEffected", { name: token.name, wallName: wallName }));
@@ -588,7 +586,7 @@ export class wallSpell extends baseSpellClass {
                             break widthLoop;
                         }
                     } else {
-                        //console.log("Token did not cross template area...");
+                        console.log("Token did not cross template area...");
                     }
                 }
             }
@@ -597,9 +595,9 @@ export class wallSpell extends baseSpellClass {
     }
 
     static async activateWallEffect(token, wallData) {
-        //console.log("Activating Wall Effect...");
-        //console.log("Token: ", token);
-        //console.log("Wall Data: ", wallData);
+        console.log("Activating Wall Effect...");
+        console.log("Token: ", token);
+        console.log("Wall Data: ", wallData);
         const wallOperationalData = wallData.wallOperationalData;
         const wallEffectData = wallData.wallEffectData;
         function addTokenToText(token, damageTotal) {
