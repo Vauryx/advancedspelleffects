@@ -129,7 +129,7 @@ export class callLightning {
 
         await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-call-lightning` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
-        await ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage'), { name: caster.actor.name }}` });
+        await ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage', { name: caster.actor.name })}` });
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         await callLightning.callLightningBolt(stormTileId, midiData.itemCardId, midiData.item.id);
 
@@ -155,8 +155,8 @@ export class callLightning {
             let tileX;
             let tileY;
 
-            tileWidth = (templateData.width * canvas.grid.size);
-            tileHeight = (templateData.width * canvas.grid.size);
+            tileWidth = (templateData.size * canvas.grid.size);
+            tileHeight = (templateData.size * canvas.grid.size);
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
             let data = {
@@ -358,8 +358,8 @@ export class callLightning {
                 let tileX;
                 let tileY;
 
-                tileWidth = templateData.width * (canvas.grid.size);
-                tileHeight = templateData.width * (canvas.grid.size);
+                tileWidth = templateData.size * (canvas.grid.size);
+                tileHeight = templateData.size * (canvas.grid.size);
                 tileX = templateData.x - (tileWidth / 2);
                 tileY = templateData.y - (tileHeight / 2);
                 let data = [{
