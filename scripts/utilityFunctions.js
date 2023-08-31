@@ -308,11 +308,11 @@ export function isMidiActive() {
 }
 
 export function getContainedCustom(tokenD, crosshairs) {
-    let tokenCenter = getCenter(tokenD.data, tokenD.data.width);
+    let tokenCenter = getCenter(tokenD.document, tokenD.document.width);
     let tokenCrosshairsDist = canvas.grid.measureDistance(tokenCenter, crosshairs);
-    let crosshairsDistance = crosshairs.data?.distance ?? crosshairs.distance;
+    let crosshairsDistance = crosshairs.document?.distance ?? crosshairs.distance;
     //console.log(`Crosshairs distance: ${crosshairsDistance}`);
-    let distanceRequired = (crosshairsDistance - 2.5) + (2.5 * tokenD.data.width);
+    let distanceRequired = (crosshairsDistance - 2.5) + (2.5 * tokenD.document.width);
     if ((tokenCrosshairsDist) < distanceRequired) {
         return true;
     }
@@ -360,7 +360,7 @@ export async function checkCrosshairs(crosshairs) {
 }
 
 export function cleanUpTemplateGridHighlights() {
-    const ASETemplates = canvas.scene.templates.filter((template) => { return template.data.flags.advancedspelleffects });
+    const ASETemplates = canvas.scene.templates.filter((template) => { return template.flags.advancedspelleffects });
     for (let template of ASETemplates) {
         const highlight = canvas.grid.getHighlightLayer(`Template.${template.id}`);
         if (highlight) {

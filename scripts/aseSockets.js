@@ -93,7 +93,7 @@ async function deleteTemplates(tileIds) {
 
 async function moveTile(newLocation, tileId) {
     let tile = canvas.scene.tiles.get(tileId);
-    const distance = utilFunctions.getDistanceClassic({ x: tile.data.x + canvas.grid.size, y: tile.data.y + canvas.grid.size }, { x: newLocation.x, y: newLocation.y });
+    const distance = utilFunctions.getDistanceClassic({ x: tile.x + canvas.grid.size, y: tile.y + canvas.grid.size }, { x: newLocation.x, y: newLocation.y });
     //console.log('Distance: ', distance);
 
     const moveSpeed = Math.floor(distance / 50);
@@ -137,9 +137,9 @@ async function placeWalls(wallData) {
 
 async function moveWalls(tileId, wallType, numWalls) {
     let tileD = canvas.scene.tiles.get(tileId) ?? canvas.scene.templates.get(tileId);
-    let placedX = tileD.data.x + (tileD.data.width / 2);
-    let placedY = tileD.data.y + (tileD.data.height / 2);
-    let outerCircleRadius = tileD.data.width / 2.2;
+    let placedX = tileD.x + (tileD.width / 2);
+    let placedY = tileD.y + (tileD.height / 2);
+    let outerCircleRadius = tileD.width / 2.2;
     let wall_angles = 2 * Math.PI / numWalls;
     let walls = [];
     let wallDocuments = [];

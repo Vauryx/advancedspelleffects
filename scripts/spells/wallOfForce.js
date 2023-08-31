@@ -358,7 +358,7 @@ export class wallOfForce {
                 await warpgate.wait(100);
                 //console.log(displayTemplate);
                 if (!displayTemplate) return;
-                const verticalTemplate = displayTemplate.data.t == CONST.MEASURED_TEMPLATE_TYPES.RAY;
+                const verticalTemplate = displayTemplate.t == CONST.MEASURED_TEMPLATE_TYPES.RAY;
                 //console.log("Vertical Template:", verticalTemplate);
                 let ray;
                 let angle;
@@ -446,7 +446,7 @@ export class wallOfForce {
 
     static async _placeWalls(templateDocument, deleteOldWalls = false) {
 
-        if (templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) return;
+        if (templateDocument.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) return;
 
         if (deleteOldWalls) {
             const walls = Tagger.getByTag([`WallOfForce-Wall${templateDocument.id}`]).map(wall => wall.id);
@@ -459,7 +459,7 @@ export class wallOfForce {
 
         const walls = [];
 
-        if (templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+        if (templateDocument.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
             const placedX = template.x;
             const placedY = template.y;
@@ -527,7 +527,7 @@ export class wallOfForce {
 
     static _playEffects(aseData, template) {
 
-        if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+        if (template.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
             new Sequence()
                 .effect(aseData.texture)
@@ -539,7 +539,7 @@ export class wallOfForce {
                 .persist()
                 .play()
 
-        } else if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) {
+        } else if (template.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) {
 
             new Sequence()
                 .effect(aseData.texture)
