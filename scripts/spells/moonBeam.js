@@ -235,8 +235,8 @@ export class moonBeam {
             let tileX;
             let tileY;
 
-            tileWidth = (templateData.width * canvas.grid.size);
-            tileHeight = (templateData.width * canvas.grid.size);
+            tileWidth = (templateData.size * canvas.grid.size);
+            tileHeight = (templateData.size * canvas.grid.size);
 
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
