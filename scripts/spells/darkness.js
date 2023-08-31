@@ -82,8 +82,8 @@ export class darkness {
             let placedY = templateData.y;
             let wallPoints = [];
             let walls = [];
-            tileWidth = (templateData.width * canvas.grid.size);
-            tileHeight = (templateData.width * canvas.grid.size);
+            tileWidth = (templateData.size * canvas.grid.size);
+            tileHeight = (templateData.size * canvas.grid.size);
 
             let outerCircleRadius = tileWidth / 2.2;
             tileX = templateData.x - (tileWidth / 2);
