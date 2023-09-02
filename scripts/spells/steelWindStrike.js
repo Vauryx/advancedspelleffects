@@ -105,24 +105,24 @@ export class steelWindStrike {
         async function finalTeleport(caster, location) {
             //console.log("template: ", location);
             let startLocation = { x: caster.x, y: caster.y };
-            //let adjustedLocation = { x: location.x - (canvas.grid.size / 2), y: location.y - (canvas.grid.size / 2) }
+            let adjustedLocation = { x: location.x - (canvas.grid.size / 2), y: location.y - (canvas.grid.size / 2) }
             let distance = Math.sqrt(Math.pow((location.x - caster.x), 2) + Math.pow((location.y - caster.y), 2));
 
             let steelWindSequence = new Sequence("Advanced Spell Effects")
                 .animation()
                 .on(caster)
-                .rotateTowards(location)
+                .rotateTowards(adjustedLocation)
                 .animation()
                 .on(caster)
                 .snapToGrid()
-                .moveTowards(location, { ease: "easeOutElasticCustom" })
+                .moveTowards(adjustedLocation, { ease: "easeOutElasticCustom" })
                 .moveSpeed(distance / 60)
                 .duration(800)
                 .waitUntilFinished(-750)
                 .effect()
                 .atLocation(startLocation)
                 .file(gustAnim)
-                .stretchTo(location)
+                .stretchTo(adjustedLocation)
                 .opacity(0.8)
                 .fadeOut(250)
                 .belowTokens()
@@ -281,7 +281,7 @@ export class steelWindStrike {
             async function chooseFinalLocation() {
                 let crosshairsConfig = {
                     size: 1,
-                    icon: caster.data.img,
+                    icon: caster.document.texture.src,
                     label: game.i18n.localize("ASE.SWSFinalLocationCrosshairsLabel"),
                     tag: 'end-at-crosshairs',
                     drawIcon: true,
