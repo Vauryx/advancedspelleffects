@@ -23,16 +23,25 @@ export class thunderStep {
         const reappearSound = effectOptions.reappearSound ?? "";
         const reappearSoundDelay = Number(effectOptions.reappearSoundDelay) ?? 0;
         const reappearVolume = effectOptions.reappearVolume ?? 1;
-
+        let range = dnd5e.gridDistance * 18;
+        if(itemD.system.range.value != null && itemD.system.range.units != null)
+        {
+            range = itemD.system.range.value;
+        }
         const teleport_range = await canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [{
             t: "circle",
             user: game.userId,
             x: tokenD.x + canvas.grid.size / 2,
             y: tokenD.y + canvas.grid.size / 2,
             direction: 0,
-            distance: 92.5,
+            distance: range + dnd5e.gridDistance / 2,
             fillColor: game.user.color
         }]);
+        let distanceDamage = 2 * dnd5e.gridDistance;
+        if(itemD.system.target === 'sphere')
+        {
+            distanceDamage = itemD.system.target.value ;
+        }
 
         const damage_range = await canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [{
             t: "circle",
@@ -40,17 +49,17 @@ export class thunderStep {
             x: tokenD.x + canvas.grid.size / 2,
             y: tokenD.y + canvas.grid.size / 2,
             direction: 0,
-            distance: 12.5,
+            distance: distanceDamage + dnd5e.gridDistance / 2,
             fillColor: "#FF0000"
         }]);
 
         const passengers = [];
         if (midiData.targets.length) {
-            let passenger = await canvas.tokens.get(midiData.targets[0]._id);
+            let passenger = await canvas.tokens.get(midiData.targets[0].id);
             if (passenger) passengers.push(passenger);
         } else {
             let potentialPassengers = canvas.tokens.placeables.filter(function (target) {
-                return canvas.grid.measureDistance(tokenD, target) <= 7.5 && target.data.disposition === tokenD.data.disposition && target !== tokenD;
+                return canvas.grid.measureDistance(tokenD, target) <= (dnd5e.gridDistance + dnd5e.gridDistance / 2) && target.document.disposition === tokenD.document.disposition && target !== tokenD;
             });
 
             let passenger = potentialPassengers.length ? await new Promise((resolve) => {
@@ -125,7 +134,7 @@ export class thunderStep {
 
         let targets = canvas.tokens.placeables.filter(function (target) {
             return target?.actor?.system?.attributes?.hp?.value > 0
-                && canvas.grid.measureDistance(tokenD, target) <= 12.5
+                && canvas.grid.measureDistance(tokenD, target) <= (2 * dnd5e.gridDistance + dnd5e.gridDistance / 2)
                 && passengers.indexOf(target) === -1;
         });
 
