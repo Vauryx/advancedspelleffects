@@ -118,6 +118,7 @@ export class animateDeadDialog extends FormApplication {
 
         console.log(`Raised ${corpseToken.name} as a ${event.currentTarget.innerText}!`);
         document.getElementById("raiseLimit").value--;
+
         document.getElementById(corpseToken.id).remove();
         if (document.getElementById("raiseLimit").value == 0) {
             ui.notifications.info(game.i18n.localize("ASE.RaisedAllCorpsesNotification"));

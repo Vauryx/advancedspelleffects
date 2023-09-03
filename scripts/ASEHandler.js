@@ -146,7 +146,7 @@ export class ASEHandler {
                 viciousMockerySpell.cast();
                 return;
         }
-        if (item.name.includes(game.i18n.localize("ASE.Summon")) || aseFlags.spellEffect.includes(game.i18n.localize("ASE.Summon"))) {
+        if (item.name.includes(game.i18n.localize("ASE.Summon")) || aseFlags.spellEffect.includes(game.i18n.localize("ASE.Conjure"))) {
             await summonCreature.doSummon(data);
             return;
         }

@@ -14,7 +14,7 @@
                     </tr>
                     {{#each data.corpses as |corpse|}}
                         <tr class='corpseToken' id={{corpse.id}}>
-                            <td><img src="{{corpse.texture.src}}" width="30" height="30" style="border:0px"> -
+                            <td><img src="{{corpse.document.texture.src}}" width="30" height="30" style="border:0px"> -
                                 {{corpse.name}}
                             </td>
                             <td><button class='raiseCorpse' type="button"
