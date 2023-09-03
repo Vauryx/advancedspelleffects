@@ -430,11 +430,10 @@ export class moonBeam {
             .playIf(effectOptions.moonbeamDmgSound && effectOptions.moonbeamDmgSound != "")
             .effect()
             .file(`jb2a.impact.004.${effectOptions.moonbeamDmgColor}`)
-            .attachTo(token)
+            .attachTo(token,{randomOffset:0.5})
             .randomRotation()
             .scaleIn(0.5, 200)
             .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
-            .randomOffset(0.5)
             .repeats(4, 100, 250)
             .play()
     }
