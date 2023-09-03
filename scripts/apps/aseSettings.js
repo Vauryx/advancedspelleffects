@@ -387,11 +387,11 @@ export class ASESettings extends FormApplication {
         {{#each ../effectData.summonOptions as |id name|}}
         <option value="">{{name}}</option>
         {{/each}}
-    </select>`;
+        </select>`;
         newLabel3.innerHTML = `<label><b>game.i18n.localize("ASE.SummonQuantityLabel")</b></label>`;
         newQtyInput.innerHTML = `<input style='width: 3em;' type="text"
-    name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.qty"
-    value=1>`;
+            name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.qty"
+            value=1>`;
         this.submit({ preventClose: true }).then(() => this.render());
     }
 

@@ -81,8 +81,8 @@ export class concentrationHandler {
                 await wallSpell.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }
-        if (effectSource.includes(game.i18n.localize("ASE.Summon"))) {
-            summonCreature.handleConcentration(casterActor, casterToken, effectOptions);
+        if (effectSource.includes(game.i18n.localize("ASE.Summon")) || effectSource.includes(game.i18n.localize("ASE.Conjure"))) {
+            await summonCreature.handleConcentration(casterActor, casterToken, effectOptions);
             return;
         }
         console.log("ASE: Effect source not recognized...");

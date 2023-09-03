@@ -66,17 +66,17 @@ export class animateDead {
             label: game.i18n.localize('ASE.ZombieActorLabel'),
             type: 'dropdown',
             options: summonOptions,
-            name: 'flags.advancedspelleffects.effectOptions.summons.zombie.actor',
-            flagName: 'summons.zombie.actor',
-            flagValue: currFlags.summons?.zombie?.actor ?? '',
+            name: 'flags.advancedspelleffects.effectOptions.animateDeadSummons.zombie.actor',
+            flagName: 'animateDeadSummons.zombie.actor',
+            flagValue: currFlags.animateDeadSummons?.zombie?.actor ?? '',
         });
         spellOptions.push({
             label: game.i18n.localize('ASE.SkeletonActorLabel'),
             type: 'dropdown',
             options: summonOptions,
-            name: 'flags.advancedspelleffects.effectOptions.summons.skeleton.actor',
-            flagName: 'summons.skeleton.actor',
-            flagValue: currFlags.summons?.skeleton?.actor ?? '',
+            name: 'flags.advancedspelleffects.effectOptions.animateDeadSummons.skeleton.actor',
+            flagName: 'animateDeadSummons.skeleton.actor',
+            flagValue: currFlags.animateDeadSummons?.skeleton?.actor ?? '',
         });
 
         spellOptions.push({

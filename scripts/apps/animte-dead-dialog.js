@@ -2,7 +2,7 @@ import { aseSocket } from "../aseSockets.js";
 import * as utilFunctions from "../utilityFunctions.js";
 
 export class animateDeadDialog extends FormApplication {
-    constructor(corpses, options = { raiseLimit: 1, effectSettings: { summons: { skeleton: { actor: "" }, zombie: { actor: "" } }, effectAColor: "blue", effectBColor: "blue", magicSchool: "evocation", magicSchoolColor: "blue" } }) {
+    constructor(corpses, options = { raiseLimit: 1, effectSettings: { animateDeadSummons: { skeleton: { actor: "" }, zombie: { actor: "" } }, effectAColor: "blue", effectBColor: "blue", magicSchool: "evocation", magicSchoolColor: "blue" } }) {
         super(options);
         foundry.utils.mergeObject(this.options, options);
         this.data = {};
