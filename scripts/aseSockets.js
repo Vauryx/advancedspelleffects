@@ -102,7 +102,8 @@ async function moveTile(newLocation, tileId) {
     let moveTileSeq = new Sequence("Advanced Spell Effects")
         .animation()
         .on(tile)
-        .moveTowards(newLocation, { ease: "easeInOutQuint",offset:{ x: -canvas.grid.size, y: -canvas.grid.size }})
+        .moveTowards(newLocation, { ease: "easeInOutQuint"})
+        .offset({ x: -canvas.grid.size, y: -canvas.grid.size })
         .moveSpeed(moveSpeed)
     await moveTileSeq.play();
 
