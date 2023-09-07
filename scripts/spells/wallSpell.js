@@ -9,11 +9,11 @@ export class wallSpell extends baseSpellClass {
         super();
         this.data = data;
 
-        this.actor = game.actors.get(this.actor.id);
-        this.token = canvas.tokens.get(this.tokenId);
-        this.item = this.item;
-        this.itemCardId = this.itemCardId;
-        this.itemLevel = this.itemLevel;
+        this.actor = game.actors.get(this.data.actor.id);
+        this.token = canvas.tokens.get(this.data.tokenId);
+        this.item = this.data.item;
+        this.itemCardId = this.data.itemCardId;
+        this.itemLevel = this.data.itemLevel;
         this.effectOptions = this.item.getFlag("advancedspelleffects", "effectOptions") ?? {};
         //console.log('effectOptions:', this.effectOptions);
         this.wallType = this.effectOptions.wallType.toLowerCase();
@@ -95,9 +95,9 @@ export class wallSpell extends baseSpellClass {
                 wallSpell.placeWalls(template);
                 if (this.wallType.includes('fire')) {
                     await wallSpell.pickFireSide(template);
-                }
-                if (utilFunctions.isMidiActive()) {
-                    wallSpell.handleOnCast(template);
+                    if (utilFunctions.isMidiActive()) {
+                        wallSpell.handleOnCast(template);
+                    }
                 }
             });
             const doc = new MeasuredTemplateDocument(this.baseTemplateData, { parent: canvas.scene });
@@ -359,7 +359,7 @@ export class wallSpell extends baseSpellClass {
         //console.log("Updating combat: ", combat);
         const token = canvas.tokens.get(combat.previous.tokenId);
         if (!token) return;
-        const grid = canvas?.scene?.grid;
+        const grid = canvas?.scene?.grid.size;
         if (!grid) return false;
         const tokenPos = { x: token.x, y: token.y };
         await token.document.unsetFlag("advancedspelleffects", "wallTouchedData.wallsTouched");
@@ -396,11 +396,11 @@ export class wallSpell extends baseSpellClass {
                     const sideToCheck = templateDocument.getFlag("advancedspelleffects", "wallOperationalData.damageSide");
                     //console.log("Side to check: ", sideToCheck);
 
-                    const startX = token.width >= 1 ? 0.5 : (token.width / 2);
-                    const startY = token.height >= 1 ? 0.5 : (token.height / 2);
+                    const startX = token.document.width >= 1 ? 0.5 : (token.document.width / 2);
+                    const startY = token.document.height >= 1 ? 0.5 : (token.height / 2);
 
-                    widthLoop: for (let x = startX; x < token.width; x++) {
-                        for (let y = startY; y < token.height; y++) {
+                    widthLoop: for (let x = startX; x < token.document.width; x++) {
+                        for (let y = startY; y < token.document.height; y++) {
                             const currGrid = {
                                 x: tokenPos.x + x * grid,
                                 y: tokenPos.y + y * grid,
@@ -450,10 +450,10 @@ export class wallSpell extends baseSpellClass {
                     //console.log("Template Point B: ", templatePointB);
                     const sideToCheck = templateDocument.getFlag("advancedspelleffects", "wallOperationalData.damageSide");
                     //console.log("Side to check: ", sideToCheck);
-                    const startX = token.width >= 1 ? 0.5 : (token.width / 2);
-                    const startY = token.height >= 1 ? 0.5 : (token.height / 2);
+                    const startX = token.document.width >= 1 ? 0.5 : (token.document.width / 2);
+                    const startY = token.document.height >= 1 ? 0.5 : (token.document.height / 2);
 
-                    widthLoop: for (let x = startX; x < token.width; x++) {
+                    widthLoop: for (let x = startX; x < token.document.width; x++) {
                         for (let y = startY; y < token.height; y++) {
                             const currGrid = {
                                 x: tokenPos.x + x * grid,
@@ -492,7 +492,7 @@ export class wallSpell extends baseSpellClass {
 
         if ((!updateData.x && !updateData.y)) return;
         const token = tokenDocument;
-        const grid = canvas?.scene?.grid;
+        const grid = canvas?.scene?.grid.size;
         if (!grid) return false;
 
         const oldPos = { x: tokenDocument.x, y: tokenDocument.y };
@@ -789,7 +789,7 @@ export class wallSpell extends baseSpellClass {
     }
 
     static sourceSquareV(center, distance, direction) {
-        const gridSize = canvas.grid.h;
+        const gridSize = canvas.grid.size;
         const length = (distance / 5) * gridSize;
 
         const x = center.x + length * Math.cos(direction * Math.PI / 180);
@@ -800,7 +800,7 @@ export class wallSpell extends baseSpellClass {
 
     static sourceSquare(center, widthSquares, heightSquares) {
 
-        const gridSize = canvas.grid.h;
+        const gridSize = canvas.grid.size;
         const h = gridSize * heightSquares;
         const w = gridSize * widthSquares;
 
@@ -918,7 +918,7 @@ export class wallSpell extends baseSpellClass {
         const wallData = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData');
         if (!wallData) return;
         const wallEffectData = templateDocument.getFlag('advancedspelleffects', 'wallEffectData');
-        const grid = canvas?.scene?.grid;
+        const grid = canvas?.scene?.grid.size;
         if (!grid) return false;
         const damageOnCast = wallData.damageOnCast;
         const damageType = wallData.damageType;
@@ -946,9 +946,9 @@ export class wallSpell extends baseSpellClass {
             if (tokens.length > 0) {
                 for (let i = 0; i < tokens.length; i++) {
                     const token = tokens[i];
-                    const startX = token.width >= 1 ? 0.5 : (token.width / 2);
-                    const startY = token.height >= 1 ? 0.5 : (token.height / 2);
-                    widthLoop: for (let x = startX; x < token.width; x++) {
+                    const startX = token.document.width >= 1 ? 0.5 : (token.document.width / 2);
+                    const startY = token.document.height >= 1 ? 0.5 : (token.document.height / 2);
+                    widthLoop: for (let x = startX; x < token.document.width; x++) {
                         for (let y = startY; y < token.height; y++) {
                             const currGrid = {
                                 x: token.x + x * grid - templateDetails.x,
@@ -1044,8 +1044,8 @@ export class wallSpell extends baseSpellClass {
         console.log("aseData: ", aseData);
         console.log("template: ", template);*/
 
-        const gridSize = canvas.grid.h;
-        const previousTemplateData = template.data;
+        const gridSize = canvas.grid.size;
+        const previousTemplateData = template;
         //console.log("previousTemplateData: ", previousTemplateData);
         let panelsRemaining = panelDiag.data.aseData.flags.panelCount;
         //console.log("Panels Remaining: ", panelsRemaining);

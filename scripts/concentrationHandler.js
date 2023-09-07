@@ -53,12 +53,12 @@ export class concentrationHandler {
             case game.i18n.localize("ASE.Darkness"):
                 await darkness.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
-            case game.i18n.localize('ASE.DetectMagic'):
-                await detectMagic.handleConcentration(casterActor, casterToken, effectOptions);
-                return;
-            case game.i18n.localize('ASE.DetectStuff'):
-                await detectStuff.handleConcentration(casterActor, casterToken, effectOptions);
-                return;
+            // case game.i18n.localize('ASE.DetectMagic'):
+            //     await detectMagic.handleConcentration(casterActor, casterToken, effectOptions);
+            //     return;
+            // case game.i18n.localize('ASE.DetectStuff'):
+            //     await detectStuff.handleConcentration(casterActor, casterToken, effectOptions);
+            //     return;
             case game.i18n.localize('ASE.CallLightning'):
                 await callLightning.handleConcentration(casterActor, casterToken, effectOptions);
                 return;

@@ -38,7 +38,7 @@ export class ASESettings extends FormApplication {
         if (game.modules.get("midi-qol")?.active) {
             this.spellList[game.i18n.localize("ASE.ChaosBolt")] = chaosBolt;
         }
-        this.spellList[game.i18n.localize("ASE.DetectMagic")] = detectMagic;
+        //this.spellList[game.i18n.localize("ASE.DetectMagic")] = detectMagic;
         this.spellList[game.i18n.localize("ASE.FogCloud")] = fogCloud;
         this.spellList[game.i18n.localize("ASE.Darkness")] = darkness;
         this.spellList[game.i18n.localize("ASE.MagicMissile")] = magicMissile;
@@ -53,10 +53,10 @@ export class ASESettings extends FormApplication {
         this.spellList[game.i18n.localize("ASE.ChainLightning")] = chainLightning;
         this.spellList[game.i18n.localize("ASE.MirrorImage")] = mirrorImage;
         this.spellList[game.i18n.localize("ASE.Summon")] = summonCreature;
-        this.spellList[game.i18n.localize("ASE.WallOfForce")] = wallOfForce;
-        this.spellList[game.i18n.localize("ASE.DetectStuff")] = detectStuff;
+        //this.spellList[game.i18n.localize("ASE.WallOfForce")] = wallOfForce;
+        //this.spellList[game.i18n.localize("ASE.DetectStuff")] = detectStuff;
         this.spellList[game.i18n.localize("ASE.ViciousMockery")] = viciousMockery;
-        this.spellList[game.i18n.localize("ASE.WallSpell")] = wallSpell;
+        //this.spellList[game.i18n.localize("ASE.WallSpell")] = wallSpell;
     }
 
     static get defaultOptions() {

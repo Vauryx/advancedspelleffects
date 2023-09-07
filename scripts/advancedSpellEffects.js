@@ -7,7 +7,7 @@ import { MissileDialog } from "./apps/missile-dialog.js";
 import { animateDead } from "./spells/animateDead.js";
 import { chaosBolt } from "./spells/chaosBolt.js";
 import { darkness } from "./spells/darkness.js";
-import { detectMagic } from "./spells/detectMagic.js";
+// import { detectMagic } from "./spells/detectMagic.js";
 import { callLightning } from "./spells/callLightning.js";
 import { fogCloud } from "./spells/fogCloud.js";
 import { spiritualWeapon } from "./spells/spiritualWeapon.js";
@@ -20,9 +20,9 @@ import { scorchingRay } from "./spells/scorchingRay.js";
 import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
-import { wallOfForce } from "./spells/wallOfForce.js";
-import { detectStuff } from "./spells/detectStuff.js";
-import { wallSpell } from "./spells/wallSpell.js";
+// import { wallOfForce } from "./spells/wallOfForce.js";
+// import { detectStuff } from "./spells/detectStuff.js";
+// import { wallSpell } from "./spells/wallSpell.js";
 //Setting up socketlib Functions to be run as GM
 Hooks.once('setup', function () {
     setupASESocket();
@@ -34,9 +34,9 @@ const aseModules = {
     chaosBolt,
     callLightning,
     concentrationHandler,
-    detectMagic,
+    //detectMagic,
     fogCloud,
-    detectStuff,
+    //detectStuff,
     darkness,
     magicMissile,
     spiritualWeapon,
@@ -51,8 +51,8 @@ const aseModules = {
     eldritchBlast,
     moonBeam,
     mirrorImage,
-    wallOfForce,
-    wallSpell
+   // wallOfForce,
+    //wallSpell
 }
 Hooks.once('ready', async function () {
     Object.values(aseModules).forEach(cl => cl.registerHooks());
