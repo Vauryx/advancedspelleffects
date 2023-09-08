@@ -1,14 +1,28 @@
 {
   "socket": true,
-  "name": "advancedspelleffects",
+  "id": "advancedspelleffects",
   "title": "Advanced Spell Effects",
   "description": "",
   "version": "This is auto replaced",
   "library": "false",
   "manifestPlusVersion": "1.0.0",
-  "minimumCoreVersion": "0.8.9",
-  "compatibleCoreVersion": "9.0",
-  "packs": [],
+  "compatibility": {
+    "minimum": "0.8.9",
+    "verified": "11.306"
+  },
+  "packs": [
+    {
+      "name": "ase-spellhelper",
+      "label": "ASE Spell helper",
+      "path": "packs/ase-spellhelper",
+      "type": "Item",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "dnd5e"
+    }
+  ],
   "authors": [
     {
       "name": "Vauryx",
@@ -16,25 +30,57 @@
       "discord": "Vauryx#4507"
     }
   ],
-  "dependencies": [
-    {
-      "name": "sequencer"
-    },
-    {
-      "name": "tagger"
-    },
-    {
-      "name": "socketlib"
-    },
-    {
-      "name": "warpgate"
-    }
-  ],
-  "conflicts": [
-    {
-      "name": "betterrolls5e"
-    }
-  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "manifest": "https://github.com/foundryvtt/dnd5e/releases/download/release-2.3.1/system.json",
+        "compatibility": {
+          "verified": "2.3.1"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "id": "sequencer",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "tagger",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "warpgate",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "socketlib",
+        "type": "module",
+        "compatibility": {}
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "betterrolls5e",
+        "type": "module",
+        "compatibility": {}
+      }
+    ],
+    "recommends": [
+      {
+        "id": "midi-qol",
+        "type": "module"
+      },
+      {
+        "id": "dae",
+        "type": "module"
+      }
+    ]
+  },
   "esmodules": ["/scripts/setup.js", "/scripts/advancedSpellEffects.js"],
   "scripts": [],
   "styles": ["/styles/module.css"],

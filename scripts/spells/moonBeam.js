@@ -34,9 +34,9 @@ export class moonBeam {
 
         const token = canvas.tokens.get(tokenDocument.id);
         let newTokenPosition = { x: 0, y: 0 };
-        newTokenPosition.x = (updateData.x) ? updateData.x : token.data.x;
-        newTokenPosition.y = (updateData.y) ? updateData.y : token.data.y;
-        newTokenPosition = utilFunctions.getCenter(newTokenPosition, tokenDocument.data.width);
+        newTokenPosition.x = (updateData.x) ? updateData.x : token.document.x;
+        newTokenPosition.y = (updateData.y) ? updateData.y : token.document.y;
+        newTokenPosition = utilFunctions.getCenter(newTokenPosition, tokenDocument.width);
 
         let inTiles = token.document.getFlag("advancedspelleffects", "moonbeam.inTiles") ?? [];
         //console.log('inTiles: ', inTiles);
@@ -46,12 +46,12 @@ export class moonBeam {
         //iterate over every moonbeam tile
         for (let i = 0; i < moonbeamTiles.length; i++) {
             let moonbeamTile = moonbeamTiles[i];
-            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile.data);
+            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile);
             //console.log('Moonbeam tile center: ', moonbeamTileCenter);
             let targetToBeamDist = utilFunctions.getDistanceClassic(newTokenPosition, moonbeamTileCenter);
             //console.log('target to beam dist: ', targetToBeamDist);
             //console.log('Required Distance: ', (((tokenDocument.data.width * canvas.grid.size) / 2) + (moonbeamTile.data.width / 2)));
-            if (targetToBeamDist < (((tokenDocument.data.width * canvas.grid.size) / 2) + (moonbeamTile.data.width / 2))) {
+            if (targetToBeamDist < (((tokenDocument.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
                 //check if tile exists in inTiles which is an array of tiles
                 if (inTiles.includes(moonbeamTile.id)) {
 
@@ -83,7 +83,7 @@ export class moonBeam {
         //console.log(combat);
         const combatantToken = canvas.tokens.get(combat.current.tokenId);
         const combatantActor = combatantToken.actor;
-        const combatantPosition = utilFunctions.getCenter(combatantToken.data, combatantToken.data.width);
+        const combatantPosition = utilFunctions.getCenter(combatantToken.document, combatantToken.document.width);
 
         let inTiles = [];
         //iterate over every moonbeam tile
@@ -92,10 +92,10 @@ export class moonBeam {
             //console.log('Moonbeam tile found: ', moonbeamTile);
             let effectOptions = moonbeamTile.getFlag("advancedspelleffects", "effectOptions") ?? {};
             //check if token has entered the tile
-            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile.data);
+            let moonbeamTileCenter = utilFunctions.getTileCenter(moonbeamTile);
             let targetToBeamDist = utilFunctions.getDistanceClassic(combatantPosition, moonbeamTileCenter);
             //console.log('target to beam dist: ', targetToBeamDist);
-            if (targetToBeamDist < (((combatantToken.data.width * canvas.grid.size) / 2) + (moonbeamTile.data.width / 2))) {
+            if (targetToBeamDist < (((combatantToken.document.width * canvas.grid.size) / 2) + (moonbeamTile.width / 2))) {
                 //check if tile exists in inTiles which is an array of tiles
                 console.log(`${combatantToken.name} is starting its turn in the space of a moonbeam tile - ${moonbeamTile.id}`);
                 ui.notifications.info(game.i18n.format("ASE.StartingTurnInMoonbeam", { name: combatantToken.name }));
@@ -311,7 +311,7 @@ export class moonBeam {
       ${savePassed ? game.i18n.format("ASE.SavePassMessage", { saveTotal: saveTotal, damageTotal: damageTotal }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: saveTotal, damageTotal: damageTotal })}
         
       </div>
-      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
+      <div><img src="${token?.document?.texture.src}" height="30" style="border:0px"></div>
     </div>`;
 
         }
@@ -358,17 +358,16 @@ export class moonBeam {
         const casterActor = casterToken.actor;
         const spellSaveDC = rollInfo.spellSaveDc;
 
-        let itemData = spellItem.data;
-        itemData.data.components.concentration = false;
+        let itemData = await game.packs.get('advancedspelleffects.ase-spellhelper').getDocument('csTyAWHZEhycaBwT');
 
         if (game.modules.get("midi-qol")?.active) {
             const fullDamageRoll = await new Roll(rollInfo.damageFormula).evaluate({ async: true });
             const halfdamageroll = await new Roll(`${Math.floor(fullDamageRoll.total / 2)}`).evaluate({ async: true });
             const saveRoll = await new Roll(`1d20+@mod`, { mod: token.actor.system.abilities.con.save }).evaluate({ async: true });
-            console.log('Rolls: ');
-            console.log(fullDamageRoll);
+            //console.log('Rolls: ');
+            //console.log(fullDamageRoll);
             //console.log(halfdamageroll);
-            console.log(saveRoll);
+            //console.log(saveRoll);
             if (game.modules.get("dice-so-nice")?.active) {
                 game.dice3d?.showForRoll(fullDamageRoll);
                 game.dice3d?.showForRoll(saveRoll);
@@ -384,8 +383,8 @@ export class moonBeam {
                 midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, halfdamageroll.total, "radiant", [token],
                     halfdamageroll, {
                     flavor: `Moonbeam - Damage Roll (${rollInfo.damageFormula} Radiant)`,
-                    itemCardId: "new",
-                    itemData: spellItem.data
+                    itemCardId: 'new',
+                    itemData: itemData
                 });
             }
             else {
@@ -394,12 +393,12 @@ export class moonBeam {
                 midiData = await new MidiQOL.DamageOnlyWorkflow(casterActor, casterToken.document, fullDamageRoll.total, "radiant", [token],
                     fullDamageRoll, {
                     flavor: `Moonbeam - Damage Roll (${rollInfo.damageFormula} Radiant)`,
-                    itemCardId: "new",
-                    itemData: spellItem.data
+                    itemCardId: 'new',
+                    itemData: itemData
                 });
             }
             const chatMessage = await game.messages.get(midiData.itemCardId);
-            let chatMessageContent = await duplicate(chatMessage.data.content);
+            let chatMessageContent = await duplicate(chatMessage.content);
             let newChatmessageContent = $(chatMessageContent);
 
             newChatmessageContent.find(".midi-qol-hits-display").empty();
