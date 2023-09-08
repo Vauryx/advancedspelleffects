@@ -322,7 +322,7 @@ export class callLightning {
       <div>
       ${saveResult ? game.i18n.format("ASE.SavePassMessage", { saveTotal: roll, damageTotal: Math.floor(damageRoll.total / 2) }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: roll, damageTotal: damageRoll.total })}
       </div>
-      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
+      <div><img src="${token?.document?.texture.src}" height="30" style="border:0px"></div>
     </div>`;
 
             }

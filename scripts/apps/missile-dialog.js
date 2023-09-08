@@ -315,7 +315,7 @@ export class MissileDialog extends FormApplication {
             </div>
           <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
           <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
-          <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
+          <div><img src="${token?.document?.texture.src}" height="30" style="border:0px"></div>
           <div><span>${attacksHit.length} ${missileType}(s) hit${attacksCrit > 0 ? ', ' + attacksCrit + ' critical(s)!' : ''}${attacksHit.length ? `, dealing <b>${damageFormula} (${damage}) </b>${damageType} damage` : ''}</span></div>
         </div>`;
 
