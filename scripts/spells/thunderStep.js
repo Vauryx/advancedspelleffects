@@ -158,7 +158,7 @@ export class thunderStep {
 
                 if (targets.length) {
                     if (game.modules.get("midi-qol")?.active) {
-                        let chatMessageContent = await duplicate(chatMessage.data.content);
+                        let chatMessageContent = await duplicate(chatMessage.content);
 
                         let targetTokens = new Set();
                         let saves = new Set();

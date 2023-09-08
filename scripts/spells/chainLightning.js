@@ -277,7 +277,7 @@ export class chainLightning {
     async updateChatCards() {
 
         const chatMessage = await game.messages.get(this.params.itemCardId);
-        let chatMessageContent = $(await duplicate(chatMessage.data.content));
+        let chatMessageContent = $(await duplicate(chatMessage.content));
         chatMessageContent.find(".midi-qol-nobox.midi-qol-saves-display").append(
             this.targetData.map(target => {
                 console.log(target.roll);

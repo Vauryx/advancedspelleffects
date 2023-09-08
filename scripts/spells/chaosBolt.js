@@ -621,7 +621,7 @@ export class chaosBolt extends baseSpellClass {
         const attack = this.attackData[this.attackData.length - 1];
 
         const chatMessage = await game.messages.get(this.itemCardId);
-        const duplicatedContent = await duplicate(chatMessage.data.content);
+        const duplicatedContent = await duplicate(chatMessage.content);
         const content = $(duplicatedContent);
 
         const attackRolls = content.find('.midi-qol-attack-roll');

@@ -484,7 +484,7 @@ export class MissileDialog extends FormApplication {
                 let newDamageFormula = `${totalDamageFormula.dieCount}${this.data.effectOptions.dmgDie} ${Number(totalDamageFormula.mod) ? '+' + totalDamageFormula.mod : ''}`;
                 //console.log(attackData);
                 if (game.modules.get("midi-qol")?.active) {
-                    let chatMessageContent = await duplicate(chatMessage.data.content);
+                    let chatMessageContent = await duplicate(chatMessage.content);
                     let newChatmessageContent = $(chatMessageContent);
                     //console.log(newChatmessageContent);
                     newChatmessageContent.find(".midi-qol-hits-display").append(

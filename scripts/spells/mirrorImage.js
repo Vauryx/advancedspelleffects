@@ -133,7 +133,7 @@ export class mirrorImage {
     static async updateChatCardFailed(itemCardId, target, attackRoll) {
         const chatMessage = await game.messages.get(itemCardId, target);
         // console.log(chatMessage);
-        let chatMessageContent = $(await duplicate(chatMessage.data.content));
+        let chatMessageContent = $(await duplicate(chatMessage.content));
         // console.log(chatMessageContent);
         //chatMessageContent.find(".midi-qol-hits-display").empty();
         chatMessageContent.find(".midi-qol-hits-display").append(`<div class="midi-qol-flex-container">
@@ -148,7 +148,7 @@ export class mirrorImage {
 
         const chatMessage = await game.messages.get(itemCardId, target);
         // console.log(chatMessage);
-        let chatMessageContent = $(await duplicate(chatMessage.data.content));
+        let chatMessageContent = $(await duplicate(chatMessage.content));
         // console.log(chatMessageContent);
         chatMessageContent.find(".midi-qol-hits-display").empty();
         chatMessageContent.find(".midi-qol-hits-display").append(`<div class="midi-qol-flex-container">

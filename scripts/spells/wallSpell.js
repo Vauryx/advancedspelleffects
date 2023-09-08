@@ -638,7 +638,7 @@ export class wallSpell extends baseSpellClass {
                 itemData: spellItem.data
             });
             const chatMessage = await game.messages.get(midiData.itemCardId);
-            let chatMessageContent = await duplicate(chatMessage.data.content);
+            let chatMessageContent = await duplicate(chatMessage.content);
             let newChatmessageContent = $(chatMessageContent);
 
             newChatmessageContent.find(".midi-qol-hits-display").empty();
