@@ -442,11 +442,6 @@ export class MissileDialog extends FormApplication {
                             //console.log(this.data.item);
                             // log all data going into MIDIQOL.DamageOnlyWorkflow
                             let effectOptionsdmgType = this.data.effectOptions.dmgType;
-                            let itemCardId = this.data.itemCardId;
-                            //copy this.data.item.data to a new object without reference
-                            let itemData = JSON.parse(JSON.stringify(this.data.item.data));
-                            //new MidiQOL.DamageOnlyWorkflow(caster.actor, caster, damageRoll.total, effectOptionsdmgType, [targetToken], damageRoll, { itemCardId: itemCardId, itemData: itemData });
-                            //convert [targetToken] to a set 
                             let targetSet = new Set();
                             let saveSet = new Set();
                             targetSet.add(targetToken);
