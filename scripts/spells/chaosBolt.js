@@ -468,7 +468,7 @@ export class chaosBolt extends baseSpellClass {
             buttons: potentialTargets.map(target => {
                 const distance = Math.floor(canvas.grid.measureDistance(attack.target.center, target.center));
                 return {
-                    label: `<img width="100" style="border:0;" data-tokenid="${target.id}" src="${target.data.img}"/><br>${target.name} (${distance}ft away)`,
+                    label: `<img width="100" style="border:0;" data-tokenid="${target.id}" src="${target.document.texture.src}"/><br>${target.name} (${distance}ft away)`,
                     value: {
                         target
                     }
@@ -644,7 +644,7 @@ export class chaosBolt extends baseSpellClass {
                     <div class="midi-qol-nobox">
                         <div class="midi-qol-flex-container">
                             <div class="midi-qol-target-npc midi-qol-target-name" id="${attack.target.id}">
-                                <img src="${attack.target.data.img}" width="30" height="30" style="border:0px">
+                                <img src="${attack.target.document.texture.src}" width="30" height="30" style="border:0px">
                             </div>
                             <div> takes ${attack.damage} ${attack.damageType} damage.</div>
                         </div>

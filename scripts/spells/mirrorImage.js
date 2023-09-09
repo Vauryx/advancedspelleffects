@@ -158,7 +158,7 @@ export class mirrorImage {
                     <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${target.id}"> ${target.name}'s Mirror Image!</div>
                     <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${target.id}"> ${target.name}'s Mirror Image!
                     </div>
-                    <div><img src="${target.data.img}" width="30" height="30" style="border:0px">
+                    <div><img src="${target.document.texture.src}" width="30" height="30" style="border:0px">
                     </div>
                 </div>`);
         await chatMessage.update({ content: chatMessageContent.prop('outerHTML') });

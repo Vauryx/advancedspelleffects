@@ -103,7 +103,7 @@ export class chainLightning {
             return `
             <tr class="chain-lightning-target" tokenId="${target.id}">
                 <td class="chain-lightning-flex">
-                    <img src="${target.data.img}" width="30" height="30" style="border:0px"> - ${target.name}
+                    <img src="${target.document.texture.src}" width="30" height="30" style="border:0px"> - ${target.name}
                 </td>
                 <td>
                     <input type="checkbox" class='target' name="${index}">
@@ -290,7 +290,7 @@ export class chainLightning {
                     <div>${target.roll.formula}</div>
                     <div>${target.roll.result}</div>
                     </div></div>
-                    <div><img src="${target.token.data.img}" height="30" style="border:0px"></div>
+                    <div><img src="${target.token.document.texture.src}" height="30" style="border:0px"></div>
                 </div>`;
             })
         );
