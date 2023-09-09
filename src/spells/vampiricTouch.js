@@ -105,7 +105,7 @@ export class vampiricTouch {
             
         await warpgate.mutate(tokenD.document, updates, {}, { name: `${tactor.id}-vampiric-touch` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.VampiricTouchAttack") }));
-        await ChatMessage.create({ content: `${tactor.name}'s hands are wrapped in darkness...` });
+        await ChatMessage.create(game.i18n.format("ASE.VampiricTouchStart",{ actor: tactor.name}));
         effectOptions.concentration = true;
         let castItem = tactor.items.getName(activationItemName);
         effectOptions.castItem = castItem.uuid;
@@ -121,7 +121,7 @@ export class vampiricTouch {
 
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-vampiric-touch` });
 
-        await ChatMessage.create({ content: `${casterActor.name}'s returns to normal.` });
+        await ChatMessage.create(game.i18n.format("ASE.VampiricTouchEnd",{ actor: tactor.name}));
     }
 
     static async activateTouch(midiData) {
@@ -143,11 +143,13 @@ export class vampiricTouch {
         const maxStrands = Number(effectOptions.vtMaxStrands) ?? 20;
         missed = Array.from(midiData.hitTargets).length === 0;
         damageTotal = midiData.damageRoll?.total ?? 12;
+        const healingTotal = Math.floor(damageTotal / 2);
         if (Array.from(midiData.hitTargets).length > 0) {
-            const updatedHP = tactor.system.attributes.hp.value + Math.floor(damageTotal / 2);
+            const updatedHP = tactor.system.attributes.hp.value + healingTotal;
             await tactor.update({
                 "system.attributes.hp.value": Math.min(tactor.system.attributes.hp.max, updatedHP)
             })
+            await ChatMessage.create({ content: game.i18n.format('ASE.VampiricTouchHealing',{actor:tactor.name,heal:healingTotal})});
         }
         const strandNum = Math.min(Math.floor(damageTotal), maxStrands);
         new Sequence('Advanced Spell Effects')

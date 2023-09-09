@@ -216,6 +216,7 @@
   "ASE.ReappearVolumeLabel": "Volume du son de réapparition : ",
 
   "ASE.VampiricTouchDescription": "Le toucher de votre main enveloppée d'ombres peut siphonner la force vitale des autres pour vous soigner",
+  "ASE.VampiricTouchHealing": "Toucher vampirique soigne {actor} de {heal}",
 
   "ASE.ActivateWitchBoltDescription": "Envois une onde de choc à travers l'arc électrique.",
   "ASE.WitchBoltDamageFlavor": "Éclair de sorcière - Jet de dégâts (1d12 de Foudre)",
