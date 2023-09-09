@@ -291,6 +291,9 @@
   "ASE.ReappearVolumeLabel": "Re-appear Volume: ",
 
   "ASE.VampiricTouchDescription": "The touch of your shadow-wreathed hand can siphon force from others to heal your wounds",
+  "ASE.VampiricTouchHealing": "Vampiric Touch heals {actor} <b>{heal}</b> hit points",
+  "ASE.VampiricTouchStart": "{actor}'s hands are wrapped in darkness...",
+  "ASE.VampiricTouchEnd": "{actor}'s hands returns to normal.",
 
   "ASE.VTCasterEffectLabel": "Caster Effect: ",
   "ASE.VTCasterEffectTooltip": "The energy overlay effect on the caster",

@@ -25,7 +25,7 @@ export class vampiricTouch {
         const siphonSoundDelay = Number(effectOptions.vtSiphonSoundDelay) ?? 0;
         const siphonVolume = effectOptions.vtSiphonVolume ?? 1;
 
-        const itemData = midiData.item.data.data;
+        const itemData = midiData.item.system;
         console.log(itemData);
 
         const maxStrands = effectOptions.vtMaxStrands ?? 20;
@@ -76,11 +76,14 @@ export class vampiricTouch {
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
             damageTotal = midiData.damageRoll?.total ?? 12;
+            const healingTotal = Math.floor(damageTotal / 2);
             if (Array.from(midiData.hitTargets).length > 0) {
-                const updatedHP = tactor.system.attributes.hp.value + Math.floor(damageTotal / 2);
+                
+                const updatedHP = tactor.system.attributes.hp.value + healingTotal;
                 await tactor.update({
                     "data.attributes.hp.value": Math.min(tactor.system.attributes.hp.max, updatedHP)
                 });
+                await ChatMessage.create({ content: game.i18n.format('ASE.VampiricTouchHealing',{actor:tactor.name,heal:healingTotal})});
             }
             strandNum = Math.min(Math.floor(damageTotal), maxStrands);
         }
@@ -128,7 +131,7 @@ export class vampiricTouch {
             .play()
         await warpgate.mutate(tokenD.document, updates, {}, { name: `${tactor.id}-vampiric-touch` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.VampiricTouchAttack") }));
-        await ChatMessage.create({ content: `${tactor.name}'s hands are wrapped in darkness...` });
+        await ChatMessage.create(game.i18n.format("ASE.VampiricTouchStart",{ actor: tactor.name}));
 
     }
     static async handleConcentration(casterActor, casterToken, effectOptions) {
@@ -138,8 +141,7 @@ export class vampiricTouch {
         ui.notifications.info(game.i18n.format("ASE.RemovedAtWill", { spellName: game.i18n.localize("ASE.VampiricTouchAttack") }));
 
         await Sequencer.EffectManager.endEffects({ name: `${casterToken.id}-vampiric-touch` });
-
-        await ChatMessage.create({ content: `${casterActor.name}'s returns to normal.` });
+        await ChatMessage.create(game.i18n.format("ASE.VampiricTouchEnd",{ actor: tactor.name}));
     }
 
     static async activateTouch(midiData) {
@@ -161,11 +163,13 @@ export class vampiricTouch {
         if (game.modules.get("midi-qol")?.active) {
             missed = Array.from(midiData.hitTargets).length == 0;
             damageTotal = midiData.damageRoll?.total ?? 12;
+            const healingTotal = Math.floor(damageTotal / 2);
             if (Array.from(midiData.hitTargets).length > 0) {
-                const updatedHP = tactor.system.attributes.hp.value + Math.floor(damageTotal / 2);
+                const updatedHP = tactor.system.attributes.hp.value + healingTotal;
                 await tactor.update({
                     "data.attributes.hp.value": Math.min(tactor.system.attributes.hp.max, updatedHP)
                 })
+                await ChatMessage.create({ content: game.i18n.format('ASE.VampiricTouchHealing',{actor:tactor.name,heal:healingTotal})});
             }
         }
         const strandNum = Math.min(Math.floor(damageTotal), maxStrands);
