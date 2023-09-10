@@ -76,11 +76,14 @@ export class mirrorImage {
         else {
             console.log("Mirror Image succeeded.");
             data.noAutoDamage = true;
+            //delete item to prevent workflow damage to trigger
+            delete data.item;
             if (attackRoll.total >= imageAC) {
                 // console.log("Mirror Image hit.");
                 await warpgate.wait(effectOptions.imageDestroyDelay);
                 await Sequencer.EffectManager.endEffects({ name: mirrorImageEffectNames[0] });
                 await mirrorImage.updateChatCard(data.itemCardId, target, roll.total, true);
+
                 //console.log("------------Done Mirror Image Pre Check Hits------------");
                 return;
             }
