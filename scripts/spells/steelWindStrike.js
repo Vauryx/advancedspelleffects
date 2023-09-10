@@ -78,7 +78,7 @@ export class steelWindStrike {
             //console.log("Current damage dice roll total: ", currentRoll.total);
             //game.dice3d?.showForRoll(currentRoll);
             if (game.modules.get("midi-qol")?.active) {
-                new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item.data });
+                new MidiQOL.DamageOnlyWorkflow(midiData.actor, midiData.tokenId, currentRoll.total, "force", [target], currentRoll, { flavor: game.i18n.localize("ASE.SteelWindStrikeDamageFlavor"), itemCardId: "new", itemData: midiData.item });
             }
             //console.log("damage data: ", damageData);
             rollDataForDisplay.push({
