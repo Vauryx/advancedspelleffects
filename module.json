@@ -4,30 +4,20 @@
   "title": "Advanced Spell Effects",
   "description": "",
   "version": "This is auto replaced",
-  "library": "false",
-  "manifestPlusVersion": "1.0.0",
   "compatibility": {
-    "minimum": "0.8.9",
+    "minimum": "11",
     "verified": "11.306"
   },
-  "packs": [
-    {
-      "name": "ase-spellhelper",
-      "label": "ASE Spell helper",
-      "path": "packs/ase-spellhelper",
-      "type": "Item",
-      "ownership": {
-        "PLAYER": "OBSERVER",
-        "ASSISTANT": "OWNER"
-      },
-      "system": "dnd5e"
-    }
-  ],
   "authors": [
     {
       "name": "Vauryx",
       "url": "https://github.com/Vauryx",
       "discord": "Vauryx#4507"
+    },    
+    {
+      "name": "Tallon",
+      "url": "https://github.com/Tallon159",
+      "discord": "tallon159"
     }
   ],
   "relationships": {
@@ -105,5 +95,17 @@
       "url": "https://avatars2.githubusercontent.com/u/71292812?s=400&u=ccdb4eeb7abf551ca8f314e5a9bfd0479a4d3d41&v=4"
     }
   ],
-  "system": ["dnd5e"]
+  "packs": [
+    {
+      "name": "ase-spellhelper",
+      "label": "ASE Spell helper",
+      "path": "packs/ase-spellhelper",
+      "type": "Item",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "dnd5e"
+    }
+  ]
 }
