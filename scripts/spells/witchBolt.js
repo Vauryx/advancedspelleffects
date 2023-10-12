@@ -29,7 +29,7 @@ export class witchBolt {
             delay: streamSoundDelay
         };
 
-        const itemData = midiData.item.data.data;
+        const itemData = midiData.item.system;
         console.log(itemData);
 
         let missed = false;
@@ -145,16 +145,15 @@ export class witchBolt {
         const initialBoltSound = effectOptions.initialBoltSound ?? "";
         const initialBoltSoundDelay = Number(effectOptions.initialBoltSoundDelay) ?? 0;
         const initialBoltSoundVolume = effectOptions.initialBoltSoundVolume ?? 1;
-        let itemData = midiData.item.data;
-
-        const damageFormula = itemData.data.damage.parts[0];
-        const damageType = itemData.data.damage.parts[1];
-        console.log('damageFormula: ', damageFormula);
-        let damageRoll = await new Roll(`${damageFormula}`).evaluate({ async: true });
-
-        itemData.data.components.concentration = false;
+        let itemData = midiData.item.system;
 
         if (game.modules.get("midi-qol")?.active) {
+            const damageFormula = itemData.damage.parts[0][0];
+            const damageType = itemData.damage.parts[0][1];
+            console.log('damageFormula: ', damageFormula);
+            let damageRoll = await new Roll(`${damageFormula}`).evaluate({ async: true });
+    
+            itemData.components.concentration = false;
             //console.log(damageRoll);
             new MidiQOL.DamageOnlyWorkflow(casterActor, caster.document, damageRoll.total, damageType, target ? [target] : [], damageRoll, { flavor: game.i18n.localize("ASE.WitchBoltDamageFlavor"), itemCardId: "new", itemData: itemData });
         }
@@ -188,7 +187,7 @@ export class witchBolt {
             //console.log('Scanning Token: ',token.name);
             return (token.actor?.effects.filter((effect) => {
                 //console.log('Active Effect: ', effect);
-                let origin = effect.data.origin?.split(".");
+                let origin = effect.origin?.split(".");
                 if (!origin || origin?.length < 4) return false;
                 let itemId = origin[5] ?? origin[3];
                 //console.log("scanning item id: ", itemId);
@@ -215,8 +214,8 @@ export class witchBolt {
         //console.log("Is target of any witch bolts?", isWitchBoltTarget);
         if (isWitchBoltTarget) {
             let newPos = { x: 0, y: 0 };
-            newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
-            newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
+            newPos.x = (updateData.x) ? updateData.x : tokenDocument.x;
+            newPos.y = (updateData.y) ? updateData.y : tokenDocument.y;
             newPos = utilFunctions.getCenter(newPos);
             //console.log(newPos);
             //console.log(castersOnTarget);
@@ -262,7 +261,7 @@ export class witchBolt {
         }
         witchBoltConcentration = casterActor.effects.filter((effect) => {
             //console.log(effect.data);
-            let origin = effect.data.origin?.split(".");
+            let origin = effect.origin?.split(".");
             if (!origin || origin?.length < 4) return false;
             let itemId = origin[5] ?? origin[3];
             let item = casterActor.items.get(itemId);
@@ -275,7 +274,7 @@ export class witchBolt {
         //console.log(witchBoltConcentration);
         //console.log(casterActor);
         if (witchBoltConcentration) {
-            let concOrigin = witchBoltConcentration.data.origin.split(".");
+            let concOrigin = witchBoltConcentration.origin.split(".");
             if (!concOrigin || concOrigin?.length < 4) return false;
             let itemID = concOrigin[5] ?? concOrigin[3];
             witchBoltItem = casterActor.items.get(itemID);
@@ -286,8 +285,8 @@ export class witchBolt {
                 //console.log(effectInfo.casterId, effectInfo.targetId);
                 let target = canvas.tokens.get(effectInfo.targetId);
                 let newPos = { x: 0, y: 0 };
-                newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
-                newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
+                newPos.x = (updateData.x) ? updateData.x : tokenDocument.x;
+                newPos.y = (updateData.y) ? updateData.y : tokenDocument.y;
                 newPos = utilFunctions.getCenter(newPos);
                 //console.log(newPos);
                 await Sequencer.EffectManager.endEffects({ name: `${tokenDocument.id}-witchBolt` });
@@ -322,7 +321,7 @@ export class witchBolt {
         //console.log(casterActor, casterActor.isOwner);
         if (!casterActor.isOwner || (game.user.isGM && caster.actor.hasPlayerOwner)) return;
         let witchBoltConcentration = casterActor.effects.filter((effect) => {
-            let origin = effect.data.origin?.split(".");
+            let origin = effect.origin?.split(".");
             if (!origin || origin?.length < 4) return false;
             let itemId = origin[5] ?? origin[3];
             let effectSource = casterActor.items.get(itemId)?.name;
@@ -335,7 +334,7 @@ export class witchBolt {
                 title: game.i18n.localize("ASE.WitchBoltPromptTitle"),
             };
             let target = canvas.tokens.get(caster.document.getFlag("advancedspelleffects", "witchBolt.targetId"));
-            let concOrigin = witchBoltConcentration.data.origin.split(".");
+            let concOrigin = witchBoltConcentration.origin.split(".");
             if (!concOrigin || concOrigin?.length < 4) return false;
             let itemID = concOrigin[5] ?? concOrigin[3];
             let witchBoltItem = casterActor.items.get(itemID);

@@ -41,11 +41,11 @@ export class mirrorImage {
 
         const attackRoll = data.attackRoll;
         //console.log("Arrack Roll: ", attackRoll.total);
-        const targetAC = target.document.actor.data.data.attributes.ac.value;
+        const targetAC = target.document.actor.system.attributes.ac.value;
         //console.log("Target AC: ", targetAC);
 
         const imagesRemaining = mirrorImages.length;
-        const imageAC = 10 + target.actor.data.data.abilities.dex.mod;
+        const imageAC = 10 + target.actor.system.abilities.dex.mod;
 
         const roll = new Roll(`1d20`).evaluate({ async: false });
         //console.log("Mirror Image Roll: ", roll.total);
@@ -76,11 +76,14 @@ export class mirrorImage {
         else {
             console.log("Mirror Image succeeded.");
             data.noAutoDamage = true;
+            //delete item to prevent workflow damage to trigger
+            delete data.item;
             if (attackRoll.total >= imageAC) {
                 // console.log("Mirror Image hit.");
                 await warpgate.wait(effectOptions.imageDestroyDelay);
                 await Sequencer.EffectManager.endEffects({ name: mirrorImageEffectNames[0] });
                 await mirrorImage.updateChatCard(data.itemCardId, target, roll.total, true);
+
                 //console.log("------------Done Mirror Image Pre Check Hits------------");
                 return;
             }
@@ -133,7 +136,7 @@ export class mirrorImage {
     static async updateChatCardFailed(itemCardId, target, attackRoll) {
         const chatMessage = await game.messages.get(itemCardId, target);
         // console.log(chatMessage);
-        let chatMessageContent = $(await duplicate(chatMessage.data.content));
+        let chatMessageContent = $(await duplicate(chatMessage.content));
         // console.log(chatMessageContent);
         //chatMessageContent.find(".midi-qol-hits-display").empty();
         chatMessageContent.find(".midi-qol-hits-display").append(`<div class="midi-qol-flex-container">
@@ -148,7 +151,7 @@ export class mirrorImage {
 
         const chatMessage = await game.messages.get(itemCardId, target);
         // console.log(chatMessage);
-        let chatMessageContent = $(await duplicate(chatMessage.data.content));
+        let chatMessageContent = $(await duplicate(chatMessage.content));
         // console.log(chatMessageContent);
         chatMessageContent.find(".midi-qol-hits-display").empty();
         chatMessageContent.find(".midi-qol-hits-display").append(`<div class="midi-qol-flex-container">
@@ -158,7 +161,7 @@ export class mirrorImage {
                     <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${target.id}"> ${target.name}'s Mirror Image!</div>
                     <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${target.id}"> ${target.name}'s Mirror Image!
                     </div>
-                    <div><img src="${target.data.img}" width="30" height="30" style="border:0px">
+                    <div><img src="${target.document.texture.src}" width="30" height="30" style="border:0px">
                     </div>
                 </div>`);
         await chatMessage.update({ content: chatMessageContent.prop('outerHTML') });
@@ -169,7 +172,7 @@ export class mirrorImage {
         const casterToken = this.token;
         const numberOfImages = 3;
 
-        let casterTokenImg = casterToken.data.img;
+        let casterTokenImg = casterToken.document.texture.src;
 
 
         const positions = [];

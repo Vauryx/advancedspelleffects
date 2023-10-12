@@ -25,11 +25,11 @@ export class chaosBolt extends baseSpellClass {
         this.token = canvas.tokens.get(this.params.tokenId);
         this.item = this.params.item;
         this.effectOptions = this.item.getFlag("advancedspelleffects", "effectOptions") ?? {};
-        this.rollProf = this.actor.data.data.attributes.prof;
-        const rollAbility = this.actor.data.data.attributes.spellcasting;
-        this.rollMod = this.actor.data.data.abilities[rollAbility].mod || 0;
-        this.attackBonus = this.actor.data.data.bonuses.rsak.attack;
-        this.damageBonus = this.actor.data.data.bonuses.rsak.damage;
+        this.rollProf = this.actor.system.attributes.prof;
+        const rollAbility = this.actor.system.attributes.spellcasting;
+        this.rollMod = this.actor.system.abilities[rollAbility].mod || 0;
+        this.attackBonus = this.actor.system.bonuses.rsak.attack;
+        this.damageBonus = this.actor.system.bonuses.rsak.damage;
 
         this.itemCardId = this.params.itemCardId;
 
@@ -452,7 +452,7 @@ export class chaosBolt extends baseSpellClass {
             return canvas.grid.measureDistance(attack.target.center, new_target.center) <= distance
                 && this.targetsHitSoFar.indexOf(new_target.id) === -1
                 && attack.target.data.disposition === new_target.data.disposition
-                && new_target.actor.data.data.attributes.hp.value > 0
+                && new_target.actor.system.attributes.hp.value > 0
                 && new_target !== this.token;
         });
 
@@ -468,7 +468,7 @@ export class chaosBolt extends baseSpellClass {
             buttons: potentialTargets.map(target => {
                 const distance = Math.floor(canvas.grid.measureDistance(attack.target.center, target.center));
                 return {
-                    label: `<img width="100" style="border:0;" data-tokenid="${target.id}" src="${target.data.img}"/><br>${target.name} (${distance}ft away)`,
+                    label: `<img width="100" style="border:0;" data-tokenid="${target.id}" src="${target.document.texture.src}"/><br>${target.name} (${distance}ft away)`,
                     value: {
                         target
                     }
@@ -518,7 +518,7 @@ export class chaosBolt extends baseSpellClass {
             ...attack,
             roll: attackRoll,
             attackRollRender: attackRollRender,
-            hits: attackRoll.total >= attack.target.actor.data.data.attributes.ac.value && !criticalMiss,
+            hits: attackRoll.total >= attack.target.actor.system.attributes.ac.value && !criticalMiss,
             criticalHit: criticalHit,
             criticalMiss: criticalMiss
         }
@@ -621,7 +621,7 @@ export class chaosBolt extends baseSpellClass {
         const attack = this.attackData[this.attackData.length - 1];
 
         const chatMessage = await game.messages.get(this.itemCardId);
-        const duplicatedContent = await duplicate(chatMessage.data.content);
+        const duplicatedContent = await duplicate(chatMessage.content);
         const content = $(duplicatedContent);
 
         const attackRolls = content.find('.midi-qol-attack-roll');
@@ -644,7 +644,7 @@ export class chaosBolt extends baseSpellClass {
                     <div class="midi-qol-nobox">
                         <div class="midi-qol-flex-container">
                             <div class="midi-qol-target-npc midi-qol-target-name" id="${attack.target.id}">
-                                <img src="${attack.target.data.img}" width="30" height="30" style="border:0px">
+                                <img src="${attack.target.document.texture.src}" width="30" height="30" style="border:0px">
                             </div>
                             <div> takes ${attack.damage} ${attack.damageType} damage.</div>
                         </div>

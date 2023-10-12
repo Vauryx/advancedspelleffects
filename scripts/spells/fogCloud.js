@@ -99,10 +99,10 @@ export class fogCloud {
 
             let wall_number = aseFlags.wallNumber * spellLevel;
             let wall_angles = 2 * Math.PI / wall_number
-            tileWidth = (templateData.width * canvas.grid.size) + (canvas.grid.size / 2);
-            tileHeight = (templateData.width * canvas.grid.size) + (canvas.grid.size / 2);
+            tileWidth = (templateData.size * canvas.grid.size) + (canvas.grid.size / 2);
+            tileHeight = (templateData.size * canvas.grid.size) + (canvas.grid.size / 2);
 
-            let outerCircleRadius = (templateData.width * canvas.grid.size) / 2;
+            let outerCircleRadius = (templateData.size * canvas.grid.size) / 2;
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
             let data = [{

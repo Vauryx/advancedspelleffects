@@ -67,13 +67,12 @@ export class MissileDialog extends FormApplication {
             .volume(markerSoundVolume)
             .playIf(markerSound != "")
             .effect()
-            .attachTo(target, { followRotation: false })
+            .attachTo(target, { followRotation: false, offset: offset })
             .filter("ColorMatrix", { hue: markerAnimHue, saturate: markerAnimSaturation })
             .locally()
             .file(markerAnim)
             .scale(0.01)
             .name(`missile-target-${target.id}-${currMissile}`)
-            .offset(offset)
             .duration(300000)
             .animateProperty("sprite", "scale.x", { from: 0.01, to: baseScale, delay: 200, duration: 700, ease: "easeOutBounce" })
             .animateProperty("sprite", "scale.y", { from: 0.01, to: baseScale, duration: 900, ease: "easeOutBounce" })
@@ -113,7 +112,7 @@ export class MissileDialog extends FormApplication {
         let attackType = parsedEventData.altKey ? 'kh' : (parsedEventData.ctrlKey ? 'kl' : '');
         //console.log('Mouse Click Data: ', parsedEventData);
         let token = canvas.tokens.placeables.filter(token => {
-            const mouse = canvas.app.renderer.plugins.interaction.mouse;
+            const mouse = utilFunctions.getCanvasMouse();
             const mouseLocal = mouse.getLocalPosition(token);
             //console.log('Mouse Local: ', mouseLocal);
             return mouseLocal.x >= 0 && mouseLocal.x <= token.hitArea.width
@@ -158,7 +157,7 @@ export class MissileDialog extends FormApplication {
             let newLabel1 = newTargetRow.insertCell(0);
             let newMissilesAssignedInput = newTargetRow.insertCell(1);
             let newRemoveMissileButton = newTargetRow.insertCell(2);
-            newLabel1.innerHTML = `<img src="${target.document.data.img}" width="30" height="30" style="border:0px"> - ${target.document.data.name}`;
+            newLabel1.innerHTML = `<img src="${target.document.texture.src}" width="30" height="30" style="border:0px"> - ${target.document.name}`;
             newMissilesAssignedInput.innerHTML = `<input style='width: 2em;' type="number" id="${target.document.id}-missiles" readonly value="${missilesAssigned}"></input>`;
             newRemoveMissileButton.innerHTML = `<button id="${target.document.id}-removeMissile" class="btnRemoveMissile" type="button"><i class="fas fa-minus"></i></button>`;
             let btnRemoveMissile = document.getElementById(`${target.document.id}-removeMissile`);
@@ -254,8 +253,7 @@ export class MissileDialog extends FormApplication {
             .atLocation(caster)
             .randomizeMirrorY()
             .missed(!hit)
-            .stretchTo(target)
-            .randomOffset(0.65)
+            .stretchTo(target,{randomOffset:0.65})
             //.playbackRate(utilFunctions.getRandomNumber(0.7, 1.3))
             .waitUntilFinished(impactDelay)
             .sound()
@@ -295,7 +293,7 @@ export class MissileDialog extends FormApplication {
         let crit = attackRoll.terms[0].total == 20;
         let hit;
         game.dice3d?.showForRoll(attackRoll);
-        if (attackRoll.total < target.actor.data.data.attributes.ac.value) {
+        if (attackRoll.total < target.actor.system.attributes.ac.value) {
             console.log(`${caster.name} missed ${target.name} with roll ${attackRoll.total}${mod == '' ? '' : (mod == 'kh' ? ', with advantage!' : ', with dis-advantage!')}`);
             hit = false;
         }
@@ -317,14 +315,14 @@ export class MissileDialog extends FormApplication {
             </div>
           <div class="midi-qol-target-npc-GM midi-qol-target-name" id="${token.id}"> <b>${token.name}</b></div>
           <div class="midi-qol-target-npc-Player midi-qol-target-name" id="${token.id}" style="display: none;"> <b>${token.name}</b></div>
-          <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
+          <div><img src="${token?.document?.texture.src}" height="30" style="border:0px"></div>
           <div><span>${attacksHit.length} ${missileType}(s) hit${attacksCrit > 0 ? ', ' + attacksCrit + ' critical(s)!' : ''}${attacksHit.length ? `, dealing <b>${damageFormula} (${damage}) </b>${damageType} damage` : ''}</span></div>
         </div>`;
 
             }
             //console.log("Inside update object if statement...");
             let caster = canvas.tokens.get(this.data.caster);
-            const casterActor = game.actors.get(caster.data.actorId);
+            const casterActor = game.actors.get(caster.document.actorId);
             const item = this.data.item;
             let rollData = item.getRollData();
             const rollMod = rollData.mod;
@@ -444,11 +442,6 @@ export class MissileDialog extends FormApplication {
                             //console.log(this.data.item);
                             // log all data going into MIDIQOL.DamageOnlyWorkflow
                             let effectOptionsdmgType = this.data.effectOptions.dmgType;
-                            let itemCardId = this.data.itemCardId;
-                            //copy this.data.item.data to a new object without reference
-                            let itemData = JSON.parse(JSON.stringify(this.data.item.data));
-                            //new MidiQOL.DamageOnlyWorkflow(caster.actor, caster, damageRoll.total, effectOptionsdmgType, [targetToken], damageRoll, { itemCardId: itemCardId, itemData: itemData });
-                            //convert [targetToken] to a set 
                             let targetSet = new Set();
                             let saveSet = new Set();
                             targetSet.add(targetToken);
@@ -486,7 +479,7 @@ export class MissileDialog extends FormApplication {
                 let newDamageFormula = `${totalDamageFormula.dieCount}${this.data.effectOptions.dmgDie} ${Number(totalDamageFormula.mod) ? '+' + totalDamageFormula.mod : ''}`;
                 //console.log(attackData);
                 if (game.modules.get("midi-qol")?.active) {
-                    let chatMessageContent = await duplicate(chatMessage.data.content);
+                    let chatMessageContent = await duplicate(chatMessage.content);
                     let newChatmessageContent = $(chatMessageContent);
                     //console.log(newChatmessageContent);
                     newChatmessageContent.find(".midi-qol-hits-display").append(

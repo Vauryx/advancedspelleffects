@@ -1,40 +1,76 @@
 {
   "socket": true,
-  "name": "advancedspelleffects",
+  "id": "advancedspelleffects",
   "title": "Advanced Spell Effects",
   "description": "",
   "version": "This is auto replaced",
-  "library": "false",
-  "manifestPlusVersion": "1.0.0",
-  "minimumCoreVersion": "0.8.9",
-  "compatibleCoreVersion": "9.0",
-  "packs": [],
+  "compatibility": {
+    "minimum": "11",
+    "verified": "11.306"
+  },
   "authors": [
     {
       "name": "Vauryx",
       "url": "https://github.com/Vauryx",
       "discord": "Vauryx#4507"
+    },    
+    {
+      "name": "Tallon",
+      "url": "https://github.com/Tallon159",
+      "discord": "tallon159"
     }
   ],
-  "dependencies": [
-    {
-      "name": "sequencer"
-    },
-    {
-      "name": "tagger"
-    },
-    {
-      "name": "socketlib"
-    },
-    {
-      "name": "warpgate"
-    }
-  ],
-  "conflicts": [
-    {
-      "name": "betterrolls5e"
-    }
-  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "manifest": "https://github.com/foundryvtt/dnd5e/releases/download/release-2.3.1/system.json",
+        "compatibility": {
+          "verified": "2.3.1"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "id": "sequencer",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "tagger",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "warpgate",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "socketlib",
+        "type": "module",
+        "compatibility": {}
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "betterrolls5e",
+        "type": "module",
+        "compatibility": {}
+      }
+    ],
+    "recommends": [
+      {
+        "id": "midi-qol",
+        "type": "module"
+      },
+      {
+        "id": "dae",
+        "type": "module"
+      }
+    ]
+  },
   "esmodules": ["/scripts/setup.js", "/scripts/advancedSpellEffects.js"],
   "scripts": [],
   "styles": ["/styles/module.css"],
@@ -59,5 +95,17 @@
       "url": "https://avatars2.githubusercontent.com/u/71292812?s=400&u=ccdb4eeb7abf551ca8f314e5a9bfd0479a4d3d41&v=4"
     }
   ],
-  "system": ["dnd5e"]
+  "packs": [
+    {
+      "name": "ase-spellhelper",
+      "label": "ASE Spell helper",
+      "path": "packs/ase-spellhelper",
+      "type": "Item",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "dnd5e"
+    }
+  ]
 }

@@ -2,7 +2,7 @@ import { aseSocket } from "../aseSockets.js";
 import * as utilFunctions from "../utilityFunctions.js";
 
 export class animateDeadDialog extends FormApplication {
-    constructor(corpses, options = { raiseLimit: 1, effectSettings: { summons: { skeleton: { actor: "" }, zombie: { actor: "" } }, effectAColor: "blue", effectBColor: "blue", magicSchool: "evocation", magicSchoolColor: "blue" } }) {
+    constructor(corpses, options = { raiseLimit: 1, effectSettings: { animateDeadSummons: { skeleton: { actor: "" }, zombie: { actor: "" } }, effectAColor: "blue", effectBColor: "blue", magicSchool: "evocation", magicSchoolColor: "blue" } }) {
         super(options);
         foundry.utils.mergeObject(this.options, options);
         this.data = {};
@@ -93,14 +93,14 @@ export class animateDeadDialog extends FormApplication {
         let zombieTokenData;
         let skeletonTokenData;
         if (zombieActorId && skeletonActorId) {
-            zombieTokenData = (await game.actors.get(zombieActorId).getTokenData()).toObject();
-            skeletonTokenData = (await game.actors.get(skeletonActorId).getTokenData()).toObject();
+            zombieTokenData = (await game.actors.get(zombieActorId).getTokenDocument()).toObject();
+            skeletonTokenData = (await game.actors.get(skeletonActorId).getTokenDocument()).toObject();
             delete zombieTokenData.x;
             delete zombieTokenData.y;
             delete skeletonTokenData.x;
             delete skeletonTokenData.y;
-            zombieTokenData = mergeObject(corpseToken.data.toObject(), zombieTokenData, { inplace: false });
-            skeletonTokenData = mergeObject(corpseToken.data.toObject(), skeletonTokenData, { inplace: false });
+            zombieTokenData = mergeObject(corpseToken.document.toObject(), zombieTokenData, { inplace: false });
+            skeletonTokenData = mergeObject(corpseToken.document.toObject(), skeletonTokenData, { inplace: false });
         }
         else {
             ui.notifications.error(game.i18n.localize("ASE.AssociatedActorNotFoundNotification"));
@@ -118,6 +118,7 @@ export class animateDeadDialog extends FormApplication {
 
         console.log(`Raised ${corpseToken.name} as a ${event.currentTarget.innerText}!`);
         document.getElementById("raiseLimit").value--;
+
         document.getElementById(corpseToken.id).remove();
         if (document.getElementById("raiseLimit").value == 0) {
             ui.notifications.info(game.i18n.localize("ASE.RaisedAllCorpsesNotification"));
@@ -208,7 +209,7 @@ export class animateDeadDialog extends FormApplication {
                 .thenDo(async () => {
                     try {
                         let corpseDoc = token.document;
-                        let summonActorData = game.actors.get(summonTokenData.actorId).data.toObject();
+                        let summonActorData = game.actors.get(summonTokenData.actorId).toObject();
                         delete summonActorData.items;
                         delete summonActorData.effects;
                         delete summonActorData._id;

@@ -129,7 +129,7 @@ export class callLightning {
 
         await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-call-lightning` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
-        await ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage'), { name: caster.actor.name }}` });
+        await ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage', { name: caster.actor.name })}` });
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         await callLightning.callLightningBolt(stormTileId, midiData.itemCardId, midiData.item.id);
 
@@ -155,8 +155,8 @@ export class callLightning {
             let tileX;
             let tileY;
 
-            tileWidth = (templateData.width * canvas.grid.size);
-            tileHeight = (templateData.width * canvas.grid.size);
+            tileWidth = (templateData.size * canvas.grid.size);
+            tileHeight = (templateData.size * canvas.grid.size);
             tileX = templateData.x - (tileWidth / 2);
             tileY = templateData.y - (tileHeight / 2);
             let data = {
@@ -234,7 +234,7 @@ export class callLightning {
         let casterActor = caster.document.actor;
         const itemD = casterActor.items.get(itemId);
         //console.log(caster);
-        let dist = utilFunctions.measureDistance({ x: stormCloudTile.data.x + (stormCloudTile.data.width / 2), y: stormCloudTile.data.y + (stormCloudTile.data.width / 2) }, boltTemplate);
+        let dist = utilFunctions.measureDistance({ x: stormCloudTile.x + (stormCloudTile.width / 2), y: stormCloudTile.y + (stormCloudTile.width / 2) }, boltTemplate);
         //console.log("Distance to bolt: ", dist);
         if (dist > 60) {
             await warpgate.buttonDialog({
@@ -245,7 +245,7 @@ export class callLightning {
         }
 
         //console.log("Caster Actor: ", casterActor);
-        let saveDC = casterActor.data.data.attributes.spelldc;
+        let saveDC = casterActor.system.attributes.spelldc;
         //console.log("Save DC: ", saveDC);
         const boltOptions = {
             boltStyle: stormCloudTile.getFlag("advancedspelleffects", "boltStyle"),
@@ -270,7 +270,7 @@ export class callLightning {
             }
 
             const chatMessage = await game.messages.get(itemCardId);
-            let chatMessageContent = await duplicate(chatMessage.data.content);
+            let chatMessageContent = await duplicate(chatMessage.content);
             let targetTokens = new Set();
             let saves = new Set();
             let saveRolls = [];
@@ -280,7 +280,7 @@ export class callLightning {
             newChatmessageContent.find(".midi-qol-saves-display").empty();
             for await (let targetToken of targetsInCrosshairs) {
 
-                let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.data.data.abilities.dex.save }).evaluate({ async: true });
+                let saveRoll = await new Roll("1d20+@mod", { mod: targetToken.actor.system.abilities.dex.save }).evaluate({ async: true });
 
                 let save = saveRoll.total;
                 targetTokens.add(targetToken)
@@ -322,7 +322,7 @@ export class callLightning {
       <div>
       ${saveResult ? game.i18n.format("ASE.SavePassMessage", { saveTotal: roll, damageTotal: Math.floor(damageRoll.total / 2) }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: roll, damageTotal: damageRoll.total })}
       </div>
-      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
+      <div><img src="${token?.document?.texture.src}" height="30" style="border:0px"></div>
     </div>`;
 
             }
@@ -358,8 +358,8 @@ export class callLightning {
                 let tileX;
                 let tileY;
 
-                tileWidth = templateData.width * (canvas.grid.size);
-                tileHeight = templateData.width * (canvas.grid.size);
+                tileWidth = templateData.size * (canvas.grid.size);
+                tileHeight = templateData.size * (canvas.grid.size);
                 tileX = templateData.x - (tileWidth / 2);
                 tileY = templateData.y - (tileHeight / 2);
                 let data = [{
@@ -384,7 +384,7 @@ export class callLightning {
                 let createdTiles = await aseSocket.executeAsGM("placeTiles", data);
             }
 
-            let cloudCenter = { x: cloud.data.x + (cloud.data.width / 2), y: cloud.data.y + (cloud.data.width / 2) };
+            let cloudCenter = { x: cloud.x + (cloud.width / 2), y: cloud.y + (cloud.width / 2) };
             let strikeRay = new Ray(boltTemplate, cloudCenter);
             let strikeAngle = strikeRay.angle * (180 / Math.PI)
             let strikeRotation = (-strikeAngle) - 90;
@@ -481,7 +481,7 @@ export class callLightning {
     }
 
     static async handleConcentration(casterActor, casterToken, effectOptions) {
-        let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == casterToken.id);
+        let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.flags.advancedspelleffects?.stormCloudTile == casterToken.id);
         //console.log(casterToken);
         //console.log("tiles to delete: ", [tiles[0].id]);
         if (stormCloudTiles.length > 0) {
@@ -499,7 +499,7 @@ export class callLightning {
         let caster = canvas.tokens.get(currentCombatantId);
         if (!caster) return;
         if (!caster.actor.isOwner || (game.user.isGM && caster.actor.hasPlayerOwner)) return;
-        let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.data.flags.advancedspelleffects?.stormCloudTile == currentCombatantId);
+        let stormCloudTiles = canvas.scene.tiles.filter((tile) => tile.flags.advancedspelleffects?.stormCloudTile == currentCombatantId);
         //console.log("update hook fired...", stormCloudTiles);
         if (stormCloudTiles.length > 0) {
             //console.log("Detected Storm Cloud! Prompting for Bolt...");

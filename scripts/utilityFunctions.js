@@ -204,7 +204,7 @@ export function getSelfTarget(actor) {
     const speaker = ChatMessage.getSpeaker({ actor });
     if (speaker.token)
         return canvas.tokens?.get(speaker.token);
-    return new CONFIG.Token.documentClass(actor.getTokenData(), { actor });
+    return new CONFIG.Token.documentClass(actor.getTokenDocument(), { actor });
 }
 
 export function getAssetFilePaths(assetDBPaths) {
@@ -253,7 +253,7 @@ export function getAllItemsNamed(name) {
     let scenes = game.scenes.contents;
     let itemsWithName = [];
     for (let actor of actors) {
-        let items = actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects?.enableASE);
+        let items = actor.items.filter(item => item.name == name && item.flags.advancedspelleffects?.enableASE);
         items.forEach(item => {
             itemsWithName.push(item);
         });
@@ -261,7 +261,7 @@ export function getAllItemsNamed(name) {
     for (let scene of scenes) {
         let tokensInScene = Array.from(scene.tokens);
         tokensInScene.forEach(token => {
-            let items = token.actor.items.filter(item => item.name == name && item.data.flags.advancedspelleffects?.enableASE);
+            let items = token.actor.items.filter(item => item.name == name && item.flags.advancedspelleffects?.enableASE);
             items.forEach(item => {
                 itemsWithName.push(item);
             });
@@ -308,11 +308,11 @@ export function isMidiActive() {
 }
 
 export function getContainedCustom(tokenD, crosshairs) {
-    let tokenCenter = getCenter(tokenD.data, tokenD.data.width);
+    let tokenCenter = getCenter(tokenD.document, tokenD.document.width);
     let tokenCrosshairsDist = canvas.grid.measureDistance(tokenCenter, crosshairs);
-    let crosshairsDistance = crosshairs.data?.distance ?? crosshairs.distance;
+    let crosshairsDistance = crosshairs.document?.distance ?? crosshairs.distance;
     //console.log(`Crosshairs distance: ${crosshairsDistance}`);
-    let distanceRequired = (crosshairsDistance - 2.5) + (2.5 * tokenD.data.width);
+    let distanceRequired = (crosshairsDistance - 2.5) + (2.5 * tokenD.document.width);
     if ((tokenCrosshairsDist) < distanceRequired) {
         return true;
     }
@@ -341,9 +341,8 @@ export async function checkCrosshairs(crosshairs) {
                 new Sequence()
                     .effect()
                     .file(markerEffect)
-                    .atLocation(token)
+                    .atLocation(token,{offset:{ y: 100 }})
                     .scale(0.5)
-                    .offset({ y: 100 })
                     .mirrorY()
                     .persist()
                     .name(`ase-crosshairs-marker-${token.id}`)
@@ -360,7 +359,7 @@ export async function checkCrosshairs(crosshairs) {
 }
 
 export function cleanUpTemplateGridHighlights() {
-    const ASETemplates = canvas.scene.templates.filter((template) => { return template.data.flags.advancedspelleffects });
+    const ASETemplates = canvas.scene.templates.filter((template) => { return template.flags.advancedspelleffects });
     for (let template of ASETemplates) {
         const highlight = canvas.grid.getHighlightLayer(`Template.${template.id}`);
         if (highlight) {
@@ -477,4 +476,8 @@ export function isPointInCircle(circleCenter, checkPoint, insideRange, outsideRa
     let distanceToPoint = Math.sqrt(dx * dx + dy * dy);
     //console.log('distance: ', distanceToPoint);
     return distanceToPoint > insideRange && distanceToPoint < outsideRange;
+}
+
+export function getCanvasMouse() {
+    return game.release.generation === 11 ? canvas.app.renderer.plugins.interaction.pointer : canvas.app.renderer.plugins.interaction.mouse;
 }

@@ -40,8 +40,8 @@ Hooks.once('ready', async function () {
 
   function _ASERemoveTemplateBorder(wrapped, ...args) {
     wrapped(...args);
-    if (this.data?.flags?.advancedspelleffects) {
-      if (this.data?.flags?.advancedspelleffects?.placed) {
+    if (this.document?.flags?.advancedspelleffects) {
+      if (this.document?.flags?.advancedspelleffects?.placed) {
         this.template.alpha = 0;
       } else {
         return;
@@ -51,7 +51,7 @@ Hooks.once('ready', async function () {
 
   function _ASEGridHighlightWrapper(wrapped, ...args) {
     wrapped(...args);
-    if (!this.data?.flags?.advancedspelleffects) return;
+    if (!this.document?.flags?.advancedspelleffects) return;
     const highlight = canvas.grid.getHighlightLayer(`Template.${this.id}`);
     if (highlight) {
       highlight.clear();

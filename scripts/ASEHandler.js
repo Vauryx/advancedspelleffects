@@ -2,7 +2,7 @@ import * as utilFunctions from "./utilityFunctions.js";
 import { versionMigration } from "./versionMigration.js"
 // Importing spells
 import { darkness } from "./spells/darkness.js";
-import { detectMagic } from "./spells/detectMagic.js";
+//import { detectMagic } from "./spells/detectMagic.js";
 import { chaosBolt } from "./spells/chaosBolt.js";
 import { callLightning } from "./spells/callLightning.js";
 import { fogCloud } from "./spells/fogCloud.js";
@@ -19,17 +19,17 @@ import { eldritchBlast } from "./spells/eldritchBlast.js";
 import { moonBeam } from "./spells/moonBeam.js";
 import { chainLightning } from "./spells/chainLightning.js";
 import { mirrorImage } from "./spells/mirrorImage.js";
-import { wallOfForce } from "./spells/wallOfForce.js";
-import { detectStuff } from "./spells/detectStuff.js";
+//import { wallOfForce } from "./spells/wallOfForce.js";
+//import { detectStuff } from "./spells/detectStuff.js";
 import { viciousMockery } from "./spells/viciousMockery.js";
-import { wallSpell } from "./spells/wallSpell.js";
+//import { wallSpell } from "./spells/wallSpell.js";
 
 export class ASEHandler {
     static async handleASE(data) {
         // check if the spell being rolled is marked as an ASE spell
         let item = data.item;
         await versionMigration.handle(item);
-        let aseFlags = item?.data?.flags?.advancedspelleffects ?? false;
+        let aseFlags = item?.flags?.advancedspelleffects ?? false;
         if (!aseFlags.enableASE) return;
 
         // check for required modules
@@ -45,13 +45,13 @@ export class ASEHandler {
             case game.i18n.localize("ASE.Darkness"):
                 await darkness.createDarkness(data);
                 return;
-            case game.i18n.localize('ASE.DetectMagic'):
-                await detectMagic.activateDetectMagic(data);
-                return;
-            case game.i18n.localize('ASE.DetectStuff'):
-                const detectSpell = new detectStuff(data);
-                detectSpell.cast();
-                return;
+            // case game.i18n.localize('ASE.DetectMagic'):
+            //     await detectMagic.activateDetectMagic(data);
+            //     return;
+            // case game.i18n.localize('ASE.DetectStuff'):
+            //     const detectSpell = new detectStuff(data);
+            //     detectSpell.cast();
+            //     return;
             case game.i18n.localize('ASE.CallLightning'):
                 if (!data.flavor) {
                     await callLightning.createStormCloud(data);
@@ -132,21 +132,21 @@ export class ASEHandler {
                 mirrorImageSpell.cast();
                 return;
 
-            case game.i18n.localize('ASE.WallOfForce'):
-                wallOfForce.createWallOfForce(data);
-                return;
-            case game.i18n.localize('ASE.WallSpell'):
-                if (!data.flavor?.includes("- Damage Roll")) {
-                    const newWallSpell = new wallSpell(data);
-                    newWallSpell.cast();
-                }
-                return;
+            // case game.i18n.localize('ASE.WallOfForce'):
+            //     wallOfForce.createWallOfForce(data);
+            //     return;
+            // case game.i18n.localize('ASE.WallSpell'):
+            //     if (!data.flavor?.includes("- Damage Roll")) {
+            //         const newWallSpell = new wallSpell(data);
+            //         newWallSpell.cast();
+            //     }
+            //     return;
             case game.i18n.localize('ASE.ViciousMockery'):
                 const viciousMockerySpell = new viciousMockery(data);
                 viciousMockerySpell.cast();
                 return;
         }
-        if (item.name.includes(game.i18n.localize("ASE.Summon")) || aseFlags.spellEffect.includes(game.i18n.localize("ASE.Summon"))) {
+        if (item.name.includes(game.i18n.localize("ASE.Summon")) || aseFlags.spellEffect.includes(game.i18n.localize("ASE.Conjure"))) {
             await summonCreature.doSummon(data);
             return;
         }

@@ -19,6 +19,7 @@
   "ASE.ScorchingRay": "Scorching Ray",
   "ASE.EldritchBlast": "Eldritch Blast",
   "ASE.Summon": "Summon",
+  "ASE.Conjure": "Conjure",
   "ASE.Moonbeam": "Moonbeam",
   "ASE.MoveMoonbeam": "Move Moonbeam",
   "ASE.LightningBolt": "Lightning Bolt",
@@ -36,6 +37,12 @@
   "ASE.SummonFiend": "Summon Fiend",
   "ASE.SummonShadowspawn": "Summon Shadowspawn",
   "ASE.SummonUndead": "Summon Undead",
+  "ASE.ConjureAnimals": "Conjure Animals",
+  "ASE.ConjureCelestial": "Conjure Celestial",
+  "ASE.ConjureElemental": "Conjure Elemental",
+  "ASE.ConjureMinorElemental": "Conjure Minor Elementals",
+  "ASE.ConjureFey": "Conjure Fey",
+  "ASE.ConjureWoodlandBeings": "Conjure Woodland Beings",
   "ASE.Defender": "Defender",
 
   "ASE.Abjuration": "Abjuration",
@@ -284,6 +291,9 @@
   "ASE.ReappearVolumeLabel": "Re-appear Volume: ",
 
   "ASE.VampiricTouchDescription": "The touch of your shadow-wreathed hand can siphon force from others to heal your wounds",
+  "ASE.VampiricTouchHealing": "Vampiric Touch heals {actor} <b>{heal}</b> hit points",
+  "ASE.VampiricTouchStart": "{actor}'s hands are wrapped in darkness...",
+  "ASE.VampiricTouchEnd": "{actor}'s hands returns to normal.",
 
   "ASE.VTCasterEffectLabel": "Caster Effect: ",
   "ASE.VTCasterEffectTooltip": "The energy overlay effect on the caster",
@@ -365,6 +375,7 @@
   "ASE.SaveFailMessage": "<b>fails</b> with <b>{saveTotal}</b> and takes <b>{damageTotal}</b> damage",
 
   "ASE.ChainLightningNumJumpsLabel": "Number of targets to jump to: ",
+  "ASE.ChainLightningNoTargetSelected": "You must select a target to use this spell.",
   "ASE.ChainLightningSecondaryDelayLowerLabel": "Secondary bolt delay min: ",
   "ASE.ChainLightningSecondaryDelayUpperLabel": "Secondary bolt delay max: ",
   "ASE.ChainLightningPrimaryColorLabel": "Primary Bolt Color: ",

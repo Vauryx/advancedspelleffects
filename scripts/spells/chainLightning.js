@@ -8,6 +8,10 @@ export class chainLightning {
         this.token = canvas.tokens.get(this.params.tokenId);
         this.item = this.params.item;
         this.firstTarget = this.params.targets[0] ?? Array.from(this.params.targets)[0];
+        if(this.firstTarget == null)
+        {
+            return;
+        }       
         if (game.modules.get("midi-qol")?.active) {
             this.targetFailedSave = this.params.failedSaves.length > 0;
         }
@@ -28,7 +32,7 @@ export class chainLightning {
         }
 
 
-        this.spellSaveDC = this.actor.data.data.attributes.spelldc;
+        this.spellSaveDC = this.actor.system.attributes.spelldc;
 
         this.targetData = [];
 
@@ -40,6 +44,11 @@ export class chainLightning {
     }
     async cast() {
         console.log("Running Chain Lightning...");
+        if(this.firstTarget == null)
+        {
+            ui.notifications.warn(game.i18n.localize("ASE.ChainLightningNoTargetSelected"));
+            return;
+        }  
         //await this.rollInitialDamage();
         await this.promptJumps();
         if (!this.targetData) {
@@ -57,7 +66,7 @@ export class chainLightning {
     async rollInitialDamage() {
         const target = this.firstTarget;
         if (!target) return false;
-        const saveRoll = await new Roll("1d20+@mod", { mod: target.token.actor.data.data.abilities.dex.save }).evaluate({ async: true });
+        const saveRoll = await new Roll("1d20+@mod", { mod: target.token.actor.system.abilities.dex.save }).evaluate({ async: true });
 
         const damageDie = this.params.dmgDie ?? 'd8';
         const damageDieCount = this.params.dmgDieCount ?? 10;
@@ -79,8 +88,10 @@ export class chainLightning {
         let tokenD = this.token;
         //console.log("firstTarget", firstTarget);
         //console.log("tokenD", tokenD);
+        
+        
         const potentialTargets = canvas.tokens.placeables.filter(function (target) {
-            return target.actor?.data?.data?.attributes.hp.value > 0
+            return target.actor?.system?.attributes.hp.value > 0
                 && canvas.grid.measureDistance(firstTarget, target) <= 32.5
                 && target !== firstTarget
                 && target !== tokenD
@@ -92,7 +103,7 @@ export class chainLightning {
             return `
             <tr class="chain-lightning-target" tokenId="${target.id}">
                 <td class="chain-lightning-flex">
-                    <img src="${target.data.img}" width="30" height="30" style="border:0px"> - ${target.name}
+                    <img src="${target.document.texture.src}" width="30" height="30" style="border:0px"> - ${target.name}
                 </td>
                 <td>
                     <input type="checkbox" class='target' name="${index}">
@@ -185,7 +196,7 @@ export class chainLightning {
 
         for await (let target of this.targetData) {
 
-            const roll = await new Roll("1d20+@mod", { mod: target.token.actor.data.data.abilities.dex.save }).evaluate({ async: true });
+            const roll = await new Roll("1d20+@mod", { mod: target.token.actor.system.abilities.dex.save }).evaluate({ async: true });
             target.rollTotal = roll.total;
             target.roll = roll;
             target.saved = roll.total >= this.spellSaveDC;
@@ -266,7 +277,7 @@ export class chainLightning {
     async updateChatCards() {
 
         const chatMessage = await game.messages.get(this.params.itemCardId);
-        let chatMessageContent = $(await duplicate(chatMessage.data.content));
+        let chatMessageContent = $(await duplicate(chatMessage.content));
         chatMessageContent.find(".midi-qol-nobox.midi-qol-saves-display").append(
             this.targetData.map(target => {
                 console.log(target.roll);
@@ -279,7 +290,7 @@ export class chainLightning {
                     <div>${target.roll.formula}</div>
                     <div>${target.roll.result}</div>
                     </div></div>
-                    <div><img src="${target.token.data.img}" height="30" style="border:0px"></div>
+                    <div><img src="${target.token.document.texture.src}" height="30" style="border:0px"></div>
                 </div>`;
             })
         );

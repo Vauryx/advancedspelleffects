@@ -49,15 +49,13 @@ export class summonCreature {
                 .playIf(circleSound != "")
                 .effect()
                 .file(magicSignIntro)
-                .offset({ x: 0, y: canvas.grid.size })
-                .atLocation(template)
+                .atLocation(template,{gridUnits: true, offset:{ x: 0, y: -1 } })
                 .belowTokens()
                 .scale(0.25)
                 .waitUntilFinished(-2000)
                 .effect()
                 .file(magicSignLoop)
-                .offset({ x: 0, y: canvas.grid.size })
-                .atLocation(template)
+                .atLocation(template,{gridUnits: true, offset:{ x: 0, y: -1 } })
                 .belowTokens()
                 .scale(0.25)
                 .persist()
@@ -70,8 +68,7 @@ export class summonCreature {
                 .playIf(effectASound != "")
                 .effect()
                 .file(effectAAnim)
-                .offset({ x: 0, y: canvas.grid.size })
-                .atLocation(template)
+                .atLocation(template,{gridUnits: true, offset:{ x: 0, y: -1 } })
                 .waitUntilFinished(-1000)
                 .endTime(3300)
                 .playbackRate(0.7)
@@ -88,16 +85,16 @@ export class summonCreature {
                 .effect()
                 .belowTokens()
                 .zIndex(2)
-                .atLocation(template)
+                .atLocation(template,{gridUnits: true, offset:{ x: 0, y: -1 } })
                 .file(portalAnim)
+                .duration(2500)
                 .fadeIn(500)
-                .offset({ x: 0, y: canvas.grid.size })
                 .scale(0)
-                .animateProperty("sprite", "scale.x", { from: 0, to: baseScale, delay: 200, duration: 500, ease: "easeInOutCubic" })
-                .animateProperty("sprite", "scale.y", { from: 0, to: baseScale, delay: 200, duration: 700, ease: "easeInOutCubic" })
-                .animateProperty("sprite", "scale.x", { from: baseScale, to: 0, delay: 2500, duration: 500, ease: "easeInElastic" })
-                .animateProperty("sprite", "scale.y", { from: baseScale, to: 0, delay: 2500, duration: 700, ease: "easeInElastic" })
-                .wait(3000)
+                .animateProperty("sprite", "scale.x", { from: 0, to: adjustedScale, delay: 200, duration: 500, ease: "easeInOutCubic" })
+                .animateProperty("sprite", "scale.y", { from: 0, to: adjustedScale, delay: 200, duration: 700, ease: "easeInOutCubic" })
+                .animateProperty("sprite", "scale.x", { from: adjustedScale, to: 0, delay: 2500, duration: 500, ease: "easeInElastic" })
+                .animateProperty("sprite", "scale.y", { from: adjustedScale, to: 0, delay: 2500, duration: 700, ease: "easeInElastic" })
+                .wait(2500)
                 .sound()
                 .file(portalCloseSound)
                 .delay(portalCloseSoundDelay)
@@ -105,9 +102,8 @@ export class summonCreature {
                 .playIf(portalCloseSound != "")
                 .effect()
                 .file(portalCloseAnim)
-                .atLocation(template)
-                .offset({ x: 0, y: canvas.grid.size })
-                .play()
+                .atLocation(template,{gridUnits: true, offset:{ x: 0, y: -1 } })
+                .play();
         }
 
         async function postEffects(template, token, effectInfo) {
@@ -115,8 +111,7 @@ export class summonCreature {
             new Sequence("Advanced Spell Effects")
                 .effect()
                 .file(magicSignOutro)
-                .offset({ x: 0, y: canvas.grid.size })
-                .atLocation(template)
+                .atLocation(template,{gridUnits: true, offset:{ x: 0, y: -1 } })
                 .belowTokens()
                 .scale(0.25)
                 .thenDo(async () => {
@@ -126,10 +121,9 @@ export class summonCreature {
                 .effect()
                 .atLocation(token)
                 .scaleToObject()
-                .file(token.data.img)
+                .file(token.texture.src)
                 .fadeIn(400)
-                .offset({ x: 0, y: canvas.grid.size })
-                .animateProperty("sprite", "position.y", { from: 0, to: canvas.grid.size, duration: 400, ease: "easeInOutCubic" })
+                .animateProperty("sprite", "position.y", { from: -1, to: 0, duration: 500, ease: "easeInOutCubic", gridUnits:true })
                 .duration(500)
                 .fadeOut(50)
                 .wait(400)
@@ -161,8 +155,8 @@ export class summonCreature {
                     img.onerror = reject;
                     img.src = src;
                 });
-            let summonTokenData = (await game.actors.getName(chosenSummon[0]).getTokenData());
-            loadImage(summonTokenData.img).then(async (image) => {
+            let summonTokenData = (await game.actors.getName(chosenSummon[0]).getTokenDocument());
+            loadImage(summonTokenData.texture.src).then(async (image) => {
                 const summonImageScale = (summonTokenData.width * canvas.grid.size) / image.width;
                 new Sequence("Advanced Spell Effects")
                     .effect()
@@ -186,7 +180,7 @@ export class summonCreature {
             },
             show: displayCrosshairs
         };
-        let summonData = await game.actors.getName(chosenSummon[0]).getTokenData();
+        let summonData = await game.actors.getName(chosenSummon[0]).getTokenDocument();
         let crosshairsConfig = {
             size: summonData.width,
             label: chosenSummon[0],
@@ -212,10 +206,10 @@ export class summonCreature {
             let multiAttack = Math.floor(spellLevel / 2);
             let damageBonus = spellLevel;
             //let summonActor = game.actors.getName(chosenSummon[0]);
-            let attackBonus = casterActor.data.data.attributes.spelldc - 8;
+            let attackBonus = casterActor.system.attributes.spelldc - 8;
             let summonActor = game.actors.getName(chosenSummon[0]);
             //console.log(summonActor);
-            //let damageItems = summonActor.data.items.filter((item) => { return item.data.data.damage.parts.length > 0 });
+            //let damageItems = summonActor.data.items.filter((item) => { return item.system.damage.parts.length > 0 });
             //console.log(damageItems);
             switch (item.name) {
                 case game.i18n.localize("ASE.SummonAberration"):
@@ -254,11 +248,11 @@ export class summonCreature {
             }
 
             updates.actor = {
-                'data.attributes.hp': { value: summonActor.data.data.attributes.hp.max + hpBonus, max: summonActor.data.data.attributes.hp.max + hpBonus },
-                'data.bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
-                'data.bonuses.mwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
-                'data.bonuses.rsak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
-                'data.bonuses.rwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` }
+                'attributes.hp': { value: summonActor.system.attributes.hp.max + hpBonus, max: summonActor.system.attributes.hp.max + hpBonus },
+                'bonuses.msak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'bonuses.mwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'bonuses.rsak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` },
+                'bonuses.rwak': { attack: `- @mod - @prof + ${attackBonus}`, damage: `${damageBonus}` }
             }
             updates.embedded = {
                 ActiveEffect: {
@@ -266,7 +260,7 @@ export class summonCreature {
                         icon: 'icons/magic/defensive/shield-barrier-blue.webp',
                         label: game.i18n.localize("ASE.SpellLevelBonusACEffectLabel"),
                         changes: [{
-                            "key": "data.attributes.ac.bonus",
+                            "key": "attributes.ac.bonus",
                             "mode": 2,
                             "value": acBonus,
                             "priority": 0

@@ -14,7 +14,7 @@
                     </tr>
                     {{#each data.corpses as |corpse|}}
                         <tr class='corpseToken' id={{corpse.id}}>
-                            <td><img src="{{corpse.data.img}}" width="30" height="30" style="border:0px"> -
+                            <td><img src="{{corpse.document.texture.src}}" width="30" height="30" style="border:0px"> -
                                 {{corpse.name}}
                             </td>
                             <td><button class='raiseCorpse' type="button"
@@ -51,8 +51,8 @@
         <input type="hidden" id="hdnMagicSchoolVolumeOutro" value="{{data.effectSettings.magicSchoolVolumeOutro}}" />
 
         <input type="hidden" id="hdnMagicSchoolColor" value="{{data.effectSettings.magicSchoolColor}}" />
-        <input type="hidden" id="hdnZombieActorId" value="{{data.effectSettings.summons.zombie.actor}}" />
-        <input type="hidden" id="hdnSkeletonActorId" value="{{data.effectSettings.summons.skeleton.actor}}" />
+        <input type="hidden" id="hdnZombieActorId" value="{{data.effectSettings.animateDeadSummons.zombie.actor}}" />
+        <input type="hidden" id="hdnSkeletonActorId" value="{{data.effectSettings.animateDeadSummons.skeleton.actor}}" />
 
     </section>
     <footer class="sheet-footer flexrow">

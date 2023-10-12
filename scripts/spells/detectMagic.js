@@ -239,7 +239,7 @@ export class detectMagic {
         const isGM = utilFunctions.isFirstGM();
 
         if (!isGM) return;
-        if (tokenDocument.actor.effects.filter((effect) => effect.data.document.sourceName == "Detect Magic").length == 0) {
+        if (tokenDocument.actor.effects.filter((effect) => effect.sourceName == "Detect Magic").length == 0) {
             return;
         }
         //console.log("Is first GM: ", isGM);

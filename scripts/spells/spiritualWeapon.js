@@ -18,7 +18,7 @@ export class spiritualWeapon {
         const level = midiData.itemLevel;
         let summonType = "Spiritual Weapon";
         const casterActorSpellcastingMod = casterActorRollData.abilities[casterActorRollData.attributes.spellcasting]?.mod ?? 0;
-        const summonerDc = casterActor.data.data.attributes.spelldc;
+        const summonerDc = casterActor.system.attributes.spelldc;
         const summonerAttack = (casterActorRollData.attributes.prof + casterActorSpellcastingMod) + Number(casterActorRollData.bonuses?.msak?.attack ?? 0);
 
         //console.log("Caster Actor Roll Data: ", casterActorRollData);
@@ -104,13 +104,15 @@ export class spiritualWeapon {
                 .fadeIn(500)
                 .play()
         }
-        let weaponData = [{
-            type: "select",
-            label: game.i18n.localize("ASE.WeaponDialogLabel"),
-            options: ["Mace", "Sword"]
-        }]
-        let weaponChoice = await warpgate.dialog(weaponData);
-        weaponChoice = weaponChoice[0].toLowerCase();
+        let weaponData = {
+            inputs: [{
+                type: "select",
+                label: game.i18n.localize("ASE.WeaponDialogLabel"),
+                options: ["Mace", "Sword"]
+            }]
+        } 
+        let weaponChoice = await warpgate.menu(weaponData);
+        weaponChoice = weaponChoice.inputs[0].toLowerCase();
 
         let spiritWeapon = `jb2a.spiritual_weapon.${weaponChoice}`;
 
@@ -121,13 +123,15 @@ export class spiritualWeapon {
             typeOptions.push(utilFunctions.capitalizeFirstLetter(type));
         });
 
-        let typeData = [{
-            type: "select",
-            label: game.i18n.localize("ASE.SpiritTypeDialogLabel"),
-            options: typeOptions
-        }];
-        let typeChoice = await warpgate.dialog(typeData);
-        typeChoice = typeChoice[0].toLowerCase();
+        let typeData = {
+            inputs: [{
+                type: "select",
+                label: game.i18n.localize("ASE.SpiritTypeDialogLabel"),
+                options: typeOptions
+            }]
+        }
+        let typeChoice = await warpgate.menu(typeData);
+        typeChoice = typeChoice.inputs[0].toLowerCase();
 
         spiritWeapon = spiritWeapon + `.${typeChoice}`;
 
@@ -154,19 +158,21 @@ export class spiritualWeapon {
             attackColorOptions.push(utilFunctions.capitalizeFirstLetter(attackColor));
         });
 
-        let colorData = [{
-            type: "select",
-            label: game.i18n.localize("ASE.SpiritColorDialogLabel"),
-            options: colorOptions
-        }, {
-            type: "select",
-            label: game.i18n.localize("ASE.SpiritAttackColorDialogLabel"),
-            options: attackColorOptions
-        }];
+        let colorData = {
+            inputs : [{
+                type: "select",
+                label: game.i18n.localize("ASE.SpiritColorDialogLabel"),
+                options: colorOptions
+            }, {
+                type: "select",
+                label: game.i18n.localize("ASE.SpiritAttackColorDialogLabel"),
+                options: attackColorOptions
+            }]
+        }
 
-        let colorChoices = await warpgate.dialog(colorData);
-        let spiritColorChoice = colorChoices[0].toLowerCase();
-        let attackColorChoice = colorChoices[1].toLowerCase();
+        let colorChoices = await warpgate.menu(colorData);
+        let spiritColorChoice = colorChoices.inputs[0].toLowerCase();
+        let attackColorChoice = colorChoices.inputs[1].toLowerCase();
 
         spiritWeapon = spiritWeapon + `.${spiritColorChoice}`;
         //console.log("Spirit Weapon: " + spiritWeapon);

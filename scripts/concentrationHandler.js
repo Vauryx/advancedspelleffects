@@ -24,8 +24,8 @@ export class concentrationHandler {
         const isGM = utilFunctions.isFirstGM();
         //console.log("Is first GM: ", isGM);
         if (!isGM) return;
-        if (activeEffect.data.label != 'Concentration' && activeEffect.data.label != game.i18n.localize("ASE.ConcentratingLabel")) return;
-        let origin = activeEffect.data.origin?.split(".");
+        if (activeEffect.label != 'Concentration' && activeEffect.label != game.i18n.localize("ASE.ConcentratingLabel")) return;
+        let origin = activeEffect.origin?.split(".");
         //console.log("Origin: ", origin);
         if (!origin || origin?.length < 4) return false;
         let itemId = origin[5] ?? origin[3];
@@ -53,12 +53,12 @@ export class concentrationHandler {
             case game.i18n.localize("ASE.Darkness"):
                 await darkness.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
-            case game.i18n.localize('ASE.DetectMagic'):
-                await detectMagic.handleConcentration(casterActor, casterToken, effectOptions);
-                return;
-            case game.i18n.localize('ASE.DetectStuff'):
-                await detectStuff.handleConcentration(casterActor, casterToken, effectOptions);
-                return;
+            // case game.i18n.localize('ASE.DetectMagic'):
+            //     await detectMagic.handleConcentration(casterActor, casterToken, effectOptions);
+            //     return;
+            // case game.i18n.localize('ASE.DetectStuff'):
+            //     await detectStuff.handleConcentration(casterActor, casterToken, effectOptions);
+            //     return;
             case game.i18n.localize('ASE.CallLightning'):
                 await callLightning.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
@@ -81,8 +81,8 @@ export class concentrationHandler {
                 await wallSpell.handleConcentration(casterActor, casterToken, effectOptions);
                 return;
         }
-        if (effectSource.includes(game.i18n.localize("ASE.Summon"))) {
-            summonCreature.handleConcentration(casterActor, casterToken, effectOptions);
+        if (effectSource.includes(game.i18n.localize("ASE.Summon")) || effectSource.includes(game.i18n.localize("ASE.Conjure"))) {
+            await summonCreature.handleConcentration(casterActor, casterToken, effectOptions);
             return;
         }
         console.log("ASE: Effect source not recognized...");
@@ -105,7 +105,7 @@ export class concentrationHandler {
             duration: {},
             flags: { "advancedspelleffects": { isConcentration: item?.uuid } }
         };
-        const convertedDuration = utilFunctions.convertDuration(item.data.data.duration, inCombat);
+        const convertedDuration = utilFunctions.convertDuration(item.system.duration, inCombat);
         if (convertedDuration?.type === "seconds") {
             effectData.duration = { seconds: convertedDuration.seconds, startTime: game.time.worldTime };
         }

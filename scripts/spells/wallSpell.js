@@ -82,7 +82,7 @@ export class wallSpell extends baseSpellClass {
         } else {
             Hooks.once('createMeasuredTemplate', async (template) => {
 
-                const direction = template.data.direction;
+                const direction = template.direction;
                 const templateDimensions = template.getFlag('advancedspelleffects', 'dimensions') ?? {};
                 const templateLength = templateDimensions?.length ?? 0;
                 if ((direction == 0 || direction == 180 || direction == 90 || direction == 270) && templateLength > 0) {
@@ -95,9 +95,9 @@ export class wallSpell extends baseSpellClass {
                 wallSpell.placeWalls(template);
                 if (this.wallType.includes('fire')) {
                     await wallSpell.pickFireSide(template);
-                }
-                if (utilFunctions.isMidiActive()) {
-                    wallSpell.handleOnCast(template);
+                    if (utilFunctions.isMidiActive()) {
+                        wallSpell.handleOnCast(template);
+                    }
                 }
             });
             const doc = new MeasuredTemplateDocument(this.baseTemplateData, { parent: canvas.scene });
@@ -279,7 +279,7 @@ export class wallSpell extends baseSpellClass {
                     damageInArea: true,
                     damageArea: {},
                     damageOnCast: true,
-                    savingThrowDC: this.actor.data.data.attributes.spelldc ?? 0,
+                    savingThrowDC: this.actor.system.attributes.spelldc ?? 0,
                     chatMessage: this.chatMessage,
                     item: this.item.id,
                     casterActor: this.actor.id,
@@ -359,9 +359,9 @@ export class wallSpell extends baseSpellClass {
         //console.log("Updating combat: ", combat);
         const token = canvas.tokens.get(combat.previous.tokenId);
         if (!token) return;
-        const grid = canvas?.scene?.data.grid;
+        const grid = canvas?.scene?.grid.size;
         if (!grid) return false;
-        const tokenPos = { x: token.data.x, y: token.data.y };
+        const tokenPos = { x: token.x, y: token.y };
         await token.document.unsetFlag("advancedspelleffects", "wallTouchedData.wallsTouched");
         const wallTemplates = canvas.templates.placeables.filter(template =>
         (template.document.getFlag('advancedspelleffects', 'wallOperationalData.damageOnTouch') == true
@@ -387,7 +387,7 @@ export class wallSpell extends baseSpellClass {
                 }
                 const wallName = templateDocument.getFlag("advancedspelleffects", "wallName") ?? "";
                 const mTemplate = templateDocument.object;
-                const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: templateData.t, distance: mTemplate.data.distance };
+                const templateDetails = { x: templateDocument.x, y: templateDocument.y, shape: templateData.t, distance: mTemplate.distance };
                 //console.log("Wall template details: ", templateDetails);
                 if (templateDetails.shape == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
                     //console.log("Circle template detected...");
@@ -396,11 +396,11 @@ export class wallSpell extends baseSpellClass {
                     const sideToCheck = templateDocument.getFlag("advancedspelleffects", "wallOperationalData.damageSide");
                     //console.log("Side to check: ", sideToCheck);
 
-                    const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
-                    const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
+                    const startX = token.document.width >= 1 ? 0.5 : (token.document.width / 2);
+                    const startY = token.document.height >= 1 ? 0.5 : (token.height / 2);
 
-                    widthLoop: for (let x = startX; x < token.data.width; x++) {
-                        for (let y = startY; y < token.data.height; y++) {
+                    widthLoop: for (let x = startX; x < token.document.width; x++) {
+                        for (let y = startY; y < token.document.height; y++) {
                             const currGrid = {
                                 x: tokenPos.x + x * grid,
                                 y: tokenPos.y + y * grid,
@@ -450,11 +450,11 @@ export class wallSpell extends baseSpellClass {
                     //console.log("Template Point B: ", templatePointB);
                     const sideToCheck = templateDocument.getFlag("advancedspelleffects", "wallOperationalData.damageSide");
                     //console.log("Side to check: ", sideToCheck);
-                    const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
-                    const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
+                    const startX = token.document.width >= 1 ? 0.5 : (token.document.width / 2);
+                    const startY = token.document.height >= 1 ? 0.5 : (token.document.height / 2);
 
-                    widthLoop: for (let x = startX; x < token.data.width; x++) {
-                        for (let y = startY; y < token.data.height; y++) {
+                    widthLoop: for (let x = startX; x < token.document.width; x++) {
+                        for (let y = startY; y < token.height; y++) {
                             const currGrid = {
                                 x: tokenPos.x + x * grid,
                                 y: tokenPos.y + y * grid,
@@ -492,13 +492,13 @@ export class wallSpell extends baseSpellClass {
 
         if ((!updateData.x && !updateData.y)) return;
         const token = tokenDocument;
-        const grid = canvas?.scene?.data.grid;
+        const grid = canvas?.scene?.grid.size;
         if (!grid) return false;
 
-        const oldPos = { x: tokenDocument.data.x, y: tokenDocument.data.y };
+        const oldPos = { x: tokenDocument.x, y: tokenDocument.y };
         let newPos = { x: 0, y: 0 };
-        newPos.x = (updateData.x) ? updateData.x : tokenDocument.data.x;
-        newPos.y = (updateData.y) ? updateData.y : tokenDocument.data.y;
+        newPos.x = (updateData.x) ? updateData.x : tokenDocument.x;
+        newPos.y = (updateData.y) ? updateData.y : tokenDocument.y;
         const movementRay = new Ray(oldPos, newPos);
 
         const templates = Array.from(canvas?.scene?.templates ?? {});
@@ -510,27 +510,25 @@ export class wallSpell extends baseSpellClass {
         for (let i = 0; i < templates.length; i++) {
 
             templateDocument = templates[i];
-            const templateData = templateDocument.data;
-            if (!templateData) return;
             const aseData = templateDocument.getFlag("advancedspelleffects", 'wallOperationalData');
             const aseEffectData = templateDocument.getFlag("advancedspelleffects", 'wallEffectData');
             if (!aseData || !aseData.damageOnTouch) return;
             if (!aseData.checkForTouch) return;
             wallName = templateDocument.getFlag("advancedspelleffects", "wallName") ?? "";
             const mTemplate = templateDocument.object;
-            const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: mTemplate.shape, distance: mTemplate.data.distance };
+            const templateDetails = { x: templateDocument.x, y: templateDocument.y, shape: mTemplate.shape, distance: mTemplate.distance };
             const templatePointA = { x: templateDetails.x, y: templateDetails.y };
-            const templateAngle = (templateData.direction) * (Math.PI / 180.0);
-            const templateLength = ((templateData.distance) * grid) / 5.0;
+            const templateAngle = (templateDocument.direction) * (Math.PI / 180.0);
+            const templateLength = ((templateDocument.distance) * grid) / 5.0;
             const templatePointBX = templatePointA.x + (templateLength * Math.cos(templateAngle));
             const templatePointBY = templatePointA.y + (templateLength * Math.sin(templateAngle));
             const templatePointB = { x: templatePointBX, y: templatePointBY };
 
-            const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
-            const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
+            const startX = token.width >= 1 ? 0.5 : (token.width / 2);
+            const startY = token.height >= 1 ? 0.5 : (token.height / 2);
 
-            widthLoop: for (let x = startX; x < token.data.width; x++) {
-                for (let y = startY; y < token.data.height; y++) {
+            widthLoop: for (let x = startX; x < token.width; x++) {
+                for (let y = startY; y < token.height; y++) {
 
                     const currGrid = {
                         x: newPos.x + x * grid - templatePointA.x,
@@ -542,7 +540,7 @@ export class wallSpell extends baseSpellClass {
                     }
                     let previousContains = templateDetails.shape?.contains(oldCurrGrid.x, oldCurrGrid.y);
                     let contains = templateDetails.shape?.contains(currGrid.x, currGrid.y);
-                    if (templateData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                    if (templateDocument.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
                         previousContains = false;
                         contains = false;
                     }
@@ -556,9 +554,9 @@ export class wallSpell extends baseSpellClass {
                             x: movementRay.B.x + x * grid,
                             y: movementRay.B.y + y * grid,
                         };
-                        //console.log("Drag Coord Old: ", dragCoordOld);
-                        //console.log("Drag Coord New: ", dragCoordNew);
-                        if (templateData.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+                        console.log("Drag Coord Old: ", dragCoordOld);
+                        console.log("Drag Coord New: ", dragCoordNew);
+                        if (templateDocument.t == CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
                             crossed = utilFunctions.lineCrossesCircle(dragCoordOld, dragCoordNew, templatePointA, (templateDetails.distance / 5) * grid);
                         } else {
@@ -567,7 +565,7 @@ export class wallSpell extends baseSpellClass {
                     }
 
                     if (((previousContains && contains) || (!previousContains)) && (crossed || contains)) {
-                        //console.log("Token touched wall!");
+                        console.log("Token touched wall!");
                         if (wallsTouched.includes(templateDocument.id)) {
                             console.log(`${token.name} has already been effected by this ${wallName} this turn - ${templateDocument.id}`);
                             ui.notifications.info(game.i18n.format("ASE.WallSpellAlreadyEffected", { name: token.name, wallName: wallName }));
@@ -588,7 +586,7 @@ export class wallSpell extends baseSpellClass {
                             break widthLoop;
                         }
                     } else {
-                        //console.log("Token did not cross template area...");
+                        console.log("Token did not cross template area...");
                     }
                 }
             }
@@ -597,9 +595,9 @@ export class wallSpell extends baseSpellClass {
     }
 
     static async activateWallEffect(token, wallData) {
-        //console.log("Activating Wall Effect...");
-        //console.log("Token: ", token);
-        //console.log("Wall Data: ", wallData);
+        console.log("Activating Wall Effect...");
+        console.log("Token: ", token);
+        console.log("Wall Data: ", wallData);
         const wallOperationalData = wallData.wallOperationalData;
         const wallEffectData = wallData.wallEffectData;
         function addTokenToText(token, damageTotal) {
@@ -611,7 +609,7 @@ export class wallSpell extends baseSpellClass {
       ${game.i18n.format("ASE.TookDamageMessage", { damageTotal: damageTotal })}
         
       </div>
-      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
+      <div><img src="${token?.document?.texture.src}" height="30" style="border:0px"></div>
     </div>`;
 
         }
@@ -640,7 +638,7 @@ export class wallSpell extends baseSpellClass {
                 itemData: spellItem.data
             });
             const chatMessage = await game.messages.get(midiData.itemCardId);
-            let chatMessageContent = await duplicate(chatMessage.data.content);
+            let chatMessageContent = await duplicate(chatMessage.content);
             let newChatmessageContent = $(chatMessageContent);
 
             newChatmessageContent.find(".midi-qol-hits-display").empty();
@@ -658,12 +656,11 @@ export class wallSpell extends baseSpellClass {
             .playIf(wallEffectData.wallSpellDmgSound && wallEffectData.wallSpellDmgSound != "")
             .effect()
             .file(`jb2a.impact.004.${wallEffectData?.fireImpactColor ?? 'orange'}`)
-            .attachTo(token)
+            .attachTo(token,{randomOffset:0.5})
             .randomRotation()
             .scaleIn(0.5, 200)
             .scaleToObject()
             .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
-            .randomOffset(0.5)
             .repeats(4, 100, 250)
             .play()
         return;
@@ -707,7 +704,7 @@ export class wallSpell extends baseSpellClass {
 
     static async placeWalls(templateDocument, deleteOldWalls = false) {
         //console.log("placing walls...");
-        if (templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) return;
+        if (templateDocument.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) return;
 
         const wallType = templateDocument.getFlag("advancedspelleffects", "wallType") ?? "";
         //console.log('wallType: ', wallType);
@@ -725,7 +722,7 @@ export class wallSpell extends baseSpellClass {
 
         const walls = [];
 
-        if (templateDocument.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+        if (templateDocument.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
             const placedX = template.x;
             const placedY = template.y;
@@ -792,7 +789,7 @@ export class wallSpell extends baseSpellClass {
     }
 
     static sourceSquareV(center, distance, direction) {
-        const gridSize = canvas.grid.h;
+        const gridSize = canvas.grid.size;
         const length = (distance / 5) * gridSize;
 
         const x = center.x + length * Math.cos(direction * Math.PI / 180);
@@ -803,7 +800,7 @@ export class wallSpell extends baseSpellClass {
 
     static sourceSquare(center, widthSquares, heightSquares) {
 
-        const gridSize = canvas.grid.h;
+        const gridSize = canvas.grid.size;
         const h = gridSize * heightSquares;
         const w = gridSize * widthSquares;
 
@@ -921,7 +918,7 @@ export class wallSpell extends baseSpellClass {
         const wallData = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData');
         if (!wallData) return;
         const wallEffectData = templateDocument.getFlag('advancedspelleffects', 'wallEffectData');
-        const grid = canvas?.scene?.data.grid;
+        const grid = canvas?.scene?.grid.size;
         if (!grid) return false;
         const damageOnCast = wallData.damageOnCast;
         const damageType = wallData.damageType;
@@ -929,7 +926,7 @@ export class wallSpell extends baseSpellClass {
         const halfDamOnSave = wallData.halfDamOnSave ?? true;
         const savingThrowOnCast = wallData.savingThrowOnCast;
         const mTemplate = templateDocument.object;
-        const templateDetails = { x: templateDocument.data.x, y: templateDocument.data.y, shape: mTemplate.shape, distance: mTemplate.data.distance };
+        const templateDetails = { x: templateDocument.x, y: templateDocument.y, shape: mTemplate.shape, distance: mTemplate.distance };
         const chatMessageId = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData.chatMessage');
         const chatMessage = await game.messages.get(chatMessageId);
         const casterActorId = templateDocument.getFlag('advancedspelleffects', 'wallOperationalData.casterActor');
@@ -949,13 +946,13 @@ export class wallSpell extends baseSpellClass {
             if (tokens.length > 0) {
                 for (let i = 0; i < tokens.length; i++) {
                     const token = tokens[i];
-                    const startX = token.data.width >= 1 ? 0.5 : (token.data.width / 2);
-                    const startY = token.data.height >= 1 ? 0.5 : (token.data.height / 2);
-                    widthLoop: for (let x = startX; x < token.data.width; x++) {
-                        for (let y = startY; y < token.data.height; y++) {
+                    const startX = token.document.width >= 1 ? 0.5 : (token.document.width / 2);
+                    const startY = token.document.height >= 1 ? 0.5 : (token.document.height / 2);
+                    widthLoop: for (let x = startX; x < token.document.width; x++) {
+                        for (let y = startY; y < token.height; y++) {
                             const currGrid = {
-                                x: token.data.x + x * grid - templateDetails.x,
-                                y: token.data.y + y * grid - templateDetails.y,
+                                x: token.x + x * grid - templateDetails.x,
+                                y: token.y + y * grid - templateDetails.y,
                             };
                             let contains = templateDetails.shape?.contains(currGrid.x, currGrid.y);
 
@@ -973,7 +970,7 @@ export class wallSpell extends baseSpellClass {
             //game.user.updateTokenTargets(targets);
             if (targets.length && targets.length > 0) {
                 //console.log('chat message', chatMessage);
-                let chatMessageContent = await duplicate(chatMessage.data.content);
+                let chatMessageContent = await duplicate(chatMessage.content);
                 let targetTokens = new Set();
                 let saves = new Set();
                 let newChatmessageContent = $(chatMessageContent);
@@ -981,7 +978,7 @@ export class wallSpell extends baseSpellClass {
                 if (halfDamOnSave) {
                     let damage = await new Roll(wallDamage).evaluate({ async: true });
                     for await (let targetToken of targets) {
-                        let targetTokenAbilities = targetToken?.actor?.data?.data?.abilities ?? {};
+                        let targetTokenAbilities = targetToken?.actor?.system?.abilities ?? {};
                         let targetTokenSaveMod = targetTokenAbilities[saveType]?.save ?? 0;
                         let saveRoll = await new Roll("1d20+@mod", { mod: targetTokenSaveMod }).evaluate({ async: true });
                         let save = saveRoll.total;
@@ -1002,11 +999,10 @@ export class wallSpell extends baseSpellClass {
                             .playIf(wallEffectData.wallSpellDmgSound && wallEffectData.wallSpellDmgSound != "")
                             .effect()
                             .file(`jb2a.impact.004.${wallEffectData?.fireImpactColor ?? 'orange'}`)
-                            .attachTo(targetToken)
+                            .attachTo(targetToken,{randomOffset:0.5})
                             .randomRotation()
                             .scaleIn(0.5, 200)
                             .animateProperty("sprite", "rotation", { duration: 1000, from: 0, to: 45 })
-                            .randomOffset(0.5)
                             .repeats(4, 100, 250)
                             .play()
                     }
@@ -1035,7 +1031,7 @@ export class wallSpell extends baseSpellClass {
       <div>
       ${saveResult ? game.i18n.format("ASE.SavePassMessage", { saveTotal: roll, damageTotal: Math.floor(damageRoll.total / 2) }) : game.i18n.format("ASE.SaveFailMessage", { saveTotal: roll, damageTotal: damageRoll.total })}
       </div>
-      <div><img src="${token?.data?.img}" height="30" style="border:0px"></div>
+      <div><img src="${token?.document?.texture.src}" height="30" style="border:0px"></div>
     </div>`;
     }
 
@@ -1048,8 +1044,8 @@ export class wallSpell extends baseSpellClass {
         console.log("aseData: ", aseData);
         console.log("template: ", template);*/
 
-        const gridSize = canvas.grid.h;
-        const previousTemplateData = template.data;
+        const gridSize = canvas.grid.size;
+        const previousTemplateData = template;
         //console.log("previousTemplateData: ", previousTemplateData);
         let panelsRemaining = panelDiag.data.aseData.flags.panelCount;
         //console.log("Panels Remaining: ", panelsRemaining);
@@ -1119,7 +1115,7 @@ export class wallSpell extends baseSpellClass {
                 await warpgate.wait(100);
                 //console.log(displayTemplate);
                 if (!displayTemplate) return;
-                const verticalTemplate = displayTemplate.data.t == CONST.MEASURED_TEMPLATE_TYPES.RAY;
+                const verticalTemplate = displayTemplate.t == CONST.MEASURED_TEMPLATE_TYPES.RAY;
                 //console.log("Vertical Template:", verticalTemplate);
                 let ray;
                 let angle;
@@ -1155,7 +1151,7 @@ export class wallSpell extends baseSpellClass {
                     ray = new Ray(square, crosshairs);
                     angle = (ray.angle * 180 / Math.PI);
 
-                    if (angle == displayTemplate.data.direction) {
+                    if (angle == displayTemplate.direction) {
                         continue;
                     }
                     if (!displayTemplate) return;
@@ -1202,7 +1198,7 @@ export class wallSpell extends baseSpellClass {
         //console.log("Playing effects...");
         //console.log("template: ", template);
         //console.log("aseData: ", aseData);
-        if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
+        if (template.t === CONST.MEASURED_TEMPLATE_TYPES.CIRCLE) {
 
             new Sequence()
                 .sound()
@@ -1219,7 +1215,7 @@ export class wallSpell extends baseSpellClass {
                 .persist()
                 .play()
 
-        } else if (template.data.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) {
+        } else if (template.t === CONST.MEASURED_TEMPLATE_TYPES.RECTANGLE) {
 
             new Sequence()
                 .sound()

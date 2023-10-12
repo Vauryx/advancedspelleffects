@@ -26,7 +26,7 @@ import { wallSpell } from "../spells/wallSpell.js";
 export class ASESettings extends FormApplication {
     constructor() {
         super(...arguments);
-        this.flags = this.object.data.flags.advancedspelleffects;
+        this.flags = this.object.flags.advancedspelleffects;
         if (this.flags) {
             if (!this.flags.effectOptions) {
                 this.flags.effectOptions = {};
@@ -35,8 +35,10 @@ export class ASESettings extends FormApplication {
         this.spellList = {};
         this.spellList[game.i18n.localize("ASE.AnimateDead")] = animateDead;
         this.spellList[game.i18n.localize("ASE.CallLightning")] = callLightning;
-        this.spellList[game.i18n.localize("ASE.ChaosBolt")] = chaosBolt;
-        this.spellList[game.i18n.localize("ASE.DetectMagic")] = detectMagic;
+        if (game.modules.get("midi-qol")?.active) {
+            this.spellList[game.i18n.localize("ASE.ChaosBolt")] = chaosBolt;
+        }
+        //this.spellList[game.i18n.localize("ASE.DetectMagic")] = detectMagic;
         this.spellList[game.i18n.localize("ASE.FogCloud")] = fogCloud;
         this.spellList[game.i18n.localize("ASE.Darkness")] = darkness;
         this.spellList[game.i18n.localize("ASE.MagicMissile")] = magicMissile;
@@ -51,10 +53,10 @@ export class ASESettings extends FormApplication {
         this.spellList[game.i18n.localize("ASE.ChainLightning")] = chainLightning;
         this.spellList[game.i18n.localize("ASE.MirrorImage")] = mirrorImage;
         this.spellList[game.i18n.localize("ASE.Summon")] = summonCreature;
-        this.spellList[game.i18n.localize("ASE.WallOfForce")] = wallOfForce;
-        this.spellList[game.i18n.localize("ASE.DetectStuff")] = detectStuff;
+        //this.spellList[game.i18n.localize("ASE.WallOfForce")] = wallOfForce;
+        //this.spellList[game.i18n.localize("ASE.DetectStuff")] = detectStuff;
         this.spellList[game.i18n.localize("ASE.ViciousMockery")] = viciousMockery;
-        this.spellList[game.i18n.localize("ASE.WallSpell")] = wallSpell;
+        //this.spellList[game.i18n.localize("ASE.WallSpell")] = wallSpell;
     }
 
     static get defaultOptions() {
@@ -90,7 +92,7 @@ export class ASESettings extends FormApplication {
         let damageDieCount;
         let damageDie;
         let damageMod;
-        let effectOptions = this.object.data.flags?.advancedspelleffects?.effectOptions ?? {};
+        let effectOptions = this.object.flags?.advancedspelleffects?.effectOptions ?? {};
         switch (item.name) {
             case game.i18n.localize("ASE.DetectMagic"):
                 data.duration = { "value": 10, "units": "minute" };
@@ -162,7 +164,7 @@ export class ASESettings extends FormApplication {
 
     async setEffectData(item, itemName) {
         //console.log(item);
-        let flags = this.object.data.flags;
+        let flags = this.object.flags;
         //let itemName = item.name;
         let returnOBJ = {};
         //console.log("Detected item name: ", itemName);
@@ -239,7 +241,7 @@ export class ASESettings extends FormApplication {
     }
 
     async getData() {
-        let flags = this.object.data.flags;
+        let flags = this.object.flags;
         //console.log("flag: ", flags.advancedspelleffects.spellEffect);
         let item = this.object;
         //console.log("item: ", item);
@@ -266,7 +268,7 @@ export class ASESettings extends FormApplication {
             await this.setItemDetails(this.object);
         }
         return {
-            flags: this.object.data.flags,
+            flags: this.object.flags,
             itemName: itemName,
             effectData: effectData,
             spellOptions: spellOptions,
@@ -385,11 +387,11 @@ export class ASESettings extends FormApplication {
         {{#each ../effectData.summonOptions as |id name|}}
         <option value="">{{name}}</option>
         {{/each}}
-    </select>`;
+        </select>`;
         newLabel3.innerHTML = `<label><b>game.i18n.localize("ASE.SummonQuantityLabel")</b></label>`;
         newQtyInput.innerHTML = `<input style='width: 3em;' type="text"
-    name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.qty"
-    value=1>`;
+            name="flags.advancedspelleffects.effectOptions.summons.${summonsTable.rows.length - 1}.qty"
+            value=1>`;
         this.submit({ preventClose: true }).then(() => this.render());
     }
 

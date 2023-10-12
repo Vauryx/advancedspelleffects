@@ -10,31 +10,31 @@ export class noMidiHandler {
 
     static async _handleASE(msg) {
         //console.log("Chat Message Data: ", msg);
-        let caster = canvas.tokens.get(msg.data.speaker.token);
+        let caster = canvas.tokens.get(msg.speaker.token);
         let casterActor = caster?.actor;
         let spellItem;
-        if(msg.data?.flags?.betterrolls5e){
+        if(msg.flags?.betterrolls5e){
             console.log("Detected Better Rolls...");
-            spellItem = casterActor?.items?.get(msg.data.flags.betterrolls5e.itemId);
+            spellItem = casterActor?.items?.get(msg.flags.betterrolls5e.itemId);
         }
         else {
-            spellItem = casterActor?.items?.getName(msg.data.flavor);
+            spellItem = casterActor?.items?.getName(msg.flavor);
         }
-        let aseSpell = spellItem?.data?.flags?.advancedspelleffects ?? false;
+        let aseSpell = spellItem?.flags?.advancedspelleffects ?? false;
         if (!caster || !casterActor || !spellItem || !aseSpell) return;
-        let chatContent = msg.data.content;
+        let chatContent = msg.content;
         let spellLevel = Number(chatContent.charAt(chatContent.indexOf("data-spell-level")+18));
         let spellTargets = Array.from(game.user.targets);
         let data = {
             actor: casterActor,
             token: caster,
-            tokenId: msg.data.speaker.token,
+            tokenId: msg.speaker.token,
             item: spellItem,
             itemLevel: spellLevel,
             targets: spellTargets,
             itemCardId: msg.id
         };
-        if(spellItem.data.data.components.concentration){
+        if(spellItem.system.components.concentration){
             await concentrationHandler.addConcentration(casterActor, spellItem);
         }
         

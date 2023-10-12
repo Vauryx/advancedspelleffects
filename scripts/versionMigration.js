@@ -4,7 +4,7 @@ export const versionMigration = {
         let spellList = {};
         spellList[game.i18n.localize("ASE.AnimateDead")] = game.i18n.localize("ASE.AnimateDead");
         spellList[game.i18n.localize("ASE.CallLightning")] = game.i18n.localize("ASE.CallLightning");
-        spellList[game.i18n.localize("ASE.DetectMagic")] = game.i18n.localize("ASE.DetectMagic");
+        //spellList[game.i18n.localize("ASE.DetectMagic")] = game.i18n.localize("ASE.DetectMagic");
         spellList[game.i18n.localize("ASE.FogCloud")] = game.i18n.localize("ASE.FogCloud");
         spellList[game.i18n.localize("ASE.Darkness")] = game.i18n.localize("ASE.Darkness");
         spellList[game.i18n.localize("ASE.MagicMissile")] = game.i18n.localize("ASE.MagicMissile");
@@ -18,7 +18,7 @@ export const versionMigration = {
         spellList[game.i18n.localize("ASE.Moonbeam")] = game.i18n.localize("ASE.Moonbeam");
         spellList[game.i18n.localize("ASE.ChainLightning")] = game.i18n.localize("ASE.ChainLightning");
         spellList[game.i18n.localize("ASE.MirrorImage")] = game.i18n.localize("ASE.MirrorImage");
-        let flags = item?.data?.flags?.advancedspelleffects ?? false;
+        let flags = item?.flags?.advancedspelleffects ?? false;
         if (!flags) return;
         if (!flags.enableASE || (flags.spellEffect && flags.spellEffect != "")) return;
         console.log(`Migrating ${item.name} for ASE...`);

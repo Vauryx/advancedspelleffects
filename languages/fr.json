@@ -16,6 +16,7 @@
   "ASE.ScorchingRay": "Rayon ardent",
   "ASE.EldritchBlast": "Décharge Occulte",
   "ASE.Summon": "Convocation",
+  "ASE.Conjure": "Invocation",
   "ASE.Moonbeam": "Rayon de lune",
   "ASE.MoveMoonbeam": "Déplacer Rayon de lune",
   "ASE.LightningBolt": "Éclair",
@@ -31,6 +32,12 @@
   "ASE.SummonFiend": "Convocation de fiélon",
   "ASE.SummonShadowspawn": "Convocation de rejeton d'ombre",
   "ASE.SummonUndead": "Convocation de mort-vivant",
+  "ASE.ConjureAnimals": "Invocation d'animaux",
+  "ASE.ConjureCelestial": "Invocation de céleste",
+  "ASE.ConjureElemental": "Invocation d'élémentaire",
+  "ASE.ConjureMinorElemental": "Invocation d'élémentaires mineurs",
+  "ASE.ConjureFey": "Invocation de fée",
+  "ASE.ConjureWoodlandBeings": "Invocation d'êtres sylvestres",
   "ASE.Defender": "Défenseur",
 
   "ASE.Abjuration": "Abjuration",
@@ -214,6 +221,7 @@
   "ASE.ReappearVolumeLabel": "Volume du son de réapparition : ",
 
   "ASE.VampiricTouchDescription": "Le toucher de votre main enveloppée d'ombres peut siphonner la force vitale des autres pour vous soigner",
+  "ASE.VampiricTouchHealing": "Toucher vampirique soigne {actor} de {heal}",
 
   "ASE.ActivateWitchBoltDescription": "Envois une onde de choc à travers l'arc électrique.",
   "ASE.WitchBoltDamageFlavor": "Éclair de sorcière - Jet de dégâts (1d12 de Foudre)",
@@ -268,6 +276,7 @@
   "ASE.SaveFailMessage": "<b>Échec</b> avec <b>{saveTotal}</b> et prend <b>{damageTotal}</b> dégât",
 
   "ASE.ChainLightningNumJumpsLabel": "Nombre de cibles vers lesquelles rebondir : ",
+  "ASE.ChainLightningNoTargetSelected": "Vous devez sélectionner une cible afin d'utiliser ce sort.",
   "ASE.ChainLightningSecondaryDelayLowerLabel": "Delai minimum du second trait : ",
   "ASE.ChainLightningSecondaryDelayUpperLabel": "Delai maximum du second trait : ",
   "ASE.ChainLightningPrimaryColorLabel": "Couleur du premier trait : ",
