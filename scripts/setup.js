@@ -23,6 +23,15 @@ Hooks.once('init', async function () {
     default: true,
     onChange: debouncedReload
   });
+  game.settings.register("advancedspelleffects", "playerAllowSettings", {
+    name: "Enable ASE settings for player",
+    hint: "Enable the settings window for player. World must be reload.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: debouncedReload
+  });
 });
 
 Hooks.once('ready', async function () {
@@ -58,7 +67,7 @@ Hooks.once('ready', async function () {
     }
   }
 
-  if (!game.user.isGM) return;
+  if (!game.settings.get("advancedspelleffects", "playerAllowSettings") && !game.user.isGM) return;
 
   Hooks.on(`renderItemSheet5e`, async (app, html, data) => {
     //console.log("ASE: Caught actor sheet render hook!", data);
