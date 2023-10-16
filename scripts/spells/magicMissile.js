@@ -89,7 +89,7 @@ export class magicMissile {
             type: 'numberInput',
             name: 'flags.advancedspelleffects.effectOptions.dmgMod',
             flagName: 'dmgMod',
-            flagValue: currFlags.dmgMod ?? 0,
+            flagValue: currFlags.dmgMod ?? 1,
         });
 
         animOptions.push({
