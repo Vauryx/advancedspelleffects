@@ -496,3 +496,6 @@ export function isPointInCircle(circleCenter, checkPoint, insideRange, outsideRa
     return distanceToPoint > insideRange && distanceToPoint < outsideRange;
 }
 
+export function getCanvasMouse() {
+    return game.release.generation === 11 ? canvas.app.renderer.plugins.interaction.pointer : canvas.app.renderer.plugins.interaction.mouse;
+}

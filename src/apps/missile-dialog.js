@@ -112,7 +112,7 @@ export class MissileDialog extends FormApplication {
         let attackType = parsedEventData.altKey ? 'kh' : (parsedEventData.ctrlKey ? 'kl' : '');
         //console.log('Mouse Click Data: ', parsedEventData);
         let token = canvas.tokens.placeables.filter(token => {
-            const mouse = canvas.app.renderer.plugins.interaction.mouse;
+            const mouse = utilFunctions.getCanvasMouse();
             const mouseLocal = mouse.getLocalPosition(token);
             //console.log('Mouse Local: ', mouseLocal);
             return mouseLocal.x >= 0 && mouseLocal.x <= token.hitArea.width
