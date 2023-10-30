@@ -9,6 +9,10 @@ export class chainLightning {
         this.token = canvas.tokens.get(this.params.tokenId);
         this.item = this.params.item;
         this.firstTarget = this.params.targets[0] ?? Array.from(this.params.targets)[0];
+        if(this.firstTarget == null)
+        {
+            return;
+        }  
         this.itemCardId = this.params.itemCardId;
 
         this.originalDamage = this.params.damageTotal;
@@ -36,7 +40,7 @@ export class chainLightning {
     async cast() {
         console.log("Running Chain Lightning...");
         if(!this.firstTarget) {
-            ui.notifications.error("Target Required");
+            ui.notifications.warn(game.i18n.localize("ASE.ChainLightningNoTargetSelected"));
             return;
         }
         //await this.rollInitialDamage();

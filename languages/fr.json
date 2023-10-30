@@ -271,6 +271,7 @@
   "ASE.SaveFailMessage": "<b>Échec</b> avec <b>{saveTotal}</b> et prend <b>{damageTotal}</b> dégât",
 
   "ASE.ChainLightningNumJumpsLabel": "Nombre de cibles vers lesquelles rebondir : ",
+  "ASE.ChainLightningNoTargetSelected": "Vous devez sélectionner une cible afin d'utiliser ce sort.",
   "ASE.ChainLightningSecondaryDelayLowerLabel": "Delai minimum du second trait : ",
   "ASE.ChainLightningSecondaryDelayUpperLabel": "Delai maximum du second trait : ",
   "ASE.ChainLightningPrimaryColorLabel": "Couleur du premier trait : ",
