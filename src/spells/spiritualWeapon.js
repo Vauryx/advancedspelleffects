@@ -99,13 +99,15 @@ export class spiritualWeapon {
                 .fadeIn(500)
                 .play()
         }
-        let weaponData = [{
-            type: "select",
-            label: game.i18n.localize("ASE.WeaponDialogLabel"),
-            options: ["Mace", "Maul", "Scythe", "Sword"]
-        }]
-        let weaponChoice = await warpgate.dialog(weaponData);
-        weaponChoice = weaponChoice[0].toLowerCase();
+        let weaponData = {
+            inputs: [{
+                type: "select",
+                label: game.i18n.localize("ASE.WeaponDialogLabel"),
+                options: ["Mace", "Sword"]
+            }]
+        }
+        let weaponChoice = await warpgate.menu(weaponData);
+        weaponChoice = weaponChoice.inputs[0].toLowerCase();
 
         let spiritWeapon = `jb2a.spiritual_weapon.${weaponChoice}`;
 
@@ -116,13 +118,15 @@ export class spiritualWeapon {
             typeOptions.push(utilFunctions.capitalizeFirstLetter(type));
         });
 
-        let typeData = [{
-            type: "select",
-            label: game.i18n.localize("ASE.SpiritTypeDialogLabel"),
-            options: typeOptions
-        }];
-        let typeChoice = await warpgate.dialog(typeData);
-        typeChoice = typeChoice[0].toLowerCase();
+        let typeData = {
+            inputs: [{
+                type: "select",
+                label: game.i18n.localize("ASE.SpiritTypeDialogLabel"),
+                options: typeOptions
+            }]
+        }
+        let typeChoice = await warpgate.menu(typeData);
+        typeChoice = typeChoice.inputs[0].toLowerCase();
 
         spiritWeapon = spiritWeapon + `.${typeChoice}`;
 
@@ -149,14 +153,16 @@ export class spiritualWeapon {
             attackColorOptions.push(utilFunctions.capitalizeFirstLetter(attackColor));
         });
 
-        let colorData = [{
-            type: "select",
-            label: game.i18n.localize("ASE.SpiritColorDialogLabel"),
-            options: colorOptions
-        }];
+        let colorData = {
+            inputs : [{
+                type: "select",
+                label: game.i18n.localize("ASE.SpiritColorDialogLabel"),
+                options: colorOptions
+            }]
+        }
 
-        let colorChoices = await warpgate.dialog(colorData);
-        let spiritColorChoice = colorChoices[0].toLowerCase();
+        let colorChoices = await warpgate.menu(colorData);
+        let spiritColorChoice = colorChoices.inputs[0].toLowerCase();
 	let attackColorChoice = spiritColorChoice;
 
         spiritWeapon = spiritWeapon + `.${spiritColorChoice}`;
