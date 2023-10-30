@@ -125,7 +125,7 @@ export class callLightning {
 
         await warpgate.mutate(caster.document, updates, {}, { name: `${caster.actor.id}-call-lightning` });
         ui.notifications.info(game.i18n.format("ASE.AddedAtWill", { spellName: game.i18n.localize("ASE.ActivateCallLightning") }));
-        await ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage'), { name: caster.actor.name }}` });
+        await ChatMessage.create({ content: `${game.i18n.format('ASE.CallLightningChatMessage', { name: caster.actor.name })}` });
         //await aseSocket.executeAsGM("updateFlag", stormTileId, "stormDamage", );
         effectOptions.stormTileId = stormTileId;
         effectOptions.concentration = true;
