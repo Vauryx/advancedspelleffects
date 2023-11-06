@@ -10,7 +10,7 @@
   import { MissileMarkerSequence } from "../sequences/MissileMarkerSequence.js";
   import { MissileSequence } from "../sequences/MissileSequence.js";
   import { MissileChatBuilder } from "../chat/MissileChatBuilder.js";
-
+  import { UtilFunctions } from "../utilityFunctions.js";
   export let elementRoot;
   export let data;
   const { application } = getContext("external");
@@ -40,7 +40,7 @@
     //console.log("Missile Dialog App Shell: handleClick: event: ", event);
     let attackType = hasAttack ? event.altKey ? 'advantage' : (event.ctrlKey ? 'disadvantage' : '') : "";
     let token = canvas.tokens.placeables.filter(token => {
-      const mouse = canvas.app.renderer.plugins.interaction.mouse;
+      const mouse = UtilFunctions.getCanvasMouse();
       const mouseLocal = mouse.getLocalPosition(token);
       //console.log("Missile Dialog App Shell: handleClick: mouseLocal: ", mouseLocal);
       return mouseLocal.x >= 0 && mouseLocal.x <= token.hitArea.width
