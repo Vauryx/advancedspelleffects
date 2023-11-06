@@ -3,7 +3,7 @@ import * as utilFunctions from "../utilityFunctions.js";
 import { localize } from "@typhonjs-fvtt/runtime/svelte/helper";
 
 export async function MissileChatBuilder(data) {
-    let content = `<table id="ASEmissileDialogChatTable"><tr><th>${localize("ASE.Target")}</th><th>Hit / Miss</th><th>${localize("ASE.AttackRoll")}</th><th>${localize("ASE.DamageRoll")}</th>`
+    let content = `<table id="ASEmissileDialogChatTable"><tr><th style="text-align: center;">${localize("ASE.Target")}</th><th style="text-align: center;">Hit / Miss</th><th style="text-align: center;">${localize("ASE.AttackRoll")}</th><th style="text-align: center;">${localize("ASE.DamageRoll")}</th>`;
     let rolls = data.rolls;
     console.log("ASE: Missile Chat Builder: Data", data);
     console.log("ASE: Missile Chat Builder: Rolls", rolls);
@@ -46,7 +46,7 @@ export async function MissileChatBuilder(data) {
             currDamageBreakdown = `NO ROLL`;
             damageTotalText = ` - `;
         }
-        content += `<tr><td><figure style="overflow: auto;"><img style="float: left; border:0;" alt="Token" src="${currTarget.document.texture.src}" height="40"><figcaption style="white-space: nowrap;">${currTargetName}</figcaption></figure></td><td>${hit ? 'Hit' : 'Miss'}</td><td title = '${currAttackBreakDown}'>${currAttackRoll._total}</td><td title = '${currDamageBreakdown}'>${damageTotalText}</td></tr>`;
+        content += `<tr><td style="text-align: center;"><figure style="overflow: auto;"><img style="float: top; border:0;" alt="Token" src="${currTarget.document.texture.src}" height="40"><figcaption style="white-space: nowrap;margin:0">${currTargetName}</figcaption></figure></td><td style="text-align: center;">${hit ? "Hit" : "Miss"}</td><td style="text-align: center;" title = '${currAttackBreakDown}'>${currAttackRoll._total}</td><td style="text-align: center;" title = '${currDamageBreakdown}'>${damageTotalText}</td></tr>`;
     }
     
 
