@@ -90,6 +90,6 @@ jobs:
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
           git fetch origin "beta"
           git switch -c "beta" "origin/beta"
-          git checkout stash module.json
+          git stash apply
           git commit -m "${{github.event.release.tag_name}} manifest"
           git push -f
