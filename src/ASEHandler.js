@@ -22,7 +22,7 @@ import { wallOfForce } from "./spells/wallOfForce.js";
 import { detectStuff } from "./spells/detectStuff.js";
 import { viciousMockery } from "./spells/viciousMockery.js";
 import { wallSpell } from "./spells/wallSpell.js";
-import {wallOfFire } from "./spells/wallOfFire.js";
+import { wallOfFire } from "./spells/wallOfFire.js";
 
 export class ASEHandler {
     static async handleASE(data, optionals = {}) {
